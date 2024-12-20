@@ -79,6 +79,7 @@ public mainMatchMenu(id) {
 
 public mainMatchMenuHandler(id, hMenu, item) {
 	if (item == MENU_EXIT) {
+		menu_destroy(hMenu);
 		return PLUGIN_HANDLED;
 	}
 

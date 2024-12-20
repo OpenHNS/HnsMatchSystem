@@ -11,6 +11,8 @@ enum _:CaptainTeam_s {
 
 new g_eCaptain[CaptainTeam_s], g_iCaptainPick;
 
+new Float:RandomPickTime;
+
 public captain_start(id) {
 	resetCaptainData();
 
@@ -263,7 +265,8 @@ public WaitPick()
 		remove_task(TASK_WAITCAP)
 	}
 
-	g_iSettings[TIME_RANDOMPICK] = get_pcvar_float(_:pCvar[TIME_RANDOMPICK]);
+	//g_iSettings[TIME_RANDOMPICK] = get_pcvar_float(_:pCvar[TIME_RANDOMPICK]);
+	RandomPickTime = g_iSettings[TIME_RANDOMPICK];
 
 	set_task(1.0, "wait_function", .id = TASK_WAITCAP, .flags = "b");
 
@@ -277,11 +280,12 @@ public wait_function(id)
 		return;
 	}
 
-	g_iSettings[TIME_RANDOMPICK] -= 1.0;
+	RandomPickTime -= 1.0;
+	server_print("%0.f %0.f", RandomPickTime, get_pcvar_float(_:pCvar[TIME_RANDOMPICK]))
 	  
-	setTaskHud(0, 0.0, 1, 255, 255, 255, 1.0, "%L", LANG_SERVER, "HUD_WAITPICK", g_iCaptainPick, g_iSettings[TIME_RANDOMPICK]);
+	setTaskHud(0, 0.0, 1, 255, 255, 255, 1.0, "%L", LANG_SERVER, "HUD_WAITPICK", g_iCaptainPick, RandomPickTime);
 
-	if(g_iSettings[TIME_RANDOMPICK] <= 0.0) {
+	if(RandomPickTime <= 0.0) {
 		new randomaizer = GetPickRandom();
 		if(randomaizer) {
 			new pPlayer = g_iCaptainPick;
