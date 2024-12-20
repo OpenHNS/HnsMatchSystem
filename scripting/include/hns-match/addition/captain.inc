@@ -265,7 +265,6 @@ public WaitPick()
 		remove_task(TASK_WAITCAP)
 	}
 
-	//g_iSettings[TIME_RANDOMPICK] = get_pcvar_float(_:pCvar[TIME_RANDOMPICK]);
 	RandomPickTime = g_iSettings[TIME_RANDOMPICK];
 
 	set_task(1.0, "wait_function", .id = TASK_WAITCAP, .flags = "b");
