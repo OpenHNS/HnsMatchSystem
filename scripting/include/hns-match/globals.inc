@@ -125,6 +125,4 @@ enum SPEC_BACK {
 
 new g_eSpecBack[MAX_PLAYERS + 1][SPEC_BACK];
 
-new Float:g_eWaitPick = 25.0;
-
 new g_msgMoney;

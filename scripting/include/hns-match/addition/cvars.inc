@@ -15,6 +15,7 @@ enum _: CVARS
 	SUTVOTETIME,
 	SURTIMEDELAY,
 	RANDOMPICK,
+	Float:TIME_RANDOMPICK,
 	KNIFEMAP[24],
 	PREFIX[24],
 	GAMENAME
@@ -64,6 +65,9 @@ stock cvars_init() {
 
 	pCvar[RANDOMPICK] = create_cvar("hns_randompick", "1", FCVAR_NONE, "Random pick", true, 0.0, true, 1.0);
 	bind_pcvar_num(pCvar[RANDOMPICK], g_iSettings[RANDOMPICK]);
+
+	pCvar[TIME_RANDOMPICK] = _:create_cvar("hns_time_randompick", "25", FCVAR_NONE, "Time Random pick", true, 10.0, true, 45.0);
+	bind_pcvar_float(_:pCvar[TIME_RANDOMPICK], g_iSettings[TIME_RANDOMPICK]);
 
 	pCvar[KNIFEMAP] = create_cvar("hns_knifemap", "35hp_2", FCVAR_NONE, "Knife map");
 	bind_pcvar_string(pCvar[KNIFEMAP], g_iSettings[KNIFEMAP], charsmax(g_iSettings[KNIFEMAP]));
