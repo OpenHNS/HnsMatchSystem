@@ -280,7 +280,6 @@ public wait_function(id)
 	}
 
 	RandomPickTime -= 1.0;
-	server_print("%0.f %0.f", RandomPickTime, get_pcvar_float(_:pCvar[TIME_RANDOMPICK]))
 	  
 	setTaskHud(0, 0.0, 1, 255, 255, 255, 1.0, "%L", LANG_SERVER, "HUD_WAITPICK", g_iCaptainPick, RandomPickTime);
 
