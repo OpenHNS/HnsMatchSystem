@@ -7,7 +7,7 @@
 
 forward hns_ownage(iToucher, iTouched);
 
-#define TASK_TIMER 54345
+#define TASK_TIMER_STATS 61237
 
 enum _:TYPE_STATS
 {
@@ -54,7 +54,6 @@ public plugin_init() {
 	RegisterHookChain(RG_CSGameRules_RestartRound, "rgRoundStart", true);
 	RegisterHookChain(RG_CSGameRules_FlPlayerFallDamage, "rgPlayerFallDamage", true);
 	RegisterHookChain(RG_CSGameRules_OnRoundFreezeEnd, "rgRoundFreezeEnd", true);
-	RegisterHookChain(RG_CSGameRules_RestartRound, "rgRestartRound", true);
 	RegisterHookChain(RG_RoundEnd, "rgRoundEnd", false);
 	RegisterHookChain(RG_PlayerBlind, "rgPlayerBlind");
 
@@ -393,24 +392,13 @@ public rgPlayerPreThink(id) {
 }
 
 public rgRoundFreezeEnd() {
-	set_task(0.25, "taskRoundEvent", .id = TASK_TIMER, .flags = "b");
-}
-
-public rgRestartRound() {
-	remove_task(TASK_TIMER);
-	new iPlayers[MAX_PLAYERS], iNum;
-	get_players(iPlayers, iNum, "ch");
-
-	for (new i; i < iNum; i++) {
-		new id = iPlayers[i];
-		iStats[id][PLR_TEAM] = rg_get_user_team(id);
-	}
+	set_task(0.25, "taskRoundEvent", .id = TASK_TIMER_STATS, .flags = "b");
 }
 
 public taskRoundEvent() {
 	if (hns_get_state() != STATE_ENABLED || hns_get_mode() != MODE_MIX)
 	{
-		remove_task(TASK_TIMER);
+		remove_task(TASK_TIMER_STATS);
 		return;
 	}
 
@@ -426,10 +414,11 @@ public taskRoundEvent() {
 }
 
 public rgRoundEnd(WinStatus: status, ScenarioEventEndRound: event, Float:tmDelay) {
-	remove_task(TASK_TIMER);
+	remove_task(TASK_TIMER_STATS);
 }
 
 public rgRoundStart() {
+	remove_task(TASK_TIMER_STATS);
 	if (hns_get_mode() != MODE_MIX) {
 		return;
 	}
@@ -444,7 +433,12 @@ public rgRoundStart() {
 	
 		iLastAttacker[id] = 0;
 	}
-	
+
+	for (new i; i < iNum; i++) {
+		new id = iPlayers[i];
+		iStats[id][PLR_TEAM] = rg_get_user_team(id);
+	}
+
 }
 
 stock ResetPlayerRoundStats(id) {
