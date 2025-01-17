@@ -729,29 +729,23 @@ public cmdShowTimers(id) {
 
 public cmdTeamSpec(id) {
 	if (g_iCurrentMode == MODE_PUB || g_iCurrentMode == MODE_DM || (g_iCurrentMode == MODE_TRAINING && g_iMatchStatus == MATCH_NONE)) { // Переделать
-		g_eSpecBack[id][sb_isSpec] = !g_eSpecBack[id][sb_isSpec];
-
-		if (g_eSpecBack[id][sb_isSpec]) {
-			if (getUserTeam(id) == TEAM_SPECTATOR) {
-				g_eSpecBack[id][sb_isSpec] = false;
-				return;
+		if (getUserTeam(id) == TEAM_SPECTATOR) {
+			new iNumTT = get_playersnum_ex(GetPlayers_MatchTeam, "TERRORIST");
+			new iNumCT = get_playersnum_ex(GetPlayers_MatchTeam, "CT");
+			if (iNumTT == iNumCT && g_eSpecBack[id] != TEAM_UNASSIGNED) {
+				rg_set_user_team(id, g_eSpecBack[id]);
+			} else if (iNumTT < iNumCT) {
+				rg_set_user_team(id, TEAM_TERRORIST);
+			} else {
+				rg_set_user_team(id, TEAM_CT);
 			}
-			g_eSpecBack[id][sb_hTeam] = getUserTeam(id);
-			transferUserToSpec(id);
+			rg_round_respawn(id);
 		} else {
-			if (getUserTeam(id) != TEAM_SPECTATOR) {
-				g_eSpecBack[id][sb_isSpec] = true;
-				return;
-			}
-			rg_set_user_team(id, g_eSpecBack[id][sb_hTeam]);
-
-			if ( g_iCurrentMode == MODE_TRAINING) {
-				rg_round_respawn(id);
-			}
+			g_eSpecBack[id] = getUserTeam(id);
+			transferUserToSpec(id);
 		}
 	}
 }
-
 
 public cmdNoplay(id) {
 	if (!g_bNoplay[id]) {
