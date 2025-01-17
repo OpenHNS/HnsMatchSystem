@@ -46,7 +46,7 @@ new Trie:g_tSaveData;
 new Trie:g_tSaveRoundData;
 
 public plugin_init() {
-	register_plugin("Match: Stats", "1.0", "OpenHNS"); // Garey
+	register_plugin("Match: Stats", "1.1", "OpenHNS"); // Garey
 
 	RegisterHookChain(RG_CBasePlayer_Killed, "rgPlayerKilled", true);
 	RegisterHookChain(RG_CBasePlayer_TakeDamage, "rgPlayerTakeDamage", false);
@@ -56,9 +56,6 @@ public plugin_init() {
 	RegisterHookChain(RG_CSGameRules_OnRoundFreezeEnd, "rgRoundFreezeEnd", true);
 	RegisterHookChain(RG_RoundEnd, "rgRoundEnd", false);
 	RegisterHookChain(RG_PlayerBlind, "rgPlayerBlind");
-
-	register_message(get_user_msgid("ShowMenu"), "msgShowMenu");
-	register_message(get_user_msgid("VGUIMenu"), "msgVguiMenu");
 
 	g_tSaveData = TrieCreate();
 	g_tSaveRoundData = TrieCreate();
@@ -179,72 +176,9 @@ public native_get_stats_ownages(amxx, params) {
 	return iStats[get_param(id)][PLR_STATS_OWNAGES];
 }
 
-public msgShowMenu(msgid, dest, id) {
-	if (!shouldAutoJoin(id))
-		return PLUGIN_CONTINUE;
-
-	static team_select[] = "#Team_Select";
-	static menu_text_code[sizeof team_select];
-	get_msg_arg_string(4, menu_text_code, sizeof menu_text_code - 1);
-	if (!equal(menu_text_code, team_select))
-		return (PLUGIN_CONTINUE);
-
-	setForceTeamJoinTask(id, msgid);
-
-	return PLUGIN_HANDLED;
-}
-
-public msgVguiMenu(msgid, dest, id) {
-	if (get_msg_arg_int(1) != 2 || !shouldAutoJoin(id))
-		return (PLUGIN_CONTINUE);
-
-	setForceTeamJoinTask(id, msgid);
-
-	return PLUGIN_HANDLED;
-}
-
-bool:shouldAutoJoin(id) {
-	return (!get_user_team(id) && !task_exists(id));
-}
-
-setForceTeamJoinTask(id, menu_msgid) {
-	static param_menu_msgid[2];
-	param_menu_msgid[0] = menu_msgid;
-
-	set_task(0.1, "taskForceTeamJoin", id, param_menu_msgid, sizeof param_menu_msgid);
-}
-
-public taskForceTeamJoin(menu_msgid[], id) {
-	if (get_user_team(id))
-		return;
-
-	forceTeamJoin(id, menu_msgid[0], "5", "5");
-}
-
-
-stock forceTeamJoin(id, menu_msgid, team[] = "5", class[] = "0") {
-	static jointeam[] = "jointeam";
-	if (class[0] == '0') {
-		engclient_cmd(id, jointeam, team);
-		return;
-	}
-
-	static msg_block, joinclass[] = "joinclass";
-	msg_block = get_msg_block(menu_msgid);
-	set_msg_block(menu_msgid, BLOCK_SET);
-	engclient_cmd(id, jointeam, team);
-	engclient_cmd(id, joinclass, class);
-	set_msg_block(menu_msgid, msg_block);
-
+public client_putinserver(id) {
 	TrieGetArray(g_tSaveData, getUserKey(id), iStats[id], PLAYER_STATS);
 	TrieGetArray(g_tSaveRoundData, getUserKey(id), g_StatsRound[id], PLAYER_STATS);
-
-	set_task(0.2, "taskSetPlayerTeam", id);
-}
-
-public taskSetPlayerTeam(id) {
-	if (!is_user_connected(id))
-		return;
 
 	if (hns_get_mode() == MODE_MIX || hns_get_state() == STATE_PAUSED) {
 		if (iStats[id][PLR_STATS_STOPS] < g_iGameStops) {
@@ -259,7 +193,6 @@ public taskSetPlayerTeam(id) {
 	} else
 		arrayset(iStats[id], 0, PLAYER_STATS);
 }
-
 
 public client_disconnected(id) {
 	if ((iStats[id][PLR_TEAM] == TEAM_TERRORIST || iStats[id][PLR_TEAM] == TEAM_CT) && (hns_get_mode() == MODE_MIX || hns_get_state() == STATE_PAUSED)) {
