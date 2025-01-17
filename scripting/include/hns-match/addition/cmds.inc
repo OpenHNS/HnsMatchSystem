@@ -445,6 +445,9 @@ public cmdStop(id) {
 		return PLUGIN_HANDLED;
 	}
 
+	if (task_exists(TASK_WAIT)) {
+		remove_task(TASK_WAIT)
+	}
 
 	switch (g_iCurrentMode) {
 		case MODE_MIX: {

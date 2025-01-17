@@ -99,7 +99,7 @@ public mainMatchMenuHandler(id, hMenu, item) {
 				else
 					mainMatchMenu(id);
 			} else {
-				if (g_iCurrentMode == MODE_PUB || g_iCurrentMode == MODE_DM || g_iCurrentMode == MODE_ZM) {
+				if (g_iCurrentMode == MODE_PUB || g_iCurrentMode == MODE_DM || g_iCurrentMode == MODE_ZM || g_iMatchStatus == MATCH_WAITCONNECT) { // beta
 					cmdStop(id);
 				}
 				else if (g_iCurrentMode == MODE_TRAINING && g_iMatchStatus <= MATCH_WAITCONNECT)
