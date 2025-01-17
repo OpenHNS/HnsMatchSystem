@@ -68,7 +68,7 @@ public plugin_precache() {
 }
 
 public plugin_init() {
-	register_plugin("Match: Ownage", "1.0", "OpenHNS");
+	register_plugin("Match: Ownage", "1.0.1", "OpenHNS");
 	
 	register_touch("player", "player", "touchPlayer");
 
@@ -178,6 +178,11 @@ public SQL_SetOwnage(id) {
 	
 	formatex(szQuery, charsmax(szQuery), SQL_SET, g_szTablePts, szAuthId);
 	SQL_ThreadQuery(g_hSqlTuple, "QueryHandler", szQuery, cData, sizeof(cData));
+}
+
+public client_disconnected(id) {
+	g_iDataOwnage[id] = 0;
+	g_flLastHeadTouch[id] = 0.0;
 }
 
 stock ClearDHUDMessages(iClear = 8) {

@@ -325,6 +325,14 @@ public client_disconnected(id) {
 		ExecuteForward(g_ModFuncs[g_iCurrentMode][MODEFUNC_PLAYER_LEAVE], _, id);
 
 	arrayset(g_ePlayerPtsData[id], 0, PTS_DATA);
+
+	g_bNoplay[id] = false;
+	g_eSpecBack[id] = TEAM_UNASSIGNED;
+
+	arrayset(eAfkData[id], 0, AfkData_s);
+	arrayset(flAfkOrigin[id], 0.0, sizeof(flAfkOrigin[]));
+	g_bSurrenderVoted[id] = false;
+	hook[id] = false;
 }
 
 public Knife_PrimaryAttack(ent)

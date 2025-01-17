@@ -56,7 +56,7 @@ enum _: SPEC_DATA {
 new g_eSpecPlayers[MAX_PLAYERS + 1][SPEC_DATA];
 
 public plugin_init() {
-	register_plugin("Match: Player info", "1.0", "OpenHNS");
+	register_plugin("Match: Player info", "1.0.1", "OpenHNS");
 
 	register_clcmd("say", "sayHandle");
 
@@ -83,6 +83,16 @@ public client_disconnected(id) {
 		arrayset(g_eSpecPlayers[id], 0, SPEC_DATA);
 	}
 
+	g_HudOnOff[id] = false;
+	g_HudRoundOnOff[id] = false;
+
+	g_bDmgThisRound[id] = false;
+	g_flHealthBefore[id] = 0.0;
+	g_flDmg[id] = 0.0;
+	g_flDmgTime[id] = 0.0;
+	g_flCmdNextUseTime[id] = 0.0;
+
+	arrayset(g_eRoundBests[id], 0, SHOW_STATS);
 }
 
 public rgPlayerSpawn(id) {

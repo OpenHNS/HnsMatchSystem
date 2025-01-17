@@ -38,15 +38,15 @@ new g_StatsRound[MAX_PLAYERS + 1][PLAYER_STATS];
 
 new g_iGameStops;
 
-new iLastAttacker[MAX_PLAYERS + 1];
+new g_iLastAttacker[MAX_PLAYERS + 1];
 
-new Float:last_position[MAX_PLAYERS+ 1][3];
+new Float:g_flLastPosition[MAX_PLAYERS + 1][3];
 
 new Trie:g_tSaveData;
 new Trie:g_tSaveRoundData;
 
 public plugin_init() {
-	register_plugin("Match: Stats", "1.1", "OpenHNS"); // Garey
+	register_plugin("Match: Stats", "1.1.1", "OpenHNS"); // Garey
 
 	RegisterHookChain(RG_CBasePlayer_Killed, "rgPlayerKilled", true);
 	RegisterHookChain(RG_CBasePlayer_TakeDamage, "rgPlayerTakeDamage", false);
@@ -200,6 +200,11 @@ public client_disconnected(id) {
 	}
 	TrieSetArray(g_tSaveData, getUserKey(id), iStats[id], PLAYER_STATS);
 	TrieSetArray(g_tSaveRoundData, getUserKey(id), g_StatsRound[id], PLAYER_STATS);
+
+	arrayset(iStats[id], 0, PLAYER_STATS);
+	arrayset(g_StatsRound[id], 0, PLAYER_STATS);
+	arrayset(g_flLastPosition[id], 0, sizeof(g_flLastPosition[]));
+	g_iLastAttacker[id] = 0;
 }
 
 public hns_match_reset_round() {
@@ -240,10 +245,10 @@ public rgPlayerKilled(victim, attacker) {
 		iStats[victim][PLR_STATS_DEATHS]++;
 	}
 
-	if (iLastAttacker[victim] && iLastAttacker[victim] != attacker) {
-		g_StatsRound[iLastAttacker[victim]][PLR_STATS_ASSISTS]++;
-		iStats[iLastAttacker[victim]][PLR_STATS_ASSISTS]++;
-		iLastAttacker[victim] = 0;
+	if (g_iLastAttacker[victim] && g_iLastAttacker[victim] != attacker) {
+		g_StatsRound[g_iLastAttacker[victim]][PLR_STATS_ASSISTS]++;
+		iStats[g_iLastAttacker[victim]][PLR_STATS_ASSISTS]++;
+		g_iLastAttacker[victim] = 0;
 	}
 }
 
@@ -255,7 +260,7 @@ public rgPlayerTakeDamage(iVictim, iWeapon, iAttacker, Float:fDamage) { // Пр�
 	if (is_user_alive(iAttacker) && iVictim != iAttacker) {
 		new Float:fHealth; get_entvar(iVictim, var_health, fHealth);
 		if (fDamage < fHealth) {
-			iLastAttacker[iVictim] = iAttacker;
+			g_iLastAttacker[iVictim] = iAttacker;
 		}
 
 		g_StatsRound[iAttacker][PLR_STATS_STABS]++;
@@ -308,7 +313,7 @@ public rgPlayerPreThink(id) {
 	if (hns_get_state() == STATE_ENABLED) {
 		if (is_user_alive(id)) {
 			if (rg_get_user_team(id) == TEAM_TERRORIST) {
-				if (vector_length(velocity) * frametime >= get_distance_f(origin, last_position[id])) {
+				if (vector_length(velocity) * frametime >= get_distance_f(origin, g_flLastPosition[id])) {
 					velocity[2] = 0.0;
 					if (vector_length(velocity) > 125.0) {
 						g_StatsRound[id][PLR_STATS_RUNNED] += vector_length(velocity) * frametime;
@@ -321,7 +326,7 @@ public rgPlayerPreThink(id) {
 	}
 
 	last_updated[id] = get_gametime();
-	xs_vec_copy(origin, last_position[id]);
+	xs_vec_copy(origin, g_flLastPosition[id]);
 }
 
 public rgRoundFreezeEnd() {
@@ -362,9 +367,9 @@ public rgRoundStart() {
 	for (new i = 0; i < iNum; i++) {
 		new id = iPlayers[i];
 		arrayset(g_StatsRound[id], 0, PLAYER_STATS);
-		arrayset(last_position[id], 0, 3);
+		arrayset(g_flLastPosition[id], 0, sizeof(g_flLastPosition[]));
 	
-		iLastAttacker[id] = 0;
+		g_iLastAttacker[id] = 0;
 	}
 
 	for (new i; i < iNum; i++) {
