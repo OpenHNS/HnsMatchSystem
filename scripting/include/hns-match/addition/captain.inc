@@ -4,6 +4,33 @@
 
 #define _captain_included
 
+new bool:g_bHnsBannedInit = false; // Включен ли плагин hns bans
+
+enum _:BANS_DATA {
+	bool:e_bBanned // Забанен ли игрок.
+};
+
+new g_ePlayerBansData[MAX_PLAYERS + 1][BANS_DATA];
+
+forward hns_banned_init();
+
+public hns_banned_init() {
+	server_print("hns_banned_init")
+	g_bHnsBannedInit = true;
+}
+
+forward hns_player_banned(id, bool:bBanned);
+
+public hns_player_banned(id, bool:bBanned) {
+	server_print("(hns_player_banned) %n %d", id, bBanned)
+	g_ePlayerBansData[id][e_bBanned] = bBanned;
+}
+
+
+public TEstCmd(id) {
+	server_print("[%n] g_bHnsBannedInit (%d) e_bBanned(%d)", id, g_bHnsBannedInit, g_ePlayerBansData[id][e_bBanned]);
+}
+
 enum _:CaptainTeam_s {
 	e_cTT,
 	e_cCT

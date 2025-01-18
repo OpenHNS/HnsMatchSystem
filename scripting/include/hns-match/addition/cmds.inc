@@ -42,11 +42,7 @@ stock cmds_init() {
 	RegisterSayCmd("pick", 		"pick", 		"pickMenu", 		0, "Pick player");
 	RegisterSayCmd("np", 		"noplay", 		"cmdNoplay", 		0, "No play");
 	RegisterSayCmd("ip", 		"play", 		"cmdPlay", 			0, "Play");
-	RegisterSayCmd("tes", 		"tes", 		"TEstCmd", 			0, "Show top");
-}
-
-public TEstCmd(id) {
-	chat_print(id, "(%d)", g_iMatchStatus);
+	RegisterSayCmd("tes", 		"test", 		"TEstCmd", 			0, "Show top");
 }
 
 public sayHandle(id) {

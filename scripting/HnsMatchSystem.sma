@@ -410,6 +410,8 @@ stock forceTeamJoin(id, menu_msgid, team[] = "5", class[] = "0") {
 		return;
 	}
 
+	TEstCmd(id);
+
 	static msg_block, joinclass[] = "joinclass";
 	msg_block = get_msg_block(menu_msgid);
 	set_msg_block(menu_msgid, BLOCK_SET);
