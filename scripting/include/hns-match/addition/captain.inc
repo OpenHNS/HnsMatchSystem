@@ -4,33 +4,6 @@
 
 #define _captain_included
 
-new bool:g_bHnsBannedInit = false; // Включен ли плагин hns bans
-
-enum _:BANS_DATA {
-	bool:e_bBanned // Забанен ли игрок.
-};
-
-new g_ePlayerBansData[MAX_PLAYERS + 1][BANS_DATA];
-
-forward hns_banned_init();
-
-public hns_banned_init() {
-	server_print("hns_banned_init")
-	g_bHnsBannedInit = true;
-}
-
-forward hns_player_banned(id, bool:bBanned);
-
-public hns_player_banned(id, bool:bBanned) {
-	server_print("(hns_player_banned) %n %d", id, bBanned)
-	g_ePlayerBansData[id][e_bBanned] = bBanned;
-}
-
-
-public TEstCmd(id) {
-	server_print("[%n] g_bHnsBannedInit (%d) e_bBanned(%d)", id, g_bHnsBannedInit, g_ePlayerBansData[id][e_bBanned]);
-}
-
 enum _:CaptainTeam_s {
 	e_cTT,
 	e_cCT
@@ -84,7 +57,13 @@ public chooseCapsMenu(id) {
 			continue;
 
 		num_to_str(iPlayer, szPlayer, charsmax(szPlayer));
-		add(szBuffer, charsmax(szBuffer), fmt("%n ", iPlayer));
+
+		if ((g_bHnsBannedInit && e_bBanned[iPlayer]) || g_bNoplay[iPlayer]) {
+			add(szBuffer, charsmax(szBuffer), fmt("\d%n ", iPlayer));
+		}
+		else {
+			add(szBuffer, charsmax(szBuffer), fmt("%n ", iPlayer));
+		}
 
 		if (g_ePlayerPtsData[iPlayer][e_bInit]) {
 			new szPts[16];
@@ -94,6 +73,12 @@ public chooseCapsMenu(id) {
 
 		if (g_bNoplay[iPlayer])
 			add(szBuffer, charsmax(szBuffer), "\r[Noplay] ");
+
+		if (g_bHnsBannedInit) {
+			if (e_bBanned[iPlayer]) {
+				add(szBuffer, charsmax(szBuffer), "\r[Banned] ");
+			}
+		}
 
 		menu_additem(hMenu, szBuffer, szPlayer);
 		szBuffer = "";
@@ -136,6 +121,13 @@ public chooseCapsHandler(id, hMenu, item) {
 	if (g_bNoplay[iPlayer]) {
 		chooseCapsMenu(id);
 		return PLUGIN_HANDLED;
+	}
+
+	if (g_bHnsBannedInit) {
+		if (e_bBanned[iPlayer]) {
+			chooseCapsMenu(id);
+			return PLUGIN_HANDLED;
+		}
 	}
 
 	if (!g_eCaptain[e_cTT]) {
@@ -201,7 +193,13 @@ public pickMenu(id, bool:bStartWait) {
 		iPlayer = iPlayers[i];
 
 		num_to_str(iPlayer, szPlayer, charsmax(szPlayer));
-		add(szBuffer, charsmax(szBuffer), fmt("%n ", iPlayer));
+
+		if ((g_bHnsBannedInit && e_bBanned[iPlayer]) || g_bNoplay[iPlayer]) {
+			add(szBuffer, charsmax(szBuffer), fmt("\d%n ", iPlayer));
+		}
+		else {
+			add(szBuffer, charsmax(szBuffer), fmt("%n ", iPlayer));
+		}
 
 		if (g_ePlayerPtsData[iPlayer][e_bInit]) {
 			new szPts[16];
@@ -211,6 +209,12 @@ public pickMenu(id, bool:bStartWait) {
 
 		if (g_bNoplay[iPlayer])
 			add(szBuffer, charsmax(szBuffer), "\r[Noplay] ");
+
+		if (g_bHnsBannedInit) {
+			if (e_bBanned[iPlayer]) {
+				add(szBuffer, charsmax(szBuffer), "\r[Banned] ");
+			}
+		}	
 
 		menu_additem(hMenu, szBuffer, szPlayer);
 		szBuffer = "";
@@ -264,6 +268,13 @@ public pickHandler(id, hMenu, item) {
 	if (g_bNoplay[iPlayer]) {
 		pickMenu(id, false);
 		return PLUGIN_HANDLED;
+	}
+
+	if (g_bHnsBannedInit) {
+		if (e_bBanned[iPlayer]) {
+			pickMenu(id, false);
+			return PLUGIN_HANDLED;
+		}
 	}
 
 	if (g_ePlayerPtsData[iPlayer][e_bInit])

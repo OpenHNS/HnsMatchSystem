@@ -13,6 +13,7 @@
 #include <PersistentDataStorage>
 
 #include <hns_matchsystem_pts.inc>
+#include <hns_matchsystem_bans.inc>
 
 #include <hns-match/gameplay/gameplays.inc>
 #include <hns-match/modes/modes.inc>
