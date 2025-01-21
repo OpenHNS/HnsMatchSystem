@@ -18,7 +18,7 @@
 );"
 
 #define SQL_ADD_SEC \
-"now() + interval %d SECOND"
+"NOW() + INTERVAL 300 SECOND"
 
 #define SQL_SET_BAN_PLAYER \
 "INSERT INTO `%s` \
@@ -39,7 +39,7 @@ VALUES \
 	'%s', \
 	'%s', \
 	'%s', \
-	'%s' \
+	%s \
 );"
 
 #define SQL_SET_OFFBAN_PLAYER \
@@ -86,6 +86,8 @@ WHERE `player_steamid` = '%s' AND (`expired` > now() OR `expired` IS NULL);"
 FROM `%s` \
 WHERE `expired` > now() OR `expired` IS NULL"
 
+new bool:g_bDebugMode;
+
 const ACCESS = ADMIN_LEVEL_A;
 
 new const g_szTable[] = "hns_bans";
@@ -113,16 +115,6 @@ enum _: SQL {
 
 new Handle:g_hSqlTuple;
 
-enum _: PLAYER_DATA {
-	bool:IS_BANNED,
-	ADMIN_NAME[MAX_NAME_LENGTH],
-	ADMIN_STEAM[24],
-	DATE_EXPIRED[32],
-	TIME_EXPIRED
-};
-
-new g_ePlayerData[MAX_PLAYERS + 1][PLAYER_DATA];
-
 enum _: BAN_DATA {
 	bool:IS_OFFBAN,
 	BAN_PAYER,
@@ -131,16 +123,18 @@ enum _: BAN_DATA {
 
 new g_eBanData[MAX_PLAYERS + 1][BAN_DATA];
 
-enum _: BAN_PLAYER_DATA {
-	B_PLAYER_NAME[MAX_NAME_LENGTH],
-	B_PLAYER_STEAM[24],
-	B_PLAYER_IP[16],
-	B_ADMIN_NAME[MAX_NAME_LENGTH],
-	B_ADMIN_STEAM[24],
-	B_PLAYER_EXPIRED[32]
+enum _: PLAYER_DATA{
+	bool:IS_BANNED,
+	PLAYER_NAME[MAX_NAME_LENGTH],
+	PLAYER_STEAM[24],
+	PLAYER_IP[16],
+	ADMIN_NAME[MAX_NAME_LENGTH],
+	ADMIN_STEAM[24],
+	DATE_EXPIRED[32],
+	TIME_EXPIRED
 };
-
-new g_eBanPlayer[MAX_PLAYERS + 1][BAN_PLAYER_DATA];
+new g_ePlayerData[MAX_PLAYERS + 1][PLAYER_DATA];
+new g_eBanPlayer[MAX_PLAYERS + 1][PLAYER_DATA];
 
 enum _: DISC_PLAYERS {
 	DISC_PLAYERS_NAME[MAX_NAME_LENGTH],
@@ -149,40 +143,29 @@ enum _: DISC_PLAYERS {
 };
 
 new Array:g_aDisconnectedPlayers;
-
-enum _: GET_BANNED_DATA {
-	GET_PLAYER_NAME[MAX_NAME_LENGTH],
-	GET_PLAYER_STEAM[24],
-	GET_PLAYER_IP[16],
-	GET_ADMIN_NAME[MAX_NAME_LENGTH],
-	GET_ADMIN_STEAM[24],
-	GET_PLAYER_EXPIRED[32]
-};
-
 new Array:g_aBannedPlayers;
 
-new g_MsgSync;
 new g_sPrefix[24];
 new g_hBanForwards;
 new g_hBanForwardsInit;
 
 public plugin_init() {
-	register_plugin("Match: Bans", "1.0", "OpenHNS");
+	register_plugin("Match: Bans", "1.1", "OpenHNS");
 
 	register_clcmd("hns_banmenu", "HnsBanMenu");
 	register_clcmd("hns_offbanmenu", "HnsOffBanMenu");
-	register_clcmd("hns_unbanmenu", "CmdUnban");
+	register_clcmd("hns_unbanmenu", "HnsUnbanMenu");
 
 	RegisterHookChain(RG_CSGameRules_RestartRound, "rgRestartRound", true);
 	RegisterHookChain(RH_SV_DropClient, "rgDropClient", false);
 
 	g_aDisconnectedPlayers = ArrayCreate(DISC_PLAYERS);
-	g_aBannedPlayers = ArrayCreate(GET_BANNED_DATA);
+	g_aBannedPlayers = ArrayCreate(PLAYER_DATA);
 
 	g_hBanForwards = CreateMultiForward("hns_player_banned", ET_CONTINUE, FP_CELL, FP_CELL);
 	g_hBanForwardsInit = CreateMultiForward("hns_banned_init", ET_CONTINUE);
 
-	g_MsgSync = CreateHudSyncObj();
+	g_bDebugMode = bool:(plugin_flags() & AMX_FLAG_DEBUG);
 }
 
 public plugin_cfg() {
@@ -245,7 +228,7 @@ public rgRestartRound() {
 			}
 
 			arrayset(g_ePlayerData[id], 0, PLAYER_DATA);
-			client_print_color(0, print_team_blue, "%s Player ^3%n^1 has expired mix ban..", g_sPrefix, id);
+			client_print_color(0, print_team_blue, "%L", LANG_PLAYER , "BAN_EXPIRED", g_sPrefix, id);
 		}
 	}
 }
@@ -260,6 +243,8 @@ public hns_sql_connection(Handle:hSqlTuple) {
 	
 	new szQuery[1024];
 	formatex(szQuery, charsmax(szQuery), SQL_CREATE_TABLE, g_szTable);
+
+	if (g_bDebugMode) server_print("MATCHBAN [SQL 1] %s", szQuery)
 	
 	SQL_ThreadQuery(g_hSqlTuple, "QueryHandler", szQuery, cData, sizeof(cData));
 	SQL_BannedPlayers();
@@ -268,15 +253,15 @@ public hns_sql_connection(Handle:hSqlTuple) {
 public SQL_BanPlayer(admin_id, player_id) {
 	new szAdminName[MAX_NAME_LENGTH];
 	SQL_QuoteString(Empty_Handle, szAdminName, charsmax(szAdminName), fmt("%n", admin_id));
-	SQL_QuoteString(Empty_Handle, g_eBanPlayer[admin_id][B_PLAYER_NAME], charsmax(g_eBanPlayer[][B_PLAYER_NAME]), fmt("%n", player_id));
+	SQL_QuoteString(Empty_Handle, g_eBanPlayer[admin_id][PLAYER_NAME], charsmax(g_eBanPlayer[][PLAYER_NAME]), fmt("%n", player_id));
 	
 	new szAdminAuth[24];
 	get_user_authid(admin_id, szAdminAuth, charsmax(szAdminAuth));
-	get_user_authid(player_id, g_eBanPlayer[admin_id][B_PLAYER_STEAM], charsmax(g_eBanPlayer[][B_PLAYER_STEAM]));
+	get_user_authid(player_id, g_eBanPlayer[admin_id][PLAYER_STEAM], charsmax(g_eBanPlayer[][PLAYER_STEAM]));
 
 	new szAdminIp[16];
 	get_user_ip(admin_id, szAdminIp, charsmax(szAdminIp), true);
-	get_user_ip(player_id, g_eBanPlayer[admin_id][B_PLAYER_IP], charsmax(g_eBanPlayer[][B_PLAYER_IP]), true);
+	get_user_ip(player_id, g_eBanPlayer[admin_id][PLAYER_IP], charsmax(g_eBanPlayer[][PLAYER_IP]), true);
 
 	new szTime[64];
 	if (g_eBanData[admin_id][BAN_TIME]) {
@@ -290,13 +275,16 @@ public SQL_BanPlayer(admin_id, player_id) {
 	
 	new szQuery[512];
 	formatex(szQuery, charsmax(szQuery), SQL_SET_BAN_PLAYER, g_szTable, 
-	g_eBanPlayer[admin_id][B_PLAYER_NAME], 
-	g_eBanPlayer[admin_id][B_PLAYER_STEAM], 
-	g_eBanPlayer[admin_id][B_PLAYER_IP], 
+	g_eBanPlayer[admin_id][PLAYER_NAME], 
+	g_eBanPlayer[admin_id][PLAYER_STEAM], 
+	g_eBanPlayer[admin_id][PLAYER_IP], 
 	szAdminName, 
 	szAdminAuth, 
 	szAdminIp, 
 	g_eBanData[admin_id][BAN_TIME] ? szTime : "NULL");
+
+	if (g_bDebugMode) server_print("MATCHBAN [SQL 2]")
+	if (g_bDebugMode) server_print("%s", szQuery)
 	
 	SQL_ThreadQuery(g_hSqlTuple, "QueryHandler", szQuery, cData, sizeof(cData));
 }
@@ -331,6 +319,8 @@ public SQL_Offban(admin_id, player_name[], player_steamid[], player_ip[]) {
 	new cData[2];
 	cData[0] = SQL_OFFBAN_PLAYER;
 	cData[1] = admin_id;
+
+	if (g_bDebugMode) server_print("MATCHBAN [SQL 3] %s", szQuery)
 	
 	SQL_ThreadQuery(g_hSqlTuple, "QueryHandler", szQuery, cData, sizeof(cData));
 }
@@ -342,6 +332,8 @@ public SQL_UnbanPlayer(admin_id, player_steamid[]) {
 	new cData[2];
 	cData[0] = SQL_UNBAN_PLAYER, 
 	cData[1] = admin_id;
+
+	if (g_bDebugMode) server_print("MATCHBAN [SQL 4] %s", szQuery)
 
 	SQL_ThreadQuery(g_hSqlTuple, "QueryHandler", szQuery, cData, sizeof(cData));
 }
@@ -357,6 +349,8 @@ public SQL_Load(id) {
 	cData[0] = SQL_LOAD;
 	cData[1] = id;
 
+	if (g_bDebugMode) server_print("MATCHBAN [SQL 5] %s", szQuery)
+
 	SQL_ThreadQuery(g_hSqlTuple, "QueryHandler", szQuery, cData, sizeof(cData));
 }
 
@@ -365,6 +359,8 @@ public SQL_BannedPlayers() {
 	formatex(szQuery, charsmax(szQuery), SQL_GET_BANNED, g_szTable);
 
 	new cData[1] = SQL_BANNED_PLAYERS;
+
+	if (g_bDebugMode) server_print("MATCHBAN [SQL 6] %s", szQuery)
 
 	SQL_ThreadQuery(g_hSqlTuple, "QueryHandler", szQuery, cData, sizeof(cData));
 }
@@ -387,13 +383,15 @@ public QueryHandler(iFailState, Handle:hQuery, szError[], iErrnum, cData[], iSiz
 			SQL_Load(player_id);
 
 			if (g_eBanData[admin_id][BAN_TIME])
-				client_print_color(0, print_team_blue, "%s ^3%n^1 banned a player ^3%n^1 on mix. Expired: ^3%s", g_sPrefix, admin_id, player_id, secondsToDHM(g_eBanData[admin_id][BAN_TIME]));
+				client_print_color(0, print_team_blue, "%L", LANG_PLAYER , "BAN_PLAYER", g_sPrefix, admin_id, player_id, secondsToDHM(g_eBanData[admin_id][BAN_TIME]));
 			else
-				client_print_color(0, print_team_blue, "%s ^3%n^1 banned a player ^3%n^1 on mix. Expired: ^3Permanent", g_sPrefix, admin_id, player_id);
+				client_print_color(0, print_team_blue, "%L", LANG_PLAYER , "BAN_PLAYER_PERM", g_sPrefix, admin_id, player_id);
 
 			ArrayClear(g_aBannedPlayers);
 
 			SQL_BannedPlayers();
+
+			Task_ShowHud(player_id)
 
 			arrayset(g_eBanData[admin_id], 0, BAN_DATA);
 			arrayset(g_eBanPlayer[admin_id], 0, BAN_DATA);
@@ -404,20 +402,20 @@ public QueryHandler(iFailState, Handle:hQuery, szError[], iErrnum, cData[], iSiz
 			if (!is_user_connected(admin_id))
 				return;
 
-			new index = FindDisconnectedAuthIndex(g_eBanPlayer[admin_id][B_PLAYER_STEAM]);
+			new index = FindDisconnectedAuthIndex(g_eBanPlayer[admin_id][PLAYER_STEAM]);
 
 			if (index != -1)
 				ArrayDeleteItem(g_aDisconnectedPlayers, index);
 
-			new found_id = find_player("c", g_eBanPlayer[admin_id][B_PLAYER_STEAM]);
+			new found_id = find_player("c", g_eBanPlayer[admin_id][PLAYER_STEAM]);
 
 			if (found_id)
 				SQL_Load(found_id);
 
 			if (g_eBanData[admin_id][BAN_TIME])
-				client_print_color(0, print_team_blue, "%s ^3%n^1 banned a player ^3%s^1 on mix. Expired: ^3%s", g_sPrefix, admin_id, g_eBanPlayer[admin_id][B_PLAYER_NAME], secondsToDHM(g_eBanData[admin_id][BAN_TIME]));
+				client_print_color(0, print_team_blue, "%L", LANG_PLAYER , "BAN_PLAYER_OFF", g_sPrefix, admin_id, g_eBanPlayer[admin_id][PLAYER_NAME], secondsToDHM(g_eBanData[admin_id][BAN_TIME]));
 			else
-				client_print_color(0, print_team_blue, "%s ^3%n^1 banned a player ^3%s^1 on mix. Expired: ^3Permanent", g_sPrefix, admin_id, g_eBanPlayer[admin_id][B_PLAYER_NAME]);
+				client_print_color(0, print_team_blue, "%L", LANG_PLAYER , "BAN_PLAYER_PERM_OFF", g_sPrefix, admin_id, g_eBanPlayer[admin_id][PLAYER_NAME]);
 
 			ArrayClear(g_aBannedPlayers);
 
@@ -432,25 +430,25 @@ public QueryHandler(iFailState, Handle:hQuery, szError[], iErrnum, cData[], iSiz
 			if (!is_user_connected(admin_id))
 				return;
 
-			new index = FindBannedAuthIndex(g_eBanPlayer[admin_id][B_PLAYER_STEAM]);
+			new index = FindBannedAuthIndex(g_eBanPlayer[admin_id][PLAYER_STEAM]);
 
 			if (index != -1)
 				ArrayDeleteItem(g_aBannedPlayers, index);
 
-			new found_id = find_player("c", g_eBanPlayer[admin_id][B_PLAYER_STEAM]);
+			new found_id = find_player("c", g_eBanPlayer[admin_id][PLAYER_STEAM]);
 
 			if (found_id)
 				SQL_Load(found_id);
 			else {
 				new TempPlayer[DISC_PLAYERS];
-				copy(TempPlayer[DISC_PLAYERS_NAME], charsmax(TempPlayer[DISC_PLAYERS_NAME]), g_eBanPlayer[admin_id][B_PLAYER_NAME]);
-				copy(TempPlayer[DISC_PLAYERS_STEAM], charsmax(TempPlayer[DISC_PLAYERS_STEAM]), g_eBanPlayer[admin_id][B_PLAYER_STEAM]);
-				copy(TempPlayer[DISC_PLAYERS_IP], charsmax(TempPlayer[DISC_PLAYERS_IP]), g_eBanPlayer[admin_id][B_PLAYER_IP]);
+				copy(TempPlayer[DISC_PLAYERS_NAME], charsmax(TempPlayer[DISC_PLAYERS_NAME]), g_eBanPlayer[admin_id][PLAYER_NAME]);
+				copy(TempPlayer[DISC_PLAYERS_STEAM], charsmax(TempPlayer[DISC_PLAYERS_STEAM]), g_eBanPlayer[admin_id][PLAYER_STEAM]);
+				copy(TempPlayer[DISC_PLAYERS_IP], charsmax(TempPlayer[DISC_PLAYERS_IP]), g_eBanPlayer[admin_id][PLAYER_IP]);
 
 				ArrayPushArray(g_aDisconnectedPlayers, TempPlayer);
 			}
 
-			client_print_color(0, print_team_blue, "%s ^3%n^1 unbanned a player ^3%s^1 on mix.", g_sPrefix, admin_id, g_eBanPlayer[admin_id][B_PLAYER_NAME]);
+			client_print_color(0, print_team_blue, "%L", LANG_PLAYER , "UNBAN_PLAYER", g_sPrefix, admin_id, g_eBanPlayer[admin_id][PLAYER_NAME]);
 			arrayset(g_eBanPlayer[admin_id], 0, BAN_DATA);
 		}
 		case SQL_LOAD: {
@@ -467,7 +465,7 @@ public QueryHandler(iFailState, Handle:hQuery, szError[], iErrnum, cData[], iSiz
 				new ban_expired = SQL_ReadResult(hQuery, 2);
 
 				if (!ban_expired)
-					copy(g_ePlayerData[id][DATE_EXPIRED], charsmax(g_ePlayerData[][DATE_EXPIRED]), "Permanent");
+					copy(g_ePlayerData[id][DATE_EXPIRED], charsmax(g_ePlayerData[][DATE_EXPIRED]), "Permanent"); // TODO: Lang
 				else
 					SQL_ReadResult(hQuery, 2, g_ePlayerData[id][DATE_EXPIRED], charsmax(g_ePlayerData[][DATE_EXPIRED]));
 
@@ -488,14 +486,14 @@ public QueryHandler(iFailState, Handle:hQuery, szError[], iErrnum, cData[], iSiz
 			}
 		}
 		case SQL_BANNED_PLAYERS: {
-			new TempPlayer[GET_BANNED_DATA];
+			new TempPlayer[PLAYER_DATA];
 			while (SQL_MoreResults(hQuery)) {
-				SQL_ReadResult(hQuery, 0, TempPlayer[GET_PLAYER_NAME], charsmax(TempPlayer[GET_PLAYER_NAME]));
-				SQL_ReadResult(hQuery, 1, TempPlayer[GET_PLAYER_STEAM], charsmax(TempPlayer[GET_PLAYER_STEAM]));
-				SQL_ReadResult(hQuery, 2, TempPlayer[GET_PLAYER_IP], charsmax(TempPlayer[GET_PLAYER_IP]));
-				SQL_ReadResult(hQuery, 3, TempPlayer[GET_ADMIN_NAME], charsmax(TempPlayer[GET_ADMIN_NAME]));
-				SQL_ReadResult(hQuery, 4, TempPlayer[GET_ADMIN_STEAM], charsmax(TempPlayer[GET_ADMIN_STEAM]));
-				SQL_ReadResult(hQuery, 5, TempPlayer[GET_PLAYER_EXPIRED], charsmax(TempPlayer[GET_PLAYER_EXPIRED]));
+				SQL_ReadResult(hQuery, 0, TempPlayer[PLAYER_NAME], charsmax(TempPlayer[PLAYER_NAME]));
+				SQL_ReadResult(hQuery, 1, TempPlayer[PLAYER_STEAM], charsmax(TempPlayer[PLAYER_STEAM]));
+				SQL_ReadResult(hQuery, 2, TempPlayer[PLAYER_IP], charsmax(TempPlayer[PLAYER_IP]));
+				SQL_ReadResult(hQuery, 3, TempPlayer[ADMIN_NAME], charsmax(TempPlayer[ADMIN_NAME]));
+				SQL_ReadResult(hQuery, 4, TempPlayer[ADMIN_STEAM], charsmax(TempPlayer[ADMIN_STEAM]));
+				SQL_ReadResult(hQuery, 5, TempPlayer[DATE_EXPIRED], charsmax(TempPlayer[DATE_EXPIRED]));
 
 				ArrayPushArray(g_aBannedPlayers, TempPlayer);
 				SQL_NextRow(hQuery);
@@ -509,13 +507,13 @@ public Task_ShowHud(id) {
 		return;
 	}
 
-	set_hudmessage(.red = 255, .green = 255, .blue = 255, .x = -1.00, .y = 0.3, .holdtime = 10.0);
-	ShowSyncHudMsg(id, g_MsgSync, 
-	"You were banned on mix!^n\
+	set_dhudmessage(250, 255, 255, -1.0, 0.3, 0, 0.0, 5.0, 0.1, 0.1);
+	show_dhudmessage(0, 
+	"You were banned on match!^n\
 	Admin: %s | Steamid: %s^n\
 	Expired: %s", 
 	g_ePlayerData[id][ADMIN_NAME], g_ePlayerData[id][ADMIN_STEAM], 
-	g_ePlayerData[id][DATE_EXPIRED]);
+	g_ePlayerData[id][DATE_EXPIRED]); // TODO: Lang
 }
 
 /* SQL queries */
@@ -644,7 +642,7 @@ public HnsTimeMenu(id) {
 
 	if (g_eBanData[id][IS_OFFBAN]) {
 		hMenu = menu_create(fmt("\rSelect ban time^n\
-						\dTarget: %s", g_eBanPlayer[id][B_PLAYER_NAME]), "HnsTimeHandler");
+						\dTarget: %s", g_eBanPlayer[id][PLAYER_NAME]), "HnsTimeHandler");
 	} else {
 		hMenu = menu_create(fmt("\rSelect ban time^n\
 							\dTarget: %n", g_eBanData[id][BAN_PAYER]), "HnsTimeHandler");
@@ -669,7 +667,7 @@ public HnsTimeHandler(id, hMenu, item) {
 	g_eBanData[id][BAN_TIME] = g_eBanTime[item][TIME_SECONDS];
 
 	if (g_eBanData[id][IS_OFFBAN]) {
-		SQL_Offban(id, g_eBanPlayer[id][B_PLAYER_NAME], g_eBanPlayer[id][B_PLAYER_STEAM], g_eBanPlayer[id][B_PLAYER_IP]);
+		SQL_Offban(id, g_eBanPlayer[id][PLAYER_NAME], g_eBanPlayer[id][PLAYER_STEAM], g_eBanPlayer[id][PLAYER_IP]);
 	} else {
 		SQL_BanPlayer(id, g_eBanData[id][BAN_PAYER]);
 	}
@@ -686,7 +684,7 @@ public HnsUnbanMenu(id, page) {
 		return PLUGIN_HANDLED;
 	}
 
-	new TempPlayer[GET_BANNED_DATA];
+	new TempPlayer[PLAYER_DATA];
 	new iSize = ArraySize(g_aBannedPlayers);
 
 	if (!iSize) {
@@ -697,7 +695,7 @@ public HnsUnbanMenu(id, page) {
 
 	for (new i; i < iSize; i++) {
 		ArrayGetArray(g_aBannedPlayers, i, TempPlayer);
-		menu_additem(hMenu, fmt("%s", TempPlayer[GET_PLAYER_NAME]));
+		menu_additem(hMenu, fmt("%s", TempPlayer[PLAYER_NAME]));
 	}
 
 	menu_display(id, hMenu, page);
@@ -727,8 +725,8 @@ public HnsInfoBanMenu(id) {
 
 	new szExpired[32];
 	
-	if (g_eBanPlayer[id][B_PLAYER_EXPIRED]) {
-		formatex(szExpired, charsmax(szExpired), "%s", g_eBanPlayer[id][B_PLAYER_EXPIRED]);
+	if (g_eBanPlayer[id][DATE_EXPIRED]) {
+		formatex(szExpired, charsmax(szExpired), "%s", g_eBanPlayer[id][DATE_EXPIRED]);
 	} else {
 		formatex(szExpired, charsmax(szExpired), "Permanent");
 	}
@@ -738,7 +736,7 @@ public HnsInfoBanMenu(id) {
 								Player steamid: %s^n\
 								Admin name: %s^n\
 								Admin steamid: %s^n\
-								Expired: %s", g_eBanPlayer[id][B_PLAYER_NAME], g_eBanPlayer[id][B_PLAYER_STEAM], g_eBanPlayer[id][B_ADMIN_NAME], g_eBanPlayer[id][B_ADMIN_STEAM], szExpired), "HnsInfoBanHandler");
+								Expired: %s", g_eBanPlayer[id][PLAYER_NAME], g_eBanPlayer[id][PLAYER_STEAM], g_eBanPlayer[id][ADMIN_NAME], g_eBanPlayer[id][ADMIN_STEAM], szExpired), "HnsInfoBanHandler");
 
 	menu_additem(hMenu, "Unban");
 
@@ -755,7 +753,7 @@ public HnsInfoBanHandler(id, hMenu, item) {
 
 	menu_destroy(hMenu);
 
-	SQL_UnbanPlayer(id, g_eBanPlayer[id][B_PLAYER_STEAM]);
+	SQL_UnbanPlayer(id, g_eBanPlayer[id][PLAYER_STEAM]);
 
 	return PLUGIN_HANDLED;
 }
@@ -779,11 +777,11 @@ stock FindDisconnectedAuthIndex(szAuth[]) {
 
 stock FindBannedAuthIndex(szAuth[]) {
 	new iSize = ArraySize(g_aBannedPlayers);
-	new TempPlayer[GET_BANNED_DATA];
+	new TempPlayer[PLAYER_DATA];
 
 	for (new i; i < iSize; i++) {
 		ArrayGetArray(g_aBannedPlayers, i, TempPlayer);
-		if (equal(szAuth, TempPlayer[GET_PLAYER_STEAM])) {
+		if (equal(szAuth, TempPlayer[PLAYER_STEAM])) {
 			return i;
 		}
 	}
