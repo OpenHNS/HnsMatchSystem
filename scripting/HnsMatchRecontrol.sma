@@ -75,7 +75,7 @@ public client_disconnected(id)
 @CSGameRules_PlayerSpawn(id)
 {
 	if (is_user_alive(id)) {
-		set_task(0.1, "GiveWeapons", id);
+		RequestFrame("GiveWeapons", id);
 	}
 }
 
@@ -427,7 +427,7 @@ public GiveWeapons(id)
 		set_entvar(id, var_velocity, g_arrData[id][Velocity]);
 		set_entvar(id, var_angles, g_arrData[id][Angles]);
 		set_entvar(id, var_fixangle, 1);
-		
+
 		switch (rg_get_user_team(id))
 		{
 			case 1:
@@ -526,6 +526,9 @@ public task_Response(Parms[], task_id)
 ReplacePlayers(replacement_player, substitutive_player, admin_replaced = 0) {
 	g_arrData[substitutive_player][iTeam] = rg_get_user_team(replacement_player);
 
+	set_entvar(substitutive_player, var_frags, Float:get_entvar(replacement_player, var_frags));
+	set_member(substitutive_player, m_iDeaths, get_member(replacement_player, m_iDeaths));
+
 	if(is_user_alive(replacement_player)) {
 		get_entvar(replacement_player, var_origin, g_arrData[substitutive_player][Origin], 3);
 		get_entvar(replacement_player, var_velocity, g_arrData[substitutive_player][Velocity], 3);
@@ -535,9 +538,12 @@ ReplacePlayers(replacement_player, substitutive_player, admin_replaced = 0) {
 		g_arrData[substitutive_player][iFlash]   = rg_get_user_bpammo(replacement_player, WEAPON_FLASHBANG);
 		g_arrData[substitutive_player][iHe]   = rg_get_user_bpammo(replacement_player, WEAPON_HEGRENADE);
 		g_arrData[substitutive_player][flHealth]  = get_entvar(replacement_player, var_health);
+
 		rg_set_user_team(substitutive_player, g_arrData[substitutive_player][iTeam]);
 		rg_set_user_team(replacement_player, TEAM_SPECTATOR);
+
 		g_bGiveWeapons[substitutive_player] = true;
+
 		rg_round_respawn(substitutive_player);        
 		user_silentkill(replacement_player);
 	}
