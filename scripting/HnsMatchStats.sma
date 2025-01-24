@@ -76,6 +76,7 @@ public plugin_natives() {
 	register_native("hns_get_stats_flashtime", "native_get_stats_flashtime");
 	register_native("hns_get_stats_surv", "native_get_stats_surv");
 	register_native("hns_get_stats_ownages", "native_get_stats_ownages");
+	register_native("hns_stats_replace", "native_stats_replace");
 }
 
 public native_get_stats_kills(amxx, params) {
@@ -174,6 +175,34 @@ public native_get_stats_ownages(amxx, params) {
 	}
 
 	return iStats[get_param(id)][PLR_STATS_OWNAGES];
+}
+
+public native_stats_replace(amxx, params) {
+	enum { arg_type = 1, arg_replacementid = 2, arg_substitutiveid = 3 };
+
+	new const plr_sub = get_param(arg_substitutiveid);
+	new const plr_rep = get_param(arg_replacementid);
+	new const type = get_param(arg_type);
+	
+	for (new i = 0; i < PLAYER_STATS; i++) {
+		if (i == PLR_STATS_KILLS || i == PLR_MATCH || i == PLR_STATS_DEATHS) {
+			continue;
+		}
+
+		if (type == STATS_ROUND)
+		{
+			g_StatsRound[plr_sub][i] = g_StatsRound[plr_rep][i];				
+		}
+		iStats[plr_sub][i] = iStats[plr_rep][i];
+	}
+	
+	if (rg_get_user_team(plr_rep) == TEAM_SPECTATOR) {
+		if (type == STATS_ROUND)
+		{
+			arrayset(g_StatsRound[plr_rep], 0, PLAYER_STATS);			
+		}
+		arrayset(iStats[plr_rep], 0, PLAYER_STATS);
+	}
 }
 
 public client_putinserver(id) {
@@ -352,6 +381,11 @@ public taskRoundEvent() {
 }
 
 public rgRoundEnd(WinStatus: status, ScenarioEventEndRound: event, Float:tmDelay) {
+	// Если уберёте код, taskRoundEvent завершиться и будет баг.
+	if (event == ROUND_GAME_COMMENCE) {
+		return;
+	}
+
 	remove_task(TASK_TIMER_STATS);
 }
 

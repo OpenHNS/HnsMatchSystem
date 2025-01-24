@@ -79,6 +79,22 @@ DMG_ERR = %s There is no OR multiple players with matching pattern -> ^3%s^1.
 DMG_SHOW_ROUND = %s ^3%n^1's fall damage ^3%.0f^1 HP - before ^3%.0f^1 HP - ^3This round^1, ^3%.1f^1 seconds ago.
 DMG_SHOW = %s ^3%n^1's fall damage ^3%.0f^1 HP - before ^3%.0f^1 HP - ^3Not this round^1, ^3%.1f^1 seconds ago.
 
+RECON_TITLE_CONTROL = \rChoose a player to give control
+RECON_TITLE_REPLACE = \rSelect a player to replace
+RECON_BANNED = \d%s \r[Banned]
+RECON_INVITED = %s \d[\rInvited\d]
+RECON_DELAY = %s Please wait ^3%.1f^1 sec..
+RECON_ADM_TRANSF_TO = \rSelect the player to replace
+RECON_ADM_TRANSF_IT = \rWho should we replace it with?
+RECON_ADM_REPLACE = %s Admin ^3%n^1 replaced the player ^3%n^1 with a ^3%n^1.
+RECON_CONFIRM_CONTROL = \rTake control of %n?
+RECON_CONFIRM_REPLACE = \r%n wants you to replace him?
+RECON_REFUSED_CONTROL = %s ^3%n^1 refused to take control.
+RECON_REFUSED_REPLACE = %s ^3%n^1 refused to replace.
+RECON_REPLACE = %s ^3%n^1 was replaced by ^3%n
+RECON_DIDNT_CHOOSE = %s Player ^3%n^1 didn't chose anything.
+RECON_EXPIRED = %s Time expired.
+
 [ru]
 
 PTS_RANK = %s Ваш ранг: ^3%d^1 (Птс: ^3%d^1 | Побед: ^3%d^1 | Поражений: ^3%d^1 | Скилл: ^3%s^1)
@@ -163,3 +179,19 @@ DMG_SPAM = %s Пожалуйста, подождите ^3%.1f^1 секунды �
 DMG_ERR = %s Не существует ИЛИ нескольких игроков с совпадающим шаблоном -> ^3%s^1.
 DMG_SHOW_ROUND = %s ^3%n^1 потерял ^3%.0f^1 HP - до ^3%.0f^1 HP - ^3В этом раунде^1, ^3%.1f^1 секунд назад.
 DMG_SHOW = %s ^3%n^1 потерял ^3%.0f^1 HP - до ^3%.0f^1 HP - ^3Не в этом раунде^1, ^3%.1f^1 секунд назад.
+
+RECON_TITLE_CONTROL = \rВыберите игрока для передачи контроля
+RECON_TITLE_REPLACE = \rВыберите игрока для замены
+RECON_BANNED = \d%s \r[Забанен]
+RECON_INVITED = %s \d[\rОтправлено\d]
+RECON_DELAY = %s Пожалуйста, подождите ^3%.1f^1 сек...
+RECON_ADM_TRANSF_TO = \rВыберите игрока для замены
+RECON_ADM_TRANSF_IT = \rНа кого мы должны его заменить?
+RECON_ADM_REPLACE = %s Администратор ^3%n^1 заменил игрока ^3%n^1 на ^3%n^1.
+RECON_CONFIRM_CONTROL = \rВзять контроль от %n?
+RECON_CONFIRM_REPLACE = \r%n хочет, чтобы вы его заменили?
+RECON_REFUSED_CONTROL = %s ^3%n^1 отказался от контроля.
+RECON_REFUSED_REPLACE = %s ^3%n^1 отказался от замены.
+RECON_REPLACE = %s ^3%n^1 был заменен на ^3%n.
+RECON_DIDNT_CHOOSE = %s Игрок ^3%n^1 ничего не выбрал.
+RECON_EXPIRED = %s Время истекло.

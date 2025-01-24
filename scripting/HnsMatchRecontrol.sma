@@ -2,6 +2,7 @@
 #include <reapi>
 #include <hns_matchsystem>
 #include <hns_matchsystem_bans>
+#include <hns_matchsystem_stats>
 
 #define rg_get_user_team(%0) get_member(%0, m_iTeam)
 
@@ -27,19 +28,29 @@ enum TransferType
 	TRANSFER_IT
 };
 
-new g_FirstId[MAX_PLAYERS + 1], g_SecondId[MAX_PLAYERS + 1][MAX_PLAYERS + 1], g_arrData[MAX_PLAYERS + 1][Data];
+enum ControlType
+{
+	TYPE_REPLACE,
+	TYPE_CONTROL
+}
+/*
+[33] == [request]
+*/
+new g_ReplaceRequests[MAX_PLAYERS + 1]
 
 new Float:g_flDelay[MAX_PLAYERS + 1];
 
-new bool:g_bControl[MAX_PLAYERS + 1];
+new ControlType:g_ControlType[MAX_PLAYERS + 1];
 new bool:g_bInvited[MAX_PLAYERS + 1];
 new bool:g_bGiveWeapons[MAX_PLAYERS + 1];
 
 new TransferType:g_eTransferType[MAX_PLAYERS + 1], g_iTransferPlayer[MAX_PLAYERS + 1];
 
+new g_saveData[MAX_PLAYERS + 1][Data];
+
 public plugin_init()
 {
-	register_plugin("Match: ReControl", "1.2", "OpenHNS"); // Thanks Conor, Denzer
+	register_plugin("Match: ReControl", "1.3", "OpenHNS"); // Thanks Conor, Denzer, Garey
 
 	register_clcmd("drop", "Control");
 	RegisterSayCmd("co", "co", "Control");
@@ -52,13 +63,15 @@ public plugin_init()
 	RegisterSayCmd("rea", "rea", "ReplaceAdmin");
 
 	RegisterHookChain(RG_CSGameRules_PlayerSpawn, "@CSGameRules_PlayerSpawn", true);
+
+	register_dictionary("match_additons.txt");
 }
 
 public client_putinserver(id)
 {
 	ResetTransfer(id);
 
-	arrayset(g_arrData[id], 0, Data);
+	arrayset(g_saveData[id], 0, Data);
 	g_bGiveWeapons[id] = false;
 	g_flDelay[id] = 0.0;
 	g_bInvited[id] = false;
@@ -81,7 +94,7 @@ public client_disconnected(id)
 
 public Control(id)
 {
-	g_bControl[id] = true;
+	g_ControlType[id] = TYPE_CONTROL;
 	Menu(id);
 	
 	return;
@@ -89,7 +102,7 @@ public Control(id)
 
 public Replace(id)
 {
-	g_bControl[id] = false;
+	g_ControlType[id] = TYPE_REPLACE;
 	Menu(id);
 	
 	return;
@@ -97,13 +110,16 @@ public Replace(id)
 
 public Menu(id)
 {
-	if ((is_user_alive(id) && g_bControl[id] || is_user_alive(id) && !g_bControl[id] || !is_user_alive(id) && !g_bControl[id]) && (rg_get_user_team(id) == 1 || rg_get_user_team(id) == 2))
+	new const bool:is_control = (g_ControlType[id] == TYPE_CONTROL);
+	// Only alive player can be controled, replace works any time.
+	new const bool:can_control = (!is_control) || (is_control && is_user_alive(id));
+	if (can_control && rg_get_user_team(id) != TEAM_SPECTATOR)
 	{
-		new m_Menu = menu_create(fmt("%s", g_bControl[id] ? "\rChoose a player to give control" : "\rSelect a player to replace"), "MenuHandler");
+		new m_Menu = menu_create(fmt("%L", LANG_PLAYER, is_control ? "RECON_TITLE_CONTROL" : "RECON_TITLE_REPLACE"), "MenuHandler");
 
 		new Players[32], Count, szPlayer[10], Player, szName[MAX_NAME_LENGTH], szBuffer[64];
 
-		if (g_bControl[id])
+		if (is_control)
 		{
 			switch (rg_get_user_team(id))
 			{
@@ -125,11 +141,11 @@ public Menu(id)
 
 			num_to_str(Player, szPlayer, charsmax(szPlayer));
 
-			if ((g_bHnsBannedInit && e_bBanned[Player] && !g_bControl[Player])) {
-				formatex(szBuffer, charsmax(szBuffer), "\d%s \r[Banned]", szName);
+			if (g_bHnsBannedInit && e_bBanned[Player] && !is_control) {
+				formatex(szBuffer, charsmax(szBuffer), "%L", LANG_PLAYER, "RECON_BANNED", szName);
 				menu_additem(m_Menu, szBuffer, szPlayer);
 			} else if (g_bInvited[Player]) {
-				formatex(szBuffer, charsmax(szBuffer), "%s \d[\rInvited\d]", szName);
+				formatex(szBuffer, charsmax(szBuffer), "%L", LANG_PLAYER, "RECON_INVITED", szName);
 				menu_additem(m_Menu, szBuffer, szPlayer);
 			} else {
 				menu_additem(m_Menu, szName, szPlayer);
@@ -164,40 +180,41 @@ public MenuHandler(id, m_Menu, szKeys)
 	
 	new UserId = str_to_num(szData);
 	
-	new SecondId = g_SecondId[id][UserId] = UserId;
-	new FirstId = g_FirstId[UserId] = id;
+	new invited_id = UserId;
+
+	g_ReplaceRequests[invited_id] = id;
 
 	if (g_bHnsBannedInit) {
-		if (e_bBanned[SecondId]) {
+		if (e_bBanned[invited_id]) {
 			Menu(id);
 			return;
 		}
 	}
 	
-	if (!g_bInvited[SecondId])
+	if (!g_bInvited[invited_id])
 	{
 		new Float:szTime = get_gametime();
 		
-		if(szTime < g_flDelay[FirstId])
-			client_print_color(FirstId, print_team_blue, "%s Please wait ^3%.1f^1 sec..", g_Prefix, g_flDelay[FirstId] - szTime);
+		if(szTime < g_flDelay[id])
+			client_print_color(id, print_team_blue, "%L", LANG_PLAYER, "RECON_DELAY", g_Prefix, g_flDelay[id] - szTime);
 		else
 		{
-			g_bInvited[SecondId] = true;
-			g_flDelay[FirstId] = get_gametime() + 10.0;
+			g_bInvited[invited_id] = true;
+			g_flDelay[id] = get_gametime() + 10.0;
 			
-			Confirmation(SecondId);
+			Confirmation(invited_id);
 			
 			new Parms[2];
-			Parms[0] = FirstId;
-			Parms[1] = SecondId;
+			Parms[0] = id;
+			Parms[1] = invited_id;
 			
 			set_task(10.0, "task_Response", 1337, Parms, 2);
 		}
 	}
 	
-	if (g_bInvited[SecondId])
+	if (g_bInvited[invited_id])
 	{
-		Menu(FirstId);
+		Menu(id);
 		return;
 	}
 	
@@ -222,11 +239,11 @@ public ReplaceAdmin(id)
 
 	if (g_eTransferType[id] == TRANSFER_TO)
 	{
-		formatex(title, charsmax(title), "\rSelect the player to replace");
+		formatex(title, charsmax(title), "%L", LANG_PLAYER, "RECON_ADM_TRANSF_TO");
 	}
 	else if (g_eTransferType[id] == TRANSFER_IT)
 	{
-		formatex(title, charsmax(title), "\rWho should we replace it with?");
+		formatex(title, charsmax(title), "%L", LANG_PLAYER, "RECON_ADM_TRANSF_IT");
 	}
 
 	new iPlayers[MAX_PLAYERS], iNum;
@@ -264,8 +281,8 @@ public ReplaceAdmin(id)
 
 		new szPlayer[10]; num_to_str(iPlayer, szPlayer, charsmax(szPlayer));
 
-		if ((g_bHnsBannedInit && e_bBanned[iPlayer] && !g_bControl[iPlayer])) {
-			menu_additem(menu, fmt("\d%n \r[Banned]", iPlayer), szPlayer);
+		if ((g_bHnsBannedInit && e_bBanned[iPlayer] && (g_ControlType[iPlayer] == TYPE_REPLACE))) {
+			menu_additem(menu, fmt("%L", LANG_PLAYER, "RECON_BANNED", iPlayer), szPlayer);
 		} else {
 			menu_additem(menu, fmt("%n", iPlayer), szPlayer);
 		}
@@ -360,12 +377,13 @@ public Confirmation(id)
 	if (!is_user_alive(id))
 	{
 		new m_Confirmation;
-		new FirstId = g_FirstId[id];
 		
-		if (g_bControl[FirstId])
-			m_Confirmation = menu_create(fmt("\rTake control of %n?", FirstId), "ConfirmationHandler");
+		new requested_id = g_ReplaceRequests[id];
+					
+		if (g_ControlType[requested_id] == TYPE_CONTROL)
+			m_Confirmation = menu_create(fmt("%L", LANG_PLAYER, "RECON_CONFIRM_CONTROL", requested_id), "ConfirmationHandler");
 		else
-			m_Confirmation = menu_create(fmt("\r%n wants you to replace him", FirstId), "ConfirmationHandler");
+			m_Confirmation = menu_create(fmt("%L", LANG_PLAYER, "RECON_CONFIRM_REPLACE", requested_id), "ConfirmationHandler");
 		
 		menu_additem(m_Confirmation, "Yes");
 		menu_additem(m_Confirmation, "No");
@@ -385,9 +403,8 @@ public ConfirmationHandler(id, m_Confirmation, szKeys)
 		menu_destroy(m_Confirmation);
 		return;
 	}
-	
-	new FirstId = g_FirstId[id];
-	new SecondId = g_SecondId[FirstId][id];
+
+	new requested_id = g_ReplaceRequests[id];
 	
 	g_bInvited[id] = false;
 	
@@ -395,15 +412,20 @@ public ConfirmationHandler(id, m_Confirmation, szKeys)
 	{
 		case 0:
 		{
-			ReControl(SecondId);
+			ReControl(id);
 			
-			show_menu(FirstId, 0, "", 1);
+			show_menu(requested_id, 0, "", 1);
 		}
 		case 1:
 		{
-			client_print_color(FirstId, SecondId, "%s ^3%n^1 refused to %s", g_Prefix, SecondId, g_bControl[FirstId] ? "take control" : "replace");
+			if (g_ControlType[requested_id] == TYPE_CONTROL) {
+				client_print_color(requested_id, id, "%L", LANG_PLAYER, "RECON_REFUSED_CONTROL", g_Prefix, id);
+			}
+			else {
+				client_print_color(requested_id, id, "%L", LANG_PLAYER, "RECON_REFUSED_REPLACE", g_Prefix, id);
+			}
 			
-			Menu(FirstId);
+			Menu(requested_id);
 		}
 	}
 	
@@ -416,16 +438,14 @@ public GiveWeapons(id)
 {
 	if (is_user_alive(id) && g_bGiveWeapons[id])
 	{
-		new FirstId = g_FirstId[id];
-
 		rg_remove_all_items(id);
 		rg_give_item(id, "weapon_knife");
 
 		set_entvar(id, var_flags, get_entvar(id, var_flags) | FL_DUCKING);
-		set_entvar(id, var_health, g_arrData[id][flHealth]);
-		set_entvar(id, var_origin, g_arrData[id][Origin]);
-		set_entvar(id, var_velocity, g_arrData[id][Velocity]);
-		set_entvar(id, var_angles, g_arrData[id][Angles]);
+		set_entvar(id, var_health, g_saveData[id][flHealth]);
+		set_entvar(id, var_origin, g_saveData[id][Origin]);
+		set_entvar(id, var_velocity, g_saveData[id][Velocity]);
+		set_entvar(id, var_angles, g_saveData[id][Angles]);
 		set_entvar(id, var_fixangle, 1);
 
 		switch (rg_get_user_team(id))
@@ -434,22 +454,22 @@ public GiveWeapons(id)
 			{
 				rg_set_user_footsteps(id, true);
 				
-				if (g_arrData[FirstId][iHe])
+				if (g_saveData[id][iHe])
 				{
 					rg_give_item(id, "weapon_hegrenade");
-					rg_set_user_bpammo(id, WEAPON_HEGRENADE, g_arrData[FirstId][iHe]);
+					rg_set_user_bpammo(id, WEAPON_HEGRENADE, g_saveData[id][iHe]);
 				}
 				
-				if (g_arrData[FirstId][iFlash])
+				if (g_saveData[id][iFlash])
 				{
 					rg_give_item(id, "weapon_flashbang");
-					rg_set_user_bpammo(id, WEAPON_FLASHBANG, g_arrData[FirstId][iFlash]);
+					rg_set_user_bpammo(id, WEAPON_FLASHBANG, g_saveData[id][iFlash]);
 				}
 				
-				if (g_arrData[FirstId][iSmoke])
+				if (g_saveData[id][iSmoke])
 				{
 					rg_give_item(id, "weapon_smokegrenade");
-					rg_set_user_bpammo(id, WEAPON_SMOKEGRENADE, g_arrData[FirstId][iSmoke]);
+					rg_set_user_bpammo(id, WEAPON_SMOKEGRENADE, g_saveData[id][iSmoke]);
 				}
 			}
 		case 2: rg_set_user_footsteps(id, false);
@@ -461,85 +481,93 @@ public GiveWeapons(id)
 
 public ReControl(id)
 {
-	new FirstId = g_FirstId[id];
-	new SecondId = g_SecondId[FirstId][id];
-	
-	g_arrData[FirstId][iTeam] = rg_get_user_team(FirstId);
-	
-	if (is_user_alive(FirstId))
+	new requested_id = g_ReplaceRequests[id];
+		
+	g_saveData[id][iTeam] = rg_get_user_team(requested_id);
+	if (is_user_alive(requested_id))
 	{
-		get_entvar(FirstId, var_origin, g_arrData[FirstId][Origin], 3);
-		get_entvar(FirstId, var_velocity, g_arrData[FirstId][Velocity], 3);
-		get_entvar(FirstId, var_v_angle, g_arrData[FirstId][Angles], 3);
+		get_entvar(requested_id, var_origin, 	g_saveData[id][Origin], 3);
+		get_entvar(requested_id, var_velocity, 	g_saveData[id][Velocity], 3);
+		get_entvar(requested_id, var_v_angle, 	g_saveData[id][Angles], 3);
 		
-		g_arrData[FirstId][iHe] = rg_get_user_bpammo(FirstId, WEAPON_HEGRENADE);
-		g_arrData[FirstId][iFlash] = rg_get_user_bpammo(FirstId, WEAPON_FLASHBANG);
-		g_arrData[FirstId][iSmoke] = rg_get_user_bpammo(FirstId, WEAPON_SMOKEGRENADE);
-		g_arrData[FirstId][flHealth] = get_entvar(FirstId, var_health);
+		g_saveData[id][iHe] = rg_get_user_bpammo(requested_id, WEAPON_HEGRENADE);
+		g_saveData[id][iFlash] = rg_get_user_bpammo(requested_id, WEAPON_FLASHBANG);
+		g_saveData[id][iSmoke] = rg_get_user_bpammo(requested_id, WEAPON_SMOKEGRENADE);
+		g_saveData[id][flHealth] = get_entvar(requested_id, var_health);
 		
-		if (!g_bControl[FirstId])
+		if (g_ControlType[requested_id] == TYPE_REPLACE)
 		{
-			rg_set_user_team(SecondId, g_arrData[FirstId][iTeam]);
-			rg_set_user_team(FirstId, TEAM_SPECTATOR);
+			set_entvar(id, var_frags, Float:get_entvar(requested_id, var_frags));
+			set_member(id, m_iDeaths, get_member(requested_id, m_iDeaths));
+
+			rg_set_user_team(id, g_saveData[id][iTeam]);
+			rg_set_user_team(requested_id, TEAM_SPECTATOR);
+
+			hns_stats_replace(STATS_ALL, requested_id, id);
 		}
 		
-		g_bGiveWeapons[SecondId] = true;
+		g_bGiveWeapons[id] = true;
 		
-		rg_round_respawn(SecondId);
+		rg_round_respawn(id);
 		
-		user_kill(FirstId, true);
+		user_kill(requested_id, true);
 	}
 	else
 	{
-		if (!g_bControl[FirstId])
+		if (g_ControlType[requested_id] == TYPE_REPLACE)
 		{
-			rg_set_user_team(SecondId, g_arrData[FirstId][iTeam]);
-			rg_set_user_team(FirstId, TEAM_SPECTATOR);
+			set_entvar(id, var_frags, Float:get_entvar(requested_id, var_frags));
+			set_member(id, m_iDeaths, get_member(requested_id, m_iDeaths));	
+
+			rg_set_user_team(id, g_saveData[id][iTeam]);
+			rg_set_user_team(requested_id, TEAM_SPECTATOR);
+
+			hns_stats_replace(STATS_ALL, requested_id, id);
 		}
 	}
 	
-	if (!g_bControl[FirstId])
-		client_print_color(0, print_team_blue, "%s ^3%n^1 was replaced by ^3%n", g_Prefix, SecondId, FirstId);
+	if (g_ControlType[requested_id] == TYPE_REPLACE)
+		client_print_color(0, print_team_blue, "%L", LANG_PLAYER, "RECON_REPLACE", g_Prefix, id, requested_id);
 	
-	show_menu(FirstId, 0, "", 1);
+	show_menu(requested_id, 0, "", 1);
 }
 
 public task_Response(Parms[], task_id)
 {
-	new FirstId = Parms[0];
-	new SecondId = Parms[1];
+	new requested_id = Parms[0];
+	new id = Parms[1];
 	
-	if (g_bInvited[SecondId])
+	if (g_bInvited[id])
 	{
-		g_bInvited[SecondId] = false;
+		g_bInvited[id] = false;
 		
-		Menu(FirstId);
-		client_print_color(FirstId, SecondId, "%s Player ^3%n^1 didn't chose anything", g_Prefix, SecondId);
+		Menu(requested_id);
+		client_print_color(requested_id, id, "%L", LANG_PLAYER, "RECON_DIDNT_CHOOSE", g_Prefix, id);
 		
-		show_menu(SecondId, 0, "", 1);
-		client_print_color(SecondId, print_team_blue, "%s Time expired", g_Prefix);
+		show_menu(id, 0, "", 1);
+		client_print_color(id, print_team_blue, "%L", LANG_PLAYER, "RECON_EXPIRED", g_Prefix);
 	}
 	
 	return;
 }
 
 ReplacePlayers(replacement_player, substitutive_player, admin_replaced = 0) {
-	g_arrData[substitutive_player][iTeam] = rg_get_user_team(replacement_player);
+	g_saveData[substitutive_player][iTeam] = rg_get_user_team(replacement_player);
 
 	set_entvar(substitutive_player, var_frags, Float:get_entvar(replacement_player, var_frags));
 	set_member(substitutive_player, m_iDeaths, get_member(replacement_player, m_iDeaths));
 
 	if(is_user_alive(replacement_player)) {
-		get_entvar(replacement_player, var_origin, g_arrData[substitutive_player][Origin], 3);
-		get_entvar(replacement_player, var_velocity, g_arrData[substitutive_player][Velocity], 3);
-		get_entvar(replacement_player, var_v_angle, g_arrData[substitutive_player][Angles], 3);
+		get_entvar(replacement_player, var_origin, g_saveData[substitutive_player][Origin], 3);
+		get_entvar(replacement_player, var_velocity, g_saveData[substitutive_player][Velocity], 3);
+		get_entvar(replacement_player, var_v_angle, g_saveData[substitutive_player][Angles], 3);
 
-		g_arrData[substitutive_player][iSmoke]   = rg_get_user_bpammo(replacement_player, WEAPON_SMOKEGRENADE);
-		g_arrData[substitutive_player][iFlash]   = rg_get_user_bpammo(replacement_player, WEAPON_FLASHBANG);
-		g_arrData[substitutive_player][iHe]   = rg_get_user_bpammo(replacement_player, WEAPON_HEGRENADE);
-		g_arrData[substitutive_player][flHealth]  = get_entvar(replacement_player, var_health);
+		g_saveData[substitutive_player][iSmoke]   = rg_get_user_bpammo(replacement_player, WEAPON_SMOKEGRENADE);
+		g_saveData[substitutive_player][iFlash]   = rg_get_user_bpammo(replacement_player, WEAPON_FLASHBANG);
+		g_saveData[substitutive_player][iHe]   = rg_get_user_bpammo(replacement_player, WEAPON_HEGRENADE);
+		g_saveData[substitutive_player][flHealth]  = get_entvar(replacement_player, var_health);
 
-		rg_set_user_team(substitutive_player, g_arrData[substitutive_player][iTeam]);
+		rg_set_user_team(substitutive_player, g_saveData[substitutive_player][iTeam]);
 		rg_set_user_team(replacement_player, TEAM_SPECTATOR);
 
 		g_bGiveWeapons[substitutive_player] = true;
@@ -548,9 +576,11 @@ ReplacePlayers(replacement_player, substitutive_player, admin_replaced = 0) {
 		user_silentkill(replacement_player);
 	}
 	else {
-		rg_set_user_team(substitutive_player, g_arrData[substitutive_player][iTeam]);
+		rg_set_user_team(substitutive_player, g_saveData[substitutive_player][iTeam]);
 		rg_set_user_team(replacement_player, TEAM_SPECTATOR);
 	}
 
-	client_print_color(0, print_team_blue, "%s Admin ^3%n^1 replaced the player ^3%n^1 with a ^3%n^1", g_Prefix, admin_replaced, replacement_player, substitutive_player);
+	hns_stats_replace(STATS_ALL, replacement_player, substitutive_player);
+
+	client_print_color(0, print_team_blue, "%L", LANG_PLAYER, "RECON_ADM_REPLACE", g_Prefix, admin_replaced, replacement_player, substitutive_player);
 }
