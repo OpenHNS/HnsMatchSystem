@@ -88,8 +88,6 @@ WHERE `expired` > now() OR `expired` IS NULL"
 
 new bool:g_bDebugMode;
 
-const ACCESS = ADMIN_LEVEL_A;
-
 new const g_szTable[] = "hns_bans";
 
 enum _: BAN_TIME_DATA {
@@ -133,7 +131,7 @@ enum _: PLAYER_DATA{
 	DATE_EXPIRED[32],
 	TIME_EXPIRED
 };
-new g_ePlayerData[MAX_PLAYERS + 1][PLAYER_DATA];
+new g_ePlayerInfo[MAX_PLAYERS + 1][PLAYER_DATA];
 new g_eBanPlayer[MAX_PLAYERS + 1][PLAYER_DATA];
 
 enum _: DISC_PLAYERS {
@@ -194,7 +192,7 @@ public client_putinserver(id) {
 }
 
 public rgDropClient(const id, bool:crash) {
-	if (g_ePlayerData[id][IS_BANNED]) {
+	if (g_ePlayerInfo[id][IS_BANNED]) {
 		return;
 	}
 
@@ -214,11 +212,11 @@ public rgRestartRound() {
 	for (new i; i < iNum; i++) {
 		new id = iPlayers[i];
 
-		if (!g_ePlayerData[id][IS_BANNED]) {
+		if (!g_ePlayerInfo[id][IS_BANNED]) {
 			return;
 		}
 
-		if (g_ePlayerData[id][TIME_EXPIRED] && get_systime() >= g_ePlayerData[id][TIME_EXPIRED]) {
+		if (g_ePlayerInfo[id][TIME_EXPIRED] && get_systime() >= g_ePlayerInfo[id][TIME_EXPIRED]) {
 			new szAuth[24];
 			get_user_authid(id, szAuth, charsmax(szAuth));
 			new index = FindBannedAuthIndex(szAuth);
@@ -227,13 +225,13 @@ public rgRestartRound() {
 				ArrayDeleteItem(g_aBannedPlayers, index);
 			}
 
-			arrayset(g_ePlayerData[id], 0, PLAYER_DATA);
+			arrayset(g_ePlayerInfo[id], 0, PLAYER_DATA);
 			client_print_color(0, print_team_blue, "%L", LANG_PLAYER , "BAN_EXPIRED", g_sPrefix, id);
 		}
 	}
 }
 
-/* SQL squeries */
+/* SQL queries */
 
 public hns_sql_connection(Handle:hSqlTuple) {
 	g_hSqlTuple = hSqlTuple;
@@ -391,7 +389,11 @@ public QueryHandler(iFailState, Handle:hQuery, szError[], iErrnum, cData[], iSiz
 
 			SQL_BannedPlayers();
 
-			Task_ShowHud(player_id)
+			if (g_bDebugMode) server_print("QueryHandler [SQL_BAN_PLAYER] %n", admin_id)
+			if (g_bDebugMode) server_print("QueryHandler [SQL_BAN_PLAYER] %n", player_id)
+
+
+			//Task_ShowHud(player_id)
 
 			arrayset(g_eBanData[admin_id], 0, BAN_DATA);
 			arrayset(g_eBanPlayer[admin_id], 0, BAN_DATA);
@@ -458,20 +460,20 @@ public QueryHandler(iFailState, Handle:hQuery, szError[], iErrnum, cData[], iSiz
 				return;
 
 			if (SQL_NumResults(hQuery)) {
-				g_ePlayerData[id][IS_BANNED] = true;
-				SQL_ReadResult(hQuery, 0, g_ePlayerData[id][ADMIN_NAME], charsmax(g_ePlayerData[][ADMIN_NAME]));
-				SQL_ReadResult(hQuery, 1, g_ePlayerData[id][ADMIN_STEAM], charsmax(g_ePlayerData[][ADMIN_STEAM]));
+				g_ePlayerInfo[id][IS_BANNED] = true;
+				SQL_ReadResult(hQuery, 0, g_ePlayerInfo[id][ADMIN_NAME], charsmax(g_ePlayerInfo[][ADMIN_NAME]));
+				SQL_ReadResult(hQuery, 1, g_ePlayerInfo[id][ADMIN_STEAM], charsmax(g_ePlayerInfo[][ADMIN_STEAM]));
 
 				new ban_expired = SQL_ReadResult(hQuery, 2);
 
 				if (!ban_expired)
-					copy(g_ePlayerData[id][DATE_EXPIRED], charsmax(g_ePlayerData[][DATE_EXPIRED]), "Permanent"); // TODO: Lang
+					copy(g_ePlayerInfo[id][DATE_EXPIRED], charsmax(g_ePlayerInfo[][DATE_EXPIRED]), "Permanent"); // TODO: Lang
 				else
-					SQL_ReadResult(hQuery, 2, g_ePlayerData[id][DATE_EXPIRED], charsmax(g_ePlayerData[][DATE_EXPIRED]));
+					SQL_ReadResult(hQuery, 2, g_ePlayerInfo[id][DATE_EXPIRED], charsmax(g_ePlayerInfo[][DATE_EXPIRED]));
 
-				g_ePlayerData[id][TIME_EXPIRED] = SQL_ReadResult(hQuery, 3);
+				g_ePlayerInfo[id][TIME_EXPIRED] = SQL_ReadResult(hQuery, 3);
 
-				ExecuteForward(g_hBanForwards, _, id, g_ePlayerData[id][IS_BANNED]);
+				ExecuteForward(g_hBanForwards, _, id, g_ePlayerInfo[id][IS_BANNED]);
 
 				set_task(5.0, "Task_ShowHud", id);
 			} else {
@@ -482,7 +484,7 @@ public QueryHandler(iFailState, Handle:hQuery, szError[], iErrnum, cData[], iSiz
 				if (index != -1)
 					ArrayDeleteItem(g_aBannedPlayers, index);
 
-				arrayset(g_ePlayerData[id], 0, PLAYER_DATA);
+				arrayset(g_ePlayerInfo[id], 0, PLAYER_DATA);
 			}
 		}
 		case SQL_BANNED_PLAYERS: {
@@ -503,7 +505,7 @@ public QueryHandler(iFailState, Handle:hQuery, szError[], iErrnum, cData[], iSiz
 }
 
 public Task_ShowHud(id) {
-	if (!g_ePlayerData[id][IS_BANNED]) {
+	if (!g_ePlayerInfo[id][IS_BANNED]) {
 		return;
 	}
 
@@ -512,8 +514,8 @@ public Task_ShowHud(id) {
 	"You were banned on match!^n\
 	Admin: %s | Steamid: %s^n\
 	Expired: %s", 
-	g_ePlayerData[id][ADMIN_NAME], g_ePlayerData[id][ADMIN_STEAM], 
-	g_ePlayerData[id][DATE_EXPIRED]); // TODO: Lang
+	g_ePlayerInfo[id][ADMIN_NAME], g_ePlayerInfo[id][ADMIN_STEAM], 
+	g_ePlayerInfo[id][DATE_EXPIRED]); // TODO: Lang
 }
 
 /* SQL queries */
@@ -536,7 +538,7 @@ public HnsBanMenu(id, page) {
 		// if (id == iPlayer)
 		// 	continue;
 
-		if (g_ePlayerData[iPlayer][IS_BANNED]) {
+		if (g_ePlayerInfo[iPlayer][IS_BANNED]) {
 			continue;
 		}
 
@@ -569,7 +571,7 @@ public HnsBanHandler(id, hMenu, item) {
 		return PLUGIN_HANDLED;
 	}
 
-	if (g_ePlayerData[iPlayer][IS_BANNED]) {
+	if (g_ePlayerInfo[iPlayer][IS_BANNED]) {
 		HnsBanMenu(id, item / 7);
 		return PLUGIN_HANDLED;
 	}
@@ -789,7 +791,7 @@ stock FindBannedAuthIndex(szAuth[]) {
 }
 
 stock bool:getUserInAccess(id) {
-	if (get_user_flags(id) & ACCESS)
+	if (get_user_flags(id) & accessFW)
 		return true;
 	else
 		return false;

@@ -179,10 +179,10 @@ public mix_roundstart() {
 		}
 	
 		if (getUserTeam(id) == TEAM_TERRORIST || getUserTeam(id) == TEAM_CT) {
-			g_ePlayerData[id][PLAYER_MATCH] = true;
-			copy(g_ePlayerData[id][PLAYER_TEAM], charsmax(g_ePlayerData[][PLAYER_TEAM]), fmt("%s", getUserTeam(id) == TEAM_TERRORIST ? "TERRORIST" : "CT"));
+			g_ePlayerInfo[id][PLAYER_MATCH] = true;
+			copy(g_ePlayerInfo[id][PLAYER_TEAM], charsmax(g_ePlayerInfo[][PLAYER_TEAM]), fmt("%s", getUserTeam(id) == TEAM_TERRORIST ? "TERRORIST" : "CT"));
 		} else {
-			g_ePlayerData[id][PLAYER_MATCH] = false;
+			g_ePlayerInfo[id][PLAYER_MATCH] = false;
 		}
 	}
 
@@ -308,7 +308,6 @@ public mix_roundend(bool:win_ct) {
 			if (!iNum) {
 				new Float:roundtime = get_round_time() * 60.0;
 				g_eMatchInfo[e_flSidesTime][g_isTeamTT] += roundtime - g_flRoundTime;
-				//lient_print_color(0, 0, "Тут")
 			}
 
 			if (g_eMatchInfo[e_iRoundsPlayed][g_isTeamTT] + g_eMatchInfo[e_iRoundsPlayed][HNS_TEAM:!g_isTeamTT] >= g_iSettings[MAXROUNDS] * 2) {
@@ -413,8 +412,8 @@ public mix_reverttimer() {
 }
 
 public mix_player_join(id) {
-	TrieGetArray(g_PlayersLeaveData, getUserKey(id), g_ePlayerData[id], PlayerData_s);
-	if (g_ePlayerData[id][PLAYER_MATCH]) {
+	TrieGetArray(g_PlayersLeaveData, getUserKey(id), g_ePlayerInfo[id], PLAYER_INFO);
+	if (g_ePlayerInfo[id][PLAYER_MATCH]) {
 		new iNum = get_num_players_in_match();
 		if (iNum >= g_eMatchInfo[e_mTeamSize]) {
 			transferUserToSpec(id);
@@ -422,10 +421,10 @@ public mix_player_join(id) {
 		}
 
 
-		if (g_eMatchInfo[e_iMatchSwapped] == g_ePlayerData[id][PLAYER_SAVE_SWAP]) {
-			rg_set_user_team(id, g_ePlayerData[id][PLAYER_TEAM][0] == 'T' ? TEAM_TERRORIST : TEAM_CT);
+		if (g_eMatchInfo[e_iMatchSwapped] == g_ePlayerInfo[id][PLAYER_SAVE_SWAP]) {
+			rg_set_user_team(id, g_ePlayerInfo[id][PLAYER_TEAM][0] == 'T' ? TEAM_TERRORIST : TEAM_CT);
 		} else {
-			rg_set_user_team(id, g_ePlayerData[id][PLAYER_TEAM][0] == 'T' ? TEAM_CT : TEAM_TERRORIST);
+			rg_set_user_team(id, g_ePlayerInfo[id][PLAYER_TEAM][0] == 'T' ? TEAM_CT : TEAM_TERRORIST);
 		}
 
 		if (g_eMatchState == STATE_PAUSED)
@@ -437,15 +436,15 @@ public mix_player_join(id) {
 }
 
 public mix_player_leave(id) {
-	if (g_ePlayerData[id][PLAYER_MATCH]) {
-		g_ePlayerData[id][PLAYER_SAVE_SWAP] = g_eMatchInfo[e_iMatchSwapped];
+	if (g_ePlayerInfo[id][PLAYER_MATCH]) {
+		g_ePlayerInfo[id][PLAYER_SAVE_SWAP] = g_eMatchInfo[e_iMatchSwapped];
 
 		if (g_iCurrentRules == RULES_DUEL) {
 			mix_pause();
 		}
 	}
 
-	TrieSetArray(g_PlayersLeaveData, getUserKey(id), g_ePlayerData[id], PlayerData_s);
+	TrieSetArray(g_PlayersLeaveData, getUserKey(id), g_ePlayerInfo[id], PLAYER_INFO);
 
-	arrayset(g_ePlayerData[id], 0, PlayerData_s);
+	arrayset(g_ePlayerInfo[id], 0, PLAYER_INFO);
 }

@@ -5,6 +5,9 @@
 
 #define rg_get_user_team(%0) get_member(%0, m_iTeam)
 
+#define access ADMIN_MAP
+#define accessFW ADMIN_LEVEL_A
+
 enum _:HNS_MODES
 {
 	MODE_TRAINING,

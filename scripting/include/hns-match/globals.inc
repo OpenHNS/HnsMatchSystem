@@ -16,6 +16,7 @@
 
 #define TASK_SURRENDER 55566
 
+new bool:g_bDebugMode;
 
 new g_PluginId;
 
@@ -54,6 +55,16 @@ enum HNS_TEAM {
 }
 
 new HNS_TEAM:g_isTeamTT;
+
+enum PLAYER_ROLES { 
+	ROLE_SPEC = 0, 
+	ROLE_CAPA, 
+	ROLE_TEAMA, 
+	ROLE_CAPB, 
+	ROLE_TEAMB 
+};
+
+new g_ePlayerRoles[PLAYER_ROLES];
 
 enum _:MatchInfo_s {
 	e_mTeamSize,
@@ -97,13 +108,13 @@ enum _: Forwards {
 
 new g_hForwards[Forwards];
 
-enum _: PlayerData_s {
+enum _: PLAYER_INFO {
 	bool:PLAYER_MATCH,
 	PLAYER_TEAM[16],
 	PLAYER_SAVE_SWAP
 };
 
-new g_ePlayerData[MAX_PLAYERS + 1][PlayerData_s];
+new g_ePlayerInfo[MAX_PLAYERS + 1][PLAYER_INFO];
 
 new Trie:g_PlayersLeaveData;
 

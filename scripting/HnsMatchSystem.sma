@@ -61,6 +61,8 @@ public plugin_init() {
 	get_localinfo("amxx_configsdir", szPath, charsmax(szPath));
 	format(szPath, charsmax(szPath), "%s/mixsystem/%s", szPath, "matchsystem.cfg");
 	server_cmd("exec %s", szPath);
+
+	g_bDebugMode = bool:(plugin_flags() & AMX_FLAG_DEBUG);
 }
 
 public forward_init() {

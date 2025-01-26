@@ -687,7 +687,7 @@ public cmdShowTimers(id) {
 			get_players(iPlayers, iNum, "ch");
 
 			for (new j; j < iNum; j++) {
-				if (!g_ePlayerData[iPlayers[j]][PLAYER_MATCH]) {
+				if (!g_ePlayerInfo[iPlayers[j]][PLAYER_MATCH]) {
 					continue;                }
 				if (g_isTeamTT == HNS_TEAM_A) {
 					if (getUserTeam(iPlayers[j]) == TEAM_TERRORIST) {                        
