@@ -71,7 +71,7 @@ public kniferound_roundend(bool:win_ct) {
 
 			g_eMatchState = STATE_DISABLED;
 
-			savePlayers(win_ct ? TEAM_CT : TEAM_TERRORIST);
+			Save_players(win_ct ? TEAM_CT : TEAM_TERRORIST);
 			training_start();
 			g_iMatchStatus = MATCH_MAPPICK;
 			StartVoteRules();

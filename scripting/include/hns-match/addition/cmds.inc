@@ -42,7 +42,8 @@ stock cmds_init() {
 	RegisterSayCmd("pick", 		"pick", 		"pickMenu", 		0, "Pick player");
 	RegisterSayCmd("np", 		"noplay", 		"cmdNoplay", 		0, "No play");
 	RegisterSayCmd("ip", 		"play", 		"cmdPlay", 			0, "Play");
-	RegisterSayCmd("tes", 		"test", 		"TEstCmd", 			0, "Show top");
+	RegisterSayCmd("save", 		"sv", 		"Save_d", 			0, "Show top");
+	RegisterSayCmd("load", 		"ld", 		"Load_d", 			0, "Show top");
 }
 
 public sayHandle(id) {

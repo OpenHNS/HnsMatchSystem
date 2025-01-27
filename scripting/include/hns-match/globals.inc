@@ -56,16 +56,6 @@ enum HNS_TEAM {
 
 new HNS_TEAM:g_isTeamTT;
 
-enum PLAYER_ROLES { 
-	ROLE_SPEC = 0, 
-	ROLE_CAPA, 
-	ROLE_TEAMA, 
-	ROLE_CAPB, 
-	ROLE_TEAMB 
-};
-
-new g_ePlayerRoles[PLAYER_ROLES];
-
 enum _:MatchInfo_s {
 	e_mTeamSize,
 	e_mTeamSizeTT,
@@ -108,22 +98,28 @@ enum _: Forwards {
 
 new g_hForwards[Forwards];
 
+enum PLAYER_ROLES { 
+	ROLE_SPEC = 0, 
+	ROLE_CAPA, 
+	ROLE_TEAMA, 
+	ROLE_CAPB, 
+	ROLE_TEAMB 
+};
+
 enum _: PLAYER_INFO {
+	PLAYER_ROLES:PLAYER_ROLE,
 	bool:PLAYER_MATCH,
 	PLAYER_TEAM[16],
 	PLAYER_SAVE_SWAP
 };
+
+
 
 new g_ePlayerInfo[MAX_PLAYERS + 1][PLAYER_INFO];
 
 new Trie:g_PlayersLeaveData;
 
 new bool:g_bPlayersLeaved;
-
-enum _:PlayersLoad_s {
-	e_pAuth[24],
-	e_pTeam
-};
 
 new Array:g_aPlayersLoadData;
 
