@@ -130,11 +130,9 @@ stock bool:checkUserBan() {
 		if (getUserTeam(tempid) == TEAM_SPECTATOR) continue;
 
 		if (g_bHnsBannedInit && e_bBanned[tempid]) {
-			if (getUserTeam(tempid) != TEAM_SPECTATOR) {
-				if (g_iMatchStatus == MATCH_TEAMKNIFE || g_iMatchStatus == MATCH_STARTED) {
-					mix_pause();
-					chat_print(0, "%L", LANG_PLAYER, "BAN_PAUSE", tempid);
-				}
+			if (g_iMatchStatus == MATCH_TEAMKNIFE || g_iMatchStatus == MATCH_STARTED) {
+				mix_pause();
+				chat_print(0, "%L", LANG_PLAYER, "BAN_PAUSE", tempid);
 				transferUserToSpec(tempid);
 				return true;
 			}
