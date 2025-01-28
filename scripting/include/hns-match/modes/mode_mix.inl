@@ -53,6 +53,7 @@ public mix_start() {
 public mix_freezeend() {
 	if (g_eMatchState == STATE_ENABLED) {
 		set_task(5.0, "taskCheckAfk");
+		checkUserBan();
 		//set_task(10.0, "mix_pause");
 		set_task(0.25, "taskRoundEvent", .id = TASK_TIMER, .flags = "b");
 

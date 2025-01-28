@@ -121,6 +121,25 @@ stock get_num_players_in_match() {
 	return numGameplr;
 }
 
-stock check_user_ban(id) {
+stock bool:checkUserBan() {
+	new iPlayers[MAX_PLAYERS], iNum;
+	get_players(iPlayers, iNum, "ch");
 
+	for (new i; i < iNum; i++) {
+		new tempid = iPlayers[i];
+		if (getUserTeam(tempid) == TEAM_SPECTATOR) continue;
+
+		if (g_bHnsBannedInit && e_bBanned[tempid]) {
+			if (getUserTeam(tempid) != TEAM_SPECTATOR) {
+				if (g_iMatchStatus == MATCH_TEAMKNIFE || g_iMatchStatus == MATCH_STARTED) {
+					mix_pause();
+					chat_print(0, "%L", LANG_PLAYER, "BAN_PAUSE", tempid);
+				}
+				transferUserToSpec(tempid);
+				return true;
+			}
+		}
+		
+	}
+	return false;
 }

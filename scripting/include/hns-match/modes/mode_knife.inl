@@ -33,6 +33,8 @@ public kniferound_roundstart() {
 			ChangeGameplay(GAMEPLAY_KNIFE);
 			g_eMatchState = STATE_ENABLED;
 
+			checkUserBan();
+
 			ResetAfkData();
 			set_task(2.0, "taskSaveAfk");
 			set_task(4.0, "taskCheckAfk");
@@ -46,7 +48,7 @@ public kniferound_roundstart() {
 public kniferound_roundend(bool:win_ct) {
 	switch(g_iMatchStatus) {
 		case MATCH_CAPTAINKNIFE: {
-			g_iCaptainPick = win_ct ? g_eCaptain[e_cCT] : g_eCaptain[e_cTT];
+			g_iCaptainPick = win_ct ? g_iCaptainSecond : g_iCaptainFirst;
 
 			setTaskHud(0, 2.0, 1, 255, 255, 255, 3.0, fmt("%L", LANG_SERVER, "HUD_CAPWIN", g_iCaptainPick));
 

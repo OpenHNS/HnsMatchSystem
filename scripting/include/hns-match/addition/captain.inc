@@ -4,12 +4,13 @@
 
 #define _captain_included
 
-enum _:CaptainTeam_s {
+/*enum _:CaptainTeam_s {
 	e_cTT,
 	e_cCT
-};
+};*/
 
-new g_eCaptain[CaptainTeam_s], g_iCaptainPick;
+//new g_eCaptain[CaptainTeam_s];
+new g_iCaptainPick;
 
 new g_iCaptainFirst;
 new g_iCaptainSecond;
@@ -145,7 +146,7 @@ public chooseCapsHandler(id, hMenu, item) {
 		chooseCapsMenu(id);
 	} else if (!g_iCaptainSecond) {
 		g_iCaptainSecond = iPlayer;
-		g_ePlayerInfo[g_iCaptainSecond][PLAYER_ROLE] = ROLE_CAP_B
+		g_ePlayerInfo[g_iCaptainSecond][PLAYER_ROLE] = ROLE_CAP_B;
 
 		if (g_ePlayerPtsData[iPlayer][e_bInit])
 			chat_print(0, "%L", LANG_PLAYER, "CAP_SECOND_PTS", iPlayer, g_ePlayerPtsData[iPlayer][e_iPts], g_ePlayerPtsData[iPlayer][e_szRank]);
@@ -379,6 +380,10 @@ GetPickRandom() {
 			continue;
 		}
 
+		if (g_bHnsBannedInit && e_bBanned[iPlayers[i]]) {
+			continue;
+		}
+
 		iSpecPlayers[iSpecNum] = iPlayers[i];
 		iSpecNum++;
 	}
@@ -405,7 +410,11 @@ public checkFullTeams() {
 	for (new i; i < iNum; i++) {
 		new tempid = iPlayers[i];
 
-		if(g_bNoplay[tempid]) { // TODO: Убрать ноплей, зачем он нужен?
+		if (g_bHnsBannedInit && e_bBanned[tempid]) {
+			continue;
+		}
+
+		if(g_bNoplay[tempid]) {
 			continue;
 		}
 
@@ -413,8 +422,6 @@ public checkFullTeams() {
 			iPlayersNotMatch++;
 			continue;
 		}
-
-		// TODO: Проверка на забаненого игрока, если он в команде и забанен, выкинуть в спеки и continue
 
 		iPlayersMatch++;
 	}

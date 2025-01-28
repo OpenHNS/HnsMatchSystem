@@ -79,6 +79,8 @@ DMG_ERR = %s There is no OR multiple players with matching pattern -> ^3%s^1.
 DMG_SHOW_ROUND = %s ^3%n^1's fall damage ^3%.0f^1 HP - before ^3%.0f^1 HP - ^3This round^1, ^3%.1f^1 seconds ago.
 DMG_SHOW = %s ^3%n^1's fall damage ^3%.0f^1 HP - before ^3%.0f^1 HP - ^3Not this round^1, ^3%.1f^1 seconds ago.
 
+
+BAN_PAUSE = ^3%n^1 banned from matches.
 BAN_EXPIRED = %s Player ^3%n^1 has expired match ban.
 BAN_PLAYER = %s ^3%n^1 banned a player ^3%n^1 on match. Expired: ^3%s^1.
 BAN_PLAYER_PERM = %s ^3%n^1 banned a player ^3%n^1 on match. Expired: ^3Permanent^1.
@@ -171,6 +173,7 @@ DMG_ERR = %s Не существует ИЛИ нескольких игроко�
 DMG_SHOW_ROUND = %s ^3%n^1 потерял ^3%.0f^1 HP - до ^3%.0f^1 HP - ^3В этом раунде^1, ^3%.1f^1 секунд назад.
 DMG_SHOW = %s ^3%n^1 потерял ^3%.0f^1 HP - до ^3%.0f^1 HP - ^3Не в этом раунде^1, ^3%.1f^1 секунд назад.
 
+BAN_PAUSE = ^3%n^1 забанен на матчах.
 BAN_EXPIRED = %s У игрока ^3%n^1 истек срок запрета на матч.
 BAN_PLAYER = %s ^3%n^1 забанил игрока ^3%n^1 на матчи. Истек срок действия: ^3%s^1.
 BAN_PLAYER_PERM = %s ^3%n^1 забанил игрока ^3%n^1 на матчи. Истекло: ^3Постоянный^1.
