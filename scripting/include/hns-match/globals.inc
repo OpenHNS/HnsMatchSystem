@@ -100,10 +100,10 @@ new g_hForwards[Forwards];
 
 enum PLAYER_ROLES { 
 	ROLE_SPEC = 0, 
-	ROLE_CAPA, 
-	ROLE_TEAMA, 
-	ROLE_CAPB, 
-	ROLE_TEAMB 
+	ROLE_CAP_A, 
+	ROLE_TEAM_A, 
+	ROLE_CAP_B, 
+	ROLE_TEAM_B 
 };
 
 enum _: PLAYER_INFO {

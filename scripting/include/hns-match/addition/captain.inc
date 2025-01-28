@@ -11,6 +11,9 @@ enum _:CaptainTeam_s {
 
 new g_eCaptain[CaptainTeam_s], g_iCaptainPick;
 
+new g_iCaptainFirst;
+new g_iCaptainSecond;
+
 new Float:RandomPickTime;
 
 public captain_start(id) {
@@ -53,7 +56,7 @@ public chooseCapsMenu(id) {
 	for (new i; i < iNum; i++) {
 		iPlayer = iPlayers[i];
 
-		if (iPlayer == g_eCaptain[e_cTT] || iPlayer == g_eCaptain[e_cCT])
+		if (iPlayer == g_iCaptainFirst || iPlayer == g_iCaptainSecond)
 			continue;
 
 		num_to_str(iPlayer, szPlayer, charsmax(szPlayer));
@@ -130,8 +133,9 @@ public chooseCapsHandler(id, hMenu, item) {
 		}
 	}
 
-	if (!g_eCaptain[e_cTT]) {
-		g_eCaptain[e_cTT] = iPlayer;
+	if (!g_iCaptainFirst) {
+		g_iCaptainFirst = iPlayer;
+		g_ePlayerInfo[g_iCaptainFirst][PLAYER_ROLE] = ROLE_CAP_A;
 		
 		if (g_ePlayerPtsData[iPlayer][e_bInit])
 			chat_print(0, "%L", LANG_PLAYER, "CAP_FIRST_PTS", iPlayer, g_ePlayerPtsData[iPlayer][e_iPts], g_ePlayerPtsData[iPlayer][e_szRank]);
@@ -139,17 +143,18 @@ public chooseCapsHandler(id, hMenu, item) {
 			chat_print(0, "%L", LANG_PLAYER, "CAP_FIRST", iPlayer);
 
 		chooseCapsMenu(id);
-	} else if (!g_eCaptain[e_cCT]) {
-		g_eCaptain[e_cCT] = iPlayer;
+	} else if (!g_iCaptainSecond) {
+		g_iCaptainSecond = iPlayer;
+		g_ePlayerInfo[g_iCaptainSecond][PLAYER_ROLE] = ROLE_CAP_B
 
 		if (g_ePlayerPtsData[iPlayer][e_bInit])
 			chat_print(0, "%L", LANG_PLAYER, "CAP_SECOND_PTS", iPlayer, g_ePlayerPtsData[iPlayer][e_iPts], g_ePlayerPtsData[iPlayer][e_szRank]);
 		else
 			chat_print(0, "%L", LANG_PLAYER, "CAP_SECOND", iPlayer);
 
-		if (is_user_connected(g_eCaptain[e_cTT]) && is_user_connected(g_eCaptain[e_cCT])) {
-			rg_set_user_team(g_eCaptain[e_cTT], TEAM_TERRORIST);
-			rg_set_user_team(g_eCaptain[e_cCT], TEAM_CT);
+		if (is_user_connected(g_iCaptainFirst) && is_user_connected(g_iCaptainSecond)) {
+			rg_set_user_team(g_iCaptainFirst, TEAM_TERRORIST);
+			rg_set_user_team(g_iCaptainSecond, TEAM_CT);
 
 			g_iMatchStatus = MATCH_CAPTAINKNIFE;
 
@@ -282,10 +287,16 @@ public pickHandler(id, hMenu, item) {
 	else
 		chat_print(0, "%L", LANG_PLAYER, "PLAYER_CHOOSE", id, iPlayer);
 
+	if (g_ePlayerInfo[id][PLAYER_ROLE] == ROLE_CAP_A) {
+		g_ePlayerInfo[iPlayer][PLAYER_ROLE] = ROLE_TEAM_A;
+		g_iCaptainPick = g_iCaptainSecond;
+	} else {
+		g_ePlayerInfo[iPlayer][PLAYER_ROLE] = ROLE_TEAM_B;
+		g_iCaptainPick = g_iCaptainFirst;
+	}
+
 	rg_set_user_team(iPlayer, getUserTeam(id));
 	rg_round_respawn(iPlayer);
-
-	g_iCaptainPick = id == g_eCaptain[e_cTT] ? g_eCaptain[e_cCT] : g_eCaptain[e_cTT];
 
 	pickMenu(g_iCaptainPick, true);
 	checkFullTeams();
@@ -325,17 +336,12 @@ public wait_function(id)
 		new randomaizer = GetPickRandom();
 		if(randomaizer) {
 			new pPlayer = g_iCaptainPick;
-			if(getUserTeam(pPlayer) == TEAM_TERRORIST) {
-				rg_set_user_team(randomaizer, TEAM_TERRORIST);
-			}
-			else {
-				rg_set_user_team(randomaizer, TEAM_CT);
-			}
+			rg_set_user_team(randomaizer, getUserTeam(pPlayer));
 
 			rg_round_respawn(randomaizer);
 			chat_print(0, "%L", LANG_PLAYER, "PLAYER_CHOOSE_RANDOM", pPlayer, randomaizer);
 
-			g_iCaptainPick = g_iCaptainPick == g_eCaptain[e_cTT] ? g_eCaptain[e_cCT] : g_eCaptain[e_cTT];
+			g_iCaptainPick = g_iCaptainPick == g_iCaptainFirst ? g_iCaptainSecond : g_iCaptainFirst;
 			show_menu(pPlayer, 0, "^n", 1);
 
 			if (task_exists(TASK_WAITCAP)) {
@@ -399,7 +405,7 @@ public checkFullTeams() {
 	for (new i; i < iNum; i++) {
 		new tempid = iPlayers[i];
 
-		if(g_bNoplay[tempid]) {
+		if(g_bNoplay[tempid]) { // TODO: Убрать ноплей, зачем он нужен?
 			continue;
 		}
 
@@ -407,6 +413,8 @@ public checkFullTeams() {
 			iPlayersNotMatch++;
 			continue;
 		}
+
+		// TODO: Проверка на забаненого игрока, если он в команде и забанен, выкинуть в спеки и continue
 
 		iPlayersMatch++;
 	}
@@ -426,11 +434,23 @@ resetCaptainData() {
 		remove_task(TASK_WAITCAP)
 	}
 
-	for (new i; i < sizeof(g_eCaptain); i++) {
-		if (is_user_connected(g_eCaptain[i])) {
-			show_menu(g_eCaptain[i], 0, "^n", 1);
-		}
+	new iPlayers[MAX_PLAYERS], iNum;
+	get_players(iPlayers, iNum, "ch");
 
-		g_eCaptain[i] = 0;
+	for (new i; i < iNum; i++) {
+		new id = iPlayers[i];
+
+		arrayset(g_ePlayerInfo[id], 0, PLAYER_INFO);
 	}
+
+	if (is_user_connected(g_iCaptainFirst)) {
+		show_menu(g_iCaptainFirst, 0, "^n", 1);
+	}
+
+	if (is_user_connected(g_iCaptainSecond)) {
+		show_menu(g_iCaptainSecond, 0, "^n", 1);
+	}
+
+	g_iCaptainFirst = 0;
+	g_iCaptainSecond = 0;
 }

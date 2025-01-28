@@ -120,3 +120,7 @@ stock get_num_players_in_match() {
 	}
 	return numGameplr;
 }
+
+stock check_user_ban(id) {
+
+}
