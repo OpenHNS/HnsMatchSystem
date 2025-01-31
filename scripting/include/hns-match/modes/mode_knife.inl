@@ -1,6 +1,8 @@
 public kniferound_init() {
 	g_ModFuncs[MODE_KNIFE][MODEFUNC_START]		= CreateOneForward(g_PluginId, "kniferound_start");
 	g_ModFuncs[MODE_KNIFE][MODEFUNC_END]		= CreateOneForward(g_PluginId, "kniferound_stop");
+	g_ModFuncs[MODE_KNIFE][MODEFUNC_PAUSE]		= CreateOneForward(g_PluginId, "kniferound_pause");
+	g_ModFuncs[MODE_KNIFE][MODEFUNC_UNPAUSE]	= CreateOneForward(g_PluginId, "kniferound_unpause");
 	g_ModFuncs[MODE_KNIFE][MODEFUNC_ROUNDSTART]	= CreateOneForward(g_PluginId, "kniferound_roundstart");
 	g_ModFuncs[MODE_KNIFE][MODEFUNC_ROUNDEND]	= CreateOneForward(g_PluginId, "kniferound_roundend", FP_CELL);
 	g_ModFuncs[MODE_KNIFE][MODEFUNC_PLAYER_JOIN]= CreateOneForward(g_PluginId, "kniferound_player_join", FP_CELL);
@@ -18,6 +20,30 @@ public kniferound_stop() {
 	g_iMatchStatus = MATCH_NONE;
 	training_start();
 }
+
+public kniferound_pause() {
+	if (g_eMatchState == STATE_PAUSED) {
+		return;
+	}
+	g_eMatchState = STATE_PAUSED;
+
+	ChangeGameplay(GAMEPLAY_TRAINING);
+
+	set_pause_settings();
+}
+
+public kniferound_unpause() {
+	if (g_eMatchState != STATE_PAUSED) {
+		return;
+	}
+	g_eMatchState = STATE_PREPARE;
+
+	restartRound(1.0);
+
+	ChangeGameplay(GAMEPLAY_KNIFE);
+
+	set_unpause_settings();
+}
  
 public kniferound_roundstart() {
 	switch (g_iMatchStatus) {
@@ -33,7 +59,9 @@ public kniferound_roundstart() {
 			ChangeGameplay(GAMEPLAY_KNIFE);
 			g_eMatchState = STATE_ENABLED;
 
-			checkUserBan();
+			if (g_bHnsBannedInit) {
+				checkUserBan();
+			}
 
 			ResetAfkData();
 			set_task(2.0, "taskSaveAfk");

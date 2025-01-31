@@ -52,3 +52,36 @@ public set_cvars_mode(iMode) {
 		case MODE_ZM: server_cmd("exec %s/zombie.cfg", szPath);
 	}
 }
+
+stock set_pause_settings() {
+	new iPlayers[MAX_PLAYERS], iNum;
+	get_players(iPlayers, iNum, "ac");
+	for (new i; i < iNum; i++) {
+		new iPlayer = iPlayers[i];
+		rg_remove_all_items(iPlayer);
+		rg_give_item(iPlayer, "weapon_knife");
+		setUserGodmode(iPlayer, true);
+		rg_reset_maxspeed(iPlayer);
+	}
+
+	set_task(1.0, "taskHudPaused", .id = HUD_PAUSE, .flags = "b");
+	rg_send_audio(0, "fvox/deactivated.wav");
+	
+	server_cmd("sv_alltalk 1");
+}
+
+stock set_unpause_settings() {
+	if(task_exists(HUD_PAUSE)) {
+		remove_task(HUD_PAUSE);
+	}
+
+	setTaskHud(0, 1.0, 1, 255, 255, 255, 3.0, "%L", LANG_SERVER, "HUD_UNPAUSE");
+	rg_send_audio(0, "fvox/activated.wav");
+	server_cmd("sv_alltalk 3");
+}
+
+public taskHudPaused() { // убить таск
+	if (g_eMatchState == STATE_PAUSED) {
+		setTaskHud(0, 0.0, 1, 255, 255, 255, 1.0, "%L", LANG_SERVER, "HUD_PAUSE");
+	}
+}

@@ -15,11 +15,12 @@
 #include <hns_matchsystem_pts.inc>
 #include <hns_matchsystem_bans.inc>
 
+#include <hns-match/globals>
+
 #include <hns-match/gameplay/gameplays.inc>
 #include <hns-match/modes/modes.inc>
 
 #include <hns-match/addition/cvars>
-#include <hns-match/globals>
 #include <hns-match/utils>
 #include <hns-match/user>
 #include <hns-match/save>

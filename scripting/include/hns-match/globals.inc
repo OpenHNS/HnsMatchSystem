@@ -113,8 +113,6 @@ enum _: PLAYER_INFO {
 	PLAYER_SAVE_SWAP
 };
 
-
-
 new g_ePlayerInfo[MAX_PLAYERS + 1][PLAYER_INFO];
 
 new Trie:g_PlayersLeaveData;

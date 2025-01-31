@@ -129,15 +129,20 @@ stock bool:checkUserBan() {
 		new tempid = iPlayers[i];
 		if (getUserTeam(tempid) == TEAM_SPECTATOR) continue;
 
-		if (g_bHnsBannedInit && e_bBanned[tempid]) {
-			if (g_iMatchStatus == MATCH_TEAMKNIFE || g_iMatchStatus == MATCH_STARTED) {
-				mix_pause();
-				chat_print(0, "%L", LANG_PLAYER, "BAN_PAUSE", tempid);
-				transferUserToSpec(tempid);
-				return true;
-			}
+		if (!e_bBanned[tempid]) continue;
+
+		switch (g_iCurrentMode){
+		case MODE_KNIFE: {
+			kniferound_pause()
+		}
+		case MODE_MIX:{
+			mix_pause();
+		}
 		}
 		
+		chat_print(0, "%L", LANG_PLAYER, "BAN_PAUSE", tempid);
+		transferUserToSpec(tempid);
+		return true;
 	}
 	return false;
 }

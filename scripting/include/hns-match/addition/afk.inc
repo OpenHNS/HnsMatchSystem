@@ -38,7 +38,15 @@ public taskCheckAfk() {
 		if(task_exists(TASK_AFK))
 			remove_task(TASK_AFK);
 
-		mix_pause();
+		switch (g_iCurrentMode){
+		case MODE_KNIFE: {
+			kniferound_pause()
+		}
+		case MODE_MIX:{
+			mix_pause();
+		}
+		}
+		
 		chat_print(0, "%L", LANG_PLAYER, "AFK_PAUSE", iPlayersAfk);
 		set_task(1.0, "taskAfk", .id = TASK_AFK, .flags = "b");
 	}

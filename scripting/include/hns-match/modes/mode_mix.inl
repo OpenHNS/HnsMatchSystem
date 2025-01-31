@@ -53,7 +53,11 @@ public mix_start() {
 public mix_freezeend() {
 	if (g_eMatchState == STATE_ENABLED) {
 		set_task(5.0, "taskCheckAfk");
-		checkUserBan();
+		
+		if (g_bHnsBannedInit) {
+			checkUserBan();
+		}
+		
 		//set_task(10.0, "mix_pause");
 		set_task(0.25, "taskRoundEvent", .id = TASK_TIMER, .flags = "b");
 
@@ -83,26 +87,7 @@ public mix_pause() {
 
 	ChangeGameplay(GAMEPLAY_TRAINING);
 
-	new iPlayers[MAX_PLAYERS], iNum;
-	get_players(iPlayers, iNum, "ac");
-	for (new i; i < iNum; i++) {
-		new iPlayer = iPlayers[i];
-		rg_remove_all_items(iPlayer);
-		rg_give_item(iPlayer, "weapon_knife");
-		setUserGodmode(iPlayer, true);
-		rg_reset_maxspeed(iPlayer);
-	}
-
-	set_task(1.0, "taskHudPaused", .id = HUD_PAUSE, .flags = "b");
-	rg_send_audio(0, "fvox/deactivated.wav");
-	
-	server_cmd("sv_alltalk 1");
-}
-
-public taskHudPaused() { // убить таск
-	if (g_eMatchState == STATE_PAUSED) {
-		setTaskHud(0, 0.0, 1, 255, 255, 255, 1.0, "%L", LANG_SERVER, "HUD_PAUSE");
-	}
+	set_pause_settings();
 }
 
 public mix_unpause() {
@@ -111,26 +96,14 @@ public mix_unpause() {
 	}
 
 	g_eMatchState = STATE_PREPARE;
+
 	restartRound(1.0);
 
-	switch (g_iCurrentMode) {
-		case MODE_MIX: {
-			ChangeGameplay(GAMEPLAY_HNS);
-			g_eMatchInfo[e_mTeamSize] = get_num_players_in_match();
-		}
-		case MODE_KNIFE: {
-			ChangeGameplay(GAMEPLAY_KNIFE);
-		}
-	}
+	g_eMatchInfo[e_mTeamSize] = get_num_players_in_match();
 
-	if(task_exists(HUD_PAUSE)) {
-		remove_task(HUD_PAUSE);
-	}
+	ChangeGameplay(GAMEPLAY_HNS);
 
-	setTaskHud(0, 1.0, 1, 255, 255, 255, 3.0, "%L", LANG_SERVER, "HUD_UNPAUSE");
-	rg_send_audio(0, "fvox/activated.wav");
-	server_cmd("sv_alltalk 3");
-
+	set_unpause_settings();
 }
 
 
