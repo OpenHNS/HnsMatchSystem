@@ -572,17 +572,17 @@ public cmdStartPause(id) {
 		return PLUGIN_HANDLED;
 	}
 
-	if (g_iCurrentMode != MODE_MIX || g_iCurrentMode != MODE_KNIFE || g_eMatchState == STATE_PAUSED) {
+	if ((g_iCurrentMode != MODE_MIX || g_iCurrentMode != MODE_KNIFE) && g_eMatchState == STATE_PAUSED) {
 		return PLUGIN_HANDLED;
 	}
 
-	switch (g_iCurrentMode){
-	case MODE_KNIFE: {
-		kniferound_pause()
-	}
-	case MODE_MIX:{
-		mix_pause();
-	}
+	switch (g_iCurrentMode) {
+		case MODE_KNIFE: {
+			kniferound_pause();
+		}
+		case MODE_MIX:{
+			mix_pause();
+		}
 	}
 
 	chat_print(0, "%l", "GAME_PAUSED", id);
@@ -595,11 +595,18 @@ public cmdStopPause(id) {
 		return PLUGIN_HANDLED;
 	}
 	
-	if (g_iCurrentMode != MODE_MIX || g_eMatchState != STATE_PAUSED) {
+	if ((g_iCurrentMode != MODE_MIX || g_iCurrentMode != MODE_KNIFE) && g_eMatchState != STATE_PAUSED) {
 		return PLUGIN_HANDLED;
 	}
 
-	mix_unpause();
+	switch (g_iCurrentMode) {
+		case MODE_KNIFE: {
+			kniferound_unpause();
+		}
+		case MODE_MIX:{
+			mix_unpause();
+		}
+	}
 
 	chat_print(0, "%l", "GAME_UNPAUSED", id);
 

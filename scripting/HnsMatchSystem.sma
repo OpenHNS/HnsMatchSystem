@@ -138,24 +138,6 @@ public NATCH_RULES:native_get_rules(amxx, params) {
 	return g_iCurrentRules;
 }
 
-/* public native_get_score_TT(amxx, params) {
-  if (g_isTeamTT == HNS_TEAM_A) {
-    return g_eMatchInfo[e_iRoundsPlayed][HNS_TEAM_A];
-    } else {
-    return g_eMatchInfo[e_iRoundsPlayed][HNS_TEAM_B];
-  }
-}*/
-
-//TEST NATIVES
-
-/*public native_get_score_CT(amxx, params) {
-  if (g_isTeamTT == HNS_TEAM_A) {
-	return g_eMatchInfo[e_iRoundsPlayed][HNS_TEAM_B];
-  }	 else {
-    return g_eMatchInfo[e_iRoundsPlayed][HNS_TEAM_A];
-  }
-} */
-
 public fwdEmitSoundPre(id, iChannel, szSample[], Float:volume, Float:attenuation, fFlags, pitch) {
 	if (equal(szSample, "weapons/knife_deploy1.wav")) {
 		return FMRES_SUPERCEDE;

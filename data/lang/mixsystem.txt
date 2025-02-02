@@ -134,6 +134,7 @@ MENU_MAIN_NOSTOPMIX  = \dStop mix match
 MENU_MAIN_STOPKF     = \rStop knife round^n
 MENU_MAIN_NOTSTARTKF = \dStart knife round^n
 MENU_MAIN_STARTKF    = Start knife round^n
+MENU_MAIN_UNPAUSEKF  = Unpause knife round
 MENU_MAIN_CUSTOM     = Start custom mode^n
 MENU_MAIN_BLEND      = Blend Teams^n
 MENU_MAIN_PAUSE      = Pause match^n

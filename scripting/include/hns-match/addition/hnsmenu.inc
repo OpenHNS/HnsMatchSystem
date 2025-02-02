@@ -18,6 +18,8 @@ public mainMatchMenu(id) {
 	if (equali(g_iSettings[KNIFEMAP], g_szMapName)) {
 		if (g_iCurrentMode == MODE_TRAINING && g_iMatchStatus == MATCH_NONE)
 			formatex(szMsg, charsmax(szMsg), "%L", id, "MENU_MAIN_CAP");
+		else if (g_iCurrentMode == MODE_KNIFE && g_iMatchStatus == MATCH_TEAMKNIFE && g_eMatchState == STATE_PAUSED)
+			formatex(szMsg, charsmax(szMsg), "%L", id, "MENU_MAIN_UNPAUSEKF");
 		else if (g_iMatchStatus == MATCH_CAPTAINPICK || g_iMatchStatus == MATCH_CAPTAINKNIFE || g_iMatchStatus == MATCH_TEAMPICK)
 			formatex(szMsg, charsmax(szMsg), "%L", id, "MENU_MAIN_STOPCAP");
 		else
@@ -94,6 +96,8 @@ public mainMatchMenuHandler(id, hMenu, item) {
 			if (equali(g_iSettings[KNIFEMAP], g_szMapName)) {
 				if (g_iCurrentMode == MODE_TRAINING && g_iMatchStatus == MATCH_NONE)
 					cmdCaptain(id);
+				else if (g_iCurrentMode == MODE_KNIFE && g_iMatchStatus == MATCH_TEAMKNIFE && g_eMatchState == STATE_PAUSED)
+					cmdStopPause(id);
 				else if (g_iMatchStatus == MATCH_CAPTAINPICK || g_iMatchStatus == MATCH_CAPTAINKNIFE|| g_iMatchStatus == MATCH_TEAMPICK)
 					cmdStop(id);
 				else
