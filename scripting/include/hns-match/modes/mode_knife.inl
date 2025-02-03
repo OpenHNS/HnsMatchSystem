@@ -60,8 +60,12 @@ public kniferound_roundstart() {
 			g_eMatchState = STATE_ENABLED;
 
 			if (g_bHnsBannedInit) {
-				checkUserBan();
+				if (checkUserBan()) {
+					return;
+				}
 			}
+
+			//check_players_set_role();
 
 			ResetAfkData();
 			set_task(2.0, "taskSaveAfk");

@@ -4,12 +4,6 @@
 
 #define _captain_included
 
-/*enum _:CaptainTeam_s {
-	e_cTT,
-	e_cCT
-};*/
-
-//new g_eCaptain[CaptainTeam_s];
 new g_iCaptainPick;
 
 new g_iCaptainFirst;
@@ -428,11 +422,13 @@ public checkFullTeams() {
 
 	if (iPlayersMatch == 10 || !iPlayersNotMatch || (iPlayersMatch % 2 == 0) && (iPlayersNotMatch <= 1)) {
 		resetCaptainData();
-		chat_print(0, "%L", LANG_PLAYER, "TEAM_FULL");
+		chat_print(0, "%L", LANG_PLAYER, "TEAM_FULL"); // TODO: Чат: Ножевой раунд начнется через 5 сек
 		g_iMatchStatus = MATCH_TEAMKNIFE;
-		kniferound_start();
+		kniferound_start(); // TODO: Добавить в худ таймер: Ножевой раунд начнется через %d сек
 	}
 }
+
+// Тут реализовать время ожидания.
 
 resetCaptainData() {
 	g_iCaptainPick = 0;

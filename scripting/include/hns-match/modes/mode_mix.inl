@@ -55,9 +55,11 @@ public mix_freezeend() {
 		set_task(5.0, "taskCheckAfk");
 		
 		if (g_bHnsBannedInit) {
-			checkUserBan();
+			if (checkUserBan()) {
+				return;
+			}
 		}
-		
+
 		//set_task(10.0, "mix_pause");
 		set_task(0.25, "taskRoundEvent", .id = TASK_TIMER, .flags = "b");
 

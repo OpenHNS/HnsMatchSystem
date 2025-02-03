@@ -146,3 +146,63 @@ stock bool:checkUserBan() {
 	}
 	return false;
 }
+
+// stock check_players_set_role() {
+// 	new iPlayers[MAX_PLAYERS], iNum;
+// 	get_players(iPlayers, iNum, "ch");
+
+// 	for (new i; i < iNum; i++) {
+// 		new id = iPlayers[i];
+// 		if (getUserTeam(id) == TEAM_SPECTATOR) continue;
+
+// 		if (g_ePlayerInfo[id][PLAYER_ROLE] == ROLE_SPEC) {
+// 			if (getUserTeam(id) == TEAM_TERRORIST) {
+// 				if (g_isTeamTT == HNS_TEAM_A) {
+
+// 				}
+// 			}
+// 		}
+		
+// 	}
+// }
+
+// stock bool:check_captain_role(TeamName:iTeam) {
+// 	new iPlayers[MAX_PLAYERS], iNum;
+// 	get_players(iPlayers, iNum, "ch");
+
+// 	for (new i; i < iNum; i++) {
+// 		new id = iPlayers[i];
+// 		if (getUserTeam(id) == !iTeam) continue;
+
+// 		if (g_ePlayerInfo[id][PLAYER_ROLE] == ROLE_CAP_A || g_ePlayerInfo[id][PLAYER_ROLE] == ROLE_CAP_B) {
+// 		}
+		
+// 	}
+// }
+
+
+// stock getNumPlayersRolesA(&playersA, &playersB, &capA, &capB) {
+// 	new iPlayers[MAX_PLAYERS], iNum;
+// 	get_players(iPlayers, iNum, "ch");
+
+// 	for (new i; i < iNum; i++) {
+// 		new id = iPlayers[i];
+// 		if (getUserTeam(id) == TEAM_SPECTATOR) continue;
+
+// 		switch (g_ePlayerInfo[id][PLAYER_ROLE]){
+// 			case ROLE_TEAM_A: {
+// 				&playersA++;
+// 			}
+// 			case ROLE_TEAM_B: {
+// 				&playersB++;
+// 			}
+// 			case ROLE_CAP_A: {
+				
+// 			}
+// 			case ROLE_TEAM_B: {
+				
+// 			}
+// 		}
+// 	}
+
+// }

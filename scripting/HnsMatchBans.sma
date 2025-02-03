@@ -18,7 +18,7 @@
 );"
 
 #define SQL_ADD_SEC \
-"NOW() + INTERVAL 300 SECOND"
+"NOW() + INTERVAL %d SECOND"
 
 #define SQL_SET_BAN_PLAYER \
 "INSERT INTO `%s` \
@@ -475,7 +475,7 @@ public QueryHandler(iFailState, Handle:hQuery, szError[], iErrnum, cData[], iSiz
 
 				ExecuteForward(g_hBanForwards, _, id, g_ePlayerInfo[id][IS_BANNED]);
 
-				set_task(5.0, "Task_ShowHud", id);
+				//set_task(5.0, "Task_ShowHud", id);
 			} else {
 				new szAuth[24];
 				get_user_authid(id, szAuth, charsmax(szAuth));
