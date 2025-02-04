@@ -287,7 +287,7 @@ public SQL_SaveConn(id) {
 	get_user_authid(id, szAuthId, charsmax(szAuthId));
 	
 	new iTime[32];
-	get_time("%s", iTime, 31);
+	get_time("%S", iTime, charsmax(iTime));
 	
 	formatex(szQuery, charsmax(szQuery), SQL_SET_LASTCONNECT, g_szTablePlayers, iTime, szAuthId);
 	SQL_ThreadQuery(g_hSqlTuple, "QueryHandler", szQuery, cData, sizeof(cData));

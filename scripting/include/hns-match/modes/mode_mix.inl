@@ -146,10 +146,12 @@ public mix_roundstart() {
 
 	ResetAfkData();
 
-	// ТУт проверку на бан
+	if (g_bHnsBannedInit) {
+		checkUserBan();
+		return;
+	}
 
-	taskCheckLeave();
-																		
+	taskCheckLeave();																
 
 	new iPlayers[MAX_PLAYERS], iNum;
 	get_players(iPlayers, iNum, "che", "TERRORIST");
@@ -417,6 +419,7 @@ public mix_player_join(id) {
 }
 
 public mix_player_leave(id) {
+	server_print("ili mi tut?")
 	if (g_ePlayerInfo[id][PLAYER_MATCH]) {
 		g_ePlayerInfo[id][PLAYER_SAVE_SWAP] = g_eMatchInfo[e_iMatchSwapped];
 
