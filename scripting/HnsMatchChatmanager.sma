@@ -343,6 +343,8 @@ public clcmd__say_handler(id) {
 public FormatMessage(sender, CsTeams:sender_team, channel, name_color, chat_color, time_code[], name[], message[]) {
     new text[173], len = 1;
     text[0] = PRETEXT_COLOR;
+
+    // TODO: Добавить префикс капитана. Изменить чат команде: (Team)
     
     if(channel % 2) {
         len += formatex(text[len], charsmax(text) - len, "%s", channel != 7 ? "[Dead]" : "[Spec]");

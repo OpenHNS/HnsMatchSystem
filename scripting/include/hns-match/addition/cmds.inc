@@ -576,14 +576,8 @@ public cmdStartPause(id) {
 		return PLUGIN_HANDLED;
 	}
 
-	switch (g_iCurrentMode) {
-		case MODE_KNIFE: {
-			kniferound_pause();
-		}
-		case MODE_MIX:{
-			mix_pause();
-		}
-	}
+	if (g_ModFuncs[g_iCurrentMode][MODEFUNC_PAUSE])
+		ExecuteForward(g_ModFuncs[g_iCurrentMode][MODEFUNC_PAUSE], _);
 
 	chat_print(0, "%l", "GAME_PAUSED", id);
 
@@ -599,14 +593,8 @@ public cmdStopPause(id) {
 		return PLUGIN_HANDLED;
 	}
 
-	switch (g_iCurrentMode) {
-		case MODE_KNIFE: {
-			kniferound_unpause();
-		}
-		case MODE_MIX:{
-			mix_unpause();
-		}
-	}
+	if (g_ModFuncs[g_iCurrentMode][MODEFUNC_UNPAUSE])
+		ExecuteForward(g_ModFuncs[g_iCurrentMode][MODEFUNC_UNPAUSE], _);
 
 	chat_print(0, "%l", "GAME_UNPAUSED", id);
 

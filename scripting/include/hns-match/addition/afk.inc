@@ -88,7 +88,9 @@ public taskAfk() {
 	}
 
 	if (!iPlayersAfk) {
-		mix_unpause();
+		if (g_ModFuncs[g_iCurrentMode][MODEFUNC_UNPAUSE])
+			ExecuteForward(g_ModFuncs[g_iCurrentMode][MODEFUNC_UNPAUSE], _);
+			
 		chat_print(0, "%L", LANG_PLAYER, "AFK_UNPAUSE");
 
 		if(task_exists(TASK_AFK))

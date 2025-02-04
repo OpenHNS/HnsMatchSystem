@@ -148,6 +148,7 @@ public chooseCapsHandler(id, hMenu, item) {
 			chat_print(0, "%L", LANG_PLAYER, "CAP_SECOND", iPlayer);
 
 		if (is_user_connected(g_iCaptainFirst) && is_user_connected(g_iCaptainSecond)) {
+			g_isTeamTT = HNS_TEAM_A;
 			rg_set_user_team(g_iCaptainFirst, TEAM_TERRORIST);
 			rg_set_user_team(g_iCaptainSecond, TEAM_CT);
 

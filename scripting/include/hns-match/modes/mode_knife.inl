@@ -49,15 +49,21 @@ public kniferound_roundstart() {
 	switch (g_iMatchStatus) {
 		case MATCH_CAPTAINKNIFE: {
 			setTaskHud(0, 2.0, 1, 255, 255, 255, 3.0, "%L", LANG_PLAYER, "HUD_START_CAPKF");
+			
 			chat_print(0, "%L", LANG_PLAYER, "START_KNIFE");
-			ChangeGameplay(GAMEPLAY_KNIFE);
+
 			g_eMatchState = STATE_ENABLED;
+
+			ChangeGameplay(GAMEPLAY_KNIFE);
 		}
 		case MATCH_TEAMKNIFE: {
 			setTaskHud(0, 2.0, 1, 255, 255, 255, 3.0, "%L", LANG_PLAYER, "HUD_STARTKNIFE");
+			
 			chat_print(0, "%L", LANG_PLAYER, "START_KNIFE");
-			ChangeGameplay(GAMEPLAY_KNIFE);
+
 			g_eMatchState = STATE_ENABLED;
+
+			ChangeGameplay(GAMEPLAY_KNIFE);
 
 			if (g_bHnsBannedInit) {
 				if (checkUserBan()) {
@@ -103,11 +109,14 @@ public kniferound_roundend(bool:win_ct) {
 				setTaskHud(0, 2.0, 1, 255, 255, 255, 3.0, "%L", LANG_SERVER, "HUD_KF_WIN_TT");
 			}
 
+			training_start();
+
+			g_iMatchStatus = MATCH_MAPPICK;
+
 			g_eMatchState = STATE_DISABLED;
 
 			Save_players(win_ct ? TEAM_CT : TEAM_TERRORIST);
-			training_start();
-			g_iMatchStatus = MATCH_MAPPICK;
+
 			StartVoteRules();
 		}
 	}

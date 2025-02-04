@@ -142,6 +142,15 @@ public mix_roundstart() {
 
 	g_flRoundTime = 0.0;
 
+	cmdShowTimers(0);
+
+	ResetAfkData();
+
+	// ТУт проверку на бан
+
+	taskCheckLeave();
+																		
+
 	new iPlayers[MAX_PLAYERS], iNum;
 	get_players(iPlayers, iNum, "che", "TERRORIST");
 	g_eMatchInfo[e_mTeamSizeTT] = iNum;
@@ -162,11 +171,7 @@ public mix_roundstart() {
 		}
 	}
 
-	cmdShowTimers(0);
-
-	ResetAfkData();
 	set_task(0.3, "taskSaveAfk");
-	taskCheckLeave();
 	//set_task(5.0, "taskCheckLeave");
 }
 
@@ -416,7 +421,8 @@ public mix_player_leave(id) {
 		g_ePlayerInfo[id][PLAYER_SAVE_SWAP] = g_eMatchInfo[e_iMatchSwapped];
 
 		if (g_iCurrentRules == RULES_DUEL) {
-			mix_pause();
+			if (g_ModFuncs[MODE_MIX][MODEFUNC_PAUSE])
+				ExecuteForward(g_ModFuncs[MODE_MIX][MODEFUNC_PAUSE], _);
 		}
 	}
 

@@ -43,7 +43,7 @@ public plugin_precache() {
 	TrieDestroy(g_Trie);
 }
 
-public cmdMapsMenu(id) {
+public cmdMapsMenu(id) { // TODO: 2 Пункта: 1 номинировать карты, 2 Выбрать карту (для капитанов)
 	new szMapId[10];
 
 	new szMsg[64];
