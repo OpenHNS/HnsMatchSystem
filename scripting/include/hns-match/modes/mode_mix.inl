@@ -419,7 +419,6 @@ public mix_player_join(id) {
 }
 
 public mix_player_leave(id) {
-	server_print("ili mi tut?")
 	if (g_ePlayerInfo[id][PLAYER_MATCH]) {
 		g_ePlayerInfo[id][PLAYER_SAVE_SWAP] = g_eMatchInfo[e_iMatchSwapped];
 
