@@ -14,5 +14,5 @@ public pub_start() {
 	loadMapCFG();
 	g_iSettings[FLASH] = 1;
 
-	restartRound(0.5);
+	hns_restart_round(0.5);
 }

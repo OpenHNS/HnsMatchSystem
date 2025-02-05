@@ -10,7 +10,7 @@ public dm_start() {
 	g_iSettings[FLASH] = 1;
 	g_iSettings[SMOKE] = 1;
 	set_cvars_mode(MODE_DM);
-	restartRound(0.5);
+	hns_restart_round(0.5);
 }
 
 public dm_killed(victim, killer) {

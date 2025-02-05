@@ -36,7 +36,7 @@ public mix_start() {
 	setTaskHud(0, 0.0, 1, 255, 255, 255, 3.0, "%L", LANG_SERVER, "HUD_STARTMIX1");
 	setTaskHud(0, 3.1, 1, 255, 255, 255, 3.0, "%L", LANG_SERVER, "HUD_STARTMIX2");
 
-	restartRound(2.0);
+	hns_restart_round(2.0);
 
 	if (g_iCurrentRules == RULES_TIMER) {
 		if (g_iSettings[WINTIME] == 0.0) {
@@ -75,7 +75,6 @@ public mix_restartround() {
 		mix_reverttimer();
 		g_eMatchState = STATE_PREPARE;
 	}
-	restartRound(0.5);
 }
 
 
@@ -99,7 +98,7 @@ public mix_unpause() {
 
 	g_eMatchState = STATE_PREPARE;
 
-	restartRound(1.0);
+	hns_restart_round(1.0);
 
 	g_eMatchInfo[e_mTeamSize] = get_num_players_in_match();
 

@@ -13,7 +13,7 @@ public kniferound_start() {
 	ChangeGameplay(GAMEPLAY_KNIFE);
 	set_cvars_mode(MODE_KNIFE);
 	g_eMatchState = STATE_PREPARE;
-	restartRound(1.0);
+	hns_restart_round(1.0);
 }
 
 public kniferound_stop() {
@@ -38,7 +38,7 @@ public kniferound_unpause() {
 	}
 	g_eMatchState = STATE_PREPARE;
 
-	restartRound(1.0);
+	hns_restart_round(1.0);
 
 	ChangeGameplay(GAMEPLAY_KNIFE);
 
