@@ -429,11 +429,6 @@ public ShowTimeAsMoney()
 	}
 }
 
-restartRound(Float:delay = 0.5) {
-	rg_round_end(delay, WINSTATUS_DRAW, ROUND_END_DRAW, "Round Restarted", "none");
-}
-
-
 public plugin_end() {
 	TrieDestroy(g_PlayersLeaveData);
 	ArrayDestroy(g_aPlayersLoadData);

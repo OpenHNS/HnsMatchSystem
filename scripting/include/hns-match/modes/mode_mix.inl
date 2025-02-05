@@ -36,7 +36,7 @@ public mix_start() {
 	setTaskHud(0, 0.0, 1, 255, 255, 255, 3.0, "%L", LANG_SERVER, "HUD_STARTMIX1");
 	setTaskHud(0, 3.1, 1, 255, 255, 255, 3.0, "%L", LANG_SERVER, "HUD_STARTMIX2");
 
-	restartRound(2.0);
+	hns_restart_round(2.0);
 
 	if (g_iCurrentRules == RULES_TIMER) {
 		if (g_iSettings[WINTIME] == 0.0) {
@@ -75,7 +75,6 @@ public mix_restartround() {
 		mix_reverttimer();
 		g_eMatchState = STATE_PREPARE;
 	}
-	restartRound(0.5);
 }
 
 
@@ -99,7 +98,7 @@ public mix_unpause() {
 
 	g_eMatchState = STATE_PREPARE;
 
-	restartRound(1.0);
+	hns_restart_round(1.0);
 
 	g_eMatchInfo[e_mTeamSize] = get_num_players_in_match();
 
@@ -110,7 +109,6 @@ public mix_unpause() {
 
 
 public mix_swap() {
-	rg_swap_all_players();
 	g_isTeamTT = HNS_TEAM:!g_isTeamTT;
 	g_eMatchInfo[e_iMatchSwapped]++;
 }
@@ -305,12 +303,12 @@ public mix_roundend(bool:win_ct) {
 				if (win_team != HNS_TEAM:-1)
 					MixFinishedMR(win_team == g_isTeamTT ? 1 : 2);
 				else {
-					mix_swap();
+					hns_swap_teams();
 					chat_print(0, "%L", LANG_PLAYER, "SAME_TIMER");
 					g_iSettings[MAXROUNDS] += 2;
 				}
 			} else {
-				mix_swap();
+				hns_swap_teams();
 				if (g_eMatchInfo[e_iRoundsPlayed][g_isTeamTT] + g_eMatchInfo[e_iRoundsPlayed][HNS_TEAM:!g_isTeamTT] >= (g_iSettings[MAXROUNDS] * 2) - 1) {
 					new sTime[24];
 					if (g_eMatchInfo[e_flSidesTime][HNS_TEAM:!g_isTeamTT] - (get_round_time() * 60.0) > g_eMatchInfo[e_flSidesTime][g_isTeamTT]) {
@@ -329,12 +327,12 @@ public mix_roundend(bool:win_ct) {
 		}
 		case RULES_TIMER: {
 			if (win_ct) {
-				mix_swap();
+				hns_swap_teams();
 			}
 		}
 		case RULES_DUEL: {
 			if (win_ct) {
-				mix_swap();
+				hns_swap_teams();
 			} else {
 				g_eMatchInfo[e_iRoundsPlayed][g_isTeamTT]++
 			}

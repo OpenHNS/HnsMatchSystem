@@ -20,7 +20,7 @@ public zm_start() {
 
 	zm_set_teams();
 
-	restartRound(2.0);
+	hns_restart_round(2.0);
 }
 
 public zm_killed(victim, killer) {

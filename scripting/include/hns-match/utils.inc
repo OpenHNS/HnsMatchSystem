@@ -9,6 +9,20 @@ enum {
 	SEMICLIP_OFF
 }
 
+stock hns_restart_round(Float:delay = 0.5) {
+	rg_round_end(delay, WINSTATUS_DRAW, ROUND_END_DRAW, "Round Restarted", "none");
+
+	if (g_ModFuncs[g_iCurrentMode][MODEFUNC_PAUSE])
+		ExecuteForward(g_ModFuncs[g_iCurrentMode][MODEFUNC_PAUSE], _);
+}
+
+stock hns_swap_teams() {
+	if (g_ModFuncs[g_iCurrentMode][MODEFUNC_SWAP])
+		ExecuteForward(g_ModFuncs[g_iCurrentMode][MODEFUNC_SWAP], _);
+
+	rg_swap_all_players();
+}
+
 stock chat_print(const id, const message[], any:...) {
 	new msgFormated[191];
 

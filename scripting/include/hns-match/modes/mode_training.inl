@@ -6,7 +6,7 @@ public trainingmode_init() {
 public training_start() {
 	g_iCurrentMode = MODE_TRAINING;
 	ChangeGameplay(GAMEPLAY_TRAINING);
-	restartRound(1.0);
+	hns_restart_round(1.0);
 	set_cvars_mode(MODE_TRAINING);
 }
 

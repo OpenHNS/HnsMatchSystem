@@ -290,13 +290,13 @@ public cmdBlend(id) {
 		Team = (Team % 2 + 1);
 	}
 
-	restartRound();
+	hns_restart_round();
 	return PLUGIN_HANDLED;
 }
 
 public blendZM() {
 	zm_set_teams();
-	restartRound(2.0);
+	hns_restart_round(2.0);
 }
 
 public cmdTransferSpec(id) {
@@ -539,11 +539,7 @@ public cmdRestartRound(id) {
 
 	chat_print(0, "%l", "GAME_RESTART", id);
 
-	if (g_iCurrentMode == MODE_MIX) {
-		mix_restartround()
-	} else {
-		restartRound();	
-	}
+	hns_restart_round();
 
 	return PLUGIN_HANDLED;
 }
@@ -556,13 +552,12 @@ public cmdSwapTeams(id) {
 	chat_print(0, "%l", "GAME_SWAP", id);
 
 	if (g_iCurrentMode == MODE_MIX) {
-		mix_reverttimer();
-		mix_swap();
-	} else {
-		rg_swap_all_players();
+		mix_reverttimer(); // TODO: Доработать
 	}
 
-	restartRound(0.5);
+	hns_swap_teams();
+
+	hns_restart_round(0.5);
 
 	return PLUGIN_HANDLED;
 }
