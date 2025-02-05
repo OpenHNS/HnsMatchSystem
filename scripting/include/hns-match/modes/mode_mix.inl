@@ -147,7 +147,9 @@ public mix_roundstart() {
 	ResetAfkData();
 
 	if (g_bHnsBannedInit) {
-		checkUserBan();
+		if (checkUserBan()) {
+			return;
+		}
 	}
 
 	taskCheckLeave();																
