@@ -132,7 +132,7 @@ stock bool:checkUserBan() {
 		if (!e_bBanned[tempid]) continue;
 
 		if (g_ModFuncs[g_iCurrentMode][MODEFUNC_PAUSE])
-		ExecuteForward(g_ModFuncs[g_iCurrentMode][MODEFUNC_PAUSE], _);
+			ExecuteForward(g_ModFuncs[g_iCurrentMode][MODEFUNC_PAUSE], _);
 		
 		chat_print(0, "%L", LANG_PLAYER, "BAN_PAUSE", tempid);
 		transferUserToSpec(tempid);

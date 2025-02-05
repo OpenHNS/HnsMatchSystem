@@ -148,7 +148,6 @@ public mix_roundstart() {
 
 	if (g_bHnsBannedInit) {
 		checkUserBan();
-		return;
 	}
 
 	taskCheckLeave();																
