@@ -109,7 +109,6 @@ public mix_unpause() {
 
 
 public mix_swap() {
-	rg_swap_all_players();
 	g_isTeamTT = HNS_TEAM:!g_isTeamTT;
 	g_eMatchInfo[e_iMatchSwapped]++;
 }
@@ -302,12 +301,12 @@ public mix_roundend(bool:win_ct) {
 				if (win_team != HNS_TEAM:-1)
 					MixFinishedMR(win_team == g_isTeamTT ? 1 : 2);
 				else {
-					mix_swap();
+					hns_swap_teams();
 					chat_print(0, "%L", LANG_PLAYER, "SAME_TIMER");
 					g_iSettings[MAXROUNDS] += 2;
 				}
 			} else {
-				mix_swap();
+				hns_swap_teams();
 				if (g_eMatchInfo[e_iRoundsPlayed][g_isTeamTT] + g_eMatchInfo[e_iRoundsPlayed][HNS_TEAM:!g_isTeamTT] >= (g_iSettings[MAXROUNDS] * 2) - 1) {
 					new sTime[24];
 					if (g_eMatchInfo[e_flSidesTime][HNS_TEAM:!g_isTeamTT] - (get_round_time() * 60.0) > g_eMatchInfo[e_flSidesTime][g_isTeamTT]) {
@@ -326,12 +325,12 @@ public mix_roundend(bool:win_ct) {
 		}
 		case RULES_TIMER: {
 			if (win_ct) {
-				mix_swap();
+				hns_swap_teams();
 			}
 		}
 		case RULES_DUEL: {
 			if (win_ct) {
-				mix_swap();
+				hns_swap_teams();
 			} else {
 				g_eMatchInfo[e_iRoundsPlayed][g_isTeamTT]++
 			}

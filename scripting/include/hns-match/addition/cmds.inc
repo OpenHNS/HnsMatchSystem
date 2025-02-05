@@ -552,11 +552,10 @@ public cmdSwapTeams(id) {
 	chat_print(0, "%l", "GAME_SWAP", id);
 
 	if (g_iCurrentMode == MODE_MIX) {
-		mix_reverttimer();
-		mix_swap();
-	} else {
-		rg_swap_all_players();
+		mix_reverttimer(); // TODO: Доработать
 	}
+
+	hns_swap_teams();
 
 	hns_restart_round(0.5);
 

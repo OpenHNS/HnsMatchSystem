@@ -16,6 +16,13 @@ stock hns_restart_round(Float:delay = 0.5) {
 		ExecuteForward(g_ModFuncs[g_iCurrentMode][MODEFUNC_PAUSE], _);
 }
 
+stock hns_swap_teams() {
+	if (g_ModFuncs[g_iCurrentMode][MODEFUNC_SWAP])
+		ExecuteForward(g_ModFuncs[g_iCurrentMode][MODEFUNC_SWAP], _);
+
+	rg_swap_all_players();
+}
+
 stock chat_print(const id, const message[], any:...) {
 	new msgFormated[191];
 
