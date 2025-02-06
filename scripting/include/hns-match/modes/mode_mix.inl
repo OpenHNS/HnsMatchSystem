@@ -74,6 +74,8 @@ public mix_restartround() {
 	if (g_eMatchState == STATE_ENABLED) {
 		mix_reverttimer();
 		g_eMatchState = STATE_PREPARE;
+
+		ResetAfkData();
 	}
 }
 
@@ -82,9 +84,10 @@ public mix_pause() {
 	if (g_eMatchState == STATE_PAUSED) {
 		return;
 	}
-	g_eMatchState = STATE_PAUSED;
 
 	mix_reverttimer();
+
+	g_eMatchState = STATE_PAUSED;
 
 	ChangeGameplay(GAMEPLAY_TRAINING);
 
@@ -111,6 +114,8 @@ public mix_unpause() {
 public mix_swap() {
 	g_isTeamTT = HNS_TEAM:!g_isTeamTT;
 	g_eMatchInfo[e_iMatchSwapped]++;
+
+	ResetAfkData();
 }
 
 
@@ -145,9 +150,7 @@ public mix_roundstart() {
 	ResetAfkData();
 
 	if (g_bHnsBannedInit) {
-		if (checkUserBan()) {
-			return;
-		}
+		checkUserBan();
 	}
 
 	taskCheckLeave();																
@@ -380,7 +383,7 @@ public taskRoundEvent() {
 
 
 public mix_reverttimer() {
-	if (!task_exists(TASK_TIMER) && g_iCurrentMode != MODE_MIX) {
+	if (g_eMatchState != STATE_ENABLED) {
 		return;
 	}
 

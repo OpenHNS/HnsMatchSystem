@@ -17,6 +17,11 @@ new iPlayersAfk;
 new Float:flAfkOrigin[MAX_PLAYERS + 1][3];
 
 public taskCheckAfk() {
+	if (g_eMatchState != STATE_ENABLED) {
+		ResetAfkData();
+		return;
+	}
+
 	if (g_iCurrentMode != MODE_MIX && g_iMatchStatus != MATCH_TEAMKNIFE) {
 		ResetAfkData();
 		return;
