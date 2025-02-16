@@ -20,6 +20,8 @@ SUR_END         = Team ^3%s^1 surrendered!
 AFK_PAUSE       = ^3%d^1 players AFK, pausing game.
 AFK_UNPAUSE     = LIVE! All players is here! Unpausing match.
 
+BAN_PAUSE       = ^3%n^1 banned from matches.
+
 NEED_PAUSE      = Match paused, need ^3%d^1 players.
 
 DM_TRANSF       = ^3%n^1 transfered to ^3Terrorist^1.
@@ -205,6 +207,8 @@ SUR_END         = Команда ^3%s^1 сдалась!
 
 AFK_PAUSE       = ^3%d^1 игроков АФК, игра приостановлена.
 AFK_UNPAUSE     = Старт! Все игроки на месте! Игра возоблена.
+
+BAN_PAUSE       = ^3%n^1 забанен на матчах.
 
 NEED_PAUSE      = Матч приостановлен, требуется ^3%d^1 игроков.
 

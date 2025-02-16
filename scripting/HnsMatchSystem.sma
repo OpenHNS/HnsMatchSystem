@@ -44,7 +44,7 @@ public plugin_init() {
 	set_msg_block(get_user_msgid("HudTextArgs"), BLOCK_SET);
 	set_msg_block(g_msgMoney = get_user_msgid("Money"), BLOCK_SET);
 
-	set_task(0.1, "ShowTimeAsMoney", 15671983, .flags="b");
+	set_task(0.1, "ShowTimeAsMoney", 15671983, .flags="b"); // TODO: Что это за число
 
 	g_aPlayersLoadData = ArrayCreate(SAVE_PLAYER_DATA);
 	loadPlayers();
@@ -309,6 +309,9 @@ public client_disconnected(id) {
 		ExecuteForward(g_ModFuncs[g_iCurrentMode][MODEFUNC_PLAYER_LEAVE], _, id);
 
 	arrayset(g_ePlayerPtsData[id], 0, PTS_DATA);
+
+	e_bBanned[id] = false;
+	g_iBanExpired[id] = 0;
 
 	g_bNoplay[id] = false;
 	g_eSpecBack[id] = TEAM_UNASSIGNED;

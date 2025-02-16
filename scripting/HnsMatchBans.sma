@@ -86,6 +86,8 @@ WHERE `player_steamid` = '%s' AND (`expired` > now() OR `expired` IS NULL);"
 FROM `%s` \
 WHERE `expired` > now() OR `expired` IS NULL"
 
+#define BAN_TASK 22100
+
 new bool:g_bDebugMode;
 
 new const g_szTable[] = "hns_bans";
@@ -154,14 +156,15 @@ public plugin_init() {
 	register_clcmd("hns_offbanmenu", "HnsOffBanMenu");
 	register_clcmd("hns_unbanmenu", "HnsUnbanMenu");
 
-	RegisterHookChain(RG_CSGameRules_RestartRound, "rgRestartRound", true);
 	RegisterHookChain(RH_SV_DropClient, "rgDropClient", false);
 
 	g_aDisconnectedPlayers = ArrayCreate(DISC_PLAYERS);
 	g_aBannedPlayers = ArrayCreate(PLAYER_DATA);
 
-	g_hBanForwards = CreateMultiForward("hns_player_banned", ET_CONTINUE, FP_CELL, FP_CELL);
+	g_hBanForwards = CreateMultiForward("hns_player_banned", ET_CONTINUE, FP_CELL, FP_CELL, FP_CELL);
 	g_hBanForwardsInit = CreateMultiForward("hns_banned_init", ET_CONTINUE);
+
+	set_task(1.0, "BanCheckSecond", BAN_TASK, .flags="b");
 
 	g_bDebugMode = bool:(plugin_flags() & AMX_FLAG_DEBUG);
 }
@@ -203,32 +206,6 @@ public rgDropClient(const id, bool:crash) {
 	get_user_ip(id, TempPlayer[DISC_PLAYERS_IP], charsmax(TempPlayer[DISC_PLAYERS_IP]), true);
 
 	ArrayPushArray(g_aDisconnectedPlayers, TempPlayer);
-}
-
-public rgRestartRound() {
-	new iPlayers[MAX_PLAYERS], iNum;
-	get_players(iPlayers, iNum, "ch");
-
-	for (new i; i < iNum; i++) {
-		new id = iPlayers[i];
-
-		if (!g_ePlayerInfo[id][IS_BANNED]) {
-			return;
-		}
-
-		if (g_ePlayerInfo[id][TIME_EXPIRED] && get_systime() >= g_ePlayerInfo[id][TIME_EXPIRED]) {
-			new szAuth[24];
-			get_user_authid(id, szAuth, charsmax(szAuth));
-			new index = FindBannedAuthIndex(szAuth);
-
-			if (index != -1) {
-				ArrayDeleteItem(g_aBannedPlayers, index);
-			}
-
-			arrayset(g_ePlayerInfo[id], 0, PLAYER_DATA);
-			client_print_color(0, print_team_blue, "%L", LANG_PLAYER , "BAN_EXPIRED", g_sPrefix, id);
-		}
-	}
 }
 
 /* SQL queries */
@@ -392,9 +369,6 @@ public QueryHandler(iFailState, Handle:hQuery, szError[], iErrnum, cData[], iSiz
 			if (g_bDebugMode) server_print("QueryHandler [SQL_BAN_PLAYER] %n", admin_id)
 			if (g_bDebugMode) server_print("QueryHandler [SQL_BAN_PLAYER] %n", player_id)
 
-
-			//Task_ShowHud(player_id)
-
 			arrayset(g_eBanData[admin_id], 0, BAN_DATA);
 			arrayset(g_eBanPlayer[admin_id], 0, BAN_DATA);
 		}
@@ -451,6 +425,7 @@ public QueryHandler(iFailState, Handle:hQuery, szError[], iErrnum, cData[], iSiz
 			}
 
 			client_print_color(0, print_team_blue, "%L", LANG_PLAYER , "UNBAN_PLAYER", g_sPrefix, admin_id, g_eBanPlayer[admin_id][PLAYER_NAME]);
+
 			arrayset(g_eBanPlayer[admin_id], 0, BAN_DATA);
 		}
 		case SQL_LOAD: {
@@ -473,9 +448,9 @@ public QueryHandler(iFailState, Handle:hQuery, szError[], iErrnum, cData[], iSiz
 
 				g_ePlayerInfo[id][TIME_EXPIRED] = SQL_ReadResult(hQuery, 3);
 
-				ExecuteForward(g_hBanForwards, _, id, g_ePlayerInfo[id][IS_BANNED]);
+				Task_ShowHud(id)
 
-				//set_task(5.0, "Task_ShowHud", id);
+				ExecuteForward(g_hBanForwards, _, id, g_ePlayerInfo[id][IS_BANNED], g_ePlayerInfo[id][TIME_EXPIRED]);
 			} else {
 				new szAuth[24];
 				get_user_authid(id, szAuth, charsmax(szAuth));
@@ -500,6 +475,35 @@ public QueryHandler(iFailState, Handle:hQuery, szError[], iErrnum, cData[], iSiz
 				ArrayPushArray(g_aBannedPlayers, TempPlayer);
 				SQL_NextRow(hQuery);
 			}
+		}
+	}
+}
+
+public BanCheckSecond() {
+	new iPlayers[MAX_PLAYERS], iNum;
+	get_players(iPlayers, iNum, "ch");
+
+	for (new i; i < iNum; i++) {
+		new id = iPlayers[i];
+
+		if (!g_ePlayerInfo[id][IS_BANNED]) {
+			continue;
+		}
+
+		if (g_ePlayerInfo[id][TIME_EXPIRED] && get_systime() >= g_ePlayerInfo[id][TIME_EXPIRED]) {
+			new szAuth[24];
+			get_user_authid(id, szAuth, charsmax(szAuth));
+			new index = FindBannedAuthIndex(szAuth);
+
+			if (index != -1) {
+				ArrayDeleteItem(g_aBannedPlayers, index);
+			}
+
+			arrayset(g_ePlayerInfo[id], 0, PLAYER_DATA);
+
+			ExecuteForward(g_hBanForwards, _, id, false, 0);
+			
+			client_print_color(0, print_team_blue, "%L", LANG_PLAYER , "BAN_EXPIRED", g_sPrefix, id);
 		}
 	}
 }
@@ -757,6 +761,13 @@ public HnsInfoBanHandler(id, hMenu, item) {
 
 	SQL_UnbanPlayer(id, g_eBanPlayer[id][PLAYER_STEAM]);
 
+	new findID = find_player_by_steam(g_eBanPlayer[id][PLAYER_STEAM])
+
+	if (findID) {
+		arrayset(g_ePlayerInfo[id], 0, PLAYER_DATA);
+		ExecuteForward(g_hBanForwards, _, id, false, 0);
+	}
+
 	return PLUGIN_HANDLED;
 }
 
@@ -788,6 +799,24 @@ stock FindBannedAuthIndex(szAuth[]) {
 		}
 	}
 	return -1;
+}
+
+public find_player_by_steam(const steam_id[]) {
+	new iPlayers[MAX_PLAYERS], iNum;
+	get_players(iPlayers, iNum);
+
+	for (new i = 0; i < iNum; i++) {
+		new id = iPlayers[i];
+
+		new szAuth[24];
+		get_user_authid(id, szAuth, charsmax(szAuth));
+
+		if (equal(szAuth, steam_id)) {
+			return id;
+		}
+	}
+
+	return 0;
 }
 
 stock bool:getUserInAccess(id) {

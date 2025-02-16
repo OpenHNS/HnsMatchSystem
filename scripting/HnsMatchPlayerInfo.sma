@@ -5,6 +5,7 @@
 #include <hns_matchsystem>
 #include <hns_matchsystem_pts>
 #include <hns_matchsystem_stats>
+#include <hns_matchsystem_bans>
 
 #define TASK_SHOWBEST 1328
 
@@ -280,7 +281,7 @@ public hns_round_end() {
 	set_task(1.0, "taskShowBestRound", TASK_SHOWBEST, .flags = "b");
 }
 
-public taskShowBestRound(id) {
+public taskShowBestRound() {
 	if (g_flShowRoundStats < get_gametime()) {
 		reset_best_players();
 		remove_task(TASK_SHOWBEST);
@@ -493,6 +494,12 @@ public task_ShowPlayerInfo() {
 				iLen += format(szHudMess[iLen], sizeof szHudMess - iLen, "\
 				Stabs: %d^n",
 				hns_get_stats_stabs(STATS_ALL, show_id));
+			}
+
+			if (g_bHnsBannedInit) {
+				if (e_bBanned[id]) {
+					iLen += format(szHudMess[iLen], sizeof szHudMess - iLen, "You are banned from matches: %s^n", secondsToDHM(g_iBanExpired[id] - get_systime()));
+				}
 			}
 
 
