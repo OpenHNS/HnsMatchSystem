@@ -13,6 +13,8 @@ Counter-Strike Hide'n'Seek Match System plugins.
 | [ReSemiclip](https://github.com/rehlds/resemiclip/releases) | [![Download](https://img.shields.io/github/v/release/rehlds/resemiclip?include_prereleases&style=flat-square)](https://github.com/rehlds/resemiclip/releases) |
 | [AMXModX (v1.9 or v1.10)](https://www.amxmodx.org/downloads-new.php) | [![Download](https://img.shields.io/badge/AMXModX-%3E%3D1.9.0-blue?style=flat-square)](https://www.amxmodx.org/downloads-new.php) |
 | [ReAPI](https://github.com/rehlds/reapi) | [![Download](https://img.shields.io/github/v/release/rehlds/reapi?include_prereleases&style=flat-square)](https://github.com/rehlds/reapi) |
+| [MySQL (Необязательно)](https://dev.mysql.com/downloads/mysql/) | [![Download](https://img.shields.io/badge/MySQL-Latest-blue?style=flat-square)](https://dev.mysql.com/downloads/mysql/) |
+
 
 ## Характеристики
 
