@@ -218,7 +218,7 @@ public ManagementWatcherMenu(id) {
 	formatex(szMsg, charsmax(szMsg), "%L", LANG_PLAYER, "WTR_MENU_MANAGMENT");
 	new hMenu = menu_create(szMsg, "codeManagementWatcherMenu");
 
-	if (get_user_flags(id) & ACCESS) {
+	if (get_user_flags(id) & FULL_ACCESS) {
 		formatex(szMsg, charsmax(szMsg), "%L", LANG_PLAYER, "WTR_MENU_DEL");
 	} else {
 		formatex(szMsg, charsmax(szMsg), "%L", LANG_PLAYER, "WTR_MENU_NOT_DEL");
