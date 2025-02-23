@@ -3,6 +3,7 @@
 #include <hns_matchsystem>
 
 #define ACCESS ADMIN_MAP // f
+#define FULL_ACCESS ADMIN_LEVEL_A // m
 
 #define RATIO 0.66
 
@@ -31,7 +32,7 @@ public plugin_init() {
 
 	RegisterSayCmd("rnw", "rocknewwatcher", "cmdRnw", 0, "Rock new watchers");
 	RegisterSayCmd("unrnw", "nornw", "cmdUnRnw", 0, "Cancel vote new watchers");
-	RegisterSayCmd("watcher", "wt", "cmdWatcherMenu", 0, "Watcher menu");
+	RegisterSayCmd("watcher", "wt", "FullWatcherMenu", 0, "Watcher menu");
 
 	register_dictionary("match_additons.txt");
 
@@ -64,32 +65,51 @@ public client_disconnected(id) {
 	}
 }
 
-public cmdWatcherMenu(id) {
-	if(get_user_flags(id) & ADMIN_LEVEL_A) {
-		superWatcherMenu(id);
-	} else if (id == g_eWatcher[w_iId]) {
-		watcherMenu(id);
-	}
-	
-	return PLUGIN_HANDLED;
-}
+public FullWatcherMenu(id) {
+	if (!is_user_connected(id))
+		return;
 
-public superWatcherMenu(id) {
+	if (~get_user_flags(id) & ACCESS) {
+		return;
+	}
+
 	static szMsg[128];
 
 	formatex(szMsg, charsmax(szMsg), "%L", LANG_PLAYER, "WTR_MENU_MANAGMENT");
-	new hMenu = menu_create(szMsg, "codeSuperWatcherMenu");
-	
-	formatex(szMsg, charsmax(szMsg), "%L", LANG_PLAYER, "WTR_MENU_DEL");
+	new hMenu = menu_create(szMsg, "codeFullWatcherMenu");
+
+	formatex(szMsg, charsmax(szMsg), "%L", LANG_PLAYER, "WTR_MENU");
 	menu_additem(hMenu, szMsg, "1");
 
-	formatex(szMsg, charsmax(szMsg), "%L", LANG_PLAYER, "WTR_MENU_ADD");
+	formatex(szMsg, charsmax(szMsg), "%L", LANG_PLAYER, "WTR_MENU_TRANSFER");
 	menu_additem(hMenu, szMsg, "2");
+
+	formatex(szMsg, charsmax(szMsg), "%L", LANG_PLAYER, "WTR_MENU_CHANGEMAP");
+	menu_additem(hMenu, szMsg, "3");
+
+	formatex(szMsg, charsmax(szMsg), "%L", LANG_PLAYER, "WTR_MENU_KILLPLAYERS");
+	menu_additem(hMenu, szMsg, "4");
+
+	if (get_user_flags(id) & FULL_ACCESS) {
+		formatex(szMsg, charsmax(szMsg), "%L", LANG_PLAYER, "WTR_MENU_BLACKLIST");
+	} else {
+		formatex(szMsg, charsmax(szMsg), "%L", LANG_PLAYER, "WTR_MENU_NOT_BLACKLIST");
+	}
+
+	menu_additem(hMenu, szMsg, "5");
+
+	if (get_user_flags(id) & FULL_ACCESS) {
+		formatex(szMsg, charsmax(szMsg), "%L", LANG_PLAYER, "WTR_MENU_MIXBANMENUS");
+	} else {
+		formatex(szMsg, charsmax(szMsg), "%L", LANG_PLAYER, "WTR_MENU_NOT_MIXBANMENUS");
+	}
+
+	menu_additem(hMenu, szMsg, "6");
 
 	menu_display(id, hMenu, 0);
 }
 
-public codeSuperWatcherMenu(id, hMenu, item) {
+public codeFullWatcherMenu(id, hMenu, item) {
 	if (item == MENU_EXIT) {
 		menu_destroy(hMenu);
 		return PLUGIN_HANDLED;
@@ -100,22 +120,149 @@ public codeSuperWatcherMenu(id, hMenu, item) {
 	menu_destroy(hMenu);
 	
 	new iKey = str_to_num(szData);
-	if(iKey == 1) {
-		if(is_user_connected(g_eWatcher[w_iId])) {
-			remove_user_flags(g_eWatcher[w_iId], ACCESS);
-			g_eWatcher[w_szSteamId] = "";
-			g_eWatcher[w_iId] = 0;
-			client_print_color(0, print_team_red, "%L", LANG_PLAYER, "WTR_DELETE", g_sPrefix, id, g_eWatcher[w_iId]);
-		} else {
-			if(strlen(g_eWatcher[w_szSteamId])) {
-				client_print_color(0, print_team_red, "%L", LANG_PLAYER, "WTR_DELETE_STEAM", g_sPrefix, id, g_eWatcher[w_szSteamId]);
-				g_eWatcher[w_szSteamId] = "";
+
+	switch(iKey) {
+		case 1: {
+			ManagementWatcherMenu(id);
+		}
+		case 2: {
+			client_cmd(id, "amx_teammenu");
+		}
+		case 3: {
+			client_cmd(id, "amx_mapmenu");
+		}
+		case 4: {
+			client_cmd(id, "amx_slapmenu");
+		}
+		case 5: {
+			if (get_user_flags(id) & FULL_ACCESS) {
+				//client_cmd(id, ""); // Вызов блэклист меню
+			} else {
+				FullWatcherMenu(id);
 			}
 		}
-	} else {
-		watcherMenu(id);
-	}	
+		case 6: {
+			if (get_user_flags(id) & FULL_ACCESS) {
+				mixBansMenu(id);
+			} else {
+				FullWatcherMenu(id);
+			}
+		}
+	}
 	
+	return PLUGIN_HANDLED;
+}
+
+public mixBansMenu(id) {
+	if (!is_user_connected(id))
+		return;
+
+	if (~get_user_flags(id) & FULL_ACCESS) {
+		return;
+	}
+
+	static szMsg[128];
+
+	formatex(szMsg, charsmax(szMsg), "%L", LANG_PLAYER, "WTR_MAIN_BANMENU");
+	new hMenu = menu_create(szMsg, "codemixBansMenu");
+
+	formatex(szMsg, charsmax(szMsg), "%L", LANG_PLAYER, "WTR_BANMENU");
+	menu_additem(hMenu, szMsg, "1");
+
+	formatex(szMsg, charsmax(szMsg), "%L", LANG_PLAYER, "WTR_OFFBANMENU");
+	menu_additem(hMenu, szMsg, "2");
+
+	formatex(szMsg, charsmax(szMsg), "%L", LANG_PLAYER, "WTR_UNBANMENU");
+	menu_additem(hMenu, szMsg, "3");
+
+	menu_display(id, hMenu, 0);
+}
+
+public codemixBansMenu(id, hMenu, item) {
+	if (item == MENU_EXIT) {
+		menu_destroy(hMenu);
+		return PLUGIN_HANDLED;
+	}
+
+	new szData[6], szName[64], iAccess, iCallback;
+	menu_item_getinfo(hMenu, item, iAccess, szData, charsmax(szData), szName, charsmax(szName), iCallback);
+	menu_destroy(hMenu);
+	
+	new iKey = str_to_num(szData);
+
+	switch(iKey) {
+		case 1: {
+			client_cmd(id, "hns_banmenu");
+		}
+		case 2: {
+			client_cmd(id, "hns_offbanmenu");
+		}
+		case 3: {
+			client_cmd(id, "hns_unbanmenu");
+		}
+	}
+
+	return PLUGIN_HANDLED;
+}
+
+public ManagementWatcherMenu(id) {
+	if (!is_user_connected(id))
+		return;
+
+	if (~get_user_flags(id) & ACCESS) {
+		return;
+	}
+
+	static szMsg[128];
+
+	formatex(szMsg, charsmax(szMsg), "%L", LANG_PLAYER, "WTR_MENU_MANAGMENT");
+	new hMenu = menu_create(szMsg, "codeManagementWatcherMenu");
+
+	if (get_user_flags(id) & ACCESS) {
+		formatex(szMsg, charsmax(szMsg), "%L", LANG_PLAYER, "WTR_MENU_DEL");
+	} else {
+		formatex(szMsg, charsmax(szMsg), "%L", LANG_PLAYER, "WTR_MENU_NOT_DEL");
+	}
+
+	menu_additem(hMenu, szMsg, "1");
+
+	formatex(szMsg, charsmax(szMsg), "%L", LANG_PLAYER, "WTR_MENU_ADD");
+	menu_additem(hMenu, szMsg, "2");
+
+	menu_display(id, hMenu, 0);
+}
+
+public codeManagementWatcherMenu(id, hMenu, item) {
+	if (item == MENU_EXIT) {
+		menu_destroy(hMenu);
+		return PLUGIN_HANDLED;
+	}
+
+	new szData[6], szName[64], iAccess, iCallback;
+	menu_item_getinfo(hMenu, item, iAccess, szData, charsmax(szData), szName, charsmax(szName), iCallback);
+	menu_destroy(hMenu);
+	
+	new iKey = str_to_num(szData);
+
+	switch (iKey) {
+		case 1: {
+			if(is_user_connected(g_eWatcher[w_iId])) {
+				remove_user_flags(g_eWatcher[w_iId], ACCESS);
+				g_eWatcher[w_szSteamId] = "";
+				g_eWatcher[w_iId] = 0;
+				client_print_color(0, print_team_red, "%L", LANG_PLAYER, "WTR_DELETE", g_sPrefix, id, g_eWatcher[w_iId]);
+			} else {
+				if(strlen(g_eWatcher[w_szSteamId])) {
+					client_print_color(0, print_team_red, "%L", LANG_PLAYER, "WTR_DELETE_STEAM", g_sPrefix, id, g_eWatcher[w_szSteamId]);
+					g_eWatcher[w_szSteamId] = "";
+				}
+			}
+		}
+		case 2: {
+			watcherMenu(id);
+		}
+	}
+
 	return PLUGIN_HANDLED;
 }
 

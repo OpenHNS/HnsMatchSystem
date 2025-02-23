@@ -144,8 +144,8 @@ MENU_MAIN_UNPAUSE    = Unpause match^n
 MENU_MAIN_SETTINGS   = Mix system settings^n
 MENU_MAIN_RESTART    = Restart round
 MENU_MAIN_SWAP       = Swap teams^n
-MENU_MAIN_TEAM       = Team Transfer Player
-MENU_MAIN_MAP        = Change map
+MENU_MAIN_WTRMENU    = Watcher menu
+MENU_MAIN_ADMMENU    = Admin menu
 
 MENU_CUSTOM_PUB     = Public
 MENU_CUSTOM_DM      = DeathMatch
@@ -331,8 +331,8 @@ MENU_MAIN_UNPAUSE    = Возобновить микс^n
 MENU_MAIN_SETTINGS   = Настройки микса^n
 MENU_MAIN_RESTART    = Перезапустить раунд
 MENU_MAIN_SWAP       = Поменять команды местами^n
-MENU_MAIN_TEAM       = Команда игрока
-MENU_MAIN_MAP        = Сменить карту
+MENU_MAIN_WTRMENU    = Ватчер меню
+MENU_MAIN_ADMMENU    = Админ меню
 
 MENU_CUSTOM_PUB     = Паблик
 MENU_CUSTOM_DM      = ДМ

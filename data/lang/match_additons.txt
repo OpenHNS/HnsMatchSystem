@@ -25,7 +25,22 @@ WTR_NEW = %s New Watcher - ^3%n^1 (^3%d^1 votes)
 WTR_MENU_NEW = \rChoose new watcher:
 WTR_MENU_CHOSE = \rVote for new watcher:
 WTR_MENU_MANAGMENT = \rWatcher managment
+WTR_MENU = Add / Remove Watcher
+WTR_MENU_TRANSFER = Team Transfer Player^n
+WTR_MENU_CHANGEMAP = Change map
+WTR_MENU_KILLPLAYERS = Kill players^n
+WTR_MENU_BLACKLIST = Blacklist menu
+WTR_MENU_NOT_BLACKLIST = \dBlacklist menu
+WTR_MENU_MIXBANMENUS = Ban menu \d[Mix]
+WTR_MENU_NOT_MIXBANMENUS = \dBan menu \d[Mix]
+
+WTR_MAIN_BANMENU = Ban menu
+WTR_BANMENU = Ban \d[Mix]
+WTR_OFFBANMENU = OffBan \d[Mix]
+WTR_UNBANMENU = Unban \d[Mix]
+
 WTR_MENU_DEL = Remove current watcher
+WTR_MENU_NOT_DEL = \dRemove current watcher
 WTR_MENU_ADD = Choose new watcher
 
 KNIFE_HIDE = Hide knife
@@ -114,7 +129,22 @@ WTR_NEW = %s Новый watcher - ^3%n^1 с ^3%d^1 голосами!
 WTR_MENU_NEW = \rВыберите нового watcher'a:
 WTR_MENU_CHOSE = \rПроголосуйте за watcher'a:
 WTR_MENU_MANAGMENT = \rУправление watcher'кой
+WTR_MENU = Добавить / Удалить Watcher'а
+WTR_MENU_TRANSFER = Команда игрока^n
+WTR_MENU_CHANGEMAP = Смена карты
+WTR_MENU_KILLPLAYERS = Убить игрока^n
+WTR_MENU_BLACKLIST = Меню черного списка
+WTR_MENU_NOT_BLACKLIST = \dМеню черного списка
+WTR_MENU_MIXBANMENUS = Бан меню \d[Mix]
+WTR_MENU_NOT_MIXBANMENUS = \dБан меню \d[Mix]
+
+WTR_MAIN_BANMENU = Бан меню
+WTR_BANMENU = Бан \d[Mix]
+WTR_OFFBANMENU = Оффлайн бан \d[Mix]
+WTR_UNBANMENU = Разбан \d[Mix]
+
 WTR_MENU_DEL = Удалить текущего watcher'a
+WTR_MENU_NOT_DEL = \dУдалить текущего watcher'a
 WTR_MENU_ADD = Добавить нового watcher'a
 
 KNIFE_HIDE = Спрятать нож

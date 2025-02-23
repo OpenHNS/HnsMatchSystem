@@ -68,10 +68,10 @@ public mainMatchMenu(id) {
 	formatex(szMsg, charsmax(szMsg), "%L", id, "MENU_MAIN_SWAP");
 	menu_additem(hMenu, szMsg, "5");
 
-	formatex(szMsg, charsmax(szMsg), "%L", id, "MENU_MAIN_TEAM");
+	formatex(szMsg, charsmax(szMsg), "%L", id, "MENU_MAIN_WTRMENU");
 	menu_additem(hMenu, szMsg, "6");
 
-	formatex(szMsg, charsmax(szMsg), "%L", id, "MENU_MAIN_MAP");
+	formatex(szMsg, charsmax(szMsg), "%L", id, "MENU_MAIN_ADMMENU");
 	menu_additem(hMenu, szMsg, "7");
 
 	menu_display(id, hMenu, 0);
@@ -144,10 +144,10 @@ public mainMatchMenuHandler(id, hMenu, item) {
 			cmdSwapTeams(id);
 		}
 		case 6: {
-			client_cmd(id, "amx_teammenu");
+			client_cmd(id, "watcher");
 		}
 		case 7: {
-			client_cmd(id, "amx_mapmenu");
+			client_cmd(id, "amxmodmenu");
 		}
 	}
 
