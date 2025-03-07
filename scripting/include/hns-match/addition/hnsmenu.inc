@@ -7,7 +7,7 @@
 new Float:g_flTimeToVoteMode;
 
 public mainMatchMenu(id) {
-	if (!is_user_connected(id) || !getUserInAccess(id))
+	if (!is_user_connected(id) || !isUserWatcher(id))
 		return PLUGIN_HANDLED;
 
 	static szMsg[128];
@@ -202,7 +202,7 @@ public customMenuHandler(id, hMenu, item) {
 }
 
 public settingsMatchMenu(id) {
-	if (!is_user_connected(id) || !getUserInAccess(id))
+	if (!is_user_connected(id) || !isUserWatcher(id))
 		return PLUGIN_HANDLED;
 
 	new szMsg[64];
@@ -394,7 +394,7 @@ public verifMenuHandler(id, hMenu, item) {
 }
 
 public menuSelectMode(id) {
-	if (!getUserInAccess(id)) {
+	if (!isUserWatcher(id)) {
 		return PLUGIN_HANDLED;
 	}
 	

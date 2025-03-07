@@ -13,29 +13,31 @@ stock cmds_init() {
 	register_clcmd("jointeam", 		"blockCmd");
 	register_clcmd("joinclass", 	"blockCmd");
 
-	RegisterSayCmd("mix", 	"mix", 	"mainMatchMenu",	access, "Main menu admin");
-	RegisterSayCmd("mode", 	"type", "menuSelectMode",	access, "Mode match menu");
+	new iWatcherAccess = read_flags(g_iSettings[WATCHER_FLAG]);
 
-	RegisterSayCmd("mr", 		"maxround", 	"cmdMrMode",		access, "Choose MR mode");
-	RegisterSayCmd("timer", 	"wintime", 		"cmdWintimeMode",	access, "Choose Wintime mode");
-	RegisterSayCmd("duel", 		"versus", 		"cmdDuelMode",		access, "Choose 1x1 mode");
-	RegisterSayCmd("pub", 		"public", 		"cmdPubMode", 		access, "Public mode");
-	RegisterSayCmd("dm", 		"deathmatch", 	"cmdDMMode", 		access, "DeathMatch mode");
-	RegisterSayCmd("zm", 		"zombie", 		"cmdZMMode", 		access, "Zombie mode");
-	RegisterSayCmd("bld", 		"blend", 		"cmdBlend", 		access, "Blend teams");
-	RegisterSayCmd("specall", 	"specall", 		"cmdTransferSpec", 	access, "Spec Transfer");
-	RegisterSayCmd("ttall", 	"ttall", 		"cmdTransferTT", 	access, "TT Transfer");
-	RegisterSayCmd("ctall", 	"ctall", 		"cmdTransferCT", 	access, "CT Transfer");
-	RegisterSayCmd("startmix", 	"start", 		"cmdStartMatch", 	access, "Starts Round");
-	RegisterSayCmd("kniferound", "kf", 			"cmdKnifeRound", 	access, "Knife Round");
-	RegisterSayCmd("captain", 	"cap", 			"cmdCaptain", 		access, "Captain Mode");
-	RegisterSayCmd("stop", 		"cancel", 		"cmdStopMode", 		access, "Stop Current Mode");
-	RegisterSayCmd("skill", 	"skill", 		"cmdSkillMode", 	access, "Skill mode");
-	RegisterSayCmd("boost", 	"boost", 		"cmdBoostMode", 	access, "Boost mode");
-	RegisterSayCmd("rr", 		"restart", 		"cmdRestartRound", 	access, "Restart round");
-	RegisterSayCmd("swap", 		"swap", 		"cmdSwapTeams", 	access, "Swap Teams");
-	RegisterSayCmd("pause", 	"ps", 			"cmdStartPause", 	access, "Start pause");
-	RegisterSayCmd("live", 		"unpause", 		"cmdStopPause",		access, "Unpause");
+	RegisterSayCmd("mix", 	"mix", 	"mainMatchMenu",	iWatcherAccess, "Main menu admin");
+	RegisterSayCmd("mode", 	"type", "menuSelectMode",	iWatcherAccess, "Mode match menu");
+
+	RegisterSayCmd("mr", 		"maxround", 	"cmdMrMode",		iWatcherAccess, "Choose MR mode");
+	RegisterSayCmd("timer", 	"wintime", 		"cmdWintimeMode",	iWatcherAccess, "Choose Wintime mode");
+	RegisterSayCmd("duel", 		"versus", 		"cmdDuelMode",		iWatcherAccess, "Choose 1x1 mode");
+	RegisterSayCmd("pub", 		"public", 		"cmdPubMode", 		iWatcherAccess, "Public mode");
+	RegisterSayCmd("dm", 		"deathmatch", 	"cmdDMMode", 		iWatcherAccess, "DeathMatch mode");
+	RegisterSayCmd("zm", 		"zombie", 		"cmdZMMode", 		iWatcherAccess, "Zombie mode");
+	RegisterSayCmd("bld", 		"blend", 		"cmdBlend", 		iWatcherAccess, "Blend teams");
+	RegisterSayCmd("specall", 	"specall", 		"cmdTransferSpec", 	iWatcherAccess, "Spec Transfer");
+	RegisterSayCmd("ttall", 	"ttall", 		"cmdTransferTT", 	iWatcherAccess, "TT Transfer");
+	RegisterSayCmd("ctall", 	"ctall", 		"cmdTransferCT", 	iWatcherAccess, "CT Transfer");
+	RegisterSayCmd("startmix", 	"start", 		"cmdStartMatch", 	iWatcherAccess, "Starts Round");
+	RegisterSayCmd("kniferound", "kf", 			"cmdKnifeRound", 	iWatcherAccess, "Knife Round");
+	RegisterSayCmd("captain", 	"cap", 			"cmdCaptain", 		iWatcherAccess, "Captain Mode");
+	RegisterSayCmd("stop", 		"cancel", 		"cmdStopMode", 		iWatcherAccess, "Stop Current Mode");
+	RegisterSayCmd("skill", 	"skill", 		"cmdSkillMode", 	iWatcherAccess, "Skill mode");
+	RegisterSayCmd("boost", 	"boost", 		"cmdBoostMode", 	iWatcherAccess, "Boost mode");
+	RegisterSayCmd("rr", 		"restart", 		"cmdRestartRound", 	iWatcherAccess, "Restart round");
+	RegisterSayCmd("swap", 		"swap", 		"cmdSwapTeams", 	iWatcherAccess, "Swap Teams");
+	RegisterSayCmd("pause", 	"ps", 			"cmdStartPause", 	iWatcherAccess, "Start pause");
+	RegisterSayCmd("live", 		"unpause", 		"cmdStopPause",		iWatcherAccess, "Unpause");
 	RegisterSayCmd("surrender", "sur", 			"cmdSurrender", 	0, "Surrender vote");
 	RegisterSayCmd("score", 	"s", 			"cmdShowTimers", 	0, "Score");
 	RegisterSayCmd("back", 		"spec", 		"cmdTeamSpec", 		0, "Spec/Back player");
@@ -68,7 +70,7 @@ public sayHandle(id) {
 	if (equali(szArgs, "/roundtime", 10)) {
 		trim(szTarget);
 
-		if (!getUserInAccess(id))
+		if (!isUserWatcher(id))
 			return PLUGIN_HANDLED;
 
 		if (is_str_num(szTarget)) {
@@ -81,7 +83,7 @@ public sayHandle(id) {
 	if (equali(szArgs, "/mr", 10)) {
 		trim(szTarget);
 
-		if (!getUserInAccess(id))
+		if (!isUserWatcher(id))
 			return PLUGIN_HANDLED;
 			
 		if (!is_str_num(szTarget))
@@ -97,7 +99,7 @@ public sayHandle(id) {
 	if (equali(szArgs, "/wintime", 10)) {
 		trim(szTarget);
 
-		if (!getUserInAccess(id))
+		if (!isUserWatcher(id))
 			return PLUGIN_HANDLED;
 			
 		if (!is_str_num(szTarget))
@@ -121,7 +123,7 @@ public blockCmd(id) {
 }
 
 public cmdMrMode(id) {
-	if (!getUserInAccess(id)) {
+	if (!isUserWatcher(id)) {
 		return PLUGIN_HANDLED;
 	}
 
@@ -142,7 +144,7 @@ public cmdMrMode(id) {
 }
 
 public cmdWintimeMode(id) {
-	if (!getUserInAccess(id)) {
+	if (!isUserWatcher(id)) {
 		return PLUGIN_HANDLED;
 	}
 
@@ -163,7 +165,7 @@ public cmdWintimeMode(id) {
 }
 
 public cmdDuelMode(id) {
-	if (!getUserInAccess(id)) {
+	if (!isUserWatcher(id)) {
 		return PLUGIN_HANDLED;
 	}
 
@@ -189,7 +191,7 @@ public cmdDuelMode(id) {
 }
 
 public cmdPubMode(id) {
-	if (!getUserInAccess(id)) {
+	if (!isUserWatcher(id)) {
 		return PLUGIN_HANDLED;
 	}
 
@@ -211,7 +213,7 @@ public cmdPubMode(id) {
 }
 
 public cmdDMMode(id) {
-	if (!getUserInAccess(id)) {
+	if (!isUserWatcher(id)) {
 		return PLUGIN_HANDLED;
 	}
 
@@ -233,7 +235,7 @@ public cmdDMMode(id) {
 }
 
 public cmdZMMode(id) {
-	if (!getUserInAccess(id)) {
+	if (!isUserWatcher(id)) {
 		return PLUGIN_HANDLED;
 	}
 
@@ -255,7 +257,7 @@ public cmdZMMode(id) {
 }
 
 public cmdBlend(id) {
-	if (!getUserInAccess(id)) {
+	if (!isUserWatcher(id)) {
 		return PLUGIN_HANDLED;
 	}
 
@@ -300,7 +302,7 @@ public blendZM() {
 }
 
 public cmdTransferSpec(id) {
-	if (!getUserInAccess(id)) {
+	if (!isUserWatcher(id)) {
 		return PLUGIN_HANDLED;
 	}
 	
@@ -316,7 +318,7 @@ public cmdTransferSpec(id) {
 }
 
 public cmdTransferTT(id) {
-	if (!getUserInAccess(id)) {
+	if (!isUserWatcher(id)) {
 		return PLUGIN_HANDLED;
 	}
 
@@ -332,7 +334,7 @@ public cmdTransferTT(id) {
 }
 
 public cmdTransferCT(id) {
-	if (!getUserInAccess(id)) {
+	if (!isUserWatcher(id)) {
 		return PLUGIN_HANDLED;
 	}
 
@@ -348,7 +350,7 @@ public cmdTransferCT(id) {
 }
 
 public cmdStartMatch(id) {
-	if (!getUserInAccess(id)) {
+	if (!isUserWatcher(id)) {
 		return PLUGIN_HANDLED;
 	}
 
@@ -377,7 +379,7 @@ public cmdStartMatch(id) {
 }
 
 public cmdKnifeRound(id) {
-	if (!getUserInAccess(id)) {
+	if (!isUserWatcher(id)) {
 		return PLUGIN_HANDLED;
 	}
 
@@ -400,7 +402,7 @@ public cmdKnifeRound(id) {
 }
 
 public cmdCaptain(id) {
-	if (!getUserInAccess(id)) {
+	if (!isUserWatcher(id)) {
 		return PLUGIN_HANDLED;
 	}
 
@@ -419,7 +421,7 @@ public cmdCaptain(id) {
 }
 
 public cmdStopMode(id) {
-	if (!getUserInAccess(id)) {
+	if (!isUserWatcher(id)) {
 		return PLUGIN_HANDLED;
 	}
 
@@ -433,7 +435,7 @@ public cmdStopMode(id) {
 }
 
 public cmdStop(id) {
-	if (!getUserInAccess(id)) {
+	if (!isUserWatcher(id)) {
 		return PLUGIN_HANDLED;
 	}
 
@@ -490,7 +492,7 @@ public cmdStop(id) {
 }
 
 public cmdSkillMode(id) {
-	if (!getUserInAccess(id)) {
+	if (!isUserWatcher(id)) {
 		return PLUGIN_HANDLED;
 	}
 
@@ -513,7 +515,7 @@ public cmdSkillMode(id) {
 }
 
 public cmdBoostMode(id) {
-	if (!getUserInAccess(id)) {
+	if (!isUserWatcher(id)) {
 		return PLUGIN_HANDLED;
 	}
 
@@ -533,7 +535,7 @@ public cmdBoostMode(id) {
 }
 
 public cmdRestartRound(id) {
-	if (!getUserInAccess(id)) {
+	if (!isUserWatcher(id)) {
 		return PLUGIN_HANDLED;
 	}
 
@@ -545,7 +547,7 @@ public cmdRestartRound(id) {
 }
 
 public cmdSwapTeams(id) {
-	if (!getUserInAccess(id)) {
+	if (!isUserWatcher(id)) {
 		return PLUGIN_HANDLED;
 	}
 
@@ -563,7 +565,7 @@ public cmdSwapTeams(id) {
 }
 
 public cmdStartPause(id) {
-	if (!getUserInAccess(id)) {
+	if (!isUserWatcher(id)) {
 		return PLUGIN_HANDLED;
 	}
 
@@ -580,7 +582,7 @@ public cmdStartPause(id) {
 }
 
 public cmdStopPause(id) {
-	if (!getUserInAccess(id)) {
+	if (!isUserWatcher(id)) {
 		return PLUGIN_HANDLED;
 	}
 	

@@ -33,8 +33,15 @@ stock bool:getUserInMatch(id) {
 	return false;
 }
 
-stock bool:getUserInAccess(id) {
-	if (get_user_flags(id) & access)
+stock bool:isUserWatcher(id) {
+	if (get_user_flags(id) & read_flags(g_iSettings[WATCHER_FLAG]))
+		return true;
+	else
+		return false;
+}
+
+stock bool:isUserFullWatcher(id) {
+	if (get_user_flags(id) & read_flags(g_iSettings[FULL_WATCHER_FLAG]))
 		return true;
 	else
 		return false;

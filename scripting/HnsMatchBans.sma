@@ -485,7 +485,7 @@ public BanCheckSecond() {
 
 	for (new i; i < iNum; i++) {
 		new id = iPlayers[i];
-
+		
 		if (!g_ePlayerInfo[id][IS_BANNED]) {
 			continue;
 		}
@@ -526,12 +526,78 @@ public Task_ShowHud(id) {
 
 /* Menus */
 
-public HnsBanMenu(id, page) {
-	if (!is_user_connected(id) || !getUserInAccess(id)) {
+
+public HnsBansMenu(id) {
+	if (!is_user_connected(id) || !isUserFullWatcher(id))
+		return;
+
+	static szMsg[128];
+
+	formatex(szMsg, charsmax(szMsg), "%L", LANG_PLAYER, "BAN_MAIN_MENU");
+	new hMenu = menu_create(szMsg, "codeHnsBansMenu");
+
+	formatex(szMsg, charsmax(szMsg), "%L", LANG_PLAYER, "BAN_MAIN_BAN");
+	menu_additem(hMenu, szMsg, "1");
+
+	formatex(szMsg, charsmax(szMsg), "%L", LANG_PLAYER, "BAN_MAIN_OFFBAN");
+	menu_additem(hMenu, szMsg, "2");
+
+	new iSize = ArraySize(g_aBannedPlayers);
+
+	if (!iSize || !g_aBannedPlayers) {
+		formatex(szMsg, charsmax(szMsg), "\d%L", LANG_PLAYER, "BAN_MAIN_UNBAN");
+	} else {
+		formatex(szMsg, charsmax(szMsg), "%L", LANG_PLAYER, "BAN_MAIN_UNBAN");
+	}
+
+	menu_additem(hMenu, szMsg, "3");
+
+	menu_display(id, hMenu, 0);
+}
+
+public codeHnsBansMenu(id, hMenu, item) {
+	if (item == MENU_EXIT) {
+		menu_destroy(hMenu);
 		return PLUGIN_HANDLED;
 	}
 
-	new hMenu = menu_create("\rBan player on mix", "HnsBanHandler");
+	new szData[6], szName[64], iAccess, iCallback;
+	menu_item_getinfo(hMenu, item, iAccess, szData, charsmax(szData), szName, charsmax(szName), iCallback);
+	menu_destroy(hMenu);
+	
+	new iKey = str_to_num(szData);
+
+	switch(iKey) {
+		case 1: {
+			HnsBanMenu(id, 0);
+		}
+		case 2: {
+			HnsOffBanMenu(id, 0);
+		}
+		case 3: {
+			new iSize = ArraySize(g_aBannedPlayers);
+
+			if (!iSize || !g_aBannedPlayers) {
+				HnsBansMenu(id);
+			} else {
+				HnsUnbanMenu(id, 0);
+			}
+		}
+	}
+
+	return PLUGIN_HANDLED;
+}
+
+public HnsBanMenu(id, page) {
+	if (!is_user_connected(id) || !isUserWatcher(id)) {
+		return PLUGIN_HANDLED;
+	}
+
+	static szMsg[128];
+
+	formatex(szMsg, charsmax(szMsg), "%L", LANG_PLAYER, "BAN_BAN_MENU");
+	
+	new hMenu = menu_create(szMsg, "HnsBanHandler");
 
 	new iPlayers[MAX_PLAYERS], iNum;
 	get_players(iPlayers, iNum, "ch");
@@ -589,7 +655,7 @@ public HnsBanHandler(id, hMenu, item) {
 }
 
 public HnsOffBanMenu(id, page) {
-	if (!is_user_connected(id) || !getUserInAccess(id)) {
+	if (!is_user_connected(id) || !isUserWatcher(id)) {
 		return PLUGIN_HANDLED;
 	}
 
@@ -604,7 +670,11 @@ public HnsOffBanMenu(id, page) {
 		return PLUGIN_HANDLED;
 	}
 
-	new hMenu = menu_create("\rBan disconnected player on mix", "HnsOffBanHandler");
+	static szMsg[128];
+
+	formatex(szMsg, charsmax(szMsg), "%L", LANG_PLAYER, "BAN_OFFBAN_MENU");
+	
+	new hMenu = menu_create(szMsg, "HnsOffBanHandler");
 
 	for (new i; i < iSize; i++) {
 		ArrayGetArray(g_aDisconnectedPlayers, i, TempPlayer);
@@ -640,19 +710,19 @@ public HnsOffBanHandler(id, hMenu, item) {
 }
 
 public HnsTimeMenu(id) {
-	if (!is_user_connected(id) || !getUserInAccess(id)) {
+	if (!is_user_connected(id) || !isUserWatcher(id)) {
 		return PLUGIN_HANDLED;
 	}
 
-	new hMenu;
+	static szMsg[128];
 
 	if (g_eBanData[id][IS_OFFBAN]) {
-		hMenu = menu_create(fmt("\rSelect ban time^n\
-						\dTarget: %s", g_eBanPlayer[id][PLAYER_NAME]), "HnsTimeHandler");
+		formatex(szMsg, charsmax(szMsg), "%L", LANG_PLAYER, "BAN_TIME_MENU_S", g_eBanPlayer[id][PLAYER_NAME]);
 	} else {
-		hMenu = menu_create(fmt("\rSelect ban time^n\
-							\dTarget: %n", g_eBanData[id][BAN_PAYER]), "HnsTimeHandler");
+		formatex(szMsg, charsmax(szMsg), "%L", LANG_PLAYER, "BAN_TIME_MENU_N", g_eBanData[id][BAN_PAYER]);
 	}
+
+	new hMenu = menu_create(szMsg, "HnsTimeHandler");
 
 	for (new i; i < sizeof(g_eBanTime); i++)
 		menu_additem(hMenu, fmt("%s", g_eBanTime[i][TIME_NAME]));
@@ -682,7 +752,7 @@ public HnsTimeHandler(id, hMenu, item) {
 }
 
 public HnsUnbanMenu(id, page) {
-	if (!is_user_connected(id) || !getUserInAccess(id)) {
+	if (!is_user_connected(id) || !isUserWatcher(id)) {
 		return PLUGIN_HANDLED;
 	}
 
@@ -690,15 +760,19 @@ public HnsUnbanMenu(id, page) {
 		return PLUGIN_HANDLED;
 	}
 
-	new TempPlayer[PLAYER_DATA];
 	new iSize = ArraySize(g_aBannedPlayers);
 
 	if (!iSize) {
 		return PLUGIN_HANDLED;
 	}
 
-	new hMenu = menu_create("\rUnban player on mix", "HnsUnbanHandler");
+	static szMsg[128];
 
+	formatex(szMsg, charsmax(szMsg), "%L", LANG_PLAYER, "BAN_UNBAN_MENU");
+	
+	new hMenu = menu_create(szMsg, "HnsOffBanHandler");
+
+	new TempPlayer[PLAYER_DATA];
 	for (new i; i < iSize; i++) {
 		ArrayGetArray(g_aBannedPlayers, i, TempPlayer);
 		menu_additem(hMenu, fmt("%s", TempPlayer[PLAYER_NAME]));
@@ -725,7 +799,7 @@ public HnsUnbanHandler(id, hMenu, item) {
 }
 
 public HnsInfoBanMenu(id) {
-	if (!is_user_connected(id) || !getUserInAccess(id)) {
+	if (!is_user_connected(id) || !isUserWatcher(id)) {
 		return PLUGIN_HANDLED;
 	}
 
@@ -817,13 +891,6 @@ public find_player_by_steam(const steam_id[]) {
 	}
 
 	return 0;
-}
-
-stock bool:getUserInAccess(id) {
-	if (get_user_flags(id) & accessFW)
-		return true;
-	else
-		return false;
 }
 
 stock secondsToDHM(time) {

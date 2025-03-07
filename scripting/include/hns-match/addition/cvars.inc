@@ -18,7 +18,9 @@ enum _: CVARS
 	Float:TIME_RANDOMPICK,
 	KNIFEMAP[24],
 	PREFIX[24],
-	GAMENAME
+	GAMENAME,
+	WATCHER_FLAG[4],
+	FULL_WATCHER_FLAG[4],
 }
 
 new pCvar[CVARS];
@@ -77,6 +79,12 @@ stock cvars_init() {
 
 	pCvar[GAMENAME] = create_cvar("hns_gamename", "Hide'n'Seek", FCVAR_NONE, "Game name");
 	bind_pcvar_string(pCvar[GAMENAME], g_iSettings[GAMENAME], charsmax(g_iSettings[GAMENAME]));
+
+	pCvar[WATCHER_FLAG] = create_cvar("hns_watcher_flag", "f", FCVAR_NONE, "Watcher access flag");
+	bind_pcvar_string(pCvar[WATCHER_FLAG], g_iSettings[WATCHER_FLAG], charsmax(g_iSettings[WATCHER_FLAG]));
+
+	pCvar[FULL_WATCHER_FLAG] = create_cvar("hns_fullwatcher_flag", "m", FCVAR_NONE, "Full watcher access flag");
+	bind_pcvar_string(pCvar[FULL_WATCHER_FLAG], g_iSettings[FULL_WATCHER_FLAG], charsmax(g_iSettings[FULL_WATCHER_FLAG]));
 }
 
 stock Float:get_round_time() {

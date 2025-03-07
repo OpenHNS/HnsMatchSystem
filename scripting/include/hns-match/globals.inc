@@ -4,8 +4,6 @@
 
 #define _globals_included
 
-#define access ADMIN_MAP
-
 #define TASK_TIMER 54345
 #define HUD_PAUSE 23931
 

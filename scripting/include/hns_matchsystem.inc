@@ -5,9 +5,6 @@
 
 #define rg_get_user_team(%0) get_member(%0, m_iTeam)
 
-#define access ADMIN_MAP
-#define accessFW ADMIN_LEVEL_A
-
 enum _:HNS_MODES
 {
 	MODE_TRAINING,
@@ -53,6 +50,26 @@ enum NATCH_RULES {
 * @noreturn
 */
 native hns_get_prefix(szPrefix[], iLen);
+
+/*
+* 
+*
+* 
+* 
+*
+* 
+*/
+native hns_get_flag_watcher();
+
+/*
+* 
+*
+* 
+* 
+*
+* 
+*/
+native hns_get_flag_fullwatcher();
 
 /*
 * Gets mode system.
@@ -168,4 +185,18 @@ stock RegisterSayCmd(const szCmd[], const szShort[], const szFunc[], flags = -1,
 	register_clcmd(szTemp, szFunc, flags, szInfoLang);
 
 	return 1;
+}
+
+stock bool:isUserWatcher(id) {
+	if (get_user_flags(id) & hns_get_flag_watcher())
+		return true;
+	else
+		return false;
+}
+
+stock bool:isUserFullWatcher(id) {
+	if (get_user_flags(id) & hns_get_flag_fullwatcher())
+		return true;
+	else
+		return false;
 }
