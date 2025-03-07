@@ -153,6 +153,7 @@ public plugin_init() {
 	register_plugin("Match: Bans", "1.1", "OpenHNS");
 
 	register_clcmd("hns_banmenu", "HnsBanMenu");
+	register_clcmd("hns_bans_menu", "HnsBansMenu");
 	register_clcmd("hns_offbanmenu", "HnsOffBanMenu");
 	register_clcmd("hns_unbanmenu", "HnsUnbanMenu");
 
@@ -441,8 +442,11 @@ public QueryHandler(iFailState, Handle:hQuery, szError[], iErrnum, cData[], iSiz
 
 				new ban_expired = SQL_ReadResult(hQuery, 2);
 
+				static szMsg[128];
+				formatex(szMsg, charsmax(szMsg), "%L", LANG_PLAYER, "BAN_DATE_EXPIRED_P");
+
 				if (!ban_expired)
-					copy(g_ePlayerInfo[id][DATE_EXPIRED], charsmax(g_ePlayerInfo[][DATE_EXPIRED]), "Permanent"); // TODO: Lang
+					copy(g_ePlayerInfo[id][DATE_EXPIRED], charsmax(g_ePlayerInfo[][DATE_EXPIRED]), szMsg);
 				else
 					SQL_ReadResult(hQuery, 2, g_ePlayerInfo[id][DATE_EXPIRED], charsmax(g_ePlayerInfo[][DATE_EXPIRED]));
 
@@ -513,13 +517,11 @@ public Task_ShowHud(id) {
 		return;
 	}
 
+	static szMsg[128];
+	formatex(szMsg, charsmax(szMsg), "%L", LANG_PLAYER, "BAN_INFO", g_ePlayerInfo[id][ADMIN_NAME], g_ePlayerInfo[id][ADMIN_STEAM], g_ePlayerInfo[id][DATE_EXPIRED]);
+
 	set_dhudmessage(250, 255, 255, -1.0, 0.3, 0, 0.0, 5.0, 0.1, 0.1);
-	show_dhudmessage(0, 
-	"You were banned on match!^n\
-	Admin: %s | Steamid: %s^n\
-	Expired: %s", 
-	g_ePlayerInfo[id][ADMIN_NAME], g_ePlayerInfo[id][ADMIN_STEAM], 
-	g_ePlayerInfo[id][DATE_EXPIRED]); // TODO: Lang
+	show_dhudmessage(id, szMsg);
 }
 
 /* SQL queries */
@@ -605,8 +607,8 @@ public HnsBanMenu(id, page) {
 	for (new i; i < iNum; i++) {
 		new iPlayer = iPlayers[i];
 
-		// if (id == iPlayer)
-		// 	continue;
+		if (id == iPlayer && g_ePlayerInfo[id][IS_BANNED])
+			continue;
 
 		if (g_ePlayerInfo[iPlayer][IS_BANNED]) {
 			continue;
@@ -770,7 +772,7 @@ public HnsUnbanMenu(id, page) {
 
 	formatex(szMsg, charsmax(szMsg), "%L", LANG_PLAYER, "BAN_UNBAN_MENU");
 	
-	new hMenu = menu_create(szMsg, "HnsOffBanHandler");
+	new hMenu = menu_create(szMsg, "HnsUnbanHandler");
 
 	new TempPlayer[PLAYER_DATA];
 	for (new i; i < iSize; i++) {
@@ -808,15 +810,13 @@ public HnsInfoBanMenu(id) {
 	if (g_eBanPlayer[id][DATE_EXPIRED]) {
 		formatex(szExpired, charsmax(szExpired), "%s", g_eBanPlayer[id][DATE_EXPIRED]);
 	} else {
-		formatex(szExpired, charsmax(szExpired), "Permanent");
+		formatex(szExpired, charsmax(szExpired), "%L", LANG_PLAYER, "BAN_DATE_EXPIRED_P");
 	}
 
-	new hMenu = menu_create(fmt("\rUnban player^n\
-								\dPlayer name: %s^n\
-								Player steamid: %s^n\
-								Admin name: %s^n\
-								Admin steamid: %s^n\
-								Expired: %s", g_eBanPlayer[id][PLAYER_NAME], g_eBanPlayer[id][PLAYER_STEAM], g_eBanPlayer[id][ADMIN_NAME], g_eBanPlayer[id][ADMIN_STEAM], szExpired), "HnsInfoBanHandler");
+	static szMsg[512];
+	formatex(szMsg, charsmax(szMsg), "%L", LANG_PLAYER, "BAN_FULLINFO", g_eBanPlayer[id][PLAYER_NAME], g_eBanPlayer[id][PLAYER_STEAM], g_eBanPlayer[id][ADMIN_NAME], g_eBanPlayer[id][ADMIN_STEAM], szExpired);
+
+	new hMenu = menu_create(szMsg, "HnsInfoBanHandler");
 
 	menu_additem(hMenu, "Unban");
 
@@ -835,11 +835,11 @@ public HnsInfoBanHandler(id, hMenu, item) {
 
 	SQL_UnbanPlayer(id, g_eBanPlayer[id][PLAYER_STEAM]);
 
-	new findID = find_player_by_steam(g_eBanPlayer[id][PLAYER_STEAM])
+	new findID = find_player_by_steam(g_eBanPlayer[id][PLAYER_STEAM]);
 
 	if (findID) {
-		arrayset(g_ePlayerInfo[id], 0, PLAYER_DATA);
-		ExecuteForward(g_hBanForwards, _, id, false, 0);
+		arrayset(g_ePlayerInfo[findID], 0, PLAYER_DATA);
+		ExecuteForward(g_hBanForwards, _, findID, false, 0);
 	}
 
 	return PLUGIN_HANDLED;

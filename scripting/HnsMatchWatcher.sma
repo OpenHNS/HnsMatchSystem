@@ -199,9 +199,9 @@ public codeManagementWatcherMenu(id, hMenu, item) {
 		case 1: {
 			if(is_user_connected(g_eWatcher[w_iId])) {
 				remove_user_flags(g_eWatcher[w_iId], hns_get_flag_watcher());
+				client_print_color(0, print_team_red, "%L", LANG_PLAYER, "WTR_DELETE", g_sPrefix, id, g_eWatcher[w_iId]);
 				g_eWatcher[w_szSteamId] = "";
 				g_eWatcher[w_iId] = 0;
-				client_print_color(0, print_team_red, "%L", LANG_PLAYER, "WTR_DELETE", g_sPrefix, id, g_eWatcher[w_iId]);
 			} else {
 				if(strlen(g_eWatcher[w_szSteamId])) {
 					client_print_color(0, print_team_red, "%L", LANG_PLAYER, "WTR_DELETE_STEAM", g_sPrefix, id, g_eWatcher[w_szSteamId]);
@@ -234,7 +234,7 @@ public ChooseNewWatcherMenu(id) {
 		get_user_name(iTempID, szName, charsmax(szName));
 		formatex(szUserId, charsmax(szUserId), "%d", get_user_userid(iTempID));
 		
-		if(!(get_user_flags(iTempID) & ADMIN_LEVEL_A))
+		if(!(get_user_flags(iTempID) & hns_get_flag_fullwatcher()))
 			menu_additem(hMenu, szName, szUserId, 0);
 	}
 	

@@ -132,20 +132,24 @@ stock bool:checkUserBan() {
 	new iPlayers[MAX_PLAYERS], iNum;
 	get_players(iPlayers, iNum, "ch");
 
+	new bool:foundPlayerBanned = false;
+
 	for (new i; i < iNum; i++) {
 		new tempid = iPlayers[i];
 		if (getUserTeam(tempid) == TEAM_SPECTATOR) continue;
 
 		if (!e_bBanned[tempid]) continue;
 
-		if (g_ModFuncs[g_iCurrentMode][MODEFUNC_PAUSE])
-			ExecuteForward(g_ModFuncs[g_iCurrentMode][MODEFUNC_PAUSE], _);
-		
 		chat_print(0, "%L", LANG_PLAYER, "BAN_PAUSE", tempid);
 		transferUserToSpec(tempid);
-		return true;
+		foundPlayerBanned = true;	
 	}
-	return false;
+
+	if (foundPlayerBanned && g_ModFuncs[g_iCurrentMode][MODEFUNC_PAUSE]) {
+		ExecuteForward(g_ModFuncs[g_iCurrentMode][MODEFUNC_PAUSE], _);
+	}
+
+	return foundPlayerBanned;
 }
 
 stock check_players_set_role() {

@@ -102,12 +102,16 @@ BAN_TIME_MENU_S = \rSelect ban time^n\dTarget: %s
 BAN_TIME_MENU_N = \rSelect ban time^n\dTarget: %n
 BAN_UNBAN_MENU = \rUnban player on match
 
+BAN_DATE_EXPIRED_P = Permanent
 BAN_EXPIRED = %s Player ^3%n^1 has expired match ban.
 BAN_PLAYER = %s ^3%n^1 banned a player ^3%n^1 on match. Expired: ^3%s^1.
 BAN_PLAYER_PERM = %s ^3%n^1 banned a player ^3%n^1 on match. Expired: ^3Permanent^1.
 BAN_PLAYER_OFF = %s ^3%n^1 banned a player ^3%s^1 on match. Expired: ^3%s^1.
 BAN_PLAYER_PERM_OFF = %s ^3%n^1 banned a player ^3%s^1 on match. Expired: ^3Permanent^1.
 UNBAN_PLAYER = %s ^3%n^1 unbanned a player ^3%s^1 on match.
+
+BAN_INFO = You were banned on match!^nAdmin: %s | Steamid: %s^nExpired: %s
+BAN_FULLINFO = \rUnban player^n\dPlayer name: %s^nPlayer steamid: %s^nAdmin name: %s^nAdmin steamid: %s^nExpired: %s
 
 [ru]
 
@@ -216,9 +220,13 @@ BAN_TIME_MENU_S = \rВыберите время бана^n\dЦель: %s
 BAN_TIME_MENU_N = \rВыберите время банаe^n\dЦель: %n
 BAN_UNBAN_MENU = \rРазбанить игрока на матчи
 
+BAN_DATE_EXPIRED_P = Навсегда
 BAN_EXPIRED = %s У игрока ^3%n^1 истек срок запрета на матч.
 BAN_PLAYER = %s ^3%n^1 забанил игрока ^3%n^1 на матчи. Истек срок действия: ^3%s^1.
 BAN_PLAYER_PERM = %s ^3%n^1 забанил игрока ^3%n^1 на матчи. Истекло: ^3Постоянный^1.
 BAN_PLAYER_OFF = %s ^3%n^1 забанил игрока ^3%s^1 на матчи. Истекает: ^3%s^1.
 BAN_PLAYER_PERM_OFF = %s ^3%n^1 забанил игрока ^3%s^1 на матчи. Истекло: ^3Permanent^1.
 UNBAN_PLAYER = %s ^3%n^1 разбанил игрока ^3%s^1 на матчи.
+
+BAN_INFO = Вы были забанены на матчах!^nАдмин: %s | Стимайди: %s^nИстекает: %s
+BAN_FULLINFO = \rРазбан игрока^n\dНик игрока: %s^nСтимайди игрока: %s^nНик админа: %s^nСтимайди админа: %s^nИстекает: %s
