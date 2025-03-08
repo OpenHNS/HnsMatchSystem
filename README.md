@@ -20,7 +20,7 @@ Counter-Strike Hide'n'Seek Match System plugins.
 
 - Public / DeathMatch / Zombie - Моды для разминок.
 - Knife / Captain - Режимы распределений команд.
-- MR / Wintime / 1x1 - Режими матчей
+- MR / Wintime / 1x1 - Режимы матчей
 - Watcher (admin) menu (N)
 - Система зависит от администратора.
 - Surrender
@@ -68,14 +68,24 @@ Counter-Strike Hide'n'Seek Match System plugins.
 
 - Watcher
 
-    Для watcher'а необходимо настроить `configs/cmdaccess.ini`, а именно сделать доступным для флага f следующие команды:
+    Для начало:
+    1. Открываем файл `configs/mixsystem/matchsystem.cfg`
+    2. Изменяем квар hns_watcher_flag, который будет использоваться для ватчера (Обычный f - ADMIN_MAP).
+    3. Сохраняем. 
+
+    Для watcher'а необходимо настроить `configs/cmdaccess.ini`, а именно сделать доступным для флага (в зависимости от значения квара) следующие команды:
 
         "amx_slay" 	"f" ; admincmd.amxx
         "amx_slap" 	"f" ; admincmd.amxx
         "amx_map" 	"f" ; admincmd.amxx
         "amx_slapmenu" 	"f" ; plmenu.amxx
         "amx_teammenu" 	"f" ; plmenu.amxx
-        "amx_mapmenu" 	"f" ; mapsmenu.amxx   
+        "amx_mapmenu" 	"f" ; mapsmenu.amxx  
+- Full Watcher
+
+    1. Открываем файл `configs/mixsystem/matchsystem.cfg`
+    2. Изменяем квар hns_fullwatcher_flag, который будет использоваться для полного ватчера (Обычный m - ADMIN_LEVEL_A).
+    3. Сохраняем.          
 
 ## Описание
     
@@ -83,7 +93,11 @@ Counter-Strike Hide'n'Seek Match System plugins.
 
     Система не автоматическая, для того, чтобы игроки могли заводить миксы, есть плагин 'HnsMatchWatcher.amxx'. 
     
-    Watcher - игрок, который запускает миксы.     
+    Watcher - игрок, который запускает миксы.
+
+- Full Watcher
+
+    Данная привилегия такая же как и Watcher, только у нас добавляются возможности: Кикать, Банить на миксы, Забирать права у игроков кто Watcher.
     
 - Запуск микса
     
@@ -105,12 +119,19 @@ Counter-Strike Hide'n'Seek Match System plugins.
 
 - Матч - Wintime режим
 
-    Командам дается определенное кол-во времени (15)
+    Командам дается определенное кол-во времени (15)    
     У команды, которая играет за террористов время отнимается.
     Та команда, у которой закончилось время, победила.
 
+- Матч - Дуэль режим
+
+    Игроки играют до трёх раундов (чтобы счёт был у тт 3)   
+    У игрока, который бегает полный раунд или игрок из противоположной команды разбивается, плюс очко в сторону игрока за ТТ.   
+    Тот игрок, который наберёт 3 очка за тт выигрывает.    
+
 ## Плагины
 - HnsMatchSystem.sma - Основной плагин мода
+- HnsMatchBans.sma - Плагин для банов на матчах
 - HnsMatchStats.sma - Плагин статистики микса
 - HnsMatchPlayerInfo.sma - Hud информация игрока
 - HnsMatchSql.sma - Плагин для взаимодействия с БД
@@ -119,6 +140,7 @@ Counter-Strike Hide'n'Seek Match System plugins.
 - HnsMatchChatmanager.sma - Измененый ЧМ, показывает префикс ранга (скилла)
 - HnsMatchMaps.sma - Список карт для игроков (/maps)
 - HnsMatchTraining.sma - Трейнинг меню (Чектоинты)
+- HnsMatchReControl.sma - Плагин для замены/передачи контроля/замены админом игрока
 - HnsMatchWatcher.sma - Watcher система, позволяет игрокам становиться/голосовать за watcher
 - HnsMatchMapRules.sma - Плагин для установления правил для карт (убийство в воде на карте de_piranesi) 
 
@@ -141,10 +163,13 @@ Counter-Strike Hide'n'Seek Match System plugins.
 | hns_knifemap         | 35hp_2     | Ножевая карта |
 | hns_prefix           | MATCH      | Префикс системы |
 | hns_gamename         | Hide'n'Seek | Геймнейм сервера |
+| hns_watcher_flag     | f          | Флаг Ватчера |
+| hns_fullwatcher_flag | m          | Флаг Фулл-ватчера |
+| hns_admin_flag       | b          | Флаг Администратора |
 
-## Комманды
+## Команды
 
-- Комманды в чат
+- Команды в чат
 
 - Watcher (ADMIN_MAP)
 
@@ -166,6 +191,7 @@ Counter-Strike Hide'n'Seek Match System plugins.
 | stop / cancel | Остановить текущий режим  |
 | skill | Скилл мод |
 | boost | Буст мод |
+| duel | Дуэль мод |
 | rr / restart | Рестарт раунда |
 | swap / swap | Поменять команды местами |
 | pause / ps | Пауза |
@@ -185,7 +211,7 @@ Counter-Strike Hide'n'Seek Match System plugins.
 | ip / play | Играю |
 | checkpoint / cp | Чекпоинт |
 | teleport / tp | Телепорт к чекпоинту |
-| gocheck / gc | Чекпоинтn |
+| gocheck / gc | Телепорт к чекпоинту |
 | showdmg / showdamade | Дамаг |
 | noclip / clip | Ноуклип |
 | respawn / resp | Заспавниться |
