@@ -25,7 +25,7 @@ enum _:RNW {
 new g_eRnw[RNW];
 
 public plugin_init() {
-	register_plugin("Match: Watcher", "1.0", "OpenHNS"); // Garey
+	register_plugin("Match: Watcher", "1.1", "OpenHNS"); // Garey
 
 	RegisterSayCmd("rnw", "rocknewwatcher", "cmdRnw", 0, "Rock new watchers");
 	RegisterSayCmd("unrnw", "nornw", "cmdUnRnw", 0, "Cancel vote new watchers");
