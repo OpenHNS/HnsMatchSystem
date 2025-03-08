@@ -6,8 +6,6 @@
 
 #define rg_get_user_team(%0) get_member(%0, m_iTeam)
 
-new const g_Prefix[] = ">";
-
 const g_Access = ADMIN_BAN;
 
 enum _:Data
@@ -65,6 +63,10 @@ public plugin_init()
 	RegisterHookChain(RG_CSGameRules_PlayerSpawn, "@CSGameRules_PlayerSpawn", true);
 
 	register_dictionary("match_additons.txt");
+}
+
+public plugin_cfg() {
+	hns_get_prefix(g_sPrefix, charsmax(g_sPrefix));
 }
 
 public client_putinserver(id)
@@ -196,7 +198,7 @@ public MenuHandler(id, m_Menu, szKeys)
 		new Float:szTime = get_gametime();
 		
 		if(szTime < g_flDelay[id])
-			client_print_color(id, print_team_blue, "%L", LANG_PLAYER, "RECON_DELAY", g_Prefix, g_flDelay[id] - szTime);
+			client_print_color(id, print_team_blue, "%L", LANG_PLAYER, "RECON_DELAY", g_sPrefix, g_flDelay[id] - szTime);
 		else
 		{
 			g_bInvited[invited_id] = true;
@@ -419,10 +421,10 @@ public ConfirmationHandler(id, m_Confirmation, szKeys)
 		case 1:
 		{
 			if (g_ControlType[requested_id] == TYPE_CONTROL) {
-				client_print_color(requested_id, id, "%L", LANG_PLAYER, "RECON_REFUSED_CONTROL", g_Prefix, id);
+				client_print_color(requested_id, id, "%L", LANG_PLAYER, "RECON_REFUSED_CONTROL", g_sPrefix, id);
 			}
 			else {
-				client_print_color(requested_id, id, "%L", LANG_PLAYER, "RECON_REFUSED_REPLACE", g_Prefix, id);
+				client_print_color(requested_id, id, "%L", LANG_PLAYER, "RECON_REFUSED_REPLACE", g_sPrefix, id);
 			}
 			
 			Menu(requested_id);
@@ -527,7 +529,7 @@ public ReControl(id)
 	}
 	
 	if (g_ControlType[requested_id] == TYPE_REPLACE)
-		client_print_color(0, print_team_blue, "%L", LANG_PLAYER, "RECON_REPLACE", g_Prefix, id, requested_id);
+		client_print_color(0, print_team_blue, "%L", LANG_PLAYER, "RECON_REPLACE", g_sPrefix, id, requested_id);
 	
 	show_menu(requested_id, 0, "", 1);
 }
@@ -542,10 +544,10 @@ public task_Response(Parms[], task_id)
 		g_bInvited[id] = false;
 		
 		Menu(requested_id);
-		client_print_color(requested_id, id, "%L", LANG_PLAYER, "RECON_DIDNT_CHOOSE", g_Prefix, id);
+		client_print_color(requested_id, id, "%L", LANG_PLAYER, "RECON_DIDNT_CHOOSE", g_sPrefix, id);
 		
 		show_menu(id, 0, "", 1);
-		client_print_color(id, print_team_blue, "%L", LANG_PLAYER, "RECON_EXPIRED", g_Prefix);
+		client_print_color(id, print_team_blue, "%L", LANG_PLAYER, "RECON_EXPIRED", g_sPrefix);
 	}
 	
 	return;
@@ -582,5 +584,5 @@ ReplacePlayers(replacement_player, substitutive_player, admin_replaced = 0) {
 
 	hns_stats_replace(STATS_ALL, replacement_player, substitutive_player);
 
-	client_print_color(0, print_team_blue, "%L", LANG_PLAYER, "RECON_ADM_REPLACE", g_Prefix, admin_replaced, replacement_player, substitutive_player);
+	client_print_color(0, print_team_blue, "%L", LANG_PLAYER, "RECON_ADM_REPLACE", g_sPrefix, admin_replaced, replacement_player, substitutive_player);
 }
