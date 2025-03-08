@@ -18,8 +18,9 @@ Counter-Strike Hide'n'Seek Match System plugins.
 
 ## Характеристики
 
-- Public / DeathMatch / Zombie / Knife / Captain mode
-- MR / Wintime / 1x1 match system
+- Public / DeathMatch / Zombie - Моды для разминок.
+- Knife / Captain - Режимы распределений команд.
+- MR / Wintime / 1x1 - Режими матчей
 - Watcher (admin) menu (N)
 - Система зависит от администратора.
 - Surrender
@@ -116,7 +117,6 @@ Counter-Strike Hide'n'Seek Match System plugins.
 - HnsMatchPts.sma - Плагин для ПТС (не работает без Sql плагина)
 - HnsMatchOwnage.sma - Плагин для подсчета Ownage (не работает без Sql плагина)
 - HnsMatchChatmanager.sma - Измененый ЧМ, показывает префикс ранга (скилла)
-- HnsMatchHideKnife.sma - Показать/Спрятать нож
 - HnsMatchMaps.sma - Список карт для игроков (/maps)
 - HnsMatchTraining.sma - Трейнинг меню (Чектоинты)
 - HnsMatchWatcher.sma - Watcher система, позволяет игрокам становиться/голосовать за watcher

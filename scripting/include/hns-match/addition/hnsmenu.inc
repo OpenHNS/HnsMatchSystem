@@ -71,7 +71,12 @@ public mainMatchMenu(id) {
 	formatex(szMsg, charsmax(szMsg), "%L", id, "MENU_MAIN_WTRMENU");
 	menu_additem(hMenu, szMsg, "6");
 
-	formatex(szMsg, charsmax(szMsg), "%L", id, "MENU_MAIN_ADMMENU");
+	if (isUserAdmin(id)) {
+		formatex(szMsg, charsmax(szMsg), "%L", id, "MENU_MAIN_ADMMENU");
+	} else {
+		formatex(szMsg, charsmax(szMsg), "\d%L", id, "MENU_MAIN_ADMMENU");
+	}
+
 	menu_additem(hMenu, szMsg, "7");
 
 	menu_display(id, hMenu, 0);
@@ -147,7 +152,11 @@ public mainMatchMenuHandler(id, hMenu, item) {
 			client_cmd(id, "watcher");
 		}
 		case 7: {
-			client_cmd(id, "amxmodmenu");
+			if (isUserAdmin(id)) {
+				client_cmd(id, "amxmodmenu");
+			} else {
+				mainMatchMenu(id);
+			}
 		}
 	}
 

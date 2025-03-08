@@ -80,6 +80,7 @@ public plugin_natives() {
 	register_native("hns_get_prefix", "native_get_prefix");
 	register_native("hns_get_flag_watcher", "native_flag_watcher");
 	register_native("hns_get_flag_fullwatcher", "native_flag_fullwatcher");
+	register_native("hns_get_flag_admin", "native_get_flag_admin");
 
 	register_native("hns_get_mode", "native_get_mode");
 	register_native("hns_set_mode", "native_set_mode");
@@ -106,6 +107,10 @@ public native_flag_watcher(amxx, params) {
 
 public native_flag_fullwatcher(amxx, params) {
 	return read_flags(g_iSettings[FULL_WATCHER_FLAG]);
+}
+
+public native_get_flag_admin(amxx, params) {
+	return read_flags(g_iSettings[ADMIN_FLAG]);
 }
 
 public native_get_mode(amxx, params) {

@@ -72,6 +72,16 @@ native hns_get_flag_watcher();
 native hns_get_flag_fullwatcher();
 
 /*
+* 
+*
+* 
+* 
+*
+* 
+*/
+native hns_get_flag_admin();
+
+/*
 * Gets mode system.
 *
 * @return enum HNS_MODES
@@ -196,6 +206,13 @@ stock bool:isUserWatcher(id) {
 
 stock bool:isUserFullWatcher(id) {
 	if (get_user_flags(id) & hns_get_flag_fullwatcher())
+		return true;
+	else
+		return false;
+}
+
+stock bool:isUserAdmin(id) {
+	if (get_user_flags(id) & hns_get_flag_admin())
 		return true;
 	else
 		return false;

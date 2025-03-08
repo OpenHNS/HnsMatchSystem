@@ -541,12 +541,17 @@ public HnsBansMenu(id) {
 	formatex(szMsg, charsmax(szMsg), "%L", LANG_PLAYER, "BAN_MAIN_BAN");
 	menu_additem(hMenu, szMsg, "1");
 
-	formatex(szMsg, charsmax(szMsg), "%L", LANG_PLAYER, "BAN_MAIN_OFFBAN");
+	if (!g_aDisconnectedPlayers) {
+		formatex(szMsg, charsmax(szMsg), "\d%L", LANG_PLAYER, "BAN_MAIN_OFFBAN");
+	} else {
+		formatex(szMsg, charsmax(szMsg), "%L", LANG_PLAYER, "BAN_MAIN_OFFBAN");
+	}
+
 	menu_additem(hMenu, szMsg, "2");
 
 	new iSize = ArraySize(g_aBannedPlayers);
 
-	if (!iSize || !g_aBannedPlayers) {
+	if (!iSize || !g_aBannedPlayers || !isUserAdmin(id)) {
 		formatex(szMsg, charsmax(szMsg), "\d%L", LANG_PLAYER, "BAN_MAIN_UNBAN");
 	} else {
 		formatex(szMsg, charsmax(szMsg), "%L", LANG_PLAYER, "BAN_MAIN_UNBAN");
@@ -574,12 +579,16 @@ public codeHnsBansMenu(id, hMenu, item) {
 			HnsBanMenu(id, 0);
 		}
 		case 2: {
-			HnsOffBanMenu(id, 0);
+			if (!g_aDisconnectedPlayers) {
+				HnsBansMenu(id);
+			} else {
+				HnsOffBanMenu(id, 0);
+			}
 		}
 		case 3: {
 			new iSize = ArraySize(g_aBannedPlayers);
 
-			if (!iSize || !g_aBannedPlayers) {
+			if (!iSize || !g_aBannedPlayers || !isUserAdmin(id)) {
 				HnsBansMenu(id);
 			} else {
 				HnsUnbanMenu(id, 0);

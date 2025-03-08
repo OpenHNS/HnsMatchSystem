@@ -21,6 +21,7 @@ enum _: CVARS
 	GAMENAME,
 	WATCHER_FLAG[4],
 	FULL_WATCHER_FLAG[4],
+	ADMIN_FLAG[4],
 }
 
 new pCvar[CVARS];
@@ -85,6 +86,9 @@ stock cvars_init() {
 
 	pCvar[FULL_WATCHER_FLAG] = create_cvar("hns_fullwatcher_flag", "m", FCVAR_NONE, "Full watcher access flag");
 	bind_pcvar_string(pCvar[FULL_WATCHER_FLAG], g_iSettings[FULL_WATCHER_FLAG], charsmax(g_iSettings[FULL_WATCHER_FLAG]));
+
+	pCvar[ADMIN_FLAG] = create_cvar("hns_admin_flag", "b", FCVAR_NONE, "Admin access flag");
+	bind_pcvar_string(pCvar[ADMIN_FLAG], g_iSettings[ADMIN_FLAG], charsmax(g_iSettings[ADMIN_FLAG]));
 }
 
 stock Float:get_round_time() {
