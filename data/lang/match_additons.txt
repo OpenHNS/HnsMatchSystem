@@ -113,6 +113,22 @@ UNBAN_PLAYER = %s ^3%n^1 unbanned a player ^3%s^1 on match.
 BAN_INFO = You were banned on match!^nAdmin: %s | Steamid: %s^nExpired: %s
 BAN_FULLINFO = \rUnban player^n\dPlayer name: %s^nPlayer steamid: %s^nAdmin name: %s^nAdmin steamid: %s^nExpired: %s
 
+RECON_TITLE_CONTROL = \rChoose a player to give control
+RECON_TITLE_REPLACE = \rSelect a player to replace
+RECON_BANNED = \d%s \r[Banned]
+RECON_INVITED = %s \d[\rInvited\d]
+RECON_DELAY = %s Please wait ^3%.1f^1 sec..
+RECON_ADM_TRANSF_TO = \rSelect the player to replace
+RECON_ADM_TRANSF_IT = \rWho should we replace it with?
+RECON_ADM_REPLACE = %s Admin ^3%n^1 replaced the player ^3%n^1 with a ^3%n^1.
+RECON_CONFIRM_CONTROL = \rTake control of %n?
+RECON_CONFIRM_REPLACE = \r%n wants you to replace him?
+RECON_REFUSED_CONTROL = %s ^3%n^1 refused to take control.
+RECON_REFUSED_REPLACE = %s ^3%n^1 refused to replace.
+RECON_REPLACE = %s ^3%n^1 was replaced by ^3%n
+RECON_DIDNT_CHOOSE = %s Player ^3%n^1 didn't chose anything.
+RECON_EXPIRED = %s Time expired.
+
 [ru]
 
 PTS_RANK = %s Ваш ранг: ^3%d^1 (Птс: ^3%d^1 | Побед: ^3%d^1 | Поражений: ^3%d^1 | Скилл: ^3%s^1)
@@ -230,3 +246,19 @@ UNBAN_PLAYER = %s ^3%n^1 разбанил игрока ^3%s^1 на матчи.
 
 BAN_INFO = Вы были забанены на матчах!^nАдмин: %s | Стимайди: %s^nИстекает: %s
 BAN_FULLINFO = \rРазбан игрока^n\dНик игрока: %s^nСтимайди игрока: %s^nНик админа: %s^nСтимайди админа: %s^nИстекает: %s
+
+RECON_TITLE_CONTROL = \rВыберите игрока для передачи контроля
+RECON_TITLE_REPLACE = \rВыберите игрока для замены
+RECON_BANNED = \d%s \r[Забанен]
+RECON_INVITED = %s \d[\rОтправлено\d]
+RECON_DELAY = %s Пожалуйста, подождите ^3%.1f^1 сек...
+RECON_ADM_TRANSF_TO = \rВыберите игрока для замены
+RECON_ADM_TRANSF_IT = \rНа кого мы должны его заменить?
+RECON_ADM_REPLACE = %s Администратор ^3%n^1 заменил игрока ^3%n^1 на ^3%n^1.
+RECON_CONFIRM_CONTROL = \rВзять контроль от %n?
+RECON_CONFIRM_REPLACE = \r%n хочет, чтобы вы его заменили?
+RECON_REFUSED_CONTROL = %s ^3%n^1 отказался от контроля.
+RECON_REFUSED_REPLACE = %s ^3%n^1 отказался от замены.
+RECON_REPLACE = %s ^3%n^1 был заменен на ^3%n.
+RECON_DIDNT_CHOOSE = %s Игрок ^3%n^1 ничего не выбрал.
+RECON_EXPIRED = %s Время истекло.
