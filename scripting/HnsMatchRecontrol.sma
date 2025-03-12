@@ -6,7 +6,7 @@
 
 #define rg_get_user_team(%0) get_member(%0, m_iTeam)
 
-const g_Access = ADMIN_BAN;
+new g_szPrefix[24];
 
 enum _:Data
 {
@@ -66,7 +66,7 @@ public plugin_init()
 }
 
 public plugin_cfg() {
-	hns_get_prefix(g_sPrefix, charsmax(g_sPrefix));
+	hns_get_prefix(g_szPrefix, charsmax(g_szPrefix));
 }
 
 public client_putinserver(id)
@@ -198,7 +198,7 @@ public MenuHandler(id, m_Menu, szKeys)
 		new Float:szTime = get_gametime();
 		
 		if(szTime < g_flDelay[id])
-			client_print_color(id, print_team_blue, "%L", LANG_PLAYER, "RECON_DELAY", g_sPrefix, g_flDelay[id] - szTime);
+			client_print_color(id, print_team_blue, "%L", LANG_PLAYER, "RECON_DELAY", g_szPrefix, g_flDelay[id] - szTime);
 		else
 		{
 			g_bInvited[invited_id] = true;
@@ -232,7 +232,7 @@ public ReplaceAdmin(id)
 		return;
 	}
 
-	if (~get_user_flags(id) & g_Access)
+	if (~get_user_flags(id) & hns_get_flag_admin())
 	{
 		return;
 	}
@@ -304,7 +304,7 @@ public ReplaceAdmin(id)
 
 public ReplaceAdmin_Handler(id, menu, item)
 {
-	if (~get_user_flags(id) & g_Access)
+	if (~get_user_flags(id) & hns_get_flag_admin())
 	{
 		ResetTransfer(id);
 		menu_destroy(menu);
@@ -421,10 +421,10 @@ public ConfirmationHandler(id, m_Confirmation, szKeys)
 		case 1:
 		{
 			if (g_ControlType[requested_id] == TYPE_CONTROL) {
-				client_print_color(requested_id, id, "%L", LANG_PLAYER, "RECON_REFUSED_CONTROL", g_sPrefix, id);
+				client_print_color(requested_id, id, "%L", LANG_PLAYER, "RECON_REFUSED_CONTROL", g_szPrefix, id);
 			}
 			else {
-				client_print_color(requested_id, id, "%L", LANG_PLAYER, "RECON_REFUSED_REPLACE", g_sPrefix, id);
+				client_print_color(requested_id, id, "%L", LANG_PLAYER, "RECON_REFUSED_REPLACE", g_szPrefix, id);
 			}
 			
 			Menu(requested_id);
@@ -529,7 +529,7 @@ public ReControl(id)
 	}
 	
 	if (g_ControlType[requested_id] == TYPE_REPLACE)
-		client_print_color(0, print_team_blue, "%L", LANG_PLAYER, "RECON_REPLACE", g_sPrefix, id, requested_id);
+		client_print_color(0, print_team_blue, "%L", LANG_PLAYER, "RECON_REPLACE", g_szPrefix, id, requested_id);
 	
 	show_menu(requested_id, 0, "", 1);
 }
@@ -544,10 +544,10 @@ public task_Response(Parms[], task_id)
 		g_bInvited[id] = false;
 		
 		Menu(requested_id);
-		client_print_color(requested_id, id, "%L", LANG_PLAYER, "RECON_DIDNT_CHOOSE", g_sPrefix, id);
+		client_print_color(requested_id, id, "%L", LANG_PLAYER, "RECON_DIDNT_CHOOSE", g_szPrefix, id);
 		
 		show_menu(id, 0, "", 1);
-		client_print_color(id, print_team_blue, "%L", LANG_PLAYER, "RECON_EXPIRED", g_sPrefix);
+		client_print_color(id, print_team_blue, "%L", LANG_PLAYER, "RECON_EXPIRED", g_szPrefix);
 	}
 	
 	return;
@@ -584,5 +584,5 @@ ReplacePlayers(replacement_player, substitutive_player, admin_replaced = 0) {
 
 	hns_stats_replace(STATS_ALL, replacement_player, substitutive_player);
 
-	client_print_color(0, print_team_blue, "%L", LANG_PLAYER, "RECON_ADM_REPLACE", g_sPrefix, admin_replaced, replacement_player, substitutive_player);
+	client_print_color(0, print_team_blue, "%L", LANG_PLAYER, "RECON_ADM_REPLACE", g_szPrefix, admin_replaced, replacement_player, substitutive_player);
 }
