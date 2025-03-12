@@ -330,7 +330,7 @@ public ReplaceAdmin_Handler(id, menu, item)
 
 	if (g_bHnsBannedInit) {
 		if (e_bBanned[iPlayer]) {
-			Menu(id);
+			ReplaceAdmin(id);
 			return;
 		}
 	}

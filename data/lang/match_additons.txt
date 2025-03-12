@@ -115,7 +115,7 @@ BAN_FULLINFO = \rUnban player^n\dPlayer name: %s^nPlayer steamid: %s^nAdmin name
 
 RECON_TITLE_CONTROL = \rChoose a player to give control
 RECON_TITLE_REPLACE = \rSelect a player to replace
-RECON_BANNED = \d%s \r[Banned]
+RECON_BANNED = \d%n \r[Banned]
 RECON_INVITED = %s \d[\rInvited\d]
 RECON_DELAY = %s Please wait ^3%.1f^1 sec..
 RECON_ADM_TRANSF_TO = \rSelect the player to replace
