@@ -233,7 +233,7 @@ BAN_MAIN_UNBAN = Разбанить игрока
 BAN_BAN_MENU = \rЗабанить игрока на матчи:
 BAN_OFFBAN_MENU = \rЗабанить отключившегося игрока на матчи:
 BAN_TIME_MENU_S = \rВыберите время бана^n\dЦель: %s
-BAN_TIME_MENU_N = \rВыберите время банаe^n\dЦель: %n
+BAN_TIME_MENU_N = \rВыберите время бана^n\dЦель: %n
 BAN_UNBAN_MENU = \rРазбанить игрока на матчи
 
 BAN_DATE_EXPIRED_P = Навсегда
