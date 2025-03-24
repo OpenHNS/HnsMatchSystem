@@ -36,6 +36,7 @@ public plugin_init() {
 	RegisterSayCmd("usp", "pistol", "cmdUsp");
 	RegisterSayCmd("awp", "sniper", "cmdAWP");
 	RegisterSayCmd("m4a1", "m4", "cmdM4A1");
+	RegisterSayCmd("grenade", "flash", "cmdFlash");
 	
 	RegisterHookChain(RG_CSGameRules_FlPlayerFallDamage, "rgFlPlayerFallDamage", true);
 	RegisterHookChain(RG_CBasePlayer_Spawn, "rgPlayerSpawn", false);
@@ -234,6 +235,7 @@ public cmdWeapons(id) {
 	give_user_item(id, "weapon_p90", 10);
 	give_user_item(id, "weapon_usp", 10, GT_REPLACE);
 	give_user_item(id, "weapon_scout", 10);
+	give_user_item(id, "weapon_usp", 10);
 
 	return PLUGIN_HANDLED;
 }
@@ -253,6 +255,15 @@ public cmdUsp(id) {
 	}
 
 	give_user_item(id, "weapon_usp", 10, GT_REPLACE);
+	return PLUGIN_HANDLED;
+}
+
+public cmdFlash(id) {
+	if (hns_get_mode() != MODE_TRAINING && hns_get_state() != STATE_PAUSED) {
+		return PLUGIN_HANDLED
+	}
+
+	rg_give_item(id, "weapon_flashbang");
 	return PLUGIN_HANDLED;
 }
 
@@ -371,7 +382,7 @@ public rgPlayerSpawn(id) {
 		return HC_CONTINUE;
 	}
 
-	set_task(0.2, "cmdUsp", id);
+	set_task(0.2, "cmdFlash", id);
 
 	return HC_CONTINUE;
 }

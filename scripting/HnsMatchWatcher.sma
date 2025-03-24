@@ -443,9 +443,7 @@ public LoadWatcher() {
 	if(file_exists(szDatadDr)) {
 		new iFile = fopen(szDatadDr, "r");	
 		fgets(iFile, g_eWatcher[w_szSteamId], charsmax(g_eWatcher[w_szSteamId]));
-
-		server_print("ASD [%s]", g_eWatcher[w_szSteamId]);
-
+		
 		fclose(iFile);
 	}
 }

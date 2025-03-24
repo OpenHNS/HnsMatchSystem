@@ -41,7 +41,7 @@ stock cmds_init() {
 	RegisterSayCmd("surrender", "sur", 			"cmdSurrender", 	0, "Surrender vote");
 	RegisterSayCmd("score", 	"s", 			"cmdShowTimers", 	0, "Score");
 	RegisterSayCmd("back", 		"spec", 		"cmdTeamSpec", 		0, "Spec/Back player");
-	RegisterSayCmd("pick", 		"pick", 		"pickMenu", 		0, "Pick player");
+	RegisterSayCmd("pick", 		"pickmenu", 	"pickMenu", 		0, "Pick player");
 	RegisterSayCmd("np", 		"noplay", 		"cmdNoplay", 		0, "No play");
 	RegisterSayCmd("ip", 		"play", 		"cmdPlay", 			0, "Play");
 	RegisterSayCmd("save", 		"sv", 		"Save_d", 			0, "Show top");
