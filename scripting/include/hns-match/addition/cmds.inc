@@ -735,7 +735,13 @@ public cmdTeamSpec(id) {
 			} else {
 				rg_set_user_team(id, TEAM_CT);
 			}
-			rg_round_respawn(id);
+			if (g_iCurrentMode == MODE_PUB) {
+				if (rg_is_player_can_respawn(id)) {
+					rg_round_respawn(id);
+				}
+			} else {
+				rg_round_respawn(id);
+			}
 		} else {
 			g_eSpecBack[id] = getUserTeam(id);
 			transferUserToSpec(id);
