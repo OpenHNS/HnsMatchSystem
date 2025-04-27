@@ -34,6 +34,7 @@ public plugin_init() {
 	RegisterHookChain(RG_CBasePlayer_MakeBomber, "rgPlayerMakeBomber", false);
 
 	RegisterHam(Ham_Weapon_PrimaryAttack, "weapon_knife", "Knife_PrimaryAttack", false);
+        RegisterHam(Ham_TraceAttack, "player", "fw_TraceAttack");
 
 	register_message(get_user_msgid("HostagePos"), "msgHostagePos");
 	register_message(get_user_msgid("ShowMenu"), "msgShowMenu");
@@ -348,6 +349,18 @@ public Knife_PrimaryAttack(ent)
 		return HAM_SUPERCEDE;
 	}
 
+	return HAM_IGNORED;
+}
+
+public fw_TraceAttack(attacker, victim,Float:damage, Float:direction[3], tr, damage_type)
+{
+	if(!(g_iCurrentGameplay == GAMEPLAY_KNIFE))
+	{
+		if(get_user_team(attacker) == 2 && get_user_team(victim) == 1)
+		{
+			return HAM_SUPERCEDE;
+		}
+	}
 	return HAM_IGNORED;
 }
 

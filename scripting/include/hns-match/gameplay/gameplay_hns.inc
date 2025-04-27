@@ -219,8 +219,6 @@ public fwd_Knife_Deploy_Post(ent)
 
 	set_entvar(id, var_weaponmodel, 0);
 
-	set_member(ent, m_Weapon_flNextPrimaryAttack, 99999.0);
-	set_member(ent, m_Weapon_flNextSecondaryAttack, 99999.0);
 	return HAM_IGNORED;
 }
 
