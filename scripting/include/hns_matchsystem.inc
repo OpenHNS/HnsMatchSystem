@@ -154,7 +154,7 @@ forward hns_match_canceled();
 * Called when the match is over.
 *
 * @param iWinTeam The winning team
-*				1 - TT
+*				0 - TT
 *				1 - CT
 * @noreturn
 */
