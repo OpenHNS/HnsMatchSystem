@@ -5,7 +5,12 @@
 
 #define rg_get_user_team(%0) get_member(%0, m_iTeam)
 
-enum _:HNS_MODES
+new g_szMatchPrefix[24];
+
+
+/* Hns match modes */
+
+enum HNS_MODES
 {
 	MODE_TRAINING,
 	MODE_KNIFE,
@@ -14,6 +19,41 @@ enum _:HNS_MODES
 	MODE_ZM,
 	MODE_MIX
 }
+
+/*
+* Gets mode system.
+*
+* @return enum HNS_MODES
+*/
+native HNS_MODES:hns_get_mode();
+
+/*
+* Set mode system.
+*
+* @noreturn
+*/
+native hns_set_mode(HNS_MODES:iMode);
+
+
+/* Hns mode states */
+
+enum MODE_STATES
+{
+    STATE_DISABLED,
+    STATE_PREPARE,
+    STATE_PAUSED,
+    STATE_ENABLED
+}
+
+/*
+* Gets match state
+*
+* @return type MODE_STATES
+*/
+native MODE_STATES:hns_get_state();
+
+
+/* Hns match status */
 
 enum MATCH_STATUS
 {
@@ -27,74 +67,6 @@ enum MATCH_STATUS
 	MATCH_STARTED
 }
 
-enum MODE_STATES
-{
-    STATE_DISABLED,
-    STATE_PREPARE,
-    STATE_PAUSED,
-    STATE_ENABLED
-}
-
-enum NATCH_RULES {
-	RULES_MR,
-	RULES_TIMER,
-	RULES_DUEL
-}
-
-/*
-* Gets the system prefix.
-*
-* @param szPrefix   Buffer to copy prefix to
-* @param iLen Maximum buffer size
-*
-* @noreturn
-*/
-native hns_get_prefix(szPrefix[], iLen);
-
-/*
-* 
-*
-* 
-* 
-*
-* 
-*/
-native hns_get_flag_watcher();
-
-/*
-* 
-*
-* 
-* 
-*
-* 
-*/
-native hns_get_flag_fullwatcher();
-
-/*
-* 
-*
-* 
-* 
-*
-* 
-*/
-native hns_get_flag_admin();
-
-/*
-* Gets mode system.
-*
-* @return enum HNS_MODES
-*/
-native hns_get_mode();
-
-/*
-* Set mode system.
-*
-* @noreturn
-*/
-native hns_set_mode(iMode);
-
 /*
 * Gets match status.
 *
@@ -102,12 +74,14 @@ native hns_set_mode(iMode);
 */
 native MATCH_STATUS:hns_get_status();
 
-/*
-* Gets match state
-*
-* @return type MODE_STATES
-*/
-native MODE_STATES:hns_get_state();
+
+/* Hns match rules */
+
+enum NATCH_RULES {
+	RULES_MR,
+	RULES_TIMER,
+	RULES_DUEL
+}
 
 /*
 * Gets match rules
@@ -123,18 +97,16 @@ native NATCH_RULES:hns_get_rules();
 */
 native hns_set_rules(NATCH_RULES:iRules);
 
-/* 
-* Gets score in match (For RULES_DUEL)
+
+/*
+* Gets the system prefix.
 *
-* @return type Score TT
-
-native hns_get_score_tt();
-
-* Gets score in match (For RULES_DUEL)
+* @param szPrefix   Buffer to copy prefix to
+* @param iLen Maximum buffer size
 *
-* @return type Score CT
-
-native hns_get_score_ct(); */
+* @noreturn
+*/
+native hns_get_prefix(szPrefix[], iLen);
 
 /*
 * Called when the match play begins.
@@ -173,6 +145,8 @@ forward hns_round_freezeend();
 
 forward hns_round_end();
 
+/* -- Utils -- */
+
 stock RegisterSayCmd(const szCmd[], const szShort[], const szFunc[], flags = -1, szInfo[] = "") {
 	new szTemp[65], szInfoLang[65];
 	format(szInfoLang, 64, "%L", LANG_SERVER, szInfo);
@@ -204,23 +178,27 @@ stock RegisterSayCmd(const szCmd[], const szShort[], const szFunc[], flags = -1,
 	return 1;
 }
 
-stock bool:isUserWatcher(id) {
-	if (get_user_flags(id) & hns_get_flag_watcher())
-		return true;
+stock chat_print(const id, const message[], any:...) {
+	new msgFormated[191];
+
+	vformat(msgFormated, charsmax(msgFormated), message, 3);
+
+	if (!g_szMatchPrefix[0])
+		client_print_color(id, print_team_blue, "%s", msgFormated);
 	else
-		return false;
+		client_print_color(id, print_team_blue, "[^3%s^1] %s", g_szMatchPrefix, msgFormated);
 }
 
-stock bool:isUserFullWatcher(id) {
-	if (get_user_flags(id) & hns_get_flag_fullwatcher())
-		return true;
-	else
-		return false;
+stock get_num_players_in_match() { // TODO: Сделать 1 утилиту с точными игроками в матче
+	new iPlayers[MAX_PLAYERS], iNum;
+	get_players(iPlayers, iNum, "ch");
+	new numGameplr;
+	for (new i; i < iNum; i++) {
+		new tempid = iPlayers[i];
+		if (rg_get_user_team(tempid) == TEAM_SPECTATOR) continue;
+		numGameplr++;
+	}
+	return numGameplr;
 }
 
-stock bool:isUserAdmin(id) {
-	if (get_user_flags(id) & hns_get_flag_admin())
-		return true;
-	else
-		return false;
-}
+/* -- Utils -- */
