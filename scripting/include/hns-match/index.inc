@@ -24,6 +24,7 @@
 #include <hns-match/utils>
 #include <hns-match/user>
 #include <hns-match/save>
+#include <hns-match/natives>
 
 #include <hns-match/gameplay/gameplay_hns.inc>
 #include <hns-match/gameplay/gameplay_knife.inc>

@@ -116,6 +116,13 @@ native MODE_STATES:hns_get_state();
 */
 native NATCH_RULES:hns_get_rules();
 
+/*
+* Set match rules
+*
+* @return type NATCH_RULES
+*/
+native hns_set_rules(RULES_MR:iRules);
+
 /* 
 * Gets score in match (For RULES_DUEL)
 *
