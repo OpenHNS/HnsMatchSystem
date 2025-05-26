@@ -121,7 +121,7 @@ native NATCH_RULES:hns_get_rules();
 *
 * @return type NATCH_RULES
 */
-native hns_set_rules(RULES_MR:iRules);
+native hns_set_rules(NATCH_RULES:iRules);
 
 /* 
 * Gets score in match (For RULES_DUEL)

@@ -18,9 +18,6 @@ stock cmds_init() {
 	RegisterSayCmd("mix", 	"mix", 	"mainMatchMenu",	iWatcherAccess, "Main menu admin");
 	RegisterSayCmd("mode", 	"type", "menuSelectMode",	iWatcherAccess, "Mode match menu");
 
-	RegisterSayCmd("mr", 		"maxround", 	"cmdMrMode",		iWatcherAccess, "Choose MR mode");
-	RegisterSayCmd("timer", 	"wintime", 		"cmdWintimeMode",	iWatcherAccess, "Choose Wintime mode");
-	RegisterSayCmd("duel", 		"versus", 		"cmdDuelMode",		iWatcherAccess, "Choose 1x1 mode");
 	RegisterSayCmd("pub", 		"public", 		"cmdPubMode", 		iWatcherAccess, "Public mode");
 	RegisterSayCmd("dm", 		"deathmatch", 	"cmdDMMode", 		iWatcherAccess, "DeathMatch mode");
 	RegisterSayCmd("zm", 		"zombie", 		"cmdZMMode", 		iWatcherAccess, "Zombie mode");
@@ -122,73 +119,6 @@ public blockCmd(id) {
 	return PLUGIN_CONTINUE;
 }
 
-public cmdMrMode(id) {
-	if (!isUserWatcher(id)) {
-		return PLUGIN_HANDLED;
-	}
-
-	if (g_iCurrentRules == RULES_MR) {
-		chat_print(0, "%l", "MODE_ALREADY");
-		return PLUGIN_HANDLED;
-	}
-
-	if (g_iCurrentMode == MODE_MIX) {
-		chat_print(0, "%l", "MODE_NOT_MIX");
-		return PLUGIN_HANDLED;
-	}
-
-	chat_print(0, "%l", "MODE_SET_MR", id);
-	g_iCurrentRules = RULES_MR;
-
-	return PLUGIN_HANDLED;
-}
-
-public cmdWintimeMode(id) {
-	if (!isUserWatcher(id)) {
-		return PLUGIN_HANDLED;
-	}
-
-	if (g_iCurrentRules == RULES_TIMER) {
-		chat_print(0, "%l", "MODE_ALREADY");
-		return PLUGIN_HANDLED;
-	}
-
-	if (g_iCurrentMode == MODE_MIX) {
-		chat_print(0, "%l", "MODE_NOT_MIX");
-		return PLUGIN_HANDLED;
-	}
-
-	chat_print(0, "%l", "MODE_SET_WT", id);
-	g_iCurrentRules = RULES_TIMER;
-
-	return PLUGIN_HANDLED;
-}
-
-public cmdDuelMode(id) {
-	if (!isUserWatcher(id)) {
-		return PLUGIN_HANDLED;
-	}
-
-	if (g_iCurrentRules == RULES_DUEL) {
-		chat_print(0, "%l", "MODE_ALREADY");
-		return PLUGIN_HANDLED;
-	}
-
-	if (g_iCurrentMode == MODE_MIX) {
-		chat_print(0, "%l", "MODE_NOT_MIX");
-		return PLUGIN_HANDLED;
-	}
-
-	if (get_num_players_in_match() > 2) {
-		chat_print(0, "%l", "MODE_NOT_SET_DUEL");
-		return PLUGIN_HANDLED;
-	}
-
-	chat_print(0, "%l", "MODE_SET_DUEL", id);
-	g_iCurrentRules = RULES_DUEL;
-
-	return PLUGIN_HANDLED;
-}
 
 public cmdPubMode(id) {
 	if (!isUserWatcher(id)) {

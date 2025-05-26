@@ -76,24 +76,6 @@ public forward_init() {
 	g_hForwards[HNS_ROUND_END] = CreateMultiForward("hns_round_end", ET_CONTINUE);
 }
 
-public plugin_natives() {
-	register_native("hns_get_prefix", "native_get_prefix");
-	register_native("hns_get_flag_watcher", "native_flag_watcher");
-	register_native("hns_get_flag_fullwatcher", "native_flag_fullwatcher");
-	register_native("hns_get_flag_admin", "native_get_flag_admin");
-
-	register_native("hns_get_mode", "native_get_mode");
-	register_native("hns_set_mode", "native_set_mode");
-
-	register_native("hns_get_status", "native_get_status");
-	register_native("hns_get_state", "native_get_state");
-
-	register_native("hns_get_rules", "native_get_rules");
-
-	//register_native("hns_get_score_tt", "native_get_score_TT");
-	//register_native("hns_get_score_ct", "native_get_score_CT");
-}
-
 public fwdEmitSoundPre(id, iChannel, szSample[], Float:volume, Float:attenuation, fFlags, pitch) {
 	if (equal(szSample, "weapons/knife_deploy1.wav")) {
 		return FMRES_SUPERCEDE;
