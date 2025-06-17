@@ -129,6 +129,8 @@ native hns_get_score_tt();
 
 native hns_get_score_ct(); */
 
+forward hns_team_battle_started();
+
 /*
 * Called when the match play begins.
 *

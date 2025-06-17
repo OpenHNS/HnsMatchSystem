@@ -45,8 +45,10 @@ new Float:g_flLastPosition[MAX_PLAYERS + 1][3];
 new Trie:g_tSaveData;
 new Trie:g_tSaveRoundData;
 
+new g_hApplyStatsForward;
+
 public plugin_init() {
-	register_plugin("Match: Stats", "1.1.1", "OpenHNS"); // Garey
+	register_plugin("Match: Stats", "1.2", "OpenHNS"); // Garey
 
 	RegisterHookChain(RG_CBasePlayer_Killed, "rgPlayerKilled", true);
 	RegisterHookChain(RG_CBasePlayer_TakeDamage, "rgPlayerTakeDamage", false);
@@ -54,8 +56,9 @@ public plugin_init() {
 	RegisterHookChain(RG_CSGameRules_RestartRound, "rgRoundStart", true);
 	RegisterHookChain(RG_CSGameRules_FlPlayerFallDamage, "rgPlayerFallDamage", true);
 	RegisterHookChain(RG_CSGameRules_OnRoundFreezeEnd, "rgRoundFreezeEnd", true);
-	RegisterHookChain(RG_RoundEnd, "rgRoundEnd", false);
 	RegisterHookChain(RG_PlayerBlind, "rgPlayerBlind");
+
+	g_hApplyStatsForward = CreateMultiForward("hns_apply_stats", ET_CONTINUE, FP_CELL);
 
 	g_tSaveData = TrieCreate();
 	g_tSaveRoundData = TrieCreate();
@@ -259,7 +262,6 @@ public hns_match_started() {
 
 public hns_ownage(iToucher, iTouched) {
 	g_StatsRound[iToucher][PLR_STATS_OWNAGES]++;
-	iStats[iToucher][PLR_STATS_OWNAGES]++;
 }
 
 public rgPlayerKilled(victim, attacker) {
@@ -269,14 +271,11 @@ public rgPlayerKilled(victim, attacker) {
 	
 	if (is_user_connected(attacker) && victim != attacker) {
 		g_StatsRound[attacker][PLR_STATS_KILLS]++;
-		iStats[attacker][PLR_STATS_KILLS]++;
 		g_StatsRound[victim][PLR_STATS_DEATHS]++;
-		iStats[victim][PLR_STATS_DEATHS]++;
 	}
 
 	if (g_iLastAttacker[victim] && g_iLastAttacker[victim] != attacker) {
 		g_StatsRound[g_iLastAttacker[victim]][PLR_STATS_ASSISTS]++;
-		iStats[g_iLastAttacker[victim]][PLR_STATS_ASSISTS]++;
 		g_iLastAttacker[victim] = 0;
 	}
 }
@@ -293,7 +292,6 @@ public rgPlayerTakeDamage(iVictim, iWeapon, iAttacker, Float:fDamage) { // Пр�
 		}
 
 		g_StatsRound[iAttacker][PLR_STATS_STABS]++;
-		iStats[iAttacker][PLR_STATS_STABS]++;
 	}
 }
 
@@ -306,10 +304,8 @@ public rgPlayerFallDamage(id) {
 
 	if (rg_get_user_team(id) == TEAM_TERRORIST) {
 		g_StatsRound[id][PLR_STATS_DMG_TT] += dmg;
-		iStats[id][PLR_STATS_DMG_TT] += dmg;
 	} else {
 		g_StatsRound[id][PLR_STATS_DMG_CT] += dmg;
-		iStats[id][PLR_STATS_DMG_CT] += dmg;
 	}
 }
 
@@ -321,7 +317,6 @@ public rgPlayerBlind(const index, const inflictor, const attacker, const Float:f
 		return HC_CONTINUE;
 
 	g_StatsRound[attacker][PLR_STATS_FLASHTIME] += fadeHold;
-	iStats[attacker][PLR_STATS_FLASHTIME] += fadeHold;
 
 	return HC_CONTINUE;
 }
@@ -346,7 +341,6 @@ public rgPlayerPreThink(id) {
 					velocity[2] = 0.0;
 					if (vector_length(velocity) > 125.0) {
 						g_StatsRound[id][PLR_STATS_RUNNED] += vector_length(velocity) * frametime;
-						iStats[id][PLR_STATS_RUNNED] += vector_length(velocity) * frametime;
 					}
 				}
 
@@ -363,8 +357,7 @@ public rgRoundFreezeEnd() {
 }
 
 public taskRoundEvent() {
-	if (hns_get_state() != STATE_ENABLED || hns_get_mode() != MODE_MIX)
-	{
+	if (hns_get_state() != STATE_ENABLED || hns_get_mode() != MODE_MIX) {
 		remove_task(TASK_TIMER_STATS);
 		return;
 	}
@@ -376,17 +369,35 @@ public taskRoundEvent() {
 	{
 		new id = iPlayers[i];
 		g_StatsRound[id][PLR_STATS_SURVTIME] += 0.25;
-		iStats[id][PLR_STATS_SURVTIME] += 0.25;
 	}
 }
 
-public rgRoundEnd(WinStatus: status, ScenarioEventEndRound: event, Float:tmDelay) {
-	// Если уберёте код, taskRoundEvent завершиться и будет баг.
-	if (event == ROUND_GAME_COMMENCE) {
-		return;
-	}
+public hns_round_end() {
+	if (hns_get_mode() == MODE_MIX && hns_get_state() == STATE_ENABLED) {
+		if(task_exists(TASK_TIMER_STATS)) {
+			remove_task(TASK_TIMER_STATS);
+		}
+	
+		ExecuteForward(g_hApplyStatsForward, _);
 
-	remove_task(TASK_TIMER_STATS);
+		new iPlayers[MAX_PLAYERS], iNum;
+		get_players(iPlayers, iNum, "ch");
+
+		for (new i = 0; i < iNum; i++) {
+			new id = iPlayers[i];
+
+			iStats[id][PLR_STATS_OWNAGES] += g_StatsRound[id][PLR_STATS_OWNAGES];
+			iStats[id][PLR_STATS_KILLS] += g_StatsRound[id][PLR_STATS_KILLS];
+			iStats[id][PLR_STATS_DEATHS] += g_StatsRound[id][PLR_STATS_DEATHS];
+			iStats[id][PLR_STATS_ASSISTS] += g_StatsRound[id][PLR_STATS_ASSISTS];
+			iStats[id][PLR_STATS_STABS] += g_StatsRound[id][PLR_STATS_STABS];
+			iStats[id][PLR_STATS_DMG_TT] += g_StatsRound[id][PLR_STATS_DMG_TT];
+			iStats[id][PLR_STATS_DMG_CT] += g_StatsRound[id][PLR_STATS_DMG_CT];
+			iStats[id][PLR_STATS_FLASHTIME] += g_StatsRound[id][PLR_STATS_FLASHTIME];
+			iStats[id][PLR_STATS_RUNNED] += g_StatsRound[id][PLR_STATS_RUNNED];
+			iStats[id][PLR_STATS_SURVTIME] += g_StatsRound[id][PLR_STATS_SURVTIME];
+		}
+	}
 }
 
 public rgRoundStart() {
@@ -420,8 +431,10 @@ stock ResetPlayerRoundStats(id) {
 	if (rg_get_user_team(id) == TEAM_TERRORIST || rg_get_user_team(id) == TEAM_CT) {
 		iStats[id][PLR_STATS_STABS] -= g_StatsRound[id][PLR_STATS_STABS];
 		iStats[id][PLR_STATS_DMG_CT] -= g_StatsRound[id][PLR_STATS_DMG_CT];
+		iStats[id][PLR_STATS_DMG_TT] -= g_StatsRound[id][PLR_STATS_DMG_TT];
 		iStats[id][PLR_STATS_RUNNED] -= g_StatsRound[id][PLR_STATS_RUNNED];
 		iStats[id][PLR_STATS_FLASHTIME] -= g_StatsRound[id][PLR_STATS_FLASHTIME];
+		iStats[id][PLR_STATS_OWNAGES] -= g_StatsRound[id][PLR_STATS_OWNAGES];
 
 		iStats[id][PLR_STATS_KILLS] -= g_StatsRound[id][PLR_STATS_KILLS];
 		iStats[id][PLR_STATS_DEATHS] -= g_StatsRound[id][PLR_STATS_DEATHS];

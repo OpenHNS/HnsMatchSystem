@@ -85,6 +85,7 @@ new const sndDenySelect[] = "common/wpn_denyselect.wav";
 new const sndUseSound[] = "buttons/blip1.wav";
 
 enum _: Forwards {
+	TEAM_BATTLE,
 	MATCH_START,
 	MATCH_RESET_ROUND,
 	MATCH_FINISH,

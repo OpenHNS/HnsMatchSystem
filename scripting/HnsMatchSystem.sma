@@ -6,7 +6,7 @@ public plugin_precache() {
 }
 
 public plugin_init() {
-	g_PluginId = register_plugin("Hide'n'Seek Match System", "2.0.5", "OpenHNS"); // Спасибо: Cultura, Garey, Medusa, Ruffman, Conor, Juice
+	g_PluginId = register_plugin("Hide'n'Seek Match System", "2.0.5.1", "OpenHNS"); // Спасибо: Cultura, Garey, Medusa, Ruffman, Conor, Juice
 
 	rh_get_mapname(g_szMapName, charsmax(g_szMapName));
 
@@ -66,6 +66,7 @@ public plugin_init() {
 }
 
 public forward_init() {
+	g_hForwards[TEAM_BATTLE] = CreateMultiForward("hns_team_battle_started", ET_CONTINUE);
 	g_hForwards[MATCH_START] = CreateMultiForward("hns_match_started", ET_CONTINUE);
 	g_hForwards[MATCH_RESET_ROUND] = CreateMultiForward("hns_match_reset_round", ET_CONTINUE);
 	g_hForwards[MATCH_FINISH] = CreateMultiForward("hns_match_finished", ET_CONTINUE, FP_CELL);
@@ -218,6 +219,8 @@ public rgRoundEnd(WinStatus:status, ScenarioEventEndRound:event, Float:tmDelay) 
         return HC_SUPERCEDE;
     }
 
+	ExecuteForward(g_hForwards[HNS_ROUND_END]);
+
 	if (g_GPFuncs[g_iCurrentGameplay][GP_ROUNDEND])
 		ExecuteForward(g_GPFuncs[g_iCurrentGameplay][GP_ROUNDEND], _, (status == WINSTATUS_CTS) ? true : false);
 
@@ -225,12 +228,9 @@ public rgRoundEnd(WinStatus:status, ScenarioEventEndRound:event, Float:tmDelay) 
 		ExecuteForward(g_ModFuncs[g_iCurrentMode][MODEFUNC_ROUNDEND], _, (status == WINSTATUS_CTS) ? true : false);
 
 	g_bPlayersListLoaded = false;
-
-	ExecuteForward(g_hForwards[HNS_ROUND_END]);
 	
 	return HC_CONTINUE;
 }
-
 
 public rgResetMaxSpeed(id) {
 	if (get_member_game(m_bFreezePeriod)) {
