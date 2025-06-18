@@ -30,13 +30,9 @@ new Float:g_flShowRoundStats = 0.0;
 new g_szMess[1024];
 
 enum _: SHOW_STATS {
-	PLR_STATS_KILLS,
-	PLR_STATS_DEATHS,
-	PLR_STATS_ASSISTS,
 	PLR_STATS_STABS,
 	PLR_STATS_DMG_CT,
 	PLR_STATS_DMG_TT,
-	Float:PLR_STATS_RUNNED,
 	Float:PLR_STATS_FLASHTIME,
 	PLR_STATS_OWNAGES,
 }
@@ -243,15 +239,11 @@ public hns_round_end() {
 	for (new i = 0; i < iNum; i++) {
 		new id = iPlayers[i];
 
-		g_eRoundBests[id][PLR_STATS_KILLS] = hns_get_stats_kills(STATS_ROUND, id);
-		g_eRoundBests[id][PLR_STATS_DEATHS] = hns_get_stats_deaths(STATS_ROUND, id);
-		g_eRoundBests[id][PLR_STATS_ASSISTS] = hns_get_stats_assists(STATS_ROUND, id);
+		g_eRoundBests[id][PLR_STATS_OWNAGES] = hns_get_stats_ownages(STATS_ROUND, id);
 		g_eRoundBests[id][PLR_STATS_STABS] = hns_get_stats_stabs(STATS_ROUND, id);
 		g_eRoundBests[id][PLR_STATS_DMG_CT] = hns_get_stats_dmg_ct(STATS_ROUND, id);
 		g_eRoundBests[id][PLR_STATS_DMG_TT] =  hns_get_stats_dmg_tt(STATS_ROUND, id);
-		g_eRoundBests[id][PLR_STATS_RUNNED] = hns_get_stats_runned(STATS_ROUND, id);
 		g_eRoundBests[id][PLR_STATS_FLASHTIME] = hns_get_stats_flashtime(STATS_ROUND, id);
-		g_eRoundBests[id][PLR_STATS_OWNAGES] = hns_get_stats_ownages(STATS_ROUND, id);
 				
 		for (new j = 0; j < SHOW_STATS; j++) {
 			if (g_eRoundBests[id][j] > g_eBestStats[j])
@@ -269,12 +261,9 @@ public hns_round_end() {
 
 	new iLen = format(g_szMess, sizeof g_szMess - 1, "Best players of the round:^n^n");
 	if (g_eBestIndex[PLR_STATS_OWNAGES])	iLen += format(g_szMess[iLen], sizeof g_szMess - iLen, "Ownages: %n - %d^n", g_eBestIndex[PLR_STATS_OWNAGES], g_eBestStats[PLR_STATS_OWNAGES])
-	if (g_eBestIndex[PLR_STATS_KILLS])		iLen += format(g_szMess[iLen], sizeof g_szMess - iLen, "Killed: %n - %d^n", g_eBestIndex[PLR_STATS_KILLS], g_eBestStats[PLR_STATS_KILLS])
-	if (g_eBestIndex[PLR_STATS_ASSISTS])	iLen += format(g_szMess[iLen], sizeof g_szMess - iLen, "Assists: %n - %d^n", g_eBestIndex[PLR_STATS_ASSISTS], g_eBestStats[PLR_STATS_ASSISTS])
 	if (g_eBestIndex[PLR_STATS_STABS])		iLen += format(g_szMess[iLen], sizeof g_szMess - iLen, "Stabs: %n - %d^n", g_eBestIndex[PLR_STATS_STABS], g_eBestStats[PLR_STATS_STABS])
 	if (g_eBestIndex[PLR_STATS_DMG_CT])		iLen += format(g_szMess[iLen], sizeof g_szMess - iLen, "CT Dmg: %n - %d^n", g_eBestIndex[PLR_STATS_DMG_CT], g_eBestStats[PLR_STATS_DMG_CT])
 	if (g_eBestIndex[PLR_STATS_DMG_TT])		iLen += format(g_szMess[iLen], sizeof g_szMess - iLen, "TT Dmg: %n - %d^n", g_eBestIndex[PLR_STATS_DMG_TT], g_eBestStats[PLR_STATS_DMG_TT])
-	if (g_eBestIndex[PLR_STATS_RUNNED])		iLen += format(g_szMess[iLen], sizeof g_szMess - iLen, "Runned: %n - %.2f^n", g_eBestIndex[PLR_STATS_RUNNED], g_eBestStats[PLR_STATS_RUNNED])
 	if (g_eBestIndex[PLR_STATS_FLASHTIME]) 	iLen += format(g_szMess[iLen], sizeof g_szMess - iLen, "Flashed: %n - %.2f^n", g_eBestIndex[PLR_STATS_FLASHTIME], g_eBestStats[PLR_STATS_FLASHTIME])
 
 	g_flShowRoundStats = get_gametime() + 10.0;
@@ -375,7 +364,7 @@ public ShowTop(player) {
 			}
 		}
 	}
-	new szMotd[MAX_MOTD_LENGTH], iLen;
+	new szMotd[MAX_MOTD_LENGTH], iLen; // TODO: Добавить овнеджи, сделать столько стабы
 	iLen = formatex(szMotd, charsmax(szMotd), "<html><head><meta charset=UTF-8>\
 					<link rel=^"stylesheet^" href=^"https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css^">\
 					</head>\

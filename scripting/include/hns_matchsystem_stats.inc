@@ -121,3 +121,5 @@ native hns_get_stats_ownages(type, id);
 */
 
 native hns_stats_replace(type, replacementid, substitutiveid);
+
+forward hns_apply_stats();
