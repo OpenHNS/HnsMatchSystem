@@ -67,10 +67,13 @@ public plugin_init() {
 
 public forward_init() {
 	g_hForwards[TEAM_BATTLE] = CreateMultiForward("hns_team_battle_started", ET_CONTINUE);
+
 	g_hForwards[MATCH_START] = CreateMultiForward("hns_match_started", ET_CONTINUE);
 	g_hForwards[MATCH_RESET_ROUND] = CreateMultiForward("hns_match_reset_round", ET_CONTINUE);
 	g_hForwards[MATCH_FINISH] = CreateMultiForward("hns_match_finished", ET_CONTINUE, FP_CELL);
 	g_hForwards[MATCH_CANCEL] = CreateMultiForward("hns_match_canceled", ET_CONTINUE);
+	g_hForwards[MATCH_LEAVE_PLAYER] = CreateMultiForward("hns_player_leave_inmatch", ET_CONTINUE, FP_CELL);
+	g_hForwards[MATCH_JOIN_PLAYER] = CreateMultiForward("hns_player_join_inmatch", ET_CONTINUE, FP_CELL, FP_CELL);
 
 	g_hForwards[HNS_ROUND_START] = CreateMultiForward("hns_round_start", ET_CONTINUE);
 	g_hForwards[HNS_ROUND_FREEZEEND] = CreateMultiForward("hns_round_freezeend", ET_CONTINUE);

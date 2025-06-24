@@ -14,14 +14,16 @@ public mix_init() {
 
 public mix_start() {
 	ChangeGameplay(GAMEPLAY_HNS);
+
 	g_iCurrentMode = MODE_MIX;
-	g_eMatchState = STATE_PREPARE;
-	hns_enable_rules();
 	g_iMatchStatus = MATCH_STARTED;
+	g_eMatchState = STATE_PREPARE;
+
+	g_isTeamTT = HNS_TEAM_A;
+
+	g_eSurrenderData[e_sFlDelay] = get_gametime() + g_iSettings[SURTIMEDELAY];
 
 	arrayset(g_eMatchInfo, 0, MatchInfo_s);
-	g_isTeamTT = HNS_TEAM_A;
-	g_eSurrenderData[e_sFlDelay] = get_gametime() + g_iSettings[SURTIMEDELAY];
 
 	set_cvars_mode(MODE_MIX);
 
@@ -176,7 +178,6 @@ public mix_roundstart() {
 	}
 
 	set_task(0.3, "taskSaveAfk");
-	//set_task(5.0, "taskCheckLeave");
 }
 
 public taskCheckLeave() {
@@ -400,7 +401,12 @@ public mix_player_join(id) {
 	TrieGetArray(g_PlayersLeaveData, getUserKey(id), g_ePlayerInfo[id], PLAYER_INFO);
 	if (g_ePlayerInfo[id][PLAYER_MATCH]) {
 		new iNum = get_num_players_in_match();
-		if (iNum >= g_eMatchInfo[e_mTeamSize]) {
+
+		new bool:bReplaced = iNum >= g_eMatchInfo[e_mTeamSize] ? true : false;
+
+		ExecuteForward(g_hForwards[MATCH_JOIN_PLAYER], _, id, bReplaced);
+
+		if (bReplaced) {
 			transferUserToSpec(id);
 			return;
 		}
@@ -429,6 +435,8 @@ public mix_player_leave(id) {
 				ExecuteForward(g_ModFuncs[MODE_MIX][MODEFUNC_PAUSE], _);
 		}
 	}
+
+	ExecuteForward(g_hForwards[MATCH_LEAVE_PLAYER], _, id);
 
 	TrieSetArray(g_PlayersLeaveData, getUserKey(id), g_ePlayerInfo[id], PLAYER_INFO);
 

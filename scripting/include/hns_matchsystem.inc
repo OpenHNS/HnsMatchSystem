@@ -132,19 +132,10 @@ native Float:hns_get_score_b();
 
 native HNS_TEAM:hns_get_is_team_tt();
 
+forward hns_player_leave_inmatch(id);
 
-/* 
-* Gets score in match (For RULES_DUEL)
-*
-* @return type Score TT
+forward hns_player_join_inmatch(id, bool:bReplaced);
 
-native hns_get_score_tt();
-
-* Gets score in match (For RULES_DUEL)
-*
-* @return type Score CT
-
-native hns_get_score_ct(); */
 
 forward hns_team_battle_started();
 
