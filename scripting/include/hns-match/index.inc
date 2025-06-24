@@ -12,7 +12,7 @@
 #include <json>
 #include <PersistentDataStorage>
 
-#include <hns_matchsystem_pts.inc>
+#include <hns_matchsystem_dbmysql.inc>
 #include <hns_matchsystem_bans.inc>
 
 #include <hns-match/globals>
@@ -24,6 +24,7 @@
 #include <hns-match/utils>
 #include <hns-match/user>
 #include <hns-match/save>
+#include <hns-match/natives>
 
 #include <hns-match/gameplay/gameplay_hns.inc>
 #include <hns-match/gameplay/gameplay_knife.inc>

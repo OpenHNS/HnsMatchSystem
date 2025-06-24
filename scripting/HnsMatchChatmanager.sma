@@ -1,9 +1,9 @@
 #include <amxmodx>
 #include <reapi>
-#include <hns_matchsystem_pts>
+#include <hns_matchsystem_dbmysql>
 
 #define PLUGIN "Match: ChatManager"
-#define VERSION "1.0"
+#define VERSION "1.1"
 #define AUTHOR "Mistrick, OpenHNS"
 
 #define rg_get_user_team(%0) get_member(%0, m_iTeam)
@@ -92,6 +92,7 @@ enum _:MessageReturn {
 new g_iForwards[Forwards];
 new g_sNewMessage[173];
 
+
 public plugin_init() {
     register_plugin(PLUGIN, VERSION, AUTHOR);
     
@@ -169,6 +170,8 @@ public plugin_natives() {
     register_native("cm_set_prefix", "native_set_prefix");
     register_native("cm_get_prefix", "native_get_prefix");
     register_native("cm_reset_prefix", "native_reset_prefix");
+
+    set_native_filter("hns_dbmysql_filter");
 }
 
 public native_set_player_message(plugin, params) {
@@ -357,8 +360,8 @@ public FormatMessage(sender, CsTeams:sender_team, channel, name_color, chat_colo
     }
     
     /* HNS MATCH PTS */
-    if (g_ePlayerPtsData[sender][e_bInit]) {
-        len += formatex(text[len], charsmax(text) - len, "^1[^3%s^1] ",g_ePlayerPtsData[sender][e_szRank]);
+    if (hns_db_init()) {
+        len += formatex(text[len], charsmax(text) - len, "^1[^3%s^1] ", get_skill_player(sender));
     }
     /* HNS MATCH PTS */
 

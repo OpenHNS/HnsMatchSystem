@@ -2,7 +2,6 @@
 #include <reapi>
 #include <sqlx>
 #include <hns_matchsystem>
-#include <hns_matchsystem_sql>
 
 #define SQL_CREATE_TABLE \
 "CREATE TABLE IF NOT EXISTS `%s` \

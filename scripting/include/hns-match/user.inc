@@ -129,7 +129,11 @@ stock get_num_players_in_match() {
 	new numGameplr;
 	for (new i; i < iNum; i++) {
 		new tempid = iPlayers[i];
-		if (getUserTeam(tempid) == TEAM_SPECTATOR) continue;
+
+		if (getUserTeam(tempid) != TEAM_TERRORIST && getUserTeam(tempid) != TEAM_CT) {
+			continue;
+		}
+
 		numGameplr++;
 	}
 	return numGameplr;
@@ -157,44 +161,6 @@ stock bool:checkUserBan() {
 	}
 
 	return foundPlayerBanned;
-}
-
-stock check_players_set_role() {
-	new playersA, capsA, playersB, capsB;
-
-	new iPlayers[MAX_PLAYERS], iNum;
-	get_players(iPlayers, iNum, "ch");
-
-	for (new i; i < iNum; i++) {
-		new id = iPlayers[i];
-		if (getUserTeam(id) == TEAM_SPECTATOR) continue;
-
-		switch (g_ePlayerInfo[id][PLAYER_ROLE]){
-			case ROLE_TEAM_A: {
-				playersA++;
-			}
-			case ROLE_TEAM_B: {
-				playersB++;
-			}
-			case ROLE_CAP_A: {
-				capsA++
-			}
-			case ROLE_CAP_A: {
-				capsB++
-			}
-		}
-	}
-
-
-	for (new i; i < iNum; i++) {
-		new id = iPlayers[i];
-		if (getUserTeam(id) == TEAM_SPECTATOR) continue;
-
-		if (g_ePlayerInfo[id][PLAYER_ROLE] == ROLE_SPEC) {
-			
-		}
-		
-	}
 }
 
 stock bool:check_captain_role(TeamName:iTeam) {

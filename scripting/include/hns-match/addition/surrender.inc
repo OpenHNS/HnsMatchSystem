@@ -138,8 +138,7 @@ resetSurrenderData() {
 autoLose(TeamName:iTeam) {
 	chat_print(0, "%L", LANG_PLAYER, "SUR_END", iTeam == TEAM_TERRORIST ? "TERRORISTS" : "CTS");
 
-	ExecuteForward(g_hForwards[MATCH_FINISH], _, iTeam == TEAM_TERRORIST ? 2 : 1);
-
 	setTaskHud(0, 0.0, 1, 255, 255, 255, 4.0, "%L", LANG_SERVER, "HUD_GAMEOVER");
+	
 	MixFinishedMR(iTeam == TEAM_TERRORIST ? 2 : 1);
 }

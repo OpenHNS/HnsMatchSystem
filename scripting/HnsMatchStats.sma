@@ -3,7 +3,6 @@
 #include <xs>
 
 #include <hns_matchsystem>
-#include <hns_matchsystem_pts>
 
 forward hns_ownage(iToucher, iTouched);
 
@@ -361,6 +360,30 @@ public taskRoundEvent() {
 	{
 		new id = iPlayers[i];
 		g_StatsRound[id][PLR_STATS_SURVTIME] += 0.25;
+	}
+}
+
+public hns_match_finished() {
+	ExecuteForward(g_hApplyStatsForward, _);
+
+	new iPlayers[MAX_PLAYERS], iNum;
+	get_players(iPlayers, iNum, "ch");
+
+	for (new i = 0; i < iNum; i++) {
+		new id = iPlayers[i];
+
+		iStats[id][PLR_STATS_OWNAGES] += g_StatsRound[id][PLR_STATS_OWNAGES];
+		iStats[id][PLR_STATS_KILLS] += g_StatsRound[id][PLR_STATS_KILLS];
+		iStats[id][PLR_STATS_DEATHS] += g_StatsRound[id][PLR_STATS_DEATHS];
+		iStats[id][PLR_STATS_ASSISTS] += g_StatsRound[id][PLR_STATS_ASSISTS];
+		iStats[id][PLR_STATS_STABS] += g_StatsRound[id][PLR_STATS_STABS];
+		iStats[id][PLR_STATS_DMG_TT] += g_StatsRound[id][PLR_STATS_DMG_TT];
+		iStats[id][PLR_STATS_DMG_CT] += g_StatsRound[id][PLR_STATS_DMG_CT];
+		iStats[id][PLR_STATS_FLASHTIME] += g_StatsRound[id][PLR_STATS_FLASHTIME];
+		iStats[id][PLR_STATS_RUNNED] += g_StatsRound[id][PLR_STATS_RUNNED];
+		iStats[id][PLR_STATS_SURVTIME] += g_StatsRound[id][PLR_STATS_SURVTIME];
+
+		arrayset(g_StatsRound[id], 0, PLAYER_STATS);
 	}
 }
 

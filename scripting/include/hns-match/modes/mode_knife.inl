@@ -71,8 +71,6 @@ public kniferound_roundstart() {
 				}
 			}
 
-			//check_players_set_role();
-
 			ResetAfkData();
 			set_task(2.0, "taskSaveAfk");
 			set_task(4.0, "taskCheckAfk");

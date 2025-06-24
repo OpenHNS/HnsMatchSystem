@@ -63,9 +63,9 @@ public chooseCapsMenu(id) {
 			add(szBuffer, charsmax(szBuffer), fmt("%n ", iPlayer));
 		}
 
-		if (g_ePlayerPtsData[iPlayer][e_bInit]) {
+		if (hns_db_init()) {
 			new szPts[16];
-			formatex(szPts, charsmax(szPts), "\d%d (%s) ", g_ePlayerPtsData[iPlayer][e_iPts], g_ePlayerPtsData[iPlayer][e_szRank]);
+			formatex(szPts, charsmax(szPts), "\d%d (%s) ", hns_get_pts_data(iPlayer, e_iPts), get_skill_player(iPlayer));
 			add(szBuffer, charsmax(szBuffer), szPts);
 		}
 
@@ -132,8 +132,8 @@ public chooseCapsHandler(id, hMenu, item) {
 		g_iCaptainFirst = iPlayer;
 		g_ePlayerInfo[g_iCaptainFirst][PLAYER_ROLE] = ROLE_CAP_A;
 		
-		if (g_ePlayerPtsData[iPlayer][e_bInit])
-			chat_print(0, "%L", LANG_PLAYER, "CAP_FIRST_PTS", iPlayer, g_ePlayerPtsData[iPlayer][e_iPts], g_ePlayerPtsData[iPlayer][e_szRank]);
+		if (hns_db_init())
+			chat_print(0, "%L", LANG_PLAYER, "CAP_FIRST_PTS", iPlayer, hns_get_pts_data(iPlayer, e_iPts), get_skill_player(iPlayer));
 		else
 			chat_print(0, "%L", LANG_PLAYER, "CAP_FIRST", iPlayer);
 
@@ -142,8 +142,8 @@ public chooseCapsHandler(id, hMenu, item) {
 		g_iCaptainSecond = iPlayer;
 		g_ePlayerInfo[g_iCaptainSecond][PLAYER_ROLE] = ROLE_CAP_B;
 
-		if (g_ePlayerPtsData[iPlayer][e_bInit])
-			chat_print(0, "%L", LANG_PLAYER, "CAP_SECOND_PTS", iPlayer, g_ePlayerPtsData[iPlayer][e_iPts], g_ePlayerPtsData[iPlayer][e_szRank]);
+		if (hns_db_init())
+			chat_print(0, "%L", LANG_PLAYER, "CAP_SECOND_PTS", iPlayer, hns_get_pts_data(iPlayer, e_iPts), get_skill_player(iPlayer));
 		else
 			chat_print(0, "%L", LANG_PLAYER, "CAP_SECOND", iPlayer);
 
@@ -202,9 +202,9 @@ public pickMenu(id, bool:bStartWait) {
 			add(szBuffer, charsmax(szBuffer), fmt("%n ", iPlayer));
 		}
 
-		if (g_ePlayerPtsData[iPlayer][e_bInit]) {
+		if (hns_db_init()) {
 			new szPts[16];
-			formatex(szPts, charsmax(szPts), "\d%d (%s) ", g_ePlayerPtsData[iPlayer][e_iPts], g_ePlayerPtsData[iPlayer][e_szRank]);
+			formatex(szPts, charsmax(szPts), "\d%d (%s) ", hns_get_pts_data(iPlayer, e_iPts), get_skill_player(iPlayer));
 			add(szBuffer, charsmax(szBuffer), szPts);
 		}
 
@@ -278,8 +278,8 @@ public pickHandler(id, hMenu, item) {
 		}
 	}
 
-	if (g_ePlayerPtsData[iPlayer][e_bInit])
-		chat_print(0, "%L", LANG_PLAYER, "PLAYER_CHOOSE_PTS", id, iPlayer, g_ePlayerPtsData[iPlayer][e_iPts], g_ePlayerPtsData[iPlayer][e_szRank]);
+	if (hns_db_init())
+		chat_print(0, "%L", LANG_PLAYER, "PLAYER_CHOOSE_PTS", id, iPlayer, hns_get_pts_data(iPlayer, e_iPts), get_skill_player(iPlayer));
 	else
 		chat_print(0, "%L", LANG_PLAYER, "PLAYER_CHOOSE", id, iPlayer);
 

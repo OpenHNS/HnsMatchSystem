@@ -41,6 +41,11 @@ enum NATCH_RULES {
 	RULES_DUEL
 }
 
+enum HNS_TEAM {
+	HNS_TEAM_B,
+	HNS_TEAM_A
+}
+
 /*
 * Gets the system prefix.
 *
@@ -116,6 +121,18 @@ native MODE_STATES:hns_get_state();
 */
 native NATCH_RULES:hns_get_rules();
 
+
+native hns_get_match_teamsize();
+
+native hns_isboost();
+
+native Float:hns_get_score_a();
+
+native Float:hns_get_score_b();
+
+native HNS_TEAM:hns_get_is_team_tt();
+
+
 /* 
 * Gets score in match (For RULES_DUEL)
 *
@@ -157,7 +174,7 @@ forward hns_match_canceled();
 *
 * @param iWinTeam The winning team
 *				1 - TT
-*				1 - CT
+*				2 - CT
 * @noreturn
 */
 forward hns_match_finished(iWinTeam);

@@ -3,7 +3,7 @@
 #include <reapi>
 
 #include <hns_matchsystem>
-#include <hns_matchsystem_pts>
+#include <hns_matchsystem_dbmysql>
 #include <hns_matchsystem_stats>
 #include <hns_matchsystem_bans>
 
@@ -52,8 +52,12 @@ enum _: SPEC_DATA {
 
 new g_eSpecPlayers[MAX_PLAYERS + 1][SPEC_DATA];
 
+public plugin_natives() {
+	set_native_filter("hns_dbmysql_filter");
+}
+
 public plugin_init() {
-	register_plugin("Match: Player info", "1.0.1", "OpenHNS");
+	register_plugin("Match: Player info", "1.1", "OpenHNS");
 
 	register_clcmd("say", "sayHandle");
 
@@ -457,12 +461,12 @@ public task_ShowPlayerInfo() {
 			new szHudMess[1024], iLen;
 
 			if (show_id != id) {
-				if (g_ePlayerPtsData[show_id][e_bInit]) {
+				if (hns_db_init()) {
 					iLen += format(szHudMess[iLen], sizeof szHudMess - iLen, "\
 					Player: %n (#%d)^n\
 					PTS: %d [%s]^n", 
-					show_id, g_ePlayerPtsData[show_id][e_iTop],
-					g_ePlayerPtsData[show_id][e_iPts], g_ePlayerPtsData[show_id][e_szRank]);
+					show_id, hns_get_pts_data(show_id, e_iTop),
+					hns_get_pts_data(show_id, e_iPts), get_skill_player(show_id));
 				} else {
 					iLen += format(szHudMess[iLen], sizeof szHudMess - iLen, "\
 					Player: %n^n", 

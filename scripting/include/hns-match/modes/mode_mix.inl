@@ -226,8 +226,10 @@ public MixFinishedMR(iWinTeam) {
 }
 
 public MixFinishedWT() {
+	ExecuteForward(g_hForwards[MATCH_FINISH], _, 1);
+
 	g_iMatchStatus = MATCH_NONE;
-	
+
 	new Float:TimeDiff = floatabs(g_eMatchInfo[e_flSidesTime][g_isTeamTT] - g_eMatchInfo[e_flSidesTime][HNS_TEAM:!g_isTeamTT]);
 	
 	new szTime[24];
@@ -246,11 +248,11 @@ public MixFinishedWT() {
 	if(task_exists(TASK_TIMER)) {
 		remove_task(TASK_TIMER);
 	}
-
-	ExecuteForward(g_hForwards[MATCH_FINISH], _, 1);
 }
 
 public MixFinishedDuel() {
+	ExecuteForward(g_hForwards[MATCH_FINISH], _, 1);
+	
 	g_iMatchStatus = MATCH_NONE;
 	
 	new iPlayers[MAX_PLAYERS], iNum;
@@ -269,8 +271,6 @@ public MixFinishedDuel() {
 	if(task_exists(TASK_TIMER)) {
 		remove_task(TASK_TIMER);
 	}
-
-	ExecuteForward(g_hForwards[MATCH_FINISH], _, 1);
 }
 
 public mix_roundend(bool:win_ct) {
