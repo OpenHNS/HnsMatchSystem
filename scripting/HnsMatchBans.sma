@@ -171,6 +171,8 @@ public plugin_init() {
 
 public plugin_cfg() {
 	hns_get_prefix(g_sPrefix, charsmax(g_sPrefix));
+
+	
 }
 
 public plugin_end() {
