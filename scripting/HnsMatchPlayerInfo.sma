@@ -3,7 +3,9 @@
 #include <reapi>
 
 #include <hns_matchsystem>
+#include <hns_matchsystem_filter>
 #include <hns_matchsystem_dbmysql>
+#include <hns_matchsystem_api>
 #include <hns_matchsystem_stats>
 #include <hns_matchsystem_bans>
 
@@ -53,7 +55,7 @@ enum _: SPEC_DATA {
 new g_eSpecPlayers[MAX_PLAYERS + 1][SPEC_DATA];
 
 public plugin_natives() {
-	set_native_filter("hns_dbmysql_filter");
+	set_native_filter("match_system_additons");
 }
 
 public plugin_init() {
@@ -459,20 +461,28 @@ public task_ShowPlayerInfo() {
 		if (g_HudOnOff[id]) {
 			set_hudmessage(.red = 100, .green = 100, .blue = 100, .x = 0.01, .y = 0.25, .holdtime = 1.0);
 			new szHudMess[1024], iLen;
-
-			if (show_id != id) {
+			//if (show_id != id) {
 				if (hns_db_init()) {
 					iLen += format(szHudMess[iLen], sizeof szHudMess - iLen, "\
 					Player: %n (#%d)^n\
 					PTS: %d [%s]^n", 
 					show_id, hns_get_pts_data(show_id, e_iTop),
 					hns_get_pts_data(show_id, e_iPts), get_skill_player(show_id));
+				} else if (hns_api_stats_init()) {
+					new szSkill[10];
+					hns_api_stats_rank(show_id, GET_GOOD, szSkill, charsmax(szSkill))
+
+					iLen += format(szHudMess[iLen], sizeof szHudMess - iLen, "\
+					Player: %n (#%d)^n\
+					PTS: %d [%s]^n", 
+					show_id, hns_api_stats_place(show_id, GET_GOOD),
+					hns_api_stats_rating(show_id, GET_GOOD), szSkill);
 				} else {
 					iLen += format(szHudMess[iLen], sizeof szHudMess - iLen, "\
 					Player: %n^n", 
 					show_id);	
 				}
-			}
+			//}
 
 			if (hns_get_mode() == MODE_MIX && hns_get_state() != STATE_PAUSED && hns_get_rules() != RULES_DUEL) {
 				new szTime[24];

@@ -53,24 +53,3 @@ stock get_skill_player(id) {
 native hns_get_ownage(id);
 
 native hns_set_ownage(id);
-
-
-public hns_dbmysql_filter(const szNativeName[], iNativeID, iTrapMode) {
-	if (equal(szNativeName, "hns_db_init")) { 
-		return PLUGIN_HANDLED
-	}
-
-	if (equal(szNativeName, "hns_get_pts_data")) { 
-		return PLUGIN_HANDLED
-	}
-	
-	if (equal(szNativeName, "hns_get_ownage")) { 
-		return PLUGIN_HANDLED
-	}
-
-	if (equal(szNativeName, "hns_set_ownage")) { 
-		return PLUGIN_HANDLED
-	}
-
-	return PLUGIN_CONTINUE;
-}
