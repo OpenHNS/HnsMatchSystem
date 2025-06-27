@@ -110,16 +110,4 @@ native Float:hns_get_stats_surv(type, id);
 */
 native hns_get_stats_ownages(type, id);
 
-/*
-* Gets integer all stats of a player in a match.
-*
-* @param type Stats type: TYPE_STATS
-* @param replacementid Client index
-* @param substitutiveid Client index
-*
-* @return full stats
-*/
-
-native hns_stats_replace(type, replacementid, substitutiveid);
-
 forward hns_apply_stats();

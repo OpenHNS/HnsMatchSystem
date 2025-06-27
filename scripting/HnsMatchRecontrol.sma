@@ -2,7 +2,6 @@
 #include <reapi>
 #include <hns_matchsystem>
 #include <hns_matchsystem_bans>
-#include <hns_matchsystem_stats>
 
 #define rg_get_user_team(%0) get_member(%0, m_iTeam)
 
@@ -46,9 +45,11 @@ new TransferType:g_eTransferType[MAX_PLAYERS + 1], g_iTransferPlayer[MAX_PLAYERS
 
 new g_saveData[MAX_PLAYERS + 1][Data];
 
+new g_hReplaceForward;
+
 public plugin_init()
 {
-	register_plugin("Match: ReControl", "1.3", "OpenHNS"); // Thanks Conor, Denzer, Garey
+	register_plugin("Match: ReControl", "1.4", "OpenHNS"); // Thanks Conor, Denzer, Garey
 
 	register_clcmd("drop", "Control");
 	RegisterSayCmd("co", "co", "Control");
@@ -61,6 +62,8 @@ public plugin_init()
 	RegisterSayCmd("rea", "rea", "ReplaceAdmin");
 
 	RegisterHookChain(RG_CSGameRules_PlayerSpawn, "@CSGameRules_PlayerSpawn", true);
+
+	g_hReplaceForward = CreateMultiForward("hns_players_replaced", ET_CONTINUE, FP_CELL, FP_CELL);
 
 	register_dictionary("match_additons.txt");
 }
@@ -505,7 +508,7 @@ public ReControl(id)
 			rg_set_user_team(id, g_saveData[id][iTeam]);
 			rg_set_user_team(requested_id, TEAM_SPECTATOR);
 
-			hns_stats_replace(STATS_ALL, requested_id, id);
+			ExecuteForward(g_hReplaceForward, _, requested_id, id);
 		}
 		
 		g_bGiveWeapons[id] = true;
@@ -524,7 +527,7 @@ public ReControl(id)
 			rg_set_user_team(id, g_saveData[id][iTeam]);
 			rg_set_user_team(requested_id, TEAM_SPECTATOR);
 
-			hns_stats_replace(STATS_ALL, requested_id, id);
+			ExecuteForward(g_hReplaceForward, _, requested_id, id);
 		}
 	}
 	
@@ -582,7 +585,7 @@ ReplacePlayers(replacement_player, substitutive_player, admin_replaced = 0) {
 		rg_set_user_team(replacement_player, TEAM_SPECTATOR);
 	}
 
-	hns_stats_replace(STATS_ALL, replacement_player, substitutive_player);
+	ExecuteForward(g_hReplaceForward, _, replacement_player, substitutive_player);
 
 	client_print_color(0, print_team_blue, "%L", LANG_PLAYER, "RECON_ADM_REPLACE", g_szPrefix, admin_replaced, replacement_player, substitutive_player);
 }
