@@ -12,7 +12,9 @@
 #include <json>
 #include <PersistentDataStorage>
 
+#include <hns_matchsystem_filter.inc>
 #include <hns_matchsystem_dbmysql.inc>
+#include <hns_matchsystem_api.inc>
 #include <hns_matchsystem_bans.inc>
 
 #include <hns-match/globals>

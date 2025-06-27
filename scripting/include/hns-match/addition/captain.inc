@@ -67,6 +67,13 @@ public chooseCapsMenu(id) {
 			new szPts[16];
 			formatex(szPts, charsmax(szPts), "\d%d (%s) ", hns_get_pts_data(iPlayer, e_iPts), get_skill_player(iPlayer));
 			add(szBuffer, charsmax(szBuffer), szPts);
+		} else if (hns_api_stats_init()) {
+			new szSkill[10];
+			hns_api_stats_rank(iPlayer, GET_GOOD, szSkill, charsmax(szSkill));
+
+			new szPts[16];
+			formatex(szPts, charsmax(szPts), "\d%d (%s) ", hns_api_stats_rating(iPlayer, GET_GOOD), szSkill);
+			add(szBuffer, charsmax(szBuffer), szPts);
 		}
 
 		if (g_bNoplay[iPlayer])
@@ -132,21 +139,29 @@ public chooseCapsHandler(id, hMenu, item) {
 		g_iCaptainFirst = iPlayer;
 		g_ePlayerInfo[g_iCaptainFirst][PLAYER_ROLE] = ROLE_CAP_A;
 		
-		if (hns_db_init())
+		if (hns_db_init()) {
 			chat_print(0, "%L", LANG_PLAYER, "CAP_FIRST_PTS", iPlayer, hns_get_pts_data(iPlayer, e_iPts), get_skill_player(iPlayer));
-		else
+		} else if (hns_api_stats_init()) {
+			new szSkill[10];
+			hns_api_stats_rank(iPlayer, GET_GOOD, szSkill, charsmax(szSkill));
+			chat_print(0, "%L", LANG_PLAYER, "CAP_FIRST_PTS", iPlayer, hns_api_stats_rating(iPlayer, GET_GOOD), szSkill);
+		} else {
 			chat_print(0, "%L", LANG_PLAYER, "CAP_FIRST", iPlayer);
-
+		}
 		chooseCapsMenu(id);
 	} else if (!g_iCaptainSecond) {
 		g_iCaptainSecond = iPlayer;
 		g_ePlayerInfo[g_iCaptainSecond][PLAYER_ROLE] = ROLE_CAP_B;
 
-		if (hns_db_init())
+		if (hns_db_init()) {
 			chat_print(0, "%L", LANG_PLAYER, "CAP_SECOND_PTS", iPlayer, hns_get_pts_data(iPlayer, e_iPts), get_skill_player(iPlayer));
-		else
+		} else if (hns_api_stats_init()) {
+			new szSkill[10];
+			hns_api_stats_rank(iPlayer, GET_GOOD, szSkill, charsmax(szSkill));
+			chat_print(0, "%L", LANG_PLAYER, "CAP_SECOND_PTS", iPlayer, hns_api_stats_rating(iPlayer, GET_GOOD), szSkill);
+		} else {
 			chat_print(0, "%L", LANG_PLAYER, "CAP_SECOND", iPlayer);
-
+		}
 		if (is_user_connected(g_iCaptainFirst) && is_user_connected(g_iCaptainSecond)) {
 			g_isTeamTT = HNS_TEAM_A;
 			rg_set_user_team(g_iCaptainFirst, TEAM_TERRORIST);
@@ -205,6 +220,13 @@ public pickMenu(id, bool:bStartWait) {
 		if (hns_db_init()) {
 			new szPts[16];
 			formatex(szPts, charsmax(szPts), "\d%d (%s) ", hns_get_pts_data(iPlayer, e_iPts), get_skill_player(iPlayer));
+			add(szBuffer, charsmax(szBuffer), szPts);
+		} else if (hns_api_stats_init()) {
+			new szSkill[10];
+			hns_api_stats_rank(iPlayer, GET_GOOD, szSkill, charsmax(szSkill));
+
+			new szPts[16];
+			formatex(szPts, charsmax(szPts), "\d%d (%s) ", hns_api_stats_rating(iPlayer, GET_GOOD), szSkill);
 			add(szBuffer, charsmax(szBuffer), szPts);
 		}
 
@@ -278,10 +300,15 @@ public pickHandler(id, hMenu, item) {
 		}
 	}
 
-	if (hns_db_init())
+	if (hns_db_init()) {
 		chat_print(0, "%L", LANG_PLAYER, "PLAYER_CHOOSE_PTS", id, iPlayer, hns_get_pts_data(iPlayer, e_iPts), get_skill_player(iPlayer));
-	else
+	} else if (hns_api_stats_init()) {
+		new szSkill[10];
+		hns_api_stats_rank(iPlayer, GET_GOOD, szSkill, charsmax(szSkill));
+		chat_print(0, "%L", LANG_PLAYER, "PLAYER_CHOOSE_PTS", id, iPlayer, hns_api_stats_rating(iPlayer, GET_GOOD), szSkill);
+	} else {
 		chat_print(0, "%L", LANG_PLAYER, "PLAYER_CHOOSE", id, iPlayer);
+	}
 
 	if (g_ePlayerInfo[id][PLAYER_ROLE] == ROLE_CAP_A) {
 		g_ePlayerInfo[iPlayer][PLAYER_ROLE] = ROLE_TEAM_A;

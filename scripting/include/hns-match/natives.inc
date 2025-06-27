@@ -21,13 +21,13 @@ public plugin_natives() {
 	register_native("hns_get_match_teamsize", "native_get_match_teamsize");
 
 	register_native("hns_isboost", "native_hns_isboost");
-	
-	set_native_filter("hns_dbmysql_filter");
 
 	register_native("hns_get_score_a", "native_get_score_a");
 	register_native("hns_get_score_b", "native_get_score_b");
 
 	register_native("hns_get_is_team_tt", "native_get_is_team_tt");
+
+	set_native_filter("match_system_additons");
 }
 
 public native_get_prefix(amxx, params) {
