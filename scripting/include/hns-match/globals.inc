@@ -25,7 +25,6 @@ enum NATCH_RULES {
 }
 
 new NATCH_RULES:g_iCurrentRules;
-new g_iVoteRules[NATCH_RULES];
 
 enum MATCH_STATUS {
 	MATCH_NONE,
@@ -54,15 +53,17 @@ enum HNS_TEAM {
 
 new HNS_TEAM:g_isTeamTT;
 
-enum _:MatchInfo_s {
+enum _:MATCH_INFO {
 	e_mTeamSize,
 	e_mTeamSizeTT,
+	Float:e_mWintime,
 	Float:e_flSidesTime[HNS_TEAM],
-	e_iRoundsPlayed[HNS_TEAM],
-	e_iMatchSwapped
+	e_iSidesRounds[HNS_TEAM],
+	Trie:e_tLeaveData,
+	bool:e_mLeaved
 };
 
-new g_eMatchInfo[MatchInfo_s];
+new g_eMatchInfo[MATCH_INFO];
 
 enum _:SurrenderData_s {
 	bool:e_sStarted,
@@ -73,7 +74,6 @@ enum _:SurrenderData_s {
 new g_eSurrenderData[SurrenderData_s];
 
 new bool:g_bNoplay[MAX_PLAYERS + 1];
-new bool:g_bPlayersListLoaded;
 
 new Float:g_flRoundTime;
 
@@ -104,25 +104,19 @@ enum PLAYER_ROLES {
 	ROLE_CAP_A, 
 	ROLE_TEAM_A, 
 	ROLE_CAP_B, 
-	ROLE_TEAM_B 
+	ROLE_TEAM_B
 };
 
 enum _: PLAYER_INFO {
 	PLAYER_ROLES:PLAYER_ROLE,
 	bool:PLAYER_MATCH,
 	PLAYER_TEAM[16],
-	PLAYER_SAVE_SWAP
+	LEAVE_IN_ROUND
 };
 
 new g_ePlayerInfo[MAX_PLAYERS + 1][PLAYER_INFO];
 
-new Trie:g_PlayersLeaveData;
-
-new bool:g_bPlayersLeaved;
-
 new Array:g_aPlayersLoadData;
-
-new g_szBuffer[2048];
 
 new TeamName:g_eSpecBack[MAX_PLAYERS + 1];
 

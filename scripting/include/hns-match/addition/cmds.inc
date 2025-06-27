@@ -106,7 +106,9 @@ public sayHandle(id) {
 			return PLUGIN_CONTINUE;
 
 		if (str_to_float(szTarget) >= 0.0) {
-			g_iSettings[WINTIME] = str_to_float(szTarget);
+			g_eMatchInfo[e_mWintime] = str_to_float(szTarget);
+			cvar_update_wintime(g_eMatchInfo[e_mWintime]);
+			
 			chat_print(0, "%l", "SET_WINTIME", id, str_to_num(szTarget));
 		}
 		return PLUGIN_CONTINUE;
@@ -659,17 +661,17 @@ public cmdShowTimers(id) {
 			if (g_isTeamTT == HNS_TEAM_A) {
 				chat_print(id, "%L", id, "SCORE_TIME",
 					szTimeToWin[HNS_TEAM_A], TTsize, CTSize, szTimeToWin[HNS_TEAM_B],
-					(g_eMatchInfo[e_iRoundsPlayed][HNS_TEAM_A] + g_eMatchInfo[e_iRoundsPlayed][HNS_TEAM_B]) + 1, g_iSettings[MAXROUNDS] * 2,
+					(g_eMatchInfo[e_iSidesRounds][HNS_TEAM_A] + g_eMatchInfo[e_iSidesRounds][HNS_TEAM_B]) + 1, g_iSettings[MAXROUNDS] * 2,
 					szTimeDiff);
 			} else {
 				chat_print(id, "%L", id, "SCORE_TIME",
 					szTimeToWin[HNS_TEAM_B], TTsize, CTSize, szTimeToWin[HNS_TEAM_A],
-					(g_eMatchInfo[e_iRoundsPlayed][HNS_TEAM_B] + g_eMatchInfo[e_iRoundsPlayed][HNS_TEAM_A]) + 1, g_iSettings[MAXROUNDS] * 2,
+					(g_eMatchInfo[e_iSidesRounds][HNS_TEAM_B] + g_eMatchInfo[e_iSidesRounds][HNS_TEAM_A]) + 1, g_iSettings[MAXROUNDS] * 2,
 					szTimeDiff);
 			}
 		}
 		case RULES_TIMER: {
-			new Float:flCapTime = floatmul(g_iSettings[WINTIME], 60.0);
+			new Float:flCapTime = floatmul(g_eMatchInfo[e_mWintime], 60.0);
 			new Float:flTimeToWinA = floatsub(flCapTime, Float:g_eMatchInfo[e_flSidesTime][HNS_TEAM_A]);
 			new Float:flTimeToWinB = floatsub(flCapTime, Float:g_eMatchInfo[e_flSidesTime][HNS_TEAM_B]);
 			fnConvertTime(flTimeToWinA, szTimeToWin[HNS_TEAM_A], 23);
@@ -706,15 +708,15 @@ public cmdShowTimers(id) {
 
 			if(is_user_connected(hnsteamname[HNS_TEAM_A]) && is_user_connected(hnsteamname[HNS_TEAM_B])) { // TODO
 				if (g_isTeamTT == HNS_TEAM_A) {
-					chat_print(id, "%L", id, "SCORE_DUEL", hnsteamname[HNS_TEAM_A], g_eMatchInfo[e_iRoundsPlayed][HNS_TEAM_A], g_eMatchInfo[e_iRoundsPlayed][HNS_TEAM_B], hnsteamname[HNS_TEAM_B]);
+					chat_print(id, "%L", id, "SCORE_DUEL", hnsteamname[HNS_TEAM_A], g_eMatchInfo[e_iSidesRounds][HNS_TEAM_A], g_eMatchInfo[e_iSidesRounds][HNS_TEAM_B], hnsteamname[HNS_TEAM_B]);
 				} else {
-					chat_print(id, "%L", id, "SCORE_DUEL", hnsteamname[HNS_TEAM_B], g_eMatchInfo[e_iRoundsPlayed][HNS_TEAM_B], g_eMatchInfo[e_iRoundsPlayed][HNS_TEAM_A], hnsteamname[HNS_TEAM_A]);
+					chat_print(id, "%L", id, "SCORE_DUEL", hnsteamname[HNS_TEAM_B], g_eMatchInfo[e_iSidesRounds][HNS_TEAM_B], g_eMatchInfo[e_iSidesRounds][HNS_TEAM_A], hnsteamname[HNS_TEAM_A]);
 				}
 			}  else {
 				if (g_isTeamTT == HNS_TEAM_A) {
-					chat_print(id, "%L", id, "SCORE_DUEL_DEF", g_eMatchInfo[e_iRoundsPlayed][HNS_TEAM_A], g_eMatchInfo[e_iRoundsPlayed][HNS_TEAM_B]);
+					chat_print(id, "%L", id, "SCORE_DUEL_DEF", g_eMatchInfo[e_iSidesRounds][HNS_TEAM_A], g_eMatchInfo[e_iSidesRounds][HNS_TEAM_B]);
 				} else {
-					chat_print(id, "%L", id, "SCORE_DUEL_DEF", g_eMatchInfo[e_iRoundsPlayed][HNS_TEAM_B], g_eMatchInfo[e_iRoundsPlayed][HNS_TEAM_A]);
+					chat_print(id, "%L", id, "SCORE_DUEL_DEF", g_eMatchInfo[e_iSidesRounds][HNS_TEAM_B], g_eMatchInfo[e_iSidesRounds][HNS_TEAM_A]);
 				}
 			}
 		}	

@@ -3,7 +3,7 @@ static g_pRoundTime;
 enum _: CVARS
 {
 	RULES,
-	Float:WINTIME,
+	WINTIME,
 	MAXROUNDS,
 	DUELROUNDS,
 	HNSBOOST,
@@ -34,7 +34,7 @@ stock cvars_init() {
 	bind_pcvar_num(pCvar[RULES], g_iSettings[RULES]);
 
 	pCvar[WINTIME] = _:create_cvar("hns_wintime", "15", FCVAR_NONE, "Match wintime (Timer)", true, 0.0, true, 30.0);
-	bind_pcvar_float(_:pCvar[WINTIME], g_iSettings[WINTIME]);
+	bind_pcvar_float(pCvar[WINTIME], g_eMatchInfo[e_mWintime]);
 
 	pCvar[MAXROUNDS] = create_cvar("hns_rounds", "6", FCVAR_NONE, "Match rounds (MR)", true, 0.0, true, 10.0);
 	bind_pcvar_num(pCvar[MAXROUNDS], g_iSettings[MAXROUNDS]);
@@ -89,6 +89,11 @@ stock cvars_init() {
 
 	pCvar[ADMIN_FLAG] = create_cvar("hns_admin_flag", "b", FCVAR_NONE, "Admin access flag");
 	bind_pcvar_string(pCvar[ADMIN_FLAG], g_iSettings[ADMIN_FLAG], charsmax(g_iSettings[ADMIN_FLAG]));
+}
+
+stock cvar_update_wintime(Float:flWintime) {
+	g_eMatchInfo[e_mWintime] = flWintime;
+	set_pcvar_float(pCvar[WINTIME], flWintime);
 }
 
 stock Float:get_round_time() {

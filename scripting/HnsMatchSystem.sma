@@ -53,7 +53,7 @@ public plugin_init() {
 
 	registerMode();
 
-	g_PlayersLeaveData = TrieCreate();
+	g_eMatchInfo[e_tLeaveData] = TrieCreate();
 
 	register_dictionary("mixsystem.txt");
 
@@ -164,8 +164,6 @@ public rgRoundEnd(WinStatus:status, ScenarioEventEndRound:event, Float:tmDelay) 
 
 	if (g_ModFuncs[g_iCurrentMode][MODEFUNC_ROUNDEND])
 		ExecuteForward(g_ModFuncs[g_iCurrentMode][MODEFUNC_ROUNDEND], _, (status == WINSTATUS_CTS) ? true : false);
-
-	g_bPlayersListLoaded = false;
 	
 	return HC_CONTINUE;
 }
@@ -376,7 +374,7 @@ public ShowTimeAsMoney()
 			id = players[num];
 
 			message_begin(MSG_ONE, g_msgMoney, .player=id);
-			write_long(floatround((g_iSettings[WINTIME]*60.0) - g_eMatchInfo[e_flSidesTime][g_isTeamTT], floatround_floor));
+			write_long(floatround((g_eMatchInfo[e_mWintime] * 60.0) - g_eMatchInfo[e_flSidesTime][g_isTeamTT], floatround_floor));
 			write_byte(0);
 			message_end();
 		}
@@ -384,6 +382,6 @@ public ShowTimeAsMoney()
 }
 
 public plugin_end() {
-	TrieDestroy(g_PlayersLeaveData);
+	TrieDestroy(g_eMatchInfo[e_tLeaveData]);
 	ArrayDestroy(g_aPlayersLoadData);
 }

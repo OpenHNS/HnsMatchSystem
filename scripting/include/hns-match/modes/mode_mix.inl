@@ -13,6 +13,8 @@ public mix_init() {
 }
 
 public mix_start() {
+	match_reset_data();
+
 	ChangeGameplay(GAMEPLAY_HNS);
 
 	g_iCurrentMode = MODE_MIX;
@@ -23,8 +25,6 @@ public mix_start() {
 
 	g_eSurrenderData[e_sFlDelay] = get_gametime() + g_iSettings[SURTIMEDELAY];
 
-	arrayset(g_eMatchInfo, 0, MatchInfo_s);
-
 	set_cvars_mode(MODE_MIX);
 
 	loadMapCFG();
@@ -34,42 +34,36 @@ public mix_start() {
 	g_eMatchInfo[e_mTeamSizeTT] = iNum;
 	g_eMatchInfo[e_mTeamSize] = get_num_players_in_match();
 
+	hns_restart_round(2.0);
+
 	rg_send_audio(0, "plats/elevbell1.wav");
 	setTaskHud(0, 0.0, 1, 255, 255, 255, 3.0, "%L", LANG_SERVER, "HUD_STARTMIX1");
 	setTaskHud(0, 3.1, 1, 255, 255, 255, 3.0, "%L", LANG_SERVER, "HUD_STARTMIX2");
-
-	hns_restart_round(2.0);
-
-	if (g_iCurrentRules == RULES_TIMER) {
-		if (g_iSettings[WINTIME] == 0.0) {
-			g_iSettings[WINTIME] = 15.0
-		}
-	}
-
-	g_bPlayersLeaved = false;
 
 	ExecuteForward(g_hForwards[MATCH_START], _);
 }
 
 
 public mix_freezeend() {
-	if (g_eMatchState == STATE_ENABLED) {
-		set_task(5.0, "taskCheckAfk");
-		
-		if (g_bHnsBannedInit) {
-			if (checkUserBan()) {
-				return;
-			}
-		}
-
-		//set_task(10.0, "mix_pause");
-		set_task(0.25, "taskRoundEvent", .id = TASK_TIMER, .flags = "b");
-
-		if(g_bPlayersLeaved) {
-			//mix_pause();
-			set_task(1.0, "mix_pause");
-		}	
+	if (g_eMatchState != STATE_ENABLED) {
+		return PLUGIN_HANDLED;
 	}
+
+	set_task(5.0, "taskCheckAfk");
+	
+	if (g_bHnsBannedInit) {
+		if (checkUserBan()) {
+			return PLUGIN_HANDLED;
+		}
+	}
+
+	set_task(0.25, "taskRoundEvent", .id = TASK_TIMER, .flags = "b");
+
+	if(g_eMatchInfo[e_mLeaved]) {
+		set_task(1.0, "mix_pause");
+	}
+
+	return PLUGIN_HANDLED;
 }
 
 public mix_restartround() {
@@ -115,24 +109,17 @@ public mix_unpause() {
 
 public mix_swap() {
 	g_isTeamTT = HNS_TEAM:!g_isTeamTT;
-	g_eMatchInfo[e_iMatchSwapped]++;
 
 	ResetAfkData();
 }
 
 
 public mix_stop() {
-	// ResetTeams();
-	g_iMatchStatus = MATCH_NONE;
-	g_eMatchState = STATE_DISABLED;
-	arrayset(g_eMatchInfo, 0, MatchInfo_s);
-	training_start();
-	if(task_exists(HUD_PAUSE)) {
-		remove_task(HUD_PAUSE);
-	}
 	ExecuteForward(g_hForwards[MATCH_CANCEL], _);
-	g_bPlayersListLoaded = false;
-	g_bPlayersLeaved = false;
+
+	match_reset_data();
+
+	training_start();
 }
 
 
@@ -189,7 +176,7 @@ public taskCheckLeave() {
 
 	if (iNum < g_eMatchInfo[e_mTeamSize]) {
 		// Pause Need Players
-		g_bPlayersLeaved = true;
+		g_eMatchInfo[e_mLeaved] = true;
 		chat_print(0, "%L", LANG_PLAYER, "NEED_PAUSE", g_eMatchInfo[e_mTeamSize] - iNum)
 	} else {
 		iNum = iNum - g_eMatchInfo[e_mTeamSize];
@@ -197,39 +184,31 @@ public taskCheckLeave() {
 			g_eMatchInfo[e_mTeamSize] = get_num_players_in_match();
 		}
 
-		if (g_PlayersLeaveData != Invalid_Trie) {
-			TrieClear(g_PlayersLeaveData);
+		if (g_eMatchInfo[e_tLeaveData] != Invalid_Trie) {
+			TrieClear(g_eMatchInfo[e_tLeaveData]);
 		}
 
-		g_bPlayersLeaved = false;
+		g_eMatchInfo[e_mLeaved] = false;
 	}
 }
 
 public MixFinishedMR(iWinTeam) {
 	ExecuteForward(g_hForwards[MATCH_FINISH], _, iWinTeam);
-	g_iMatchStatus = MATCH_NONE;
+
 	new Float:TimeDiff = floatabs(g_eMatchInfo[e_flSidesTime][g_isTeamTT] - g_eMatchInfo[e_flSidesTime][HNS_TEAM:!g_isTeamTT]);
 	new szTime[24];
 	fnConvertTime(TimeDiff, szTime, charsmax(szTime));
 	chat_print(0, "%L", LANG_PLAYER, "MR_WIN", iWinTeam == 1 ? "TT" : "CT", szTime);
 	
 	setTaskHud(0, 1.0, 1, 255, 255, 255, 4.0, "%L", LANG_SERVER, "HUD_GAMEOVER");
+	
+	match_reset_data();
+	
 	training_start();
-
-	g_bPlayersListLoaded = false;
-	arrayset(g_eMatchInfo, 0, MatchInfo_s);
-	if(g_PlayersLeaveData != Invalid_Trie) {
-		TrieClear(g_PlayersLeaveData);
-	}
-	if(task_exists(TASK_TIMER)) {
-		remove_task(TASK_TIMER);
-	}
 }
 
 public MixFinishedWT() {
 	ExecuteForward(g_hForwards[MATCH_FINISH], _, 1);
-
-	g_iMatchStatus = MATCH_NONE;
 
 	new Float:TimeDiff = floatabs(g_eMatchInfo[e_flSidesTime][g_isTeamTT] - g_eMatchInfo[e_flSidesTime][HNS_TEAM:!g_isTeamTT]);
 	
@@ -239,22 +218,14 @@ public MixFinishedWT() {
 	chat_print(0, "%L", LANG_PLAYER, "TT_WIN", szTime);
 	
 	setTaskHud(0, 1.0, 1, 255, 255, 255, 4.0, "%L", LANG_SERVER, "HUD_GAMEOVER");
-	training_start();
 
-	g_bPlayersListLoaded = false;
-	arrayset(g_eMatchInfo, 0, MatchInfo_s);
-	if(g_PlayersLeaveData != Invalid_Trie) {
-		TrieClear(g_PlayersLeaveData);
-	}
-	if(task_exists(TASK_TIMER)) {
-		remove_task(TASK_TIMER);
-	}
+	match_reset_data(true);
+
+	training_start();
 }
 
 public MixFinishedDuel() {
 	ExecuteForward(g_hForwards[MATCH_FINISH], _, 1);
-	
-	g_iMatchStatus = MATCH_NONE;
 	
 	new iPlayers[MAX_PLAYERS], iNum;
 	get_players(iPlayers, iNum, "che", "TERRORIST");
@@ -262,16 +233,10 @@ public MixFinishedDuel() {
 	chat_print(0, "%L", LANG_PLAYER, "DUEL_WIN", iPlayers[0]);
 	
 	setTaskHud(0, 1.0, 1, 255, 255, 255, 4.0, "%L", LANG_SERVER, "HUD_GAMEOVER");
-	training_start();
 
-	g_bPlayersListLoaded = false;
-	arrayset(g_eMatchInfo, 0, MatchInfo_s);
-	if(g_PlayersLeaveData != Invalid_Trie) {
-		TrieClear(g_PlayersLeaveData);
-	}
-	if(task_exists(TASK_TIMER)) {
-		remove_task(TASK_TIMER);
-	}
+	match_reset_data(true);
+
+	training_start();
 }
 
 public mix_roundend(bool:win_ct) {
@@ -280,13 +245,14 @@ public mix_roundend(bool:win_ct) {
 	}
 
 	g_eMatchState = STATE_PREPARE;
+
 	if(task_exists(TASK_TIMER)) {
 		remove_task(TASK_TIMER);
 	}
 
 	switch (g_iCurrentRules) {
 		case RULES_MR: {
-			g_eMatchInfo[e_iRoundsPlayed][g_isTeamTT]++;
+			g_eMatchInfo[e_iSidesRounds][g_isTeamTT]++;
 
 			new iPlayers[MAX_PLAYERS], iNum;
 			get_players(iPlayers, iNum, "ache", "CT");
@@ -296,7 +262,7 @@ public mix_roundend(bool:win_ct) {
 				g_eMatchInfo[e_flSidesTime][g_isTeamTT] += roundtime - g_flRoundTime;
 			}
 
-			if (g_eMatchInfo[e_iRoundsPlayed][g_isTeamTT] + g_eMatchInfo[e_iRoundsPlayed][HNS_TEAM:!g_isTeamTT] >= g_iSettings[MAXROUNDS] * 2) {
+			if (g_eMatchInfo[e_iSidesRounds][g_isTeamTT] + g_eMatchInfo[e_iSidesRounds][HNS_TEAM:!g_isTeamTT] >= g_iSettings[MAXROUNDS] * 2) {
 				new HNS_TEAM:win_team = HNS_TEAM:-1;
 				if (g_eMatchInfo[e_flSidesTime][g_isTeamTT] > g_eMatchInfo[e_flSidesTime][HNS_TEAM:!g_isTeamTT]) {
 					win_team = g_isTeamTT;
@@ -313,7 +279,7 @@ public mix_roundend(bool:win_ct) {
 				}
 			} else {
 				hns_swap_teams();
-				if (g_eMatchInfo[e_iRoundsPlayed][g_isTeamTT] + g_eMatchInfo[e_iRoundsPlayed][HNS_TEAM:!g_isTeamTT] >= (g_iSettings[MAXROUNDS] * 2) - 1) {
+				if (g_eMatchInfo[e_iSidesRounds][g_isTeamTT] + g_eMatchInfo[e_iSidesRounds][HNS_TEAM:!g_isTeamTT] >= (g_iSettings[MAXROUNDS] * 2) - 1) {
 					new sTime[24];
 					if (g_eMatchInfo[e_flSidesTime][HNS_TEAM:!g_isTeamTT] - (get_round_time() * 60.0) > g_eMatchInfo[e_flSidesTime][g_isTeamTT]) {
 						// variant kogda tt josko proebivaut (bolwe 4em roundtime)
@@ -330,6 +296,7 @@ public mix_roundend(bool:win_ct) {
 			}
 		}
 		case RULES_TIMER: {
+			g_eMatchInfo[e_iSidesRounds][g_isTeamTT]++
 			if (win_ct) {
 				hns_swap_teams();
 			}
@@ -338,10 +305,10 @@ public mix_roundend(bool:win_ct) {
 			if (win_ct) {
 				hns_swap_teams();
 			} else {
-				g_eMatchInfo[e_iRoundsPlayed][g_isTeamTT]++
+				g_eMatchInfo[e_iSidesRounds][g_isTeamTT]++
 			}
 			
-			if(g_eMatchInfo[e_iRoundsPlayed][g_isTeamTT] >= g_iSettings[DUELROUNDS]) {
+			if(g_eMatchInfo[e_iSidesRounds][g_isTeamTT] >= g_iSettings[DUELROUNDS]) {
 				MixFinishedDuel();
 			}
 		}
@@ -366,7 +333,7 @@ public taskRoundEvent() {
 
 	switch (g_iCurrentRules) {
 		case RULES_MR: {
-			if (g_eMatchInfo[e_iRoundsPlayed][g_isTeamTT] + g_eMatchInfo[e_iRoundsPlayed][HNS_TEAM:!g_isTeamTT] >= (g_iSettings[MAXROUNDS] * 2) - 1) {
+			if (g_eMatchInfo[e_iSidesRounds][g_isTeamTT] + g_eMatchInfo[e_iSidesRounds][HNS_TEAM:!g_isTeamTT] >= (g_iSettings[MAXROUNDS] * 2) - 1) {
 				if (g_eMatchInfo[e_flSidesTime][g_isTeamTT] > g_eMatchInfo[e_flSidesTime][HNS_TEAM:!g_isTeamTT] || g_eMatchInfo[e_flSidesTime][g_isTeamTT] < (g_eMatchInfo[e_flSidesTime][HNS_TEAM:!g_isTeamTT] - get_round_time() * 60.0)) {
 					new HNS_TEAM:iWinTeam = g_eMatchInfo[e_flSidesTime][g_isTeamTT] > g_eMatchInfo[e_flSidesTime][HNS_TEAM:!g_isTeamTT] ? g_isTeamTT : HNS_TEAM:!g_isTeamTT;
 					MixFinishedMR(iWinTeam == g_isTeamTT ? 1 : 2);
@@ -374,7 +341,7 @@ public taskRoundEvent() {
 			}
 		}
 		case RULES_TIMER: {
-			new Float:flCapTime = floatmul(g_iSettings[WINTIME], 60.0);
+			new Float:flCapTime = floatmul(g_eMatchInfo[e_mWintime], 60.0);
 			if (g_eMatchInfo[e_flSidesTime][g_isTeamTT] >= flCapTime) {
 				MixFinishedWT()
 			}
@@ -398,7 +365,7 @@ public mix_reverttimer() {
 }
 
 public mix_player_join(id) {
-	TrieGetArray(g_PlayersLeaveData, getUserKey(id), g_ePlayerInfo[id], PLAYER_INFO);
+	TrieGetArray(g_eMatchInfo[e_tLeaveData], getUserKey(id), g_ePlayerInfo[id], PLAYER_INFO);
 	if (g_ePlayerInfo[id][PLAYER_MATCH]) {
 		new iNum = get_num_players_in_match();
 
@@ -411,8 +378,9 @@ public mix_player_join(id) {
 			return;
 		}
 
+		new iMatchRounds = g_eMatchInfo[e_iSidesRounds][HNS_TEAM_A] + g_eMatchInfo[e_iSidesRounds][HNS_TEAM_B];
 
-		if (g_eMatchInfo[e_iMatchSwapped] == g_ePlayerInfo[id][PLAYER_SAVE_SWAP]) {
+		if (iMatchRounds == g_ePlayerInfo[id][LEAVE_IN_ROUND]) {
 			rg_set_user_team(id, g_ePlayerInfo[id][PLAYER_TEAM][0] == 'T' ? TEAM_TERRORIST : TEAM_CT);
 		} else {
 			rg_set_user_team(id, g_ePlayerInfo[id][PLAYER_TEAM][0] == 'T' ? TEAM_CT : TEAM_TERRORIST);
@@ -428,7 +396,9 @@ public mix_player_join(id) {
 
 public mix_player_leave(id) {
 	if (g_ePlayerInfo[id][PLAYER_MATCH]) {
-		g_ePlayerInfo[id][PLAYER_SAVE_SWAP] = g_eMatchInfo[e_iMatchSwapped];
+		new iMatchRounds = g_eMatchInfo[e_iSidesRounds][HNS_TEAM_A] + g_eMatchInfo[e_iSidesRounds][HNS_TEAM_B];
+
+		g_ePlayerInfo[id][LEAVE_IN_ROUND] = iMatchRounds;
 
 		if (g_iCurrentRules == RULES_DUEL) {
 			if (g_ModFuncs[MODE_MIX][MODEFUNC_PAUSE])
@@ -438,7 +408,41 @@ public mix_player_leave(id) {
 
 	ExecuteForward(g_hForwards[MATCH_LEAVE_PLAYER], _, id);
 
-	TrieSetArray(g_PlayersLeaveData, getUserKey(id), g_ePlayerInfo[id], PLAYER_INFO);
+	TrieSetArray(g_eMatchInfo[e_tLeaveData], getUserKey(id), g_ePlayerInfo[id], PLAYER_INFO);
 
 	arrayset(g_ePlayerInfo[id], 0, PLAYER_INFO);
+}
+
+// bMatchFinish
+stock match_reset_data(bool:bMatchFinish = false) {
+	g_iMatchStatus = MATCH_NONE;
+	g_eMatchState = STATE_DISABLED;
+
+	g_eMatchInfo[e_mTeamSize] = 0;
+	g_eMatchInfo[e_mTeamSizeTT] = 0;
+	g_eMatchInfo[e_flSidesTime][HNS_TEAM_B] = 0;
+	g_eMatchInfo[e_flSidesTime][HNS_TEAM_A] = 0;
+	g_eMatchInfo[e_iSidesRounds][HNS_TEAM_B] = 0;
+	g_eMatchInfo[e_iSidesRounds][HNS_TEAM_A] = 0;
+	g_eMatchInfo[e_mLeaved] = false;
+
+	if (g_eMatchInfo[e_mWintime] == 0.0) {
+		cvar_update_wintime(15.0);
+	}
+
+	if(g_eMatchInfo[e_tLeaveData] != Invalid_Trie) {
+		TrieClear(g_eMatchInfo[e_tLeaveData]);
+	}
+
+	if(task_exists(TASK_TIMER)) {
+		remove_task(TASK_TIMER);
+	}
+
+	if(task_exists(HUD_PAUSE)) {
+		remove_task(HUD_PAUSE);
+	}
+
+	if (bMatchFinish) {
+		save_reset_data();
+	}
 }

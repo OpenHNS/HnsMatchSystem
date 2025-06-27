@@ -234,7 +234,7 @@ public settingsMatchMenu(id) {
 			formatex(szMsg, charsmax(szMsg), "%L", id, "MENU_STNGS_MAXROUND", g_iSettings[MAXROUNDS], g_iSettings[MAXROUNDS] * 2);
 		}
 		case RULES_TIMER: {
-			formatex(szMsg, charsmax(szMsg), "%L", id, "MENU_STNGS_WINTIME", g_iSettings[WINTIME]);
+			formatex(szMsg, charsmax(szMsg), "%L", id, "MENU_STNGS_WINTIME", g_eMatchInfo[e_mWintime]);
 		}
 		case RULES_DUEL: {
 			formatex(szMsg, charsmax(szMsg), "%L", id, "MENU_STNGS_DUEL", g_iSettings[DUELROUNDS]);
@@ -312,12 +312,14 @@ public settingsMatchMenuHandler(id, hMenu, item) {
 						g_iSettings[MAXROUNDS] = 6;
 				}
 				case RULES_TIMER: {
-					if (g_iSettings[WINTIME] <= 10.0)
-						g_iSettings[WINTIME] = 15.0;
-					else if (g_iSettings[WINTIME] <= 15.0)
-						g_iSettings[WINTIME] = 20.0;
-					else if (g_iSettings[WINTIME] >= 20.0)
-						g_iSettings[WINTIME] = 10.0;
+					if (g_eMatchInfo[e_mWintime] <= 10.0)
+						g_eMatchInfo[e_mWintime] = 15.0;
+					else if (g_eMatchInfo[e_mWintime] <= 15.0)
+						g_eMatchInfo[e_mWintime] = 20.0;
+					else if (g_eMatchInfo[e_mWintime] >= 20.0)
+						g_eMatchInfo[e_mWintime] = 10.0;
+
+					set_pcvar_float(pCvar[WINTIME], g_eMatchInfo[e_mWintime]);
 				}
 				case RULES_DUEL: {
 					if (g_iSettings[DUELROUNDS] <= 2)
@@ -460,9 +462,11 @@ public HandlerSelectMode(id, hMenu, item) {
 	return PLUGIN_HANDLED;
 }
 
+new iVoteRules[NATCH_RULES];
+
 public StartVoteRules() {
 	g_flTimeToVoteMode = get_gametime() + 15.0;
-	g_iVoteRules[RULES_TIMER] = g_iVoteRules[RULES_MR] = 0;
+	iVoteRules[RULES_TIMER] = iVoteRules[RULES_MR] = 0;
 
 	new iPlayers[MAX_PLAYERS], iNum;
 	get_players(iPlayers, iNum, "ch");
@@ -507,18 +511,18 @@ public HandlerStartVoteRules(id, hMenu, item) {
 	new index = str_to_num(szData);
 
 	if(index == 1) {
-		g_iVoteRules[RULES_MR]++;		
+		iVoteRules[RULES_MR]++;		
 		chat_print(0, "%l", "VOTE_MR", id);
 	} else {
-		g_iVoteRules[RULES_TIMER]++;
+		iVoteRules[RULES_TIMER]++;
 		chat_print(0, "%l", "VOTE_WT", id);
 	}
 }
 
 public VoteFinished() {
-	if(g_iVoteRules[RULES_MR] > g_iVoteRules[RULES_TIMER]) {
+	if(iVoteRules[RULES_MR] > iVoteRules[RULES_TIMER]) {
 		g_iCurrentRules = RULES_MR;
-	} else if(g_iVoteRules[RULES_MR] < g_iVoteRules[RULES_TIMER]) {
+	} else if(iVoteRules[RULES_MR] < iVoteRules[RULES_TIMER]) {
 		g_iCurrentRules = RULES_TIMER;
 	} else {
 		g_iCurrentRules = NATCH_RULES:random_num(0, 1);
@@ -526,5 +530,5 @@ public VoteFinished() {
 
 	chat_print(0, "%l", "VOTE_WIN", g_iCurrentRules == RULES_MR? "MR" : "Wintime");
 	
-	g_iVoteRules[RULES_MR] = g_iVoteRules[RULES_TIMER] = 0;	
+	iVoteRules[RULES_MR] = iVoteRules[RULES_TIMER] = 0;	
 }

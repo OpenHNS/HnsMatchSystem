@@ -12,6 +12,10 @@ enum _:SAVE_PLAYER_DATA {
 	TeamName:SAVE_TEAM
 };
 
+new bool:g_bPlayersListLoaded;
+
+new g_szBuffer[2048];
+
 public Save_d(index) {
 	Save_players(TEAM_TERRORIST);
 
@@ -194,3 +198,8 @@ loadPlayers() {
 }
 
 /* LOAD DATA */
+
+stock save_reset_data() {
+	g_bPlayersListLoaded = false;
+	g_szBuffer = "";
+}
