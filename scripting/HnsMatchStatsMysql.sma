@@ -123,9 +123,6 @@ new g_sPrefix[24];
 
 new Float:g_flMatchDelay;
 
-new g_hFwdPlayerInit;
-
-
 public plugin_natives() {
 	register_native("hns_mysql_stats_init", "native_db_init");
 
@@ -215,7 +212,7 @@ public plugin_init() {
 
 	RegisterHookChain(RG_CBasePlayer_SetClientUserInfoName, "rgSetClientUserInfoName", true);
 
-	g_hFwdPlayerInit = CreateMultiForward("hns_pts_init_player", ET_CONTINUE, FP_CELL, FP_CELL, FP_CELL, FP_CELL, FP_CELL);
+	init_tables();
 
 	register_dictionary("match_additons.txt");
 }
@@ -598,7 +595,6 @@ public SQLPtsTopHandler(Handle:hQuery, id) {
 		g_ePointsData[id][e_iTop] = SQL_ReadResult(hQuery, 0);
 	}
 
-	ExecuteForward(g_hFwdPlayerInit, _, id, g_ePointsData[id][e_iPts], g_ePointsData[id][e_iWins], g_ePointsData[id][e_iLoss], g_ePointsData[id][e_iTop]);
 
 	return PLUGIN_HANDLED;
 }
