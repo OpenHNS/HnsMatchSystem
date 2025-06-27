@@ -63,9 +63,9 @@ public chooseCapsMenu(id) {
 			add(szBuffer, charsmax(szBuffer), fmt("%n ", iPlayer));
 		}
 
-		if (hns_db_init()) {
+		if (hns_mysql_stats_init()) {
 			new szPts[16];
-			formatex(szPts, charsmax(szPts), "\d%d (%s) ", hns_get_pts_data(iPlayer, e_iPts), get_skill_player(iPlayer));
+			formatex(szPts, charsmax(szPts), "\d%d (%s) ", hns_mysql_stats_data(iPlayer, e_iPts), hns_mysql_stats_skill(iPlayer));
 			add(szBuffer, charsmax(szBuffer), szPts);
 		} else if (hns_api_stats_init()) {
 			new szSkill[10];
@@ -139,8 +139,8 @@ public chooseCapsHandler(id, hMenu, item) {
 		g_iCaptainFirst = iPlayer;
 		g_ePlayerInfo[g_iCaptainFirst][PLAYER_ROLE] = ROLE_CAP_A;
 		
-		if (hns_db_init()) {
-			chat_print(0, "%L", LANG_PLAYER, "CAP_FIRST_PTS", iPlayer, hns_get_pts_data(iPlayer, e_iPts), get_skill_player(iPlayer));
+		if (hns_mysql_stats_init()) {
+			chat_print(0, "%L", LANG_PLAYER, "CAP_FIRST_PTS", iPlayer, hns_mysql_stats_data(iPlayer, e_iPts), hns_mysql_stats_skill(iPlayer));
 		} else if (hns_api_stats_init()) {
 			new szSkill[10];
 			hns_api_stats_rank(iPlayer, GET_GOOD, szSkill, charsmax(szSkill));
@@ -153,8 +153,8 @@ public chooseCapsHandler(id, hMenu, item) {
 		g_iCaptainSecond = iPlayer;
 		g_ePlayerInfo[g_iCaptainSecond][PLAYER_ROLE] = ROLE_CAP_B;
 
-		if (hns_db_init()) {
-			chat_print(0, "%L", LANG_PLAYER, "CAP_SECOND_PTS", iPlayer, hns_get_pts_data(iPlayer, e_iPts), get_skill_player(iPlayer));
+		if (hns_mysql_stats_init()) {
+			chat_print(0, "%L", LANG_PLAYER, "CAP_SECOND_PTS", iPlayer, hns_mysql_stats_data(iPlayer, e_iPts), hns_mysql_stats_skill(iPlayer));
 		} else if (hns_api_stats_init()) {
 			new szSkill[10];
 			hns_api_stats_rank(iPlayer, GET_GOOD, szSkill, charsmax(szSkill));
@@ -217,9 +217,9 @@ public pickMenu(id, bool:bStartWait) {
 			add(szBuffer, charsmax(szBuffer), fmt("%n ", iPlayer));
 		}
 
-		if (hns_db_init()) {
+		if (hns_mysql_stats_init()) {
 			new szPts[16];
-			formatex(szPts, charsmax(szPts), "\d%d (%s) ", hns_get_pts_data(iPlayer, e_iPts), get_skill_player(iPlayer));
+			formatex(szPts, charsmax(szPts), "\d%d (%s) ", hns_mysql_stats_data(iPlayer, e_iPts), hns_mysql_stats_skill(iPlayer));
 			add(szBuffer, charsmax(szBuffer), szPts);
 		} else if (hns_api_stats_init()) {
 			new szSkill[10];
@@ -300,8 +300,8 @@ public pickHandler(id, hMenu, item) {
 		}
 	}
 
-	if (hns_db_init()) {
-		chat_print(0, "%L", LANG_PLAYER, "PLAYER_CHOOSE_PTS", id, iPlayer, hns_get_pts_data(iPlayer, e_iPts), get_skill_player(iPlayer));
+	if (hns_mysql_stats_init()) {
+		chat_print(0, "%L", LANG_PLAYER, "PLAYER_CHOOSE_PTS", id, iPlayer, hns_mysql_stats_data(iPlayer, e_iPts), hns_mysql_stats_skill(iPlayer));
 	} else if (hns_api_stats_init()) {
 		new szSkill[10];
 		hns_api_stats_rank(iPlayer, GET_GOOD, szSkill, charsmax(szSkill));

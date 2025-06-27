@@ -43,9 +43,9 @@ public touchPlayer(iToucher, iTouched) {
 		if(flGametime > g_flLastHeadTouch[iToucher] + DELAY) {
 			ClearDHUDMessages();
 			set_dhudmessage(250, 255, 0, -1.0, 0.15, 0, 0.0, 5.0, 0.1, 0.1);
-			if (hns_db_init() && hns_get_mode() == MODE_MIX && hns_get_state() == STATE_ENABLED) {
-				show_dhudmessage(0, "%L", LANG_PLAYER, "HNS_OWNAGE_MIX", iToucher, iTouched, hns_get_ownage(iToucher));
-				hns_set_ownage(iToucher);
+			if (hns_mysql_stats_init() && hns_get_mode() == MODE_MIX && hns_get_state() == STATE_ENABLED) {
+				show_dhudmessage(0, "%L", LANG_PLAYER, "HNS_OWNAGE_MIX", iToucher, iTouched, hns_mysql_stats_get_ownage(iToucher));
+				hns_mysql_stats_set_ownage(iToucher);
 			} else if (hns_get_mode() == MODE_PUB || hns_get_mode() == MODE_DM || hns_get_mode() == MODE_ZM) {
 				show_dhudmessage(0, "%L", LANG_PLAYER, "HNS_OWNAGE", iToucher, iTouched);
 			}

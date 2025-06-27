@@ -462,12 +462,12 @@ public task_ShowPlayerInfo() {
 			set_hudmessage(.red = 100, .green = 100, .blue = 100, .x = 0.01, .y = 0.25, .holdtime = 1.0);
 			new szHudMess[1024], iLen;
 			//if (show_id != id) {
-				if (hns_db_init()) {
+				if (hns_mysql_stats_init()) {
 					iLen += format(szHudMess[iLen], sizeof szHudMess - iLen, "\
 					Player: %n (#%d)^n\
 					PTS: %d [%s]^n", 
-					show_id, hns_get_pts_data(show_id, e_iTop),
-					hns_get_pts_data(show_id, e_iPts), get_skill_player(show_id));
+					show_id, hns_mysql_stats_data(show_id, e_iTop),
+					hns_mysql_stats_data(show_id, e_iPts), hns_mysql_stats_skill(show_id));
 				} else if (hns_api_stats_init()) {
 					new szSkill[10];
 					hns_api_stats_rank(show_id, GET_GOOD, szSkill, charsmax(szSkill))

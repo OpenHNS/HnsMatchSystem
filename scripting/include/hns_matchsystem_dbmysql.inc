@@ -3,7 +3,7 @@
 #endif
 #define _hns_matchsystem_dbmysql_included
 
-native hns_db_init();
+native hns_mysql_stats_init();
 
 enum _:PTS_DATA {
 	e_iPts,
@@ -12,7 +12,7 @@ enum _:PTS_DATA {
     e_iTop
 };
 
-native hns_get_pts_data(id, _:PTS_DATA);
+native hns_mysql_stats_data(id, _:PTS_DATA);
 
 enum _:SKILL_INFO
 {
@@ -39,8 +39,8 @@ new const g_eSkillData[][SKILL_INFO] = {
 	{ 1950,	"G+" },
 };
 
-stock get_skill_player(id) {
-	new iPts = hns_get_pts_data(id, e_iPts);
+stock hns_mysql_stats_skill(id) {
+	new iPts = hns_mysql_stats_data(id, e_iPts);
 	new szSkill[10];
 	for (new i; i < sizeof(g_eSkillData); i++) {
 		if (iPts >= g_eSkillData[i][SKILL_PTS]) {
@@ -50,6 +50,6 @@ stock get_skill_player(id) {
 	return szSkill;
 }
 
-native hns_get_ownage(id);
+native hns_mysql_stats_get_ownage(id);
 
-native hns_set_ownage(id);
+native hns_mysql_stats_set_ownage(id);

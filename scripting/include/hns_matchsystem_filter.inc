@@ -5,19 +5,19 @@
 
 
 public match_system_additons(const szNativeName[], iNativeID, iTrapMode) {
-	if (equal(szNativeName, "hns_db_init")) { 
+	if (equal(szNativeName, "hns_mysql_stats_init")) { 
 		return PLUGIN_HANDLED
 	}
 
-	if (equal(szNativeName, "hns_get_pts_data")) { 
+	if (equal(szNativeName, "hns_mysql_stats_data")) { 
 		return PLUGIN_HANDLED
 	}
 	
-	if (equal(szNativeName, "hns_get_ownage")) { 
+	if (equal(szNativeName, "hns_mysql_stats_get_ownage")) { 
 		return PLUGIN_HANDLED
 	}
 
-	if (equal(szNativeName, "hns_set_ownage")) { 
+	if (equal(szNativeName, "hns_mysql_stats_set_ownage")) { 
 		return PLUGIN_HANDLED
 	}
 

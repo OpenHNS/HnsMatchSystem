@@ -127,14 +127,14 @@ new g_hFwdPlayerInit;
 
 
 public plugin_natives() {
-	register_native("hns_db_init", "native_db_init");
+	register_native("hns_mysql_stats_init", "native_db_init");
 
-	register_native("hns_get_pts_data", "native_get_pts_data");
+	register_native("hns_mysql_stats_data", "native_get_pts_data");
 	register_native("hns_set_pts_win", "native_set_pts_win");
 	register_native("hns_set_pts_lose", "native_set_pts_lose");
 
-	register_native("hns_get_ownage", "native_hns_get_ownage");
-	register_native("hns_set_ownage", "native_hns_set_ownage");
+	register_native("hns_mysql_stats_get_ownage", "native_hns_mysql_stats_get_ownage");
+	register_native("hns_mysql_stats_set_ownage", "native_hns_mysql_stats_set_ownage");
 }
 
 public native_db_init(amxx, params) {
@@ -168,7 +168,7 @@ public native_set_pts_lose(amxx, params) {
 	SQLPtsSetLose(id, iPtsNum);
 }
 
-public native_hns_get_ownage(amxx, params) {
+public native_hns_mysql_stats_get_ownage(amxx, params) {
 	enum { getId = 1 };
 
 	new id = get_param(getId);
@@ -176,7 +176,7 @@ public native_hns_get_ownage(amxx, params) {
 	return g_iOwnageData[id];
 }
 
-public native_hns_set_ownage(amxx, params) {
+public native_hns_mysql_stats_set_ownage(amxx, params) {
 	enum { getId = 1 };
 
 	new id = get_param(getId);
@@ -755,7 +755,7 @@ public client_disconnected(id) {
 }
 
 public CmdRank(id) {
-	client_print_color(id, print_team_blue, "%L", id, "PTS_RANK", g_sPrefix, g_ePointsData[id][e_iTop], g_ePointsData[id][e_iPts], g_ePointsData[id][e_iWins], g_ePointsData[id][e_iLoss], get_skill_player(id));
+	client_print_color(id, print_team_blue, "%L", id, "PTS_RANK", g_sPrefix, g_ePointsData[id][e_iTop], g_ePointsData[id][e_iPts], g_ePointsData[id][e_iWins], g_ePointsData[id][e_iLoss], hns_mysql_stats_skill(id));
 }
 
 public CmdPts(id) {
@@ -828,7 +828,7 @@ stock get_num_players_in_match() {
 	return numGameplr;
 }
 
-stock get_skill_player(id) {
+stock hns_mysql_stats_skill(id) {
 	new iPts = g_ePointsData[id][e_iPts];
 	new szSkill[10];
 	for (new i; i < sizeof(g_eSkillData); i++) {

@@ -360,8 +360,8 @@ public FormatMessage(sender, CsTeams:sender_team, channel, name_color, chat_colo
     }
     
     /* HNS MATCH PTS */
-    if (hns_db_init()) {
-        len += formatex(text[len], charsmax(text) - len, "^1[^3%s^1] ", get_skill_player(sender));
+    if (hns_mysql_stats_init()) {
+        len += formatex(text[len], charsmax(text) - len, "^1[^3%s^1] ", hns_mysql_stats_skill(sender));
     }
     /* HNS MATCH PTS */
 
