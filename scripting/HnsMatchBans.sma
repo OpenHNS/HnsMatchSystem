@@ -91,6 +91,15 @@ new bool:g_bDebugMode;
 
 new const g_szTable[] = "hns_bans";
 
+enum _:CVARS {
+	HOST[48],
+	USER[32],
+	PASS[32],
+	DB[32]
+};
+
+new g_eCvars[CVARS];
+
 enum _: BAN_TIME_DATA {
 	TIME_NAME[24], TIME_SECONDS
 };
@@ -151,6 +160,26 @@ new g_hBanForwardsInit;
 public plugin_init() {
 	register_plugin("Match: Bans", "1.1", "OpenHNS");
 
+	new pCvar;
+	pCvar = create_cvar("hns_host", "127.0.0.1", FCVAR_PROTECTED, "Host");
+	bind_pcvar_string(pCvar, g_eCvars[HOST], charsmax(g_eCvars[HOST]));
+
+	pCvar = create_cvar("hns_user", "root", FCVAR_PROTECTED, "User");
+	bind_pcvar_string(pCvar, g_eCvars[USER], charsmax(g_eCvars[USER]));
+
+	pCvar = create_cvar("hns_pass", "root", FCVAR_PROTECTED, "Password");
+	bind_pcvar_string(pCvar, g_eCvars[PASS], charsmax(g_eCvars[PASS]));
+
+	pCvar = create_cvar("hns_db", "hns", FCVAR_PROTECTED, "db");
+	bind_pcvar_string(pCvar, g_eCvars[DB], charsmax(g_eCvars[DB]));
+
+	new szPath[PLATFORM_MAX_PATH]; 
+	get_localinfo("amxx_configsdir", szPath, charsmax(szPath));
+	
+	server_cmd("exec %s/mixsystem/hnsmatch-sql.cfg", szPath);
+	server_exec();
+
+
 	register_clcmd("hns_banmenu", "HnsBanMenu");
 	register_clcmd("hns_bans_menu", "HnsBansMenu");
 	register_clcmd("hns_offbanmenu", "HnsOffBanMenu");
@@ -172,7 +201,7 @@ public plugin_init() {
 public plugin_cfg() {
 	hns_get_prefix(g_sPrefix, charsmax(g_sPrefix));
 
-	
+	hns_sql_connection();
 }
 
 public plugin_end() {
@@ -212,8 +241,9 @@ public rgDropClient(const id, bool:crash) {
 
 /* SQL queries */
 
-public hns_sql_connection(Handle:hSqlTuple) {
-	g_hSqlTuple = hSqlTuple;
+public hns_sql_connection() {
+	g_hSqlTuple = SQL_MakeDbTuple(g_eCvars[HOST], g_eCvars[USER], g_eCvars[PASS], g_eCvars[DB]);
+	SQL_SetCharset(g_hSqlTuple, "utf-8");
 
 	new cData[1];
 	cData[0] = SQL_TABLE;
