@@ -441,10 +441,9 @@ public LoadWatcher() {
 	format(szDatadDr, charsmax(szDatadDr), "%s/%s",szDatadDr, g_szFileName);
 	
 	if(file_exists(szDatadDr)) {
-		new iFile = fopen(szDatadDr, "r");	
-		fgets(iFile, g_eWatcher[w_szSteamId], charsmax(g_eWatcher[w_szSteamId]));
+		new iFile = fopen(szDatadDr, "r");
 
-		server_print("ASD [%s]", g_eWatcher[w_szSteamId]);
+		fgets(iFile, g_eWatcher[w_szSteamId], charsmax(g_eWatcher[w_szSteamId]));
 
 		fclose(iFile);
 	}

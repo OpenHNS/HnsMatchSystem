@@ -165,7 +165,7 @@ Counter-Strike Hide'n'Seek Match System plugins.
 | hns_gamename         | Hide'n'Seek | Геймнейм сервера |
 | hns_watcher_flag     | f          | Флаг Ватчера |
 | hns_fullwatcher_flag | m          | Флаг Фулл-ватчера |
-| hns_admin_flag       | b          | Флаг Администратора |
+| hns_admin_flag       | d          | Флаг Администратора |
 
 ## Команды
 

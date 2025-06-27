@@ -179,6 +179,9 @@ public sayHandle(id) {
 		} else {
 			client_print_color(0, print_team_blue, "%L", LANG_PLAYER, "DMG_SHOW", g_szPrefix, iTarget, g_flDmg[iTarget], g_flHealthBefore[iTarget], get_gametime() - g_flDmgTime[iTarget]);
 		}
+	} else {
+		client_print_color(id, print_team_blue, "%L", id, "DMG_ERR", g_szPrefix, pattern);
+		return PLUGIN_CONTINUE;
 	}
 
 	return PLUGIN_CONTINUE;
