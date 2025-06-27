@@ -465,7 +465,7 @@ public task_ShowPlayerInfo() {
 				if (hns_mysql_stats_init()) {
 					iLen += format(szHudMess[iLen], sizeof szHudMess - iLen, "\
 					Player: %n (#%d)^n\
-					PTS: %d [%s]^n", 
+					PTS: %d [%s]^n^n", 
 					show_id, hns_mysql_stats_data(show_id, e_iTop),
 					hns_mysql_stats_data(show_id, e_iPts), hns_mysql_stats_skill(show_id));
 				} else if (hns_api_stats_init()) {
@@ -474,12 +474,12 @@ public task_ShowPlayerInfo() {
 
 					iLen += format(szHudMess[iLen], sizeof szHudMess - iLen, "\
 					Player: %n (#%d)^n\
-					PTS: %d [%s]^n", 
+					PTS: %d [%s]^n^n", 
 					show_id, hns_api_stats_place(show_id, GET_GOOD),
 					hns_api_stats_rating(show_id, GET_GOOD), szSkill);
 				} else {
 					iLen += format(szHudMess[iLen], sizeof szHudMess - iLen, "\
-					Player: %n^n", 
+					Player: %n^n^n", 
 					show_id);	
 				}
 			//}

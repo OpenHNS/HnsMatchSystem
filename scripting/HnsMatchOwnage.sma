@@ -22,7 +22,7 @@ public plugin_precache() {
 }
 
 public plugin_natives() {
-	set_native_filter("hns_dbmysql_filter");
+	set_native_filter("match_system_additons");
 }
 
 public plugin_init() {
