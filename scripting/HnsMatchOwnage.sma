@@ -3,7 +3,9 @@
 #include <reapi>
 #include <sqlx>
 #include <hns_matchsystem>
+#include <hns_matchsystem_filter>
 #include <hns_matchsystem_dbmysql>
+#include <hns_matchsystem_api>
 
 #define DELAY 5.0
 
