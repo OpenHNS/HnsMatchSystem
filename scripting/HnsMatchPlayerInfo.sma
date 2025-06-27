@@ -1,6 +1,7 @@
 #include <amxmodx>
 #include <amxmisc>
 #include <reapi>
+#include <nvault>
 
 #include <hns_matchsystem>
 #include <hns_matchsystem_filter>
@@ -10,6 +11,8 @@
 #include <hns_matchsystem_bans>
 
 #define TASK_SHOWBEST 1328
+
+new g_iVault;
 
 new g_szPrefix[24];
 
@@ -56,10 +59,69 @@ new g_eSpecPlayers[MAX_PLAYERS + 1][SPEC_DATA];
 
 public plugin_natives() {
 	set_native_filter("match_system_additons");
+
+	register_native("hns_get_player_hud_info", "native_get_player_hud_info");
+	register_native("hns_set_player_hud_info", "native_set_player_hud_info");
+	register_native("hns_get_player_hud_roudinfo", "native_get_player_hud_roundinfo");
+	register_native("hns_set_player_hud_roudinfo", "native_set_player_hud_roundinfo");
+	register_native("hns_get_player_hud_specinfo", "native_get_player_hud_specinfo");
+	register_native("hns_set_player_hud_specinfo", "native_set_player_hud_specinfo");
+}
+
+public native_get_player_hud_info(amxx, params) {
+	enum { getId = 1 };
+
+	new id = get_param(getId);
+
+	return g_HudOnOff[id];
+}
+
+public native_set_player_hud_info(amxx, params) {
+	enum { getId = 1, getValue = 2 };
+
+	new id = get_param(getId);
+	new bool:bValue = bool:get_param(getValue);
+
+	g_HudOnOff[id] = bValue;
+}
+
+public native_get_player_hud_roundinfo(amxx, params) {
+	enum { getId = 1 };
+
+	new id = get_param(getId);
+
+	return g_HudRoundOnOff[id];
+}
+
+public native_set_player_hud_roundinfo(amxx, params) {
+	enum { getId = 1, getValue = 2 };
+
+	new id = get_param(getId);
+	new bool:bValue = bool:get_param(getValue);
+
+	g_HudRoundOnOff[id] = bValue;
+}
+
+
+public native_get_player_hud_specinfo(amxx, params) {
+	enum { getId = 1 };
+
+	new id = get_param(getId);
+
+	return g_eSpecPlayers[id][SHOW_SPEC];
+}
+
+public native_set_player_hud_specinfo(amxx, params) {
+	enum { getId = 1, getValue = 2 };
+
+	new id = get_param(getId);
+	new bool:bValue = bool:get_param(getValue);
+
+	g_eSpecPlayers[id][SHOW_SPEC] = bValue;
 }
 
 public plugin_init() {
-	register_plugin("Match: Player info", "1.1", "OpenHNS");
+	register_plugin("Match: Player info", "1.2", "OpenHNS");
 
 	register_clcmd("say", "sayHandle");
 
@@ -82,6 +144,18 @@ public plugin_init() {
 }
 
 public client_disconnected(id) {
+	if (g_iVault != INVALID_HANDLE) {
+		new szAuthID[32];
+		get_user_authid(id, szAuthID, charsmax(szAuthID));
+
+		new szData[32];
+
+		formatex(szData, charsmax(szData), "^"%d^" ^"%d^"", 
+		g_HudOnOff[id], g_HudRoundOnOff[id]);
+
+		nvault_set(g_iVault, szAuthID, szData);
+	}
+
 	if (g_eSpecPlayers[id][IS_SPEC]) {
 		arrayset(g_eSpecPlayers[id], 0, SPEC_DATA);
 	}
@@ -129,6 +203,12 @@ public RG_CBasePlayerObserverFindNextPlayer_Post(const id) {
 
 public plugin_cfg() {
 	hns_get_prefix(g_szPrefix, charsmax(g_szPrefix));
+
+	g_iVault = nvault_open("playerinfo");
+
+	if (g_iVault == INVALID_HANDLE) {
+		log_amx("HnsMatchPlayerInfo.sma: plugin_cfg:: can't open file ^"playerinfo.vault^"!");
+	}
 }
 
 public client_putinserver(id) {
@@ -136,6 +216,26 @@ public client_putinserver(id) {
 	g_HudRoundOnOff[id] = true;
 	g_eSpecPlayers[id][SHOW_SPEC] = true;
 	g_eSpecPlayers[id][SPEC_HIDE] = false;
+
+	if (g_iVault != INVALID_HANDLE) {
+		new szAuthID[32];
+		get_user_authid(id, szAuthID, charsmax(szAuthID));
+
+		new szData[32], iTimeStamp;
+
+		if (nvault_lookup(g_iVault, szAuthID, szData, charsmax(szData), iTimeStamp)) {
+			new HudOnOff[3], HudRoundOnOff[3];
+
+			parse(szData,
+			 HudOnOff, charsmax(HudOnOff),
+			 HudRoundOnOff, charsmax(HudRoundOnOff))
+
+			g_HudOnOff[id] = str_to_num(HudOnOff) ? true : false;
+			g_HudRoundOnOff[id] = str_to_num(HudRoundOnOff) ? true : false;
+
+			nvault_remove(g_iVault, szAuthID);
+		}
+	}
 }
 
 public sayHandle(id) {
