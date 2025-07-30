@@ -365,11 +365,14 @@ public mix_reverttimer() {
 }
 
 public mix_player_join(id) {
+	if (g_bDebugMode) server_print("[MATCH] mix_player_join | %n", id)
 	TrieGetArray(g_eMatchInfo[e_tLeaveData], getUserKey(id), g_ePlayerInfo[id], PLAYER_INFO);
 	if (g_ePlayerInfo[id][PLAYER_MATCH]) {
 		new iNum = get_num_players_in_match();
 
 		new bool:bReplaced = iNum >= g_eMatchInfo[e_mTeamSize] ? true : false;
+
+		if (g_bDebugMode) server_print("[MATCH] mix_player_join | %n %d", id, bReplaced)
 
 		ExecuteForward(g_hForwards[MATCH_JOIN_PLAYER], _, id, bReplaced);
 
@@ -395,8 +398,11 @@ public mix_player_join(id) {
 }
 
 public mix_player_leave(id) {
+	if (g_bDebugMode) server_print("[MATCH] mix_player_leave | %n", id)
 	if (g_ePlayerInfo[id][PLAYER_MATCH]) {
 		new iMatchRounds = g_eMatchInfo[e_iSidesRounds][HNS_TEAM_A] + g_eMatchInfo[e_iSidesRounds][HNS_TEAM_B];
+
+		if (g_bDebugMode) server_print("[MATCH] mix_player_leave PLAYER_MATCH | %n %d", id, iMatchRounds)
 
 		g_ePlayerInfo[id][LEAVE_IN_ROUND] = iMatchRounds;
 

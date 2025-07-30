@@ -58,7 +58,7 @@ stock arrayAppendValue(JSON:array, JSON:node) {
 	json_free(node);
 }
 
-stock Save_players(TeamName:team_winners) {
+public Save_players(TeamName:team_winners) {
 	new JSON:JSArray = json_init_array();
 
 	new iPlayers[MAX_PLAYERS], iNum;

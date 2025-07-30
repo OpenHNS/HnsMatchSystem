@@ -8,6 +8,10 @@ forward hns_players_replaced(requested_id, id);
 
 forward hns_ownage(iToucher, iTouched);
 
+forward ms_session_bhop(id, iCount, Float:flPercent, Float:flAVGSpeed);
+forward ms_session_sgs(id, iCount, Float:flPercent, Float:flAVGSpeed);
+forward ms_session_ddrun(id, iCount, Float:flPercent, Float:flAVGSpeed);
+
 #define TASK_TIMER_STATS 61237
 
 enum _:TYPE_STATS
@@ -30,6 +34,12 @@ enum _: PLAYER_STATS {
 	Float:PLR_STATS_SURVTIME,
 	PLR_STATS_OWNAGES,
 	PLR_STATS_STOPS,
+	PLR_STATS_BHOP_COUNT,
+	Float:PLR_STATS_BHOP_PERCENT_SUM,
+	PLR_STATS_SGS_COUNT,
+	Float:PLR_STATS_SGS_PERCENT_SUM,
+	PLR_STATS_DDRUN_COUNT,
+	Float:PLR_STATS_DDRUN_PERCENT_SUM,
 	bool:PLR_MATCH,
 	TeamName:PLR_TEAM
 }
@@ -80,6 +90,12 @@ public plugin_natives() {
 	register_native("hns_get_stats_flashtime", "native_get_stats_flashtime");
 	register_native("hns_get_stats_surv", "native_get_stats_surv");
 	register_native("hns_get_stats_ownages", "native_get_stats_ownages");
+	register_native("hns_get_stats_bhop_count", "native_get_stats_bhop_count");
+	register_native("hns_get_stats_bhop_percent", "native_get_stats_bhop_percent");
+	register_native("hns_get_stats_sgs_count", "native_get_stats_sgs_count");
+	register_native("hns_get_stats_sgs_percent", "native_get_stats_sgs_percent");
+	register_native("hns_get_stats_ddrun_count", "native_get_stats_ddrun_count");
+	register_native("hns_get_stats_ddrun_percent", "native_get_stats_ddrun_percent");
 }
 
 public native_get_stats_kills(amxx, params) {
@@ -180,6 +196,66 @@ public native_get_stats_ownages(amxx, params) {
 	return iStats[get_param(id)][PLR_STATS_OWNAGES] + g_StatsRound[get_param(id)][PLR_STATS_OWNAGES];
 }
 
+public native_get_stats_bhop_count(amxx, params) {
+	enum { type = 1, id = 2 };
+
+	if (get_param(type) == STATS_ROUND) {
+		return g_StatsRound[get_param(id)][PLR_STATS_BHOP_COUNT];
+	}
+
+	return iStats[get_param(id)][PLR_STATS_BHOP_COUNT] + g_StatsRound[get_param(id)][PLR_STATS_BHOP_COUNT];
+}
+
+public Float:native_get_stats_bhop_percent(amxx, params) {
+	enum { type = 1, id = 2 };
+
+	if (get_param(type) == STATS_ROUND) {
+		return get_average_percent(g_StatsRound[get_param(id)][PLR_STATS_DDRUN_COUNT], g_StatsRound[get_param(id)][PLR_STATS_BHOP_PERCENT_SUM]);
+	}
+
+	return get_average_percent(iStats[get_param(id)][PLR_STATS_DDRUN_COUNT] + g_StatsRound[get_param(id)][PLR_STATS_DDRUN_COUNT], iStats[get_param(id)][PLR_STATS_BHOP_PERCENT_SUM] + g_StatsRound[get_param(id)][PLR_STATS_BHOP_PERCENT_SUM]);
+}
+
+public native_get_stats_sgs_count(amxx, params) {
+	enum { type = 1, id = 2 };
+
+	if (get_param(type) == STATS_ROUND) {
+		return g_StatsRound[get_param(id)][PLR_STATS_SGS_COUNT];
+	}
+
+	return iStats[get_param(id)][PLR_STATS_SGS_COUNT] + g_StatsRound[get_param(id)][PLR_STATS_SGS_COUNT];
+}
+
+public Float:native_get_stats_sgs_percent(amxx, params) {
+	enum { type = 1, id = 2 };
+
+	if (get_param(type) == STATS_ROUND) {
+		return get_average_percent(g_StatsRound[get_param(id)][PLR_STATS_DDRUN_COUNT], g_StatsRound[get_param(id)][PLR_STATS_SGS_PERCENT_SUM]);
+	}
+
+	return get_average_percent(iStats[get_param(id)][PLR_STATS_DDRUN_COUNT] + g_StatsRound[get_param(id)][PLR_STATS_DDRUN_COUNT], iStats[get_param(id)][PLR_STATS_SGS_PERCENT_SUM] + g_StatsRound[get_param(id)][PLR_STATS_SGS_PERCENT_SUM]);
+}
+
+public native_get_stats_ddrun_count(amxx, params) {
+	enum { type = 1, id = 2 };
+
+	if (get_param(type) == STATS_ROUND) {
+		return g_StatsRound[get_param(id)][PLR_STATS_DDRUN_COUNT];
+	}
+
+	return iStats[get_param(id)][PLR_STATS_DDRUN_COUNT] + g_StatsRound[get_param(id)][PLR_STATS_DDRUN_COUNT];
+}
+
+public Float:native_get_stats_ddrun_percent(amxx, params) {
+	enum { type = 1, id = 2 };
+
+	if (get_param(type) == STATS_ROUND) {
+		return get_average_percent(g_StatsRound[get_param(id)][PLR_STATS_DDRUN_COUNT], g_StatsRound[get_param(id)][PLR_STATS_DDRUN_PERCENT_SUM]);
+	}
+
+	return get_average_percent(iStats[get_param(id)][PLR_STATS_DDRUN_COUNT] + g_StatsRound[get_param(id)][PLR_STATS_DDRUN_COUNT], iStats[get_param(id)][PLR_STATS_DDRUN_PERCENT_SUM] + g_StatsRound[get_param(id)][PLR_STATS_DDRUN_PERCENT_SUM]);
+}
+
 public hns_players_replaced(requested_id, id) {	
 	for (new i = 0; i < PLAYER_STATS; i++) {
 		if (i == PLR_STATS_KILLS || i == PLR_MATCH || i == PLR_STATS_DEATHS) {
@@ -239,6 +315,27 @@ public hns_match_started() {
 
 public hns_ownage(iToucher, iTouched) {
 	g_StatsRound[iToucher][PLR_STATS_OWNAGES]++;
+}
+
+public ms_session_bhop(id, iCount, Float:flPercent, Float:flAVGSpeed) {
+	g_StatsRound[id][PLR_STATS_BHOP_COUNT] += iCount;
+	
+	new Float:flWeighted = floatmul(float(iCount), flPercent);
+	g_StatsRound[id][PLR_STATS_BHOP_PERCENT_SUM] = floatadd(g_StatsRound[id][PLR_STATS_BHOP_PERCENT_SUM], flWeighted);
+}
+
+public ms_session_sgs(id, iCount, Float:flPercent, Float:flAVGSpeed) {
+	g_StatsRound[id][PLR_STATS_SGS_COUNT] += iCount;
+
+	new Float:flWeighted = floatmul(float(iCount), flPercent);
+	g_StatsRound[id][PLR_STATS_SGS_PERCENT_SUM] = floatadd(g_StatsRound[id][PLR_STATS_SGS_PERCENT_SUM], flWeighted);
+}
+
+public ms_session_ddrun(id, iCount, Float:flPercent, Float:flAVGSpeed) {
+	g_StatsRound[id][PLR_STATS_DDRUN_COUNT] += iCount;
+
+	new Float:flWeighted = floatmul(float(iCount), flPercent);
+	g_StatsRound[id][PLR_STATS_DDRUN_PERCENT_SUM] = floatadd(g_StatsRound[id][PLR_STATS_DDRUN_PERCENT_SUM], flWeighted);
 }
 
 public rgPlayerKilled(victim, attacker) {
@@ -359,6 +456,15 @@ public hns_match_finished() {
 		new id = iPlayers[i];
 
 		iStats[id][PLR_STATS_OWNAGES] += g_StatsRound[id][PLR_STATS_OWNAGES];
+		iStats[id][PLR_STATS_BHOP_COUNT] += g_StatsRound[id][PLR_STATS_BHOP_COUNT];
+		iStats[id][PLR_STATS_BHOP_PERCENT_SUM] += g_StatsRound[id][PLR_STATS_BHOP_PERCENT_SUM];
+		iStats[id][PLR_STATS_BHOP_PERCENT_SUM] = floatadd(iStats[id][PLR_STATS_BHOP_PERCENT_SUM],  g_StatsRound[id][PLR_STATS_BHOP_PERCENT_SUM]);
+		iStats[id][PLR_STATS_SGS_COUNT] += g_StatsRound[id][PLR_STATS_BHOP_COUNT];
+		iStats[id][PLR_STATS_SGS_PERCENT_SUM] += g_StatsRound[id][PLR_STATS_SGS_PERCENT_SUM];
+		iStats[id][PLR_STATS_SGS_PERCENT_SUM] = floatadd(iStats[id][PLR_STATS_SGS_PERCENT_SUM],  g_StatsRound[id][PLR_STATS_SGS_PERCENT_SUM]);
+		iStats[id][PLR_STATS_DDRUN_COUNT] += g_StatsRound[id][PLR_STATS_BHOP_COUNT];
+		iStats[id][PLR_STATS_DDRUN_PERCENT_SUM] += g_StatsRound[id][PLR_STATS_DDRUN_PERCENT_SUM];
+		iStats[id][PLR_STATS_DDRUN_PERCENT_SUM] = floatadd(iStats[id][PLR_STATS_DDRUN_PERCENT_SUM],  g_StatsRound[id][PLR_STATS_DDRUN_PERCENT_SUM]);
 		iStats[id][PLR_STATS_KILLS] += g_StatsRound[id][PLR_STATS_KILLS];
 		iStats[id][PLR_STATS_DEATHS] += g_StatsRound[id][PLR_STATS_DEATHS];
 		iStats[id][PLR_STATS_ASSISTS] += g_StatsRound[id][PLR_STATS_ASSISTS];
@@ -388,6 +494,15 @@ public hns_round_end() {
 			new id = iPlayers[i];
 
 			iStats[id][PLR_STATS_OWNAGES] += g_StatsRound[id][PLR_STATS_OWNAGES];
+			iStats[id][PLR_STATS_BHOP_COUNT] += g_StatsRound[id][PLR_STATS_BHOP_COUNT];
+			iStats[id][PLR_STATS_BHOP_PERCENT_SUM] += g_StatsRound[id][PLR_STATS_BHOP_PERCENT_SUM];
+			iStats[id][PLR_STATS_BHOP_PERCENT_SUM] = floatadd(iStats[id][PLR_STATS_BHOP_PERCENT_SUM],  g_StatsRound[id][PLR_STATS_BHOP_PERCENT_SUM]);
+			iStats[id][PLR_STATS_SGS_COUNT] += g_StatsRound[id][PLR_STATS_BHOP_COUNT];
+			iStats[id][PLR_STATS_SGS_PERCENT_SUM] += g_StatsRound[id][PLR_STATS_SGS_PERCENT_SUM];
+			iStats[id][PLR_STATS_SGS_PERCENT_SUM] = floatadd(iStats[id][PLR_STATS_SGS_PERCENT_SUM],  g_StatsRound[id][PLR_STATS_SGS_PERCENT_SUM]);
+			iStats[id][PLR_STATS_DDRUN_COUNT] += g_StatsRound[id][PLR_STATS_BHOP_COUNT];
+			iStats[id][PLR_STATS_DDRUN_PERCENT_SUM] += g_StatsRound[id][PLR_STATS_DDRUN_PERCENT_SUM];
+			iStats[id][PLR_STATS_DDRUN_PERCENT_SUM] = floatadd(iStats[id][PLR_STATS_DDRUN_PERCENT_SUM],  g_StatsRound[id][PLR_STATS_DDRUN_PERCENT_SUM]);
 			iStats[id][PLR_STATS_KILLS] += g_StatsRound[id][PLR_STATS_KILLS];
 			iStats[id][PLR_STATS_DEATHS] += g_StatsRound[id][PLR_STATS_DEATHS];
 			iStats[id][PLR_STATS_ASSISTS] += g_StatsRound[id][PLR_STATS_ASSISTS];
@@ -463,4 +578,11 @@ stock getUserKey(id) {
 	new szAuth[24];
 	get_user_authid(id, szAuth, charsmax(szAuth));
 	return szAuth;
+}
+
+public Float:get_average_percent(iCount, Float:flPercentSum) {
+    if (iCount == 0) {
+        return 0.0;
+    }
+    return floatdiv(flPercentSum, float(iCount));
 }

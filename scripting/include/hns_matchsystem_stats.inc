@@ -110,4 +110,13 @@ native Float:hns_get_stats_surv(type, id);
 */
 native hns_get_stats_ownages(type, id);
 
+native hns_get_stats_bhop_count(type, id);
+native Float:hns_get_stats_bhop_percent(type, id);
+
+native hns_get_stats_sgs_count(type, id);
+native Float:hns_get_stats_sgs_percent(type, id);
+
+native hns_get_stats_ddrun_count(type, id);
+native Float:hns_get_stats_ddrun_percent(type, id);
+
 forward hns_apply_stats();

@@ -40,6 +40,12 @@ enum _: SHOW_STATS {
 	PLR_STATS_DMG_TT,
 	Float:PLR_STATS_FLASHTIME,
 	PLR_STATS_OWNAGES,
+	PLR_STATS_BHOP_COUNT,
+	Float:PLR_STATS_BHOP_PERCENT,
+	PLR_STATS_SGS_COUNT,
+	Float:PLR_STATS_SGS_PERCENT,
+	PLR_STATS_DDRUN_COUNT,
+	Float:PLR_STATS_DDRUN_PERCENT,
 }
 
 new g_eRoundBests[MAX_PLAYERS + 1][SHOW_STATS];
@@ -211,7 +217,11 @@ public plugin_cfg() {
 	}
 }
 
-public client_putinserver(id) {
+public plugin_end() {
+	nvault_close(g_iVault);
+}
+
+public client_authorized(id) {
 	g_HudOnOff[id] = true;
 	g_HudRoundOnOff[id] = true;
 	g_eSpecPlayers[id][SHOW_SPEC] = true;
@@ -335,7 +345,7 @@ public cmdSpecHide(id) {
 	return PLUGIN_HANDLED;
 }
 
-public hns_round_end() {
+public hns_apply_stats() {
 	if (hns_get_mode() != MODE_MIX || hns_get_state() == STATE_PAUSED || hns_get_status() != MATCH_STARTED) {
 		reset_best_players();
 		return;
@@ -348,12 +358,18 @@ public hns_round_end() {
 	for (new i = 0; i < iNum; i++) {
 		new id = iPlayers[i];
 
-		g_eRoundBests[id][PLR_STATS_OWNAGES] = hns_get_stats_ownages(STATS_ROUND, id);
 		g_eRoundBests[id][PLR_STATS_STABS] = hns_get_stats_stabs(STATS_ROUND, id);
 		g_eRoundBests[id][PLR_STATS_DMG_CT] = hns_get_stats_dmg_ct(STATS_ROUND, id);
 		g_eRoundBests[id][PLR_STATS_DMG_TT] =  hns_get_stats_dmg_tt(STATS_ROUND, id);
 		g_eRoundBests[id][PLR_STATS_FLASHTIME] = hns_get_stats_flashtime(STATS_ROUND, id);
-				
+		g_eRoundBests[id][PLR_STATS_OWNAGES] = hns_get_stats_ownages(STATS_ROUND, id);
+		g_eRoundBests[id][PLR_STATS_BHOP_COUNT] = hns_get_stats_bhop_count(STATS_ROUND, id);
+		g_eRoundBests[id][PLR_STATS_BHOP_PERCENT] = hns_get_stats_bhop_percent(STATS_ROUND, id);
+		g_eRoundBests[id][PLR_STATS_SGS_COUNT] = hns_get_stats_sgs_count(STATS_ROUND, id);
+		g_eRoundBests[id][PLR_STATS_SGS_PERCENT] = hns_get_stats_sgs_percent(STATS_ROUND, id);
+		g_eRoundBests[id][PLR_STATS_DDRUN_COUNT] = hns_get_stats_ddrun_count(STATS_ROUND, id);
+		g_eRoundBests[id][PLR_STATS_DDRUN_PERCENT] = hns_get_stats_ddrun_percent(STATS_ROUND, id);
+
 		for (new j = 0; j < SHOW_STATS; j++) {
 			if (g_eRoundBests[id][j] > g_eBestStats[j])
 			{
@@ -374,6 +390,9 @@ public hns_round_end() {
 	if (g_eBestIndex[PLR_STATS_DMG_CT])		iLen += format(g_szMess[iLen], sizeof g_szMess - iLen, "CT Dmg: %n - %d^n", g_eBestIndex[PLR_STATS_DMG_CT], g_eBestStats[PLR_STATS_DMG_CT])
 	if (g_eBestIndex[PLR_STATS_DMG_TT])		iLen += format(g_szMess[iLen], sizeof g_szMess - iLen, "TT Dmg: %n - %d^n", g_eBestIndex[PLR_STATS_DMG_TT], g_eBestStats[PLR_STATS_DMG_TT])
 	if (g_eBestIndex[PLR_STATS_FLASHTIME]) 	iLen += format(g_szMess[iLen], sizeof g_szMess - iLen, "Flashed: %n - %.2f^n", g_eBestIndex[PLR_STATS_FLASHTIME], g_eBestStats[PLR_STATS_FLASHTIME])
+	if (g_eBestIndex[PLR_STATS_BHOP_PERCENT])	iLen += format(g_szMess[iLen], sizeof g_szMess - iLen, "BHOP: %n - %d (%.1f%%%%)^n", g_eBestIndex[PLR_STATS_BHOP_PERCENT], g_eBestStats[PLR_STATS_BHOP_COUNT], g_eBestStats[PLR_STATS_BHOP_PERCENT])
+	if (g_eBestIndex[PLR_STATS_SGS_PERCENT])	iLen += format(g_szMess[iLen], sizeof g_szMess - iLen, "SGS: %n - %d (%.1f%%%%)^n", g_eBestIndex[PLR_STATS_SGS_PERCENT], g_eBestStats[PLR_STATS_SGS_COUNT], g_eBestStats[PLR_STATS_SGS_PERCENT])
+	if (g_eBestIndex[PLR_STATS_DDRUN_PERCENT])	iLen += format(g_szMess[iLen], sizeof g_szMess - iLen, "DDRUN: %n - %d (%.1f%%%%)^n", g_eBestIndex[PLR_STATS_DDRUN_PERCENT], g_eBestStats[PLR_STATS_DDRUN_COUNT], g_eBestStats[PLR_STATS_DDRUN_PERCENT])
 
 	g_flShowRoundStats = get_gametime() + 10.0;
 	set_task(1.0, "taskShowBestRound", TASK_SHOWBEST, .flags = "b");
