@@ -205,6 +205,8 @@ public MixFinishedMR(iWinTeam) {
 	match_reset_data();
 	
 	training_start();
+
+	ExecuteForward(g_hForwards[MATCH_FINISH_POST], _, iWinTeam);
 }
 
 public MixFinishedWT() {
@@ -222,6 +224,8 @@ public MixFinishedWT() {
 	match_reset_data(true);
 
 	training_start();
+
+	ExecuteForward(g_hForwards[MATCH_FINISH_POST], _, 1);
 }
 
 public MixFinishedDuel() {
@@ -237,6 +241,8 @@ public MixFinishedDuel() {
 	match_reset_data(true);
 
 	training_start();
+
+	ExecuteForward(g_hForwards[MATCH_FINISH_POST], _, 1);
 }
 
 public mix_roundend(bool:win_ct) {

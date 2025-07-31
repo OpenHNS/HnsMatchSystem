@@ -170,6 +170,8 @@ forward hns_match_canceled();
 */
 forward hns_match_finished(iWinTeam);
 
+forward hns_match_finished_post(iWinTeam);
+
 forward hns_round_start();
 
 forward hns_round_freezeend();

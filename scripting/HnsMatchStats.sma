@@ -448,8 +448,6 @@ public taskRoundEvent() {
 }
 
 public hns_match_finished() {
-	ExecuteForward(g_hApplyStatsForward, _);
-
 	new iPlayers[MAX_PLAYERS], iNum;
 	get_players(iPlayers, iNum, "ch");
 
@@ -475,7 +473,17 @@ public hns_match_finished() {
 		iStats[id][PLR_STATS_FLASHTIME] += g_StatsRound[id][PLR_STATS_FLASHTIME];
 		iStats[id][PLR_STATS_RUNNED] += g_StatsRound[id][PLR_STATS_RUNNED];
 		iStats[id][PLR_STATS_SURVTIME] += g_StatsRound[id][PLR_STATS_SURVTIME];
+	}
 
+	ExecuteForward(g_hApplyStatsForward, _);
+}
+
+public hns_match_finished_post() {
+	new iPlayers[MAX_PLAYERS], iNum;
+	get_players(iPlayers, iNum, "ch");
+
+	for (new i = 0; i < iNum; i++) {
+		new id = iPlayers[i];
 		arrayset(g_StatsRound[id], 0, PLAYER_STATS);
 	}
 }
