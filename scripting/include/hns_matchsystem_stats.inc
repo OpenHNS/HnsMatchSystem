@@ -15,7 +15,7 @@ enum _:TYPE_STATS
 * @param type Stats type: TYPE_STATS
 * @param id Client index
 *
-* @return kills num
+* @return num
 */
 native hns_get_stats_kills(type, id);
 
@@ -25,7 +25,7 @@ native hns_get_stats_kills(type, id);
 * @param type Stats type: TYPE_STATS
 * @param id Client index
 *
-* @return deaths num
+* @return num
 */
 native hns_get_stats_deaths(type, id);
 
@@ -35,7 +35,7 @@ native hns_get_stats_deaths(type, id);
 * @param type Stats type: TYPE_STATS
 * @param id Client index
 *
-* @return assists num
+* @return num
 */
 native hns_get_stats_assists(type, id);
 
@@ -45,7 +45,7 @@ native hns_get_stats_assists(type, id);
 * @param type Stats type: TYPE_STATS
 * @param id Client index
 *
-* @return stabs num
+* @return num
 */
 native hns_get_stats_stabs(type, id);
 
@@ -55,7 +55,7 @@ native hns_get_stats_stabs(type, id);
 * @param type Stats type: TYPE_STATS
 * @param id Client index
 *
-* @return damage CT num
+* @return num
 */
 native hns_get_stats_dmg_ct(type, id);
 
@@ -76,9 +76,29 @@ native hns_get_stats_dmg_tt(type, id);
 * @param type Stats type: TYPE_STATS
 * @param id Client index
 *
-* @return runned distance float
+* @return float
 */
 native Float:hns_get_stats_runned(type, id);
+
+/*
+* Gets players runned time.
+*
+* @param type Stats type: TYPE_STATS
+* @param id Client index
+*
+* @return float
+*/
+native Float:hns_get_stats_runnedtime(type, id);
+
+/*
+* Gets players avg speed.
+*
+* @param type Stats type: TYPE_STATS
+* @param id Client index
+*
+* @return float
+*/
+native Float:hns_get_stats_avg_speed(type, id);
 
 /*
 * Gets players flash time.
@@ -86,9 +106,19 @@ native Float:hns_get_stats_runned(type, id);
 * @param type Stats type: TYPE_STATS
 * @param id Client index
 *
-* @return flash time float
+* @return float
 */
 native Float:hns_get_stats_flashtime(type, id);
+
+/*
+* Gets players hide time.
+*
+* @param type Stats type: TYPE_STATS
+* @param id Client index
+*
+* @return float
+*/
+native Float:hns_get_stats_hidetime(type, id);
 
 /*
 * Gets players survive time.
@@ -96,7 +126,7 @@ native Float:hns_get_stats_flashtime(type, id);
 * @param type Stats type: TYPE_STATS
 * @param id Client index
 *
-* @return survive time float
+* @return float
 */
 native Float:hns_get_stats_surv(type, id);
 
@@ -106,17 +136,69 @@ native Float:hns_get_stats_surv(type, id);
 * @param type Stats type: TYPE_STATS
 * @param id Client index
 *
-* @return ownages num
+* @return num
 */
 native hns_get_stats_ownages(type, id);
 
+
+/*
+* Get the number of bhops in sessions
+*
+* @param type Stats type: TYPE_STATS
+* @param id Client index
+*
+* @return num
+*/
 native hns_get_stats_bhop_count(type, id);
+
+/*
+* Get the percentage of perfect bhops in sessions
+*
+* @param type Stats type: TYPE_STATS
+* @param id Client index
+*
+* @return float
+*/
 native Float:hns_get_stats_bhop_percent(type, id);
 
+/*
+* Get the number of sgs in sessions
+*
+* @param type Stats type: TYPE_STATS
+* @param id Client index
+*
+* @return num
+*/
 native hns_get_stats_sgs_count(type, id);
+
+/*
+* Get the percentage of perfect sgs in sessions
+*
+* @param type Stats type: TYPE_STATS
+* @param id Client index
+*
+* @return float
+*/
 native Float:hns_get_stats_sgs_percent(type, id);
 
+/*
+* Get the number of ddrun in sessions
+*
+* @param type Stats type: TYPE_STATS
+* @param id Client index
+*
+* @return num
+*/
 native hns_get_stats_ddrun_count(type, id);
+
+/*
+* Get the percentage of perfect ddrun in sessions
+*
+* @param type Stats type: TYPE_STATS
+* @param id Client index
+*
+* @return float
+*/
 native Float:hns_get_stats_ddrun_percent(type, id);
 
 forward hns_apply_stats();

@@ -30,8 +30,11 @@ enum _: PLAYER_STATS {
 	PLR_STATS_DMG_CT,
 	PLR_STATS_DMG_TT,
 	Float:PLR_STATS_RUNNED,
+	Float:PLR_STATS_RUNNEDTIME,
+	Float:PLR_STATS_AVG_SPEED,
 	Float:PLR_STATS_FLASHTIME,
 	Float:PLR_STATS_SURVTIME,
+	Float:PLR_STATS_HIDETIME,
 	PLR_STATS_OWNAGES,
 	PLR_STATS_STOPS,
 	PLR_STATS_BHOP_COUNT,
@@ -87,8 +90,11 @@ public plugin_natives() {
 	register_native("hns_get_stats_dmg_ct", "native_get_stats_dmg_ct");
 	register_native("hns_get_stats_dmg_tt", "native_get_stats_dmg_tt");
 	register_native("hns_get_stats_runned", "native_get_stats_runned");
+	register_native("hns_get_stats_runnedtime", "native_get_stats_runnedtime");
+	register_native("hns_get_stats_avg_speed", "native_get_stats_avg_speed");
 	register_native("hns_get_stats_flashtime", "native_get_stats_flashtime");
 	register_native("hns_get_stats_surv", "native_get_stats_surv");
+	register_native("hns_get_stats_hidetime", "native_get_hidetime");
 	register_native("hns_get_stats_ownages", "native_get_stats_ownages");
 	register_native("hns_get_stats_bhop_count", "native_get_stats_bhop_count");
 	register_native("hns_get_stats_bhop_percent", "native_get_stats_bhop_percent");
@@ -100,81 +106,82 @@ public plugin_natives() {
 
 public native_get_stats_kills(amxx, params) {
 	enum { type = 1, id = 2 };
-
 	if (get_param(type) == STATS_ROUND) {
 		return g_StatsRound[get_param(id)][PLR_STATS_KILLS];
 	}
-
 	return iStats[get_param(id)][PLR_STATS_KILLS] + g_StatsRound[get_param(id)][PLR_STATS_KILLS];
 }
 
 public native_get_stats_deaths(amxx, params) {
 	enum { type = 1, id = 2 };
-
 	if (get_param(type) == STATS_ROUND) {
 		return g_StatsRound[get_param(id)][PLR_STATS_DEATHS];
 	}
-
 	return iStats[get_param(id)][PLR_STATS_DEATHS] + g_StatsRound[get_param(id)][PLR_STATS_DEATHS];
 }
 
 public native_get_stats_assists(amxx, params) {
 	enum { type = 1, id = 2 };
-
 	if (get_param(type) == STATS_ROUND) {
 		return g_StatsRound[get_param(id)][PLR_STATS_ASSISTS];
 	}
-
 	return iStats[get_param(id)][PLR_STATS_ASSISTS] + g_StatsRound[get_param(id)][PLR_STATS_ASSISTS];
 }
 
 public native_get_stats_stabs(amxx, params) {
 	enum { type = 1, id = 2 };
-
 	if (get_param(type) == STATS_ROUND) {
 		return g_StatsRound[get_param(id)][PLR_STATS_STABS];
 	}
-
 	return iStats[get_param(id)][PLR_STATS_STABS] + g_StatsRound[get_param(id)][PLR_STATS_STABS];
 }
 
 public native_get_stats_dmg_ct(amxx, params) {
 	enum { type = 1, id = 2 };
-
 	if (get_param(type) == STATS_ROUND) {
 		return g_StatsRound[get_param(id)][PLR_STATS_DMG_CT];
 	}
-
 	return iStats[get_param(id)][PLR_STATS_DMG_CT] + g_StatsRound[get_param(id)][PLR_STATS_DMG_CT];
 }
 
 public native_get_stats_dmg_tt(amxx, params) {
 	enum { type = 1, id = 2 };
-
 	if (get_param(type) == STATS_ROUND) {
 		return g_StatsRound[get_param(id)][PLR_STATS_DMG_TT];
 	}
-
 	return iStats[get_param(id)][PLR_STATS_DMG_TT] + g_StatsRound[get_param(id)][PLR_STATS_DMG_TT];
 }
 
 public Float:native_get_stats_runned(amxx, params) {
 	enum { type = 1, id = 2 };
-
 	if (get_param(type) == STATS_ROUND) {
 		return g_StatsRound[get_param(id)][PLR_STATS_RUNNED];
 	}
-
 	return iStats[get_param(id)][PLR_STATS_RUNNED] + g_StatsRound[get_param(id)][PLR_STATS_RUNNED];
+}
+
+public Float:native_get_stats_runnedtime(amxx, params) {
+	enum { type = 1, id = 2 };
+	if (get_param(type) == STATS_ROUND) {
+		return g_StatsRound[get_param(id)][PLR_STATS_RUNNEDTIME];
+	}
+	return iStats[get_param(id)][PLR_STATS_RUNNEDTIME] + g_StatsRound[get_param(id)][PLR_STATS_RUNNEDTIME];
+}
+
+public Float:native_get_stats_avg_speed(amxx, params) {
+	enum { type = 1, id = 2 };
+	if (get_param(type) == STATS_ROUND) {
+		return g_StatsRound[get_param(id)][PLR_STATS_AVG_SPEED];
+	}
+	// return iStats[get_param(id)][PLR_STATS_AVG_SPEED] + g_StatsRound[get_param(id)][PLR_STATS_AVG_SPEED];
+	return iStats[get_param(id)][PLR_STATS_AVG_SPEED];
 }
 
 public Float:native_get_stats_flashtime(amxx, params) {
 	enum { type = 1, id = 2 };
-
 	if (get_param(type) == STATS_ROUND) {
 		return g_StatsRound[get_param(id)][PLR_STATS_FLASHTIME];
 	}
-
 	return iStats[get_param(id)][PLR_STATS_FLASHTIME] + g_StatsRound[get_param(id)][PLR_STATS_FLASHTIME];
 }
 
@@ -186,73 +193,67 @@ public Float:native_get_stats_surv(amxx, params) {
 	return iStats[get_param(id)][PLR_STATS_SURVTIME] + g_StatsRound[get_param(id)][PLR_STATS_SURVTIME];
 }
 
+public Float:native_get_hidetime(amxx, params) {
+	enum { type = 1, id = 2 };
+	if (get_param(type) == STATS_ROUND) {
+		return g_StatsRound[get_param(id)][PLR_STATS_HIDETIME];
+	}
+	return iStats[get_param(id)][PLR_STATS_HIDETIME] + g_StatsRound[get_param(id)][PLR_STATS_HIDETIME];
+}
+
 public native_get_stats_ownages(amxx, params) {
 	enum { type = 1, id = 2 };
-
 	if (get_param(type) == STATS_ROUND) {
 		return g_StatsRound[get_param(id)][PLR_STATS_OWNAGES];
 	}
-
 	return iStats[get_param(id)][PLR_STATS_OWNAGES] + g_StatsRound[get_param(id)][PLR_STATS_OWNAGES];
 }
 
 public native_get_stats_bhop_count(amxx, params) {
 	enum { type = 1, id = 2 };
-
 	if (get_param(type) == STATS_ROUND) {
 		return g_StatsRound[get_param(id)][PLR_STATS_BHOP_COUNT];
 	}
-
 	return iStats[get_param(id)][PLR_STATS_BHOP_COUNT] + g_StatsRound[get_param(id)][PLR_STATS_BHOP_COUNT];
 }
 
 public Float:native_get_stats_bhop_percent(amxx, params) {
 	enum { type = 1, id = 2 };
-
 	if (get_param(type) == STATS_ROUND) {
 		return get_average_percent(g_StatsRound[get_param(id)][PLR_STATS_DDRUN_COUNT], g_StatsRound[get_param(id)][PLR_STATS_BHOP_PERCENT_SUM]);
 	}
-
 	return get_average_percent(iStats[get_param(id)][PLR_STATS_DDRUN_COUNT] + g_StatsRound[get_param(id)][PLR_STATS_DDRUN_COUNT], iStats[get_param(id)][PLR_STATS_BHOP_PERCENT_SUM] + g_StatsRound[get_param(id)][PLR_STATS_BHOP_PERCENT_SUM]);
 }
 
 public native_get_stats_sgs_count(amxx, params) {
 	enum { type = 1, id = 2 };
-
 	if (get_param(type) == STATS_ROUND) {
 		return g_StatsRound[get_param(id)][PLR_STATS_SGS_COUNT];
 	}
-
 	return iStats[get_param(id)][PLR_STATS_SGS_COUNT] + g_StatsRound[get_param(id)][PLR_STATS_SGS_COUNT];
 }
 
 public Float:native_get_stats_sgs_percent(amxx, params) {
 	enum { type = 1, id = 2 };
-
 	if (get_param(type) == STATS_ROUND) {
 		return get_average_percent(g_StatsRound[get_param(id)][PLR_STATS_DDRUN_COUNT], g_StatsRound[get_param(id)][PLR_STATS_SGS_PERCENT_SUM]);
 	}
-
 	return get_average_percent(iStats[get_param(id)][PLR_STATS_DDRUN_COUNT] + g_StatsRound[get_param(id)][PLR_STATS_DDRUN_COUNT], iStats[get_param(id)][PLR_STATS_SGS_PERCENT_SUM] + g_StatsRound[get_param(id)][PLR_STATS_SGS_PERCENT_SUM]);
 }
 
 public native_get_stats_ddrun_count(amxx, params) {
 	enum { type = 1, id = 2 };
-
 	if (get_param(type) == STATS_ROUND) {
 		return g_StatsRound[get_param(id)][PLR_STATS_DDRUN_COUNT];
 	}
-
 	return iStats[get_param(id)][PLR_STATS_DDRUN_COUNT] + g_StatsRound[get_param(id)][PLR_STATS_DDRUN_COUNT];
 }
 
 public Float:native_get_stats_ddrun_percent(amxx, params) {
 	enum { type = 1, id = 2 };
-
 	if (get_param(type) == STATS_ROUND) {
 		return get_average_percent(g_StatsRound[get_param(id)][PLR_STATS_DDRUN_COUNT], g_StatsRound[get_param(id)][PLR_STATS_DDRUN_PERCENT_SUM]);
 	}
-
 	return get_average_percent(iStats[get_param(id)][PLR_STATS_DDRUN_COUNT] + g_StatsRound[get_param(id)][PLR_STATS_DDRUN_COUNT], iStats[get_param(id)][PLR_STATS_DDRUN_PERCENT_SUM] + g_StatsRound[get_param(id)][PLR_STATS_DDRUN_PERCENT_SUM]);
 }
 
