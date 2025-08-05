@@ -174,6 +174,8 @@ public taskCheckLeave() {
 
 	new iNum = get_num_players_in_match();
 
+	server_print("iNum: %d", iNum);
+
 	if (iNum < g_eMatchInfo[e_mTeamSize]) {
 		// Pause Need Players
 		g_eMatchInfo[e_mLeaved] = true;
@@ -303,6 +305,15 @@ public mix_roundend(bool:win_ct) {
 		}
 		case RULES_TIMER: {
 			g_eMatchInfo[e_iSidesRounds][g_isTeamTT]++
+
+			new iPlayers[MAX_PLAYERS], iNum;
+			get_players(iPlayers, iNum, "ache", "CT");
+
+			if (!iNum) {
+				new Float:roundtime = get_round_time() * 60.0;
+				g_eMatchInfo[e_flSidesTime][g_isTeamTT] += roundtime - g_flRoundTime;
+			}
+
 			if (win_ct) {
 				hns_swap_teams();
 			}
@@ -380,10 +391,14 @@ public mix_player_join(id) {
 
 		if (g_bDebugMode) server_print("[MATCH] mix_player_join | %n %d", id, bReplaced)
 
+		// bilo 1, livnul stalo 1 ???
+		server_print("1)[MATCH] mix_player_join | iNum:%d, e_mTeamSize:%d, bReplaced:%d, PlayerTeam:%s, GetPlayerTeam: %s", iNum, g_eMatchInfo[e_mTeamSize], bReplaced, g_ePlayerInfo[id][PLAYER_TEAM], fmt("%s", getUserTeam(id) == TEAM_TERRORIST ? "TERRORIST" : "CT"));
+
 		ExecuteForward(g_hForwards[MATCH_JOIN_PLAYER], _, id, bReplaced);
 
 		if (bReplaced) {
 			transferUserToSpec(id);
+			server_print("1111");
 			return;
 		}
 
@@ -391,14 +406,17 @@ public mix_player_join(id) {
 
 		if (iMatchRounds == g_ePlayerInfo[id][LEAVE_IN_ROUND]) {
 			rg_set_user_team(id, g_ePlayerInfo[id][PLAYER_TEAM][0] == 'T' ? TEAM_TERRORIST : TEAM_CT);
+			server_print("tut?")
 		} else {
 			rg_set_user_team(id, g_ePlayerInfo[id][PLAYER_TEAM][0] == 'T' ? TEAM_CT : TEAM_TERRORIST);
+			server_print("tut? x2")
 		}
 
 		if (g_eMatchState == STATE_PAUSED)
 			rg_round_respawn(id);
 	} else {
 		transferUserToSpec(id);
+		server_print("2222");
 		return;
 	}
 }
@@ -408,7 +426,15 @@ public mix_player_leave(id) {
 	if (g_ePlayerInfo[id][PLAYER_MATCH]) {
 		new iMatchRounds = g_eMatchInfo[e_iSidesRounds][HNS_TEAM_A] + g_eMatchInfo[e_iSidesRounds][HNS_TEAM_B];
 
-		if (g_bDebugMode) server_print("[MATCH] mix_player_leave PLAYER_MATCH | %n %d", id, iMatchRounds)
+		if (g_bDebugMode) {
+			server_print("[MATCH] mix_player_leave PLAYER_MATCH | %n %d", id, iMatchRounds)
+		}	
+
+		// bilo 1, livnul stalo 1 ???
+		// a esli bilo 3, livnul 3, livnul eshe igrok to uje 2 = wtf???
+
+		server_print("2)[MATCH] mix_player_leave | iNum:%d, e_mTeamSize:%d, PlayerTeam:%s, GetPlayerTeam: %s", get_num_players_in_match(), g_eMatchInfo[e_mTeamSize], g_ePlayerInfo[id][PLAYER_TEAM], fmt("%s", getUserTeam(id) == TEAM_TERRORIST ? "TERRORIST" : "CT"));
+
 
 		g_ePlayerInfo[id][LEAVE_IN_ROUND] = iMatchRounds;
 
@@ -417,12 +443,16 @@ public mix_player_leave(id) {
 				ExecuteForward(g_ModFuncs[MODE_MIX][MODEFUNC_PAUSE], _);
 		}
 	}
-
+	
 	ExecuteForward(g_hForwards[MATCH_LEAVE_PLAYER], _, id);
 
 	TrieSetArray(g_eMatchInfo[e_tLeaveData], getUserKey(id), g_ePlayerInfo[id], PLAYER_INFO);
 
 	arrayset(g_ePlayerInfo[id], 0, PLAYER_INFO);
+
+	server_print("[LEAVE] reset PLAYER_MATCH for player, IN MATCH: %d", g_ePlayerInfo[id][PLAYER_MATCH]);
+
+	server_print("3)POSLE VSEGO: [MATCH] mix_player_leave | iNum:%d, e_mTeamSize:%d, PlayerTeam: %s, GetPlayerTeam: %s", get_num_players_in_match(), g_eMatchInfo[e_mTeamSize], g_ePlayerInfo[id][PLAYER_TEAM], fmt("%s", getUserTeam(id) == TEAM_TERRORIST ? "TERRORIST" : "CT"));
 }
 
 // bMatchFinish
