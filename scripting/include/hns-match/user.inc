@@ -123,12 +123,16 @@ setTeam(id, TeamName:iTeam) {
 }
 
 
-stock get_num_players_in_match() {
+stock get_num_players_in_match(iIgnonePlayer = 0) {
 	new iPlayers[MAX_PLAYERS], iNum;
 	get_players(iPlayers, iNum, "ch");
 	new numGameplr;
 	for (new i; i < iNum; i++) {
 		new tempid = iPlayers[i];
+
+		if (iIgnonePlayer == tempid) {
+			continue;
+		}
 
 		if (getUserTeam(tempid) != TEAM_TERRORIST && getUserTeam(tempid) != TEAM_CT) {
 			continue;
