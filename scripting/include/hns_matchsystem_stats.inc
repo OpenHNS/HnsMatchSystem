@@ -201,4 +201,6 @@ native hns_get_stats_ddrun_count(type, id);
 */
 native Float:hns_get_stats_ddrun_percent(type, id);
 
-forward hns_apply_stats();
+forward hns_apply_stats(iIsEndMatch);
+
+forward hns_save_leave_stats(id);
