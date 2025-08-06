@@ -1,7 +1,7 @@
 #include <amxmodx>
 #include <reapi>
 #include <xs>
-
+#include <fakemeta_util>
 #include <hns_matchsystem>
 
 forward hns_players_replaced(requested_id, id);
@@ -35,6 +35,7 @@ enum _: PLAYER_STATS {
 	Float:PLR_STATS_FLASHTIME,
 	Float:PLR_STATS_SURVTIME,
 	Float:PLR_STATS_HIDETIME,
+	Float:PLR_STATS_PLAYTIME,
 	PLR_STATS_OWNAGES,
 	PLR_STATS_STOPS,
 	PLR_STATS_BHOP_COUNT,
@@ -44,7 +45,7 @@ enum _: PLAYER_STATS {
 	PLR_STATS_DDRUN_COUNT,
 	Float:PLR_STATS_DDRUN_PERCENT_SUM,
 	bool:PLR_MATCH,
-	TeamName:PLR_TEAM
+	TeamName:PLR_TEAM,
 }
 
 new iStats[MAX_PLAYERS + 1][PLAYER_STATS];
@@ -97,6 +98,7 @@ public plugin_natives() {
 	register_native("hns_get_stats_flashtime", "native_get_stats_flashtime");
 	register_native("hns_get_stats_surv", "native_get_stats_surv");
 	register_native("hns_get_stats_hidetime", "native_get_hidetime");
+	register_native("hns_get_stats_playtime", "native_get_playtime");
 	register_native("hns_get_stats_ownages", "native_get_stats_ownages");
 	register_native("hns_get_stats_bhop_count", "native_get_stats_bhop_count");
 	register_native("hns_get_stats_bhop_percent", "native_get_stats_bhop_percent");
@@ -193,6 +195,14 @@ public Float:native_get_stats_surv(amxx, params) {
 		return g_StatsRound[get_param(id)][PLR_STATS_SURVTIME];
 	}
 	return iStats[get_param(id)][PLR_STATS_SURVTIME] + g_StatsRound[get_param(id)][PLR_STATS_SURVTIME];
+}
+
+public Float:native_get_playtime(amxx, params) {
+	enum { type = 1, id = 2 };
+	if (get_param(type) == STATS_ROUND) {
+		return g_StatsRound[get_param(id)][PLR_STATS_PLAYTIME];
+	}
+	return iStats[get_param(id)][PLR_STATS_PLAYTIME] + g_StatsRound[get_param(id)][PLR_STATS_PLAYTIME];
 }
 
 public Float:native_get_hidetime(amxx, params) {
@@ -420,13 +430,19 @@ public rgPlayerPreThink(id) {
 	if (hns_get_state() == STATE_ENABLED) {
 		if (is_user_alive(id)) {
 			if (rg_get_user_team(id) == TEAM_TERRORIST) {
-				if (vector_length(velocity) * frametime >= get_distance_f(origin, g_flLastPosition[id])) {
-					velocity[2] = 0.0;
-					if (vector_length(velocity) > 125.0) {
-						g_StatsRound[id][PLR_STATS_RUNNED] += vector_length(velocity) * frametime;
+				if(is_player_running(id))
+				{
+					g_StatsRound[id][PLR_STATS_RUNNED] += vector_length(velocity) * frametime;
+					g_StatsRound[id][PLR_STATS_RUNNEDTIME] += frametime;
+					if(g_StatsRound[id][PLR_STATS_RUNNED])
+					{
+						g_StatsRound[id][PLR_STATS_AVG_SPEED] = g_StatsRound[id][PLR_STATS_RUNNED] / g_StatsRound[id][PLR_STATS_RUNNEDTIME];
 					}
 				}
-
+				if(is_player_hidding(id))
+				{
+					g_StatsRound[id][PLR_STATS_HIDETIME] += frametime;					
+				}
 			}
 		}
 	}
@@ -446,12 +462,22 @@ public taskRoundEvent() {
 	}
 
 	new iPlayers[MAX_PLAYERS], iNum;
-	get_players(iPlayers, iNum, "aech", "TERRORIST");
+	get_players(iPlayers, iNum, "ch");
 
 	for (new i = 0; i < iNum; i++)
 	{
 		new id = iPlayers[i];
-		g_StatsRound[id][PLR_STATS_SURVTIME] += 0.25;
+		if(!is_user_connected(id))
+			continue;
+
+		new TeamName:iTeam = rg_get_user_team(id);
+		if(iTeam == TEAM_SPECTATOR)
+			continue;
+		
+		if (iTeam == TEAM_TERRORIST)
+			g_StatsRound[id][PLR_STATS_SURVTIME] += 0.25;
+
+		g_StatsRound[id][PLR_STATS_PLAYTIME] += 0.25;
 	}
 }
 
@@ -597,6 +623,46 @@ stock getUserKey(id) {
 	return szAuth;
 }
 
+stock bool:is_player_running(id) {
+	if(!is_user_alive(id))
+	{
+		return false;
+	}
+	new Float:velocity[3];
+	get_entvar(id, var_velocity, velocity);
+
+	// Don't reset the Z velocity, because it can be used for jumps/ladders
+	//velocity[2] = 0.0;
+
+	if(vector_length(velocity) > 125.0)
+		return true;
+
+	return false;
+}
+
+stock is_player_hidding(id) {
+	if(!is_user_alive(id))
+	{
+		return false;
+	}
+	
+	new iPlayers[MAX_PLAYERS], iNum;
+	get_players(iPlayers, iNum, "ache", "CT");
+	new bool:visible = false;
+	for (new i = 0; i < iNum; i++)
+	{
+		new player = iPlayers[i];
+		new Float:origin[3];
+		get_entvar(player, var_origin, origin);
+		if (fm_is_in_viewcone(player, origin) && fm_is_ent_visible(player, id))
+		{
+			visible = true;
+			break;
+		}
+	}
+
+	return visible;
+}
 public Float:get_average_percent(iCount, Float:flPercentSum) {
     if (iCount == 0) {
         return 0.0;

@@ -120,6 +120,17 @@ native Float:hns_get_stats_flashtime(type, id);
 */
 native Float:hns_get_stats_hidetime(type, id);
 
+
+/*
+* Gets players play time. (How many seconds the player was in the active game)
+*
+* @param type Stats type: TYPE_STATS
+* @param id Client index
+*
+* @return float
+*/
+
+native Float:hns_get_stats_playtime(type, id);
 /*
 * Gets players survive time.
 *
