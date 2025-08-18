@@ -1,6 +1,7 @@
 public trainingmode_init() {
-	g_ModFuncs[MODE_TRAINING][MODEFUNC_START]		= CreateOneForward(g_PluginId, "training_start");
-	g_ModFuncs[MODE_TRAINING][MODEFUNC_PLAYER_JOIN]	= CreateOneForward(g_PluginId, "training_player_join", FP_CELL);
+	g_ModFuncs[MODE_TRAINING][MODEFUNC_START]			= CreateOneForward(g_PluginId, "training_start");
+	g_ModFuncs[MODE_TRAINING][MODEFUNC_PLAYER_LEAVE]	= CreateOneForward(g_PluginId, "training_player_leave", FP_CELL);
+	g_ModFuncs[MODE_TRAINING][MODEFUNC_PLAYER_JOIN]		= CreateOneForward(g_PluginId, "training_player_join", FP_CELL);
 }
 
 public training_start() {
@@ -10,9 +11,45 @@ public training_start() {
 	set_cvars_mode(MODE_TRAINING);
 }
 
+public training_player_leave(id) {
+	if (g_iMatchStatus == MATCH_TEAMPICK) {
+		if (g_ePlayerInfo[id][PLAYER_ROLE] != ROLE_SPEC) {
+			TrieSetArray(g_eMatchInfo[e_tLeaveData], getUserKey(id), g_ePlayerInfo[id], PLAYER_INFO);
+		}
+	}
+
+	arrayset(g_ePlayerInfo[id], 0, PLAYER_INFO);
+}
+
 public training_player_join(id) {
+	TrieGetArray(g_eMatchInfo[e_tLeaveData], getUserKey(id), g_ePlayerInfo[id], PLAYER_INFO);
+
 	if (g_iMatchStatus == MATCH_CAPTAINPICK || g_iMatchStatus == MATCH_TEAMPICK || g_iMatchStatus == MATCH_MAPPICK) {
-		transferUserToSpec(id);
+		if (g_ePlayerInfo[id][PLAYER_MATCH]) {
+			if (g_ePlayerInfo[id][PLAYER_ROLE] == ROLE_TEAM_A || g_ePlayerInfo[id][PLAYER_ROLE] == ROLE_CAP_A) {
+				rg_set_user_team(id, TEAM_TERRORIST);
+				rg_round_respawn(id);
+			} else {
+				rg_set_user_team(id, TEAM_CT);
+				rg_round_respawn(id);
+			}
+
+			if (g_iMatchStatus == MATCH_TEAMPICK && (g_ePlayerInfo[id][PLAYER_ROLE] == ROLE_CAP_A || g_ePlayerInfo[id][PLAYER_ROLE] == ROLE_CAP_B)) {
+				if (g_iCaptainPick == -1) {
+					if (g_ePlayerInfo[id][PLAYER_ROLE] == ROLE_CAP_A) {
+						g_iCaptainFirst = id;
+						g_iCaptainPick = g_iCaptainFirst;
+					} else {
+						g_iCaptainSecond = id;
+						g_iCaptainPick = g_iCaptainSecond;
+					}
+					pickMenu(g_iCaptainPick, true);
+				}
+			}
+
+		} else {
+			transferUserToSpec(id);
+		}
 		return;
 	}
 	

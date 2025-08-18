@@ -174,8 +174,6 @@ public taskCheckLeave() {
 
 	new iNum = get_num_players_in_match();
 
-	server_print("iNum: %d", iNum);
-
 	if (iNum < g_eMatchInfo[e_mTeamSize]) {
 		// Pause Need Players
 		g_eMatchInfo[e_mLeaved] = true;
@@ -384,9 +382,6 @@ public mix_reverttimer() {
 public mix_player_join(id) {
 	TrieGetArray(g_eMatchInfo[e_tLeaveData], getUserKey(id), g_ePlayerInfo[id], PLAYER_INFO);
 
-	server_print("[MATCH] mix_player_join START | %n ROUNDS: %d, IS MATCH: %d, TEAM: %s",
-	id, g_ePlayerInfo[id][LEAVE_IN_ROUND], g_ePlayerInfo[id][PLAYER_MATCH], g_ePlayerInfo[id][PLAYER_TEAM]);
-
 	if (g_ePlayerInfo[id][PLAYER_MATCH]) {
 		new iNum = get_num_players_in_match(id);
 
@@ -394,18 +389,12 @@ public mix_player_join(id) {
 
 		if (g_bDebugMode) server_print("[MATCH] mix_player_join | %n %d", id, bReplaced)
 
-		// bilo 1, livnul stalo 1 ???
-		server_print("1)[MATCH] mix_player_join | iNum:%d, e_mTeamSize:%d, bReplaced:%d, PlayerTeam:%s, GetPlayerTeam: %s", iNum, g_eMatchInfo[e_mTeamSize], bReplaced, g_ePlayerInfo[id][PLAYER_TEAM], fmt("%s", getUserTeam(id) == TEAM_TERRORIST ? "TERRORIST" : "CT"));
-
 		ExecuteForward(g_hForwards[MATCH_JOIN_PLAYER], _, id, bReplaced);
 
 		if (bReplaced) {
 			transferUserToSpec(id);
-			server_print("1111");
 			return;
 		}
-
-		///
 
 		new iMatchRounds = g_eMatchInfo[e_iSidesRounds][HNS_TEAM_A] + g_eMatchInfo[e_iSidesRounds][HNS_TEAM_B];
 
@@ -443,9 +432,6 @@ public mix_player_leave(id) {
 	ExecuteForward(g_hForwards[MATCH_LEAVE_PLAYER], _, id);
 
 	TrieSetArray(g_eMatchInfo[e_tLeaveData], getUserKey(id), g_ePlayerInfo[id], PLAYER_INFO);
-
-	server_print("[MATCH] mix_player_leave END | %n ROUNDS:%d, IS MATCH:%d, TEAM: %s",
-	id, g_ePlayerInfo[id][LEAVE_IN_ROUND], g_ePlayerInfo[id][PLAYER_MATCH], g_ePlayerInfo[id][PLAYER_TEAM]);
 
 	arrayset(g_ePlayerInfo[id], 0, PLAYER_INFO);
 }

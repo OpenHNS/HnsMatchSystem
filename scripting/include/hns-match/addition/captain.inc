@@ -4,11 +4,6 @@
 
 #define _captain_included
 
-new g_iCaptainPick;
-
-new g_iCaptainFirst;
-new g_iCaptainSecond;
-
 new Float:RandomPickTime;
 
 public captain_start(id) {
@@ -138,6 +133,7 @@ public chooseCapsHandler(id, hMenu, item) {
 	if (!g_iCaptainFirst) {
 		g_iCaptainFirst = iPlayer;
 		g_ePlayerInfo[g_iCaptainFirst][PLAYER_ROLE] = ROLE_CAP_A;
+		g_ePlayerInfo[id][PLAYER_MATCH] = true;
 		
 		if (hns_mysql_stats_init()) {
 			chat_print(0, "%L", LANG_PLAYER, "CAP_FIRST_PTS", iPlayer, hns_mysql_stats_data(iPlayer, e_iPts), hns_mysql_stats_skill(iPlayer));
@@ -152,6 +148,7 @@ public chooseCapsHandler(id, hMenu, item) {
 	} else if (!g_iCaptainSecond) {
 		g_iCaptainSecond = iPlayer;
 		g_ePlayerInfo[g_iCaptainSecond][PLAYER_ROLE] = ROLE_CAP_B;
+		g_ePlayerInfo[id][PLAYER_MATCH] = true;
 
 		if (hns_mysql_stats_init()) {
 			chat_print(0, "%L", LANG_PLAYER, "CAP_SECOND_PTS", iPlayer, hns_mysql_stats_data(iPlayer, e_iPts), hns_mysql_stats_skill(iPlayer));
@@ -312,16 +309,22 @@ public pickHandler(id, hMenu, item) {
 
 	if (g_ePlayerInfo[id][PLAYER_ROLE] == ROLE_CAP_A) {
 		g_ePlayerInfo[iPlayer][PLAYER_ROLE] = ROLE_TEAM_A;
+		g_ePlayerInfo[id][PLAYER_MATCH] = true;
 		g_iCaptainPick = g_iCaptainSecond;
 	} else {
 		g_ePlayerInfo[iPlayer][PLAYER_ROLE] = ROLE_TEAM_B;
+		g_ePlayerInfo[id][PLAYER_MATCH] = true;
 		g_iCaptainPick = g_iCaptainFirst;
 	}
 
 	rg_set_user_team(iPlayer, getUserTeam(id));
 	rg_round_respawn(iPlayer);
 
-	pickMenu(g_iCaptainPick, true);
+	if (!is_user_connected(g_iCaptainSecond) || !is_user_connected(g_iCaptainFirst)) {
+		g_iCaptainPick = -1;
+	} else {
+		pickMenu(g_iCaptainPick, true);
+	}
 	checkFullTeams();
 
 	return PLUGIN_HANDLED;

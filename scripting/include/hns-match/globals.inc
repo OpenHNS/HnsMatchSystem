@@ -117,6 +117,11 @@ enum _: PLAYER_INFO {
 
 new g_ePlayerInfo[MAX_PLAYERS + 1][PLAYER_INFO];
 
+new g_iCaptainPick;
+
+new g_iCaptainFirst;
+new g_iCaptainSecond;
+
 new Array:g_aPlayersLoadData;
 
 new TeamName:g_eSpecBack[MAX_PLAYERS + 1];
