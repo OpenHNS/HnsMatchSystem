@@ -12,9 +12,17 @@ public training_start() {
 }
 
 public training_player_leave(id) {
-	if (g_iMatchStatus == MATCH_TEAMPICK) {
-		if (g_ePlayerInfo[id][PLAYER_ROLE] != ROLE_SPEC) {
-			TrieSetArray(g_eMatchInfo[e_tLeaveData], getUserKey(id), g_ePlayerInfo[id], PLAYER_INFO);
+	switch (g_iMatchStatus) {
+		case MATCH_CAPTAINPICK: {
+			if (g_ePlayerInfo[id][PLAYER_ROLE] == ROLE_CAP_A || g_ePlayerInfo[id][PLAYER_ROLE] == ROLE_CAP_B) {
+				chat_print(0, "[^3HNSRU^1] Captain ^3%n^1 leave, stop captain mode.", id);
+				captain_stop(id);
+			}
+		}
+		case MATCH_TEAMPICK: {
+			if (g_ePlayerInfo[id][PLAYER_ROLE] != ROLE_SPEC) {
+				TrieSetArray(g_eMatchInfo[e_tLeaveData], getUserKey(id), g_ePlayerInfo[id], PLAYER_INFO);
+			}
 		}
 	}
 

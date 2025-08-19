@@ -11,20 +11,18 @@ public captain_start(id) {
 
 	g_iMatchStatus = MATCH_CAPTAINPICK;
 
-	new iPlayers[MAX_PLAYERS], iNum;
-	get_players(iPlayers, iNum, "ch");
-	for (new i; i < iNum; i++) {
-		new iPlayer = iPlayers[i];
+	training_start();
 
-		if (getUserTeam(iPlayer) == TEAM_SPECTATOR)
-			continue;
-
-		transferUserToSpec(iPlayer);
-	}
+	transferUsers(TEAM_SPECTATOR);
 	
 	chooseCapsMenu(id);
 
 	chat_print(0, "%L", LANG_PLAYER, "CAP_CHOOSE", id);
+}
+
+public captain_stop(id) {
+	resetCaptainData();
+	g_iMatchStatus = MATCH_NONE;
 }
 
 public chooseCapsMenu(id) {

@@ -202,7 +202,7 @@ public cmdPubMode(id) {
 		return PLUGIN_HANDLED;
 	}
 
-	if (g_iCurrentMode != MODE_TRAINING) {
+	if (g_iCurrentMode != MODE_TRAINING || g_iMatchStatus != MATCH_NONE) {
 		chat_print(id, "%L", id, "PUB_CANC");
 		return PLUGIN_HANDLED;
 	}
@@ -224,7 +224,7 @@ public cmdDMMode(id) {
 		return PLUGIN_HANDLED;
 	}
 
-	if (g_iCurrentMode != MODE_TRAINING) {
+	if (g_iCurrentMode != MODE_TRAINING || g_iMatchStatus != MATCH_NONE) {
 		chat_print(id, "%L", id, "DM_CANC");
 		return PLUGIN_HANDLED;
 	}
@@ -246,7 +246,7 @@ public cmdZMMode(id) {
 		return PLUGIN_HANDLED;
 	}
 
-	if (g_iCurrentMode != MODE_TRAINING) {
+	if (g_iCurrentMode != MODE_TRAINING || g_iMatchStatus != MATCH_NONE) {
 		chat_print(id, "%L", id, "ZM_CANC");
 		return PLUGIN_HANDLED;
 	}
@@ -269,8 +269,9 @@ public cmdBlend(id) {
 		return PLUGIN_HANDLED; 
 	}
 
-	if (g_iCurrentMode != MODE_PUB && g_iCurrentMode != MODE_DM) 
-		return PLUGIN_HANDLED; 
+	if (g_iCurrentMode != MODE_PUB && g_iCurrentMode != MODE_DM) {
+		return PLUGIN_HANDLED;
+	}
 
 	chat_print(0, "%l", "BLEND_TEAMS", id);
 

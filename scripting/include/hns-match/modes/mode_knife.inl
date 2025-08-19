@@ -1,11 +1,12 @@
 public kniferound_init() {
-	g_ModFuncs[MODE_KNIFE][MODEFUNC_START]		= CreateOneForward(g_PluginId, "kniferound_start");
-	g_ModFuncs[MODE_KNIFE][MODEFUNC_END]		= CreateOneForward(g_PluginId, "kniferound_stop");
-	g_ModFuncs[MODE_KNIFE][MODEFUNC_PAUSE]		= CreateOneForward(g_PluginId, "kniferound_pause");
-	g_ModFuncs[MODE_KNIFE][MODEFUNC_UNPAUSE]	= CreateOneForward(g_PluginId, "kniferound_unpause");
-	g_ModFuncs[MODE_KNIFE][MODEFUNC_ROUNDSTART]	= CreateOneForward(g_PluginId, "kniferound_roundstart");
-	g_ModFuncs[MODE_KNIFE][MODEFUNC_ROUNDEND]	= CreateOneForward(g_PluginId, "kniferound_roundend", FP_CELL);
-	g_ModFuncs[MODE_KNIFE][MODEFUNC_PLAYER_JOIN]= CreateOneForward(g_PluginId, "kniferound_player_join", FP_CELL);
+	g_ModFuncs[MODE_KNIFE][MODEFUNC_START]			= CreateOneForward(g_PluginId, "kniferound_start");
+	g_ModFuncs[MODE_KNIFE][MODEFUNC_END]			= CreateOneForward(g_PluginId, "kniferound_stop");
+	g_ModFuncs[MODE_KNIFE][MODEFUNC_PAUSE]			= CreateOneForward(g_PluginId, "kniferound_pause");
+	g_ModFuncs[MODE_KNIFE][MODEFUNC_UNPAUSE]		= CreateOneForward(g_PluginId, "kniferound_unpause");
+	g_ModFuncs[MODE_KNIFE][MODEFUNC_ROUNDSTART]		= CreateOneForward(g_PluginId, "kniferound_roundstart");
+	g_ModFuncs[MODE_KNIFE][MODEFUNC_ROUNDEND]		= CreateOneForward(g_PluginId, "kniferound_roundend", FP_CELL);
+	g_ModFuncs[MODE_KNIFE][MODEFUNC_PLAYER_LEAVE]	= CreateOneForward(g_PluginId, "kniferound_player_leave", FP_CELL);
+	g_ModFuncs[MODE_KNIFE][MODEFUNC_PLAYER_JOIN]	= CreateOneForward(g_PluginId, "kniferound_player_join", FP_CELL);
 }
 
 public kniferound_start() {
@@ -121,6 +122,19 @@ public kniferound_roundend(bool:win_ct) {
 		}
 	}
 	ChangeGameplay(GAMEPLAY_TRAINING);
+}
+
+public kniferound_player_leave(id) {
+	switch (g_iMatchStatus) {
+		case MATCH_CAPTAINKNIFE: {
+			if (g_ePlayerInfo[id][PLAYER_ROLE] == ROLE_CAP_A || g_ePlayerInfo[id][PLAYER_ROLE] == ROLE_CAP_B) {
+				chat_print(0, "[^3HNSRU^1] Captain ^3%n^1 leave, stop captain knife mode.", id);
+				captain_stop(id);
+				training_start();
+			}
+		}
+	}
+	transferUserToSpec(id);
 }
 
 public kniferound_player_join(id) {
