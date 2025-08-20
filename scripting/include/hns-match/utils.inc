@@ -152,3 +152,23 @@ remove_entity_m(const Zone[]) {
 	set_member_game(m_bMapHasBuyZone, true);
 	set_member_game(m_bMapHasBombZone, false);
 }
+
+public LogSendMessage(szData[1024], any:...) {
+	if (!g_bDebugMode) {
+		return
+	}
+	new szLogFile[128];
+
+	new szPath[128];
+	formatex(szPath, charsmax(szPath), "%s", g_szLogPath);
+
+	new szTime[22];
+	get_time("%m_%d", szTime, charsmax(szTime));
+	formatex(szLogFile, charsmax(szLogFile), "%s/%s.log", szPath, szTime);
+
+	new msgFormated[1024];
+
+	vformat(msgFormated, charsmax(msgFormated), szData, 2);
+
+	log_to_file(szLogFile, msgFormated)
+}

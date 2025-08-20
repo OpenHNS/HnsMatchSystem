@@ -16,7 +16,7 @@ public training_player_leave(id) {
 		case MATCH_CAPTAINPICK: {
 			if (g_ePlayerInfo[id][PLAYER_ROLE] == ROLE_CAP_A || g_ePlayerInfo[id][PLAYER_ROLE] == ROLE_CAP_B) {
 				chat_print(0, "[^3HNSRU^1] Captain ^3%n^1 leave, stop captain mode.", id);
-				captain_stop(id);
+				captain_stop();
 			}
 		}
 		case MATCH_TEAMPICK: {

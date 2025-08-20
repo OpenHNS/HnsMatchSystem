@@ -16,6 +16,8 @@
 
 new bool:g_bDebugMode;
 
+new g_szLogPath[64];
+
 new g_PluginId;
 
 enum NATCH_RULES {

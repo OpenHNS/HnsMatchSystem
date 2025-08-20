@@ -4,6 +4,69 @@
 
 #define _user_included
 
+// Присвоить игроку роль
+stock hns_set_user_role(id, PLAYER_ROLES:eRole) {
+	g_ePlayerInfo[id][PLAYER_ROLE] = eRole;
+	g_ePlayerInfo[id][PLAYER_MATCH] = true;
+
+	LogSendMessage("[MATCH] Player (%n) set role (%d)", id, g_ePlayerInfo[id][PLAYER_ROLE]);
+}
+
+// Если игрок имеет указаную роль
+stock bool:hns_is_user_role(id, PLAYER_ROLES:eRole) {
+	if (g_ePlayerInfo[id][PLAYER_ROLE] == eRole) {
+		return true;
+	}
+
+	return false;
+}
+
+// Получить id капитана указанной роли
+stock hns_get_captain_role(PLAYER_ROLES:eRole) {
+	new iPlayers[MAX_PLAYERS], iNum;
+	get_players(iPlayers, iNum, "ch");
+
+	for (new i; i < iNum; i++) {
+		new id = iPlayers[i];
+
+		if (g_ePlayerInfo[id][PLAYER_ROLE] == eRole) {
+			return id;
+		}
+	}
+
+	return 0;
+}
+
+// На основе ролей проверяет и распределяет по командам
+stock hns_distribute_roles_teams() {
+	new iPlayers[MAX_PLAYERS], iNum;
+	get_players(iPlayers, iNum, "ch");
+
+	for (new i; i < iNum; i++) {
+		new id = iPlayers[i];
+
+		switch (g_ePlayerInfo[id][PLAYER_ROLE]) {
+			case ROLE_SPEC: {
+				if (getUserTeam(id) != TEAM_SPECTATOR) {
+					transferUserToSpec(id);
+				}
+			}
+			case ROLE_CAP_A, ROLE_TEAM_A: {
+				if (getUserTeam(id) != TEAM_TERRORIST) {
+					rg_set_user_team(id, TEAM_TERRORIST);
+					rg_round_respawn(id);
+				}
+			}
+			case ROLE_CAP_B, ROLE_TEAM_B: {
+				if (getUserTeam(id) != TEAM_CT) {
+					rg_set_user_team(id, TEAM_CT);
+					rg_round_respawn(id);
+				}
+			}
+		}
+	}
+}
+
 stock getUserKey(id) {
 	new szAuth[24];
 	get_user_authid(id, szAuth, charsmax(szAuth));

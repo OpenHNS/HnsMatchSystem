@@ -87,7 +87,7 @@ public kniferound_roundstart() {
 public kniferound_roundend(bool:win_ct) {
 	switch(g_iMatchStatus) {
 		case MATCH_CAPTAINKNIFE: {
-			g_iCaptainPick = win_ct ? g_iCaptainSecond : g_iCaptainFirst;
+			g_iCaptainPick = win_ct ? hns_get_captain_role(ROLE_CAP_B) : hns_get_captain_role(ROLE_CAP_A);
 
 			setTaskHud(0, 2.0, 1, 255, 255, 255, 3.0, fmt("%L", LANG_SERVER, "HUD_CAPWIN", g_iCaptainPick));
 
@@ -96,6 +96,8 @@ public kniferound_roundend(bool:win_ct) {
 			g_iMatchStatus = MATCH_TEAMPICK;
 
 			g_eMatchState = STATE_DISABLED;
+
+			LogSendMessage("[MATCH] Captain (%n) win kf, choose player.", g_iCaptainPick);
 
 			pickMenu(g_iCaptainPick, true);
 
@@ -127,14 +129,14 @@ public kniferound_roundend(bool:win_ct) {
 public kniferound_player_leave(id) {
 	switch (g_iMatchStatus) {
 		case MATCH_CAPTAINKNIFE: {
-			if (g_ePlayerInfo[id][PLAYER_ROLE] == ROLE_CAP_A || g_ePlayerInfo[id][PLAYER_ROLE] == ROLE_CAP_B) {
+			if (hns_is_user_role(id, ROLE_CAP_A) || hns_is_user_role(id, ROLE_CAP_B)) {
+				LogSendMessage("[MATCH] Player captain (%n) leave! (MATCH_CAPTAINKNIFE)", id);
 				chat_print(0, "[^3HNSRU^1] Captain ^3%n^1 leave, stop captain knife mode.", id);
-				captain_stop(id);
+				captain_stop();
 				training_start();
 			}
 		}
 	}
-	transferUserToSpec(id);
 }
 
 public kniferound_player_join(id) {

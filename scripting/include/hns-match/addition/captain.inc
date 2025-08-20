@@ -5,6 +5,11 @@
 #define _captain_included
 
 new Float:RandomPickTime;
+/*
+
+LogSendMessage("[MATCH]");
+
+*/
 
 public captain_start(id) {
 	resetCaptainData();
@@ -18,9 +23,11 @@ public captain_start(id) {
 	chooseCapsMenu(id);
 
 	chat_print(0, "%L", LANG_PLAYER, "CAP_CHOOSE", id);
+
+	LogSendMessage("[MATCH] Start captain");
 }
 
-public captain_stop(id) {
+public captain_stop() {
 	resetCaptainData();
 	g_iMatchStatus = MATCH_NONE;
 }
@@ -44,8 +51,9 @@ public chooseCapsMenu(id) {
 	for (new i; i < iNum; i++) {
 		iPlayer = iPlayers[i];
 
-		if (iPlayer == g_iCaptainFirst || iPlayer == g_iCaptainSecond)
+		if (g_ePlayerInfo[iPlayer][PLAYER_ROLE] == ROLE_CAP_A || g_ePlayerInfo[iPlayer][PLAYER_ROLE] == ROLE_CAP_B) {
 			continue;
+		}
 
 		num_to_str(iPlayer, szPlayer, charsmax(szPlayer));
 
@@ -128,10 +136,12 @@ public chooseCapsHandler(id, hMenu, item) {
 		}
 	}
 
-	if (!g_iCaptainFirst) {
-		g_iCaptainFirst = iPlayer;
-		g_ePlayerInfo[g_iCaptainFirst][PLAYER_ROLE] = ROLE_CAP_A;
-		g_ePlayerInfo[id][PLAYER_MATCH] = true;
+	new iCaptainA = hns_get_captain_role(ROLE_CAP_A);
+	new iCaptainB = hns_get_captain_role(ROLE_CAP_B);
+
+	if (!iCaptainA) {
+
+		hns_set_user_role(iPlayer, ROLE_CAP_A);
 		
 		if (hns_mysql_stats_init()) {
 			chat_print(0, "%L", LANG_PLAYER, "CAP_FIRST_PTS", iPlayer, hns_mysql_stats_data(iPlayer, e_iPts), hns_mysql_stats_skill(iPlayer));
@@ -143,10 +153,9 @@ public chooseCapsHandler(id, hMenu, item) {
 			chat_print(0, "%L", LANG_PLAYER, "CAP_FIRST", iPlayer);
 		}
 		chooseCapsMenu(id);
-	} else if (!g_iCaptainSecond) {
-		g_iCaptainSecond = iPlayer;
-		g_ePlayerInfo[g_iCaptainSecond][PLAYER_ROLE] = ROLE_CAP_B;
-		g_ePlayerInfo[id][PLAYER_MATCH] = true;
+	} else if (!iCaptainB) {
+
+		hns_set_user_role(iPlayer, ROLE_CAP_B);
 
 		if (hns_mysql_stats_init()) {
 			chat_print(0, "%L", LANG_PLAYER, "CAP_SECOND_PTS", iPlayer, hns_mysql_stats_data(iPlayer, e_iPts), hns_mysql_stats_skill(iPlayer));
@@ -157,10 +166,10 @@ public chooseCapsHandler(id, hMenu, item) {
 		} else {
 			chat_print(0, "%L", LANG_PLAYER, "CAP_SECOND", iPlayer);
 		}
-		if (is_user_connected(g_iCaptainFirst) && is_user_connected(g_iCaptainSecond)) {
+		if (is_user_connected(iCaptainA) && is_user_connected(iCaptainB)) {
 			g_isTeamTT = HNS_TEAM_A;
-			rg_set_user_team(g_iCaptainFirst, TEAM_TERRORIST);
-			rg_set_user_team(g_iCaptainSecond, TEAM_CT);
+			rg_set_user_team(iCaptainA, TEAM_TERRORIST);
+			rg_set_user_team(iCaptainB, TEAM_CT);
 
 			g_iMatchStatus = MATCH_CAPTAINKNIFE;
 
@@ -186,8 +195,7 @@ public pickMenu(id, bool:bStartWait) {
 		return PLUGIN_HANDLED;
 	}
 
-	if(bStartWait == true && g_iSettings[RANDOMPICK] == 1)
-	{
+	if(bStartWait == true && g_iSettings[RANDOMPICK] == 1) {
 		WaitPick();
 	}
 
@@ -203,12 +211,15 @@ public pickMenu(id, bool:bStartWait) {
 	for (new i; i < iNum; i++) {
 		iPlayer = iPlayers[i];
 
+		if (!hns_is_user_role(id, ROLE_SPEC)) {
+			continue;
+		}
+
 		num_to_str(iPlayer, szPlayer, charsmax(szPlayer));
 
 		if ((g_bHnsBannedInit && e_bBanned[iPlayer]) || g_bNoplay[iPlayer]) {
 			add(szBuffer, charsmax(szBuffer), fmt("\d%n ", iPlayer));
-		}
-		else {
+		} else {
 			add(szBuffer, charsmax(szBuffer), fmt("%n ", iPlayer));
 		}
 
@@ -305,25 +316,34 @@ public pickHandler(id, hMenu, item) {
 		chat_print(0, "%L", LANG_PLAYER, "PLAYER_CHOOSE", id, iPlayer);
 	}
 
-	if (g_ePlayerInfo[id][PLAYER_ROLE] == ROLE_CAP_A) {
-		g_ePlayerInfo[iPlayer][PLAYER_ROLE] = ROLE_TEAM_A;
-		g_ePlayerInfo[id][PLAYER_MATCH] = true;
-		g_iCaptainPick = g_iCaptainSecond;
+	if (hns_is_user_role(id, ROLE_CAP_A)) {
+		hns_set_user_role(iPlayer, ROLE_TEAM_A);
 	} else {
-		g_ePlayerInfo[iPlayer][PLAYER_ROLE] = ROLE_TEAM_B;
-		g_ePlayerInfo[id][PLAYER_MATCH] = true;
-		g_iCaptainPick = g_iCaptainFirst;
+		hns_set_user_role(iPlayer, ROLE_TEAM_B);
 	}
+
+	hns_distribute_roles_teams();
 
 	rg_set_user_team(iPlayer, getUserTeam(id));
 	rg_round_respawn(iPlayer);
 
-	if (!is_user_connected(g_iCaptainSecond) || !is_user_connected(g_iCaptainFirst)) {
-		g_iCaptainPick = -1;
-	} else {
+	// TODO: Вынести в отдельную функцию
+	new iCaptainA = hns_get_captain_role(ROLE_CAP_A);
+	new iCaptainB = hns_get_captain_role(ROLE_CAP_B);
+
+	if (iCaptainA && iCaptainB) {
+		g_iCaptainPick = g_iCaptainPick == iCaptainA ? iCaptainB : iCaptainA;
+
+		LogSendMessage("[MATCH] Captain (%n) pick (%n), next pick menu (%n)", id, iPlayer, g_iCaptainPick);
+
 		pickMenu(g_iCaptainPick, true);
+
+		checkFullTeams();
+	} else {
+		// TODO: Придумать если капитан ливнул
+		// Капитан ливнул, 10 сек отчета, если не вернулся то дать другому игроку капитана ?
 	}
-	checkFullTeams();
+	// TODO: Вынести в отдельную функцию
 
 	return PLUGIN_HANDLED;
 }
@@ -365,7 +385,24 @@ public wait_function(id)
 			rg_round_respawn(randomaizer);
 			chat_print(0, "%L", LANG_PLAYER, "PLAYER_CHOOSE_RANDOM", pPlayer, randomaizer);
 
-			g_iCaptainPick = g_iCaptainPick == g_iCaptainFirst ? g_iCaptainSecond : g_iCaptainFirst;
+			// TODO: Вынести в отдельную функцию
+			new iCaptainA = hns_get_captain_role(ROLE_CAP_A);
+			new iCaptainB = hns_get_captain_role(ROLE_CAP_B);
+
+			if (iCaptainA && iCaptainB) {
+				g_iCaptainPick = g_iCaptainPick == iCaptainA ? iCaptainB : iCaptainA;
+
+				LogSendMessage("[MATCH] Captain (%n) pick (%n), next pick menu (%n)", id, pPlayer, g_iCaptainPick);
+
+				pickMenu(g_iCaptainPick, true);
+
+				checkFullTeams();
+			} else {
+				// TODO: Придумать если капитан ливнул
+				// Капитан ливнул, 10 сек отчета, если не вернулся то дать другому игроку капитана ?
+			}
+			// TODO: Вынести в отдельную функцию
+
 			show_menu(pPlayer, 0, "^n", 1);
 
 			if (task_exists(TASK_WAITCAP)) {
@@ -395,19 +432,24 @@ GetPickRandom() {
 	new iSpecPlayers[MAX_PLAYERS], iSpecNum;
 
 	for (new i; i < iNum; i++) {
-		if (!is_user_connected(iPlayers[i])) {
+		new id = iPlayers[i]
+		if (!is_user_connected(id)) {
 			continue;
 		}
 
-		if (g_bNoplay[iPlayers[i]]) {
+		if (g_bNoplay[id]) {
 			continue;
 		}
 
-		if (g_bHnsBannedInit && e_bBanned[iPlayers[i]]) {
+		if (g_bHnsBannedInit && e_bBanned[id]) {
 			continue;
 		}
 
-		iSpecPlayers[iSpecNum] = iPlayers[i];
+		if (!hns_is_user_role(id, ROLE_SPEC)) {
+			continue;
+		}
+
+		iSpecPlayers[iSpecNum] = id;
 		iSpecNum++;
 	}
 
@@ -441,14 +483,14 @@ public checkFullTeams() {
 			continue;
 		}
 
-		if (getUserTeam(tempid) == TEAM_SPECTATOR) {
+		if (hns_is_user_role(tempid, ROLE_SPEC)) {
 			iPlayersNotMatch++;
-			continue;
+		} else {
+			iPlayersMatch++;
 		}
-
-		iPlayersMatch++;
 	}
 
+	// [Если игроков в матче 10] || [Если нет игроков в спеках] || [(Количество игроков чётное) и (максимум 1 в спеках)]
 	if (iPlayersMatch == 10 || !iPlayersNotMatch || (iPlayersMatch % 2 == 0) && (iPlayersNotMatch <= 1)) {
 		resetCaptainData();
 		chat_print(0, "%L", LANG_PLAYER, "TEAM_FULL"); // TODO: Чат: Ножевой раунд начнется через 5 сек

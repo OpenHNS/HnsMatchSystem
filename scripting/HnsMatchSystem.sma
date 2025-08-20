@@ -5,6 +5,14 @@ public plugin_precache() {
 	precache_sound(sndUseSound);
 }
 
+public plugin_cfg() {
+	get_localinfo("amxx_logs", g_szLogPath, charsmax(g_szLogPath));
+	add(g_szLogPath, charsmax(g_szLogPath), "/hnsmatchsystem");
+
+	if (!dir_exists(g_szLogPath))
+		mkdir(g_szLogPath);
+}
+
 public plugin_init() {
 	g_PluginId = register_plugin("Hide'n'Seek Match System", "2.0.5.1", "OpenHNS"); // Спасибо: Cultura, Garey, Medusa, Ruffman, Conor, Juice
 
