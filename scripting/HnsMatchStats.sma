@@ -61,7 +61,6 @@ new Trie:g_tSaveData;
 new Trie:g_tSaveRoundData;
 
 new g_hApplyStatsForward;
-new g_hSaveLeaveForward;
 
 public plugin_init() {
 	register_plugin("Match: Stats", "1.2", "OpenHNS"); // Garey
@@ -74,8 +73,7 @@ public plugin_init() {
 	RegisterHookChain(RG_CSGameRules_OnRoundFreezeEnd, "rgRoundFreezeEnd", true);
 	RegisterHookChain(RG_PlayerBlind, "rgPlayerBlind");
 
-	g_hApplyStatsForward = CreateMultiForward("hns_apply_stats", ET_CONTINUE, FP_CELL);
-	g_hSaveLeaveForward = CreateMultiForward("hns_save_leave_stats", ET_CONTINUE, FP_CELL);
+	g_hApplyStatsForward = CreateMultiForward("hns_apply_stats", ET_CONTINUE);
 
 	g_tSaveData = TrieCreate();
 	g_tSaveRoundData = TrieCreate();
@@ -177,8 +175,13 @@ public Float:native_get_stats_avg_speed(amxx, params) {
 	if (get_param(type) == STATS_ROUND) {
 		return g_StatsRound[get_param(id)][PLR_STATS_AVG_SPEED];
 	}
-	// return iStats[get_param(id)][PLR_STATS_AVG_SPEED] + g_StatsRound[get_param(id)][PLR_STATS_AVG_SPEED];
-	return iStats[get_param(id)][PLR_STATS_AVG_SPEED];
+	new Float:runned_time = iStats[get_param(id)][PLR_STATS_RUNNEDTIME] + g_StatsRound[get_param(id)][PLR_STATS_RUNNEDTIME];
+	if (runned_time == 0.0) {
+		return 0.0; // Avoid division by zero
+	}
+	new Float:run_distance = iStats[get_param(id)][PLR_STATS_RUNNED] + g_StatsRound[get_param(id)][PLR_STATS_RUNNED];
+
+	return floatdiv(run_distance, runned_time);
 }
 
 public Float:native_get_stats_flashtime(amxx, params) {
@@ -292,16 +295,10 @@ public client_putinserver(id) {
 		arrayset(iStats[id], 0, PLAYER_STATS);
 }
 
-public hns_player_leave_inmatch(id) {
-	server_print("hns_player_leave_inmatch (%n)", id);
+public client_disconnected(id) {
 	if ((iStats[id][PLR_TEAM] == TEAM_TERRORIST || iStats[id][PLR_TEAM] == TEAM_CT) && (hns_get_mode() == MODE_MIX || hns_get_state() == STATE_PAUSED)) {
 		iStats[id][PLR_STATS_STOPS] = g_iGameStops;
 	}
-
-	ExecuteForward(g_hSaveLeaveForward, _, id);
-
-	server_print("hns_player_leave_inmatch ExecuteForward (%n)", id);
-
 	TrieSetArray(g_tSaveData, getUserKey(id), iStats[id], PLAYER_STATS);
 	TrieSetArray(g_tSaveRoundData, getUserKey(id), g_StatsRound[id], PLAYER_STATS);
 
@@ -507,9 +504,12 @@ public hns_match_finished() {
 		iStats[id][PLR_STATS_FLASHTIME] += g_StatsRound[id][PLR_STATS_FLASHTIME];
 		iStats[id][PLR_STATS_RUNNED] += g_StatsRound[id][PLR_STATS_RUNNED];
 		iStats[id][PLR_STATS_SURVTIME] += g_StatsRound[id][PLR_STATS_SURVTIME];
+		iStats[id][PLR_STATS_PLAYTIME] += g_StatsRound[id][PLR_STATS_PLAYTIME];
+		iStats[id][PLR_STATS_HIDETIME] += g_StatsRound[id][PLR_STATS_HIDETIME];
+		iStats[id][PLR_STATS_RUNNEDTIME] += g_StatsRound[id][PLR_STATS_RUNNEDTIME];
 	}
 
-	ExecuteForward(g_hApplyStatsForward, _, 1);
+	ExecuteForward(g_hApplyStatsForward, _);
 }
 
 public hns_match_finished_post() {
@@ -528,7 +528,7 @@ public hns_round_end() {
 			remove_task(TASK_TIMER_STATS);
 		}
 	
-		ExecuteForward(g_hApplyStatsForward, _, 0);
+		ExecuteForward(g_hApplyStatsForward, _);
 
 		new iPlayers[MAX_PLAYERS], iNum;
 		get_players(iPlayers, iNum, "ch");

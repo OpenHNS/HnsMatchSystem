@@ -583,7 +583,7 @@ public task_ShowPlayerInfo() {
 		if (g_HudOnOff[id]) {
 			set_hudmessage(.red = 100, .green = 100, .blue = 100, .x = 0.01, .y = 0.25, .holdtime = 1.0);
 			new szHudMess[1024], iLen;
-			//if (show_id != id) {
+			if (show_id != id) {
 				if (hns_mysql_stats_init()) {
 					iLen += format(szHudMess[iLen], sizeof szHudMess - iLen, "\
 					Player: %n (#%d)^n\
@@ -604,7 +604,7 @@ public task_ShowPlayerInfo() {
 					Player: %n^n^n", 
 					show_id);	
 				}
-			//}
+			}
 
 			if (hns_get_mode() == MODE_MIX && hns_get_state() != STATE_PAUSED && hns_get_rules() != RULES_DUEL) {
 				new szTime[24];

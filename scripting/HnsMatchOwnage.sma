@@ -47,14 +47,15 @@ public touchPlayer(iToucher, iTouched) {
 			set_dhudmessage(250, 255, 0, -1.0, 0.15, 0, 0.0, 5.0, 0.1, 0.1);
 			if (hns_mysql_stats_init() && hns_get_mode() == MODE_MIX && hns_get_state() == STATE_ENABLED) {
 				show_dhudmessage(0, "%L", LANG_PLAYER, "HNS_OWNAGE_MIX", iToucher, iTouched, hns_mysql_stats_get_ownage(iToucher));
+				g_flLastHeadTouch[iToucher] = flGametime;
+				rg_send_audio(0, g_szSound[random(sizeof(g_szSound))]);
 				hns_mysql_stats_set_ownage(iToucher);
-			} else if (hns_get_mode() == MODE_PUB || hns_get_mode() == MODE_DM || hns_get_mode() == MODE_ZM) {
-				show_dhudmessage(0, "%L", LANG_PLAYER, "HNS_OWNAGE", iToucher, iTouched);
 			}
 			
 			if (hns_get_mode() == MODE_MIX || hns_get_mode() == MODE_PUB || hns_get_mode() == MODE_DM || hns_get_mode() == MODE_ZM) {
 				g_flLastHeadTouch[iToucher] = flGametime;
 				rg_send_audio(0, g_szSound[random(sizeof(g_szSound))]);
+				show_dhudmessage(0, "%L", LANG_PLAYER, "HNS_OWNAGE", iToucher, iTouched);
 			}
 
 			ExecuteForward(g_hForwardOwnage, _, iToucher, iTouched);
