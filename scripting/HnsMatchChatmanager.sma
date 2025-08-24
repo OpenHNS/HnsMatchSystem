@@ -367,7 +367,7 @@ public FormatMessage(sender, CsTeams:sender_team, channel, name_color, chat_colo
 		len += formatex(text[len], charsmax(text) - len, "^1[^3%s^1] ", hns_mysql_stats_skill(sender));
 	} else if (hns_api_stats_init()) {
 		new szSkill[10];
-		hns_api_stats_rank(sender, GET_GOOD, szSkill, charsmax(szSkill));
+		hns_api_stats_rank(sender, szSkill, charsmax(szSkill));
 
 		len += formatex(text[len], charsmax(text) - len, "^1[^3%s^1] ", szSkill);
 	}
