@@ -114,6 +114,7 @@ enum PLAYER_ROLES {
 enum _: PLAYER_INFO {
 	PLAYER_ROLES:PLAYER_ROLE,
 	bool:PLAYER_MATCH,
+	bool:IS_PICK_ME,
 	PLAYER_TEAM[16],
 	LEAVE_IN_ROUND
 };
@@ -121,6 +122,7 @@ enum _: PLAYER_INFO {
 new g_ePlayerInfo[MAX_PLAYERS + 1][PLAYER_INFO];
 
 new g_iCaptainPick;
+new g_iCaptainPickSteam[MAX_AUTHID_LENGTH];
 
 new g_iCaptainFirst;
 new g_iCaptainSecond;

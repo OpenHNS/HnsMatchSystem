@@ -88,6 +88,7 @@ public kniferound_roundend(bool:win_ct) {
 	switch(g_iMatchStatus) {
 		case MATCH_CAPTAINKNIFE: {
 			g_iCaptainPick = win_ct ? hns_get_captain_role(ROLE_CAP_B) : hns_get_captain_role(ROLE_CAP_A);
+			get_user_authid(g_iCaptainPick, g_iCaptainPickSteam, charsmax(g_iCaptainPickSteam))
 
 			setTaskHud(0, 2.0, 1, 255, 255, 255, 3.0, fmt("%L", LANG_SERVER, "HUD_CAPWIN", g_iCaptainPick));
 
@@ -131,7 +132,7 @@ public kniferound_player_leave(id) {
 		case MATCH_CAPTAINKNIFE: {
 			if (hns_is_user_role(id, ROLE_CAP_A) || hns_is_user_role(id, ROLE_CAP_B)) {
 				LogSendMessage("[MATCH] Player captain (%n) leave! (MATCH_CAPTAINKNIFE)", id);
-				chat_print(0, "[^3HNSRU^1] Captain ^3%n^1 leave, stop captain knife mode.", id);
+				chat_print(0, "Captain ^3%n^1 leave, stop captain knife mode.", id);
 				captain_stop();
 				training_start();
 			}

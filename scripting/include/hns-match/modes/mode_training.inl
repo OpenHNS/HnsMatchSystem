@@ -44,26 +44,43 @@ public training_player_join(id) {
 
 			if (g_iMatchStatus == MATCH_TEAMPICK && (g_ePlayerInfo[id][PLAYER_ROLE] == ROLE_CAP_A || g_ePlayerInfo[id][PLAYER_ROLE] == ROLE_CAP_B)) {
 				if (g_iCaptainPick == -1) {
+					LogSendMessage("[MATCH] (g_iCaptainPick == -1) (%n)", id);
 					if (g_ePlayerInfo[id][PLAYER_ROLE] == ROLE_CAP_A) {
 						g_iCaptainFirst = id;
 						g_iCaptainPick = g_iCaptainFirst;
+						get_user_authid(g_iCaptainPick, g_iCaptainPickSteam, charsmax(g_iCaptainPickSteam))
 					} else {
 						g_iCaptainSecond = id;
 						g_iCaptainPick = g_iCaptainSecond;
+						get_user_authid(g_iCaptainPick, g_iCaptainPickSteam, charsmax(g_iCaptainPickSteam))
 					}
 
 					if (task_exists(TASK_WAITLEAVECAP)) {
-						remove_task(TASK_WAITLEAVECAP)
+						remove_task(TASK_WAITLEAVECAP);
 					}
 					
 					pickMenu(g_iCaptainPick, true);
 				} else if (g_ePlayerInfo[id][PLAYER_ROLE] == ROLE_CAP_A) {
 					if (hns_get_role_num(ROLE_CAP_A) > 1) {
 						g_ePlayerInfo[id][PLAYER_ROLE] = ROLE_TEAM_A;
+					} else {
+						new szTmpAuth[MAX_AUTHID_LENGTH]
+						get_user_authid(g_iCaptainPick, szTmpAuth, charsmax(szTmpAuth))
+						if (equal(g_iCaptainPickSteam, szTmpAuth)) {
+							g_iCaptainFirst = id;
+							g_iCaptainPick = g_iCaptainFirst;
+						}
 					}
 				} else if (g_ePlayerInfo[id][PLAYER_ROLE] == ROLE_CAP_B) {
 					if (hns_get_role_num(ROLE_CAP_B) > 1) {
 						g_ePlayerInfo[id][PLAYER_ROLE] = ROLE_TEAM_B;
+					} else {
+						new szTmpAuth[MAX_AUTHID_LENGTH]
+						get_user_authid(g_iCaptainPick, szTmpAuth, charsmax(szTmpAuth))
+						if (equal(g_iCaptainPickSteam, szTmpAuth)) {
+							g_iCaptainSecond = id;
+							g_iCaptainPick = g_iCaptainSecond;
+						}
 					}
 				}
 			}
