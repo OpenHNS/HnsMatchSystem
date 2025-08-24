@@ -5,6 +5,7 @@
 #define _captain_included
 
 new Float:RandomPickTime;
+new Float:CaptainLeaveTime;
 /*
 
 LogSendMessage("[MATCH]");
@@ -14,11 +15,22 @@ LogSendMessage("[MATCH]");
 public captain_start(id) {
 	resetCaptainData();
 
+	hns_reset_users_roles();
+
 	g_iMatchStatus = MATCH_CAPTAINPICK;
 
-	training_start();
+	g_iCurrentMode = MODE_TRAINING;
 
-	transferUsers(TEAM_SPECTATOR);
+	new iPlayers[MAX_PLAYERS], iNum;
+	get_players(iPlayers, iNum, "ch");
+	for (new i; i < iNum; i++) {
+		new iPlayer = iPlayers[i];
+
+		if (getUserTeam(iPlayer) == TEAM_SPECTATOR)
+			continue;
+
+		transferUserToSpec(iPlayer);
+	}
 	
 	chooseCapsMenu(id);
 
@@ -38,6 +50,8 @@ public chooseCapsMenu(id) {
 
 	if (g_iMatchStatus != MATCH_CAPTAINPICK)
 		return PLUGIN_HANDLED;
+
+	LogSendMessage("[MATCH] chooseCapsMenu(%n)", id);
 
 	new szMsg[64];
 
@@ -97,6 +111,8 @@ public chooseCapsMenu(id) {
 }
 
 public chooseCapsHandler(id, hMenu, item) {
+	LogSendMessage("[MATCH] chooseCapsHandler (%d)", id);
+
 	if (!is_user_connected(id)) {
 		menu_destroy(hMenu);
 		return PLUGIN_HANDLED;
@@ -139,6 +155,8 @@ public chooseCapsHandler(id, hMenu, item) {
 	new iCaptainA = hns_get_captain_role(ROLE_CAP_A);
 	new iCaptainB = hns_get_captain_role(ROLE_CAP_B);
 
+	LogSendMessage("[MATCH] GET CAPTAINS ROLE (%d) (%d)", iCaptainA, iCaptainB);
+
 	if (!iCaptainA) {
 
 		hns_set_user_role(iPlayer, ROLE_CAP_A);
@@ -166,6 +184,10 @@ public chooseCapsHandler(id, hMenu, item) {
 		} else {
 			chat_print(0, "%L", LANG_PLAYER, "CAP_SECOND", iPlayer);
 		}
+
+		iCaptainB = hns_get_captain_role(ROLE_CAP_B);
+
+
 		if (is_user_connected(iCaptainA) && is_user_connected(iCaptainB)) {
 			g_isTeamTT = HNS_TEAM_A;
 			rg_set_user_team(iCaptainA, TEAM_TERRORIST);
@@ -195,9 +217,12 @@ public pickMenu(id, bool:bStartWait) {
 		return PLUGIN_HANDLED;
 	}
 
+	// TODO: Сбрасывается если /pick?
 	if(bStartWait == true && g_iSettings[RANDOMPICK] == 1) {
 		WaitPick();
 	}
+
+	LogSendMessage("[MATCH] pickMenu (%n)", id);
 
 	new szMsg[64];
 
@@ -342,6 +367,19 @@ public pickHandler(id, hMenu, item) {
 	} else {
 		// TODO: Придумать если капитан ливнул
 		// Капитан ливнул, 10 сек отчета, если не вернулся то дать другому игроку капитана ?
+		if (!iCaptainA) {
+			LogSendMessage("[HNSRU] Captain team TT leave! Wait join captain 10 sec.");
+			chat_print(0, "[^3HNSRU^1] Captain team TT leave! Wait join captain 10 sec.");
+		} else if (!iCaptainB) {
+			LogSendMessage("[HNSRU] Captain team CT leave! Wait join captain 10 sec.");
+			chat_print(0, "[^3HNSRU^1] Captain team CT leave! Wait join captain 10 sec.");
+		}
+
+		RandomPickTime = 1.0;
+		
+		WaitLeaveCap();
+
+		g_iCaptainPick = -1;
 	}
 	// TODO: Вынести в отдельную функцию
 
@@ -392,7 +430,7 @@ public wait_function(id)
 			if (iCaptainA && iCaptainB) {
 				g_iCaptainPick = g_iCaptainPick == iCaptainA ? iCaptainB : iCaptainA;
 
-				LogSendMessage("[MATCH] Captain (%n) pick (%n), next pick menu (%n)", id, pPlayer, g_iCaptainPick);
+				LogSendMessage("[MATCH] pick (%n), next pick menu (%n)", pPlayer, g_iCaptainPick);
 
 				pickMenu(g_iCaptainPick, true);
 
@@ -419,6 +457,9 @@ public wait_function(id)
 			if (task_exists(TASK_WAITCAP)) {
 				remove_task(TASK_WAITCAP)
 			}
+
+			LogSendMessage("[MATCH] wait_function - Players not found");
+			chat_print(0, "[MATCH] wait_function - Players not found");
 		}
 	}
 }
@@ -426,7 +467,7 @@ public wait_function(id)
 
 GetPickRandom() {
 	new iChoose;
-	static iPlayers[MAX_PLAYERS], iNum
+	static iPlayers[MAX_PLAYERS], iNum;
 	get_players(iPlayers, iNum, "che", "SPECTATOR");
 
 	new iSpecPlayers[MAX_PLAYERS], iSpecNum;
@@ -500,6 +541,110 @@ public checkFullTeams() {
 }
 
 // Тут реализовать время ожидания.
+
+public WaitLeaveCap() {
+	if (g_iMatchStatus != MATCH_TEAMPICK) {
+		if (task_exists(TASK_WAITLEAVECAP)) {
+			remove_task(TASK_WAITLEAVECAP)
+		}
+		return;
+	}
+
+	new iCaptainA = hns_get_captain_role(ROLE_CAP_A);
+	new iCaptainB = hns_get_captain_role(ROLE_CAP_B);
+
+	if (!iCaptainA || !iCaptainB) {
+		if (task_exists(TASK_WAITCAP)) {
+			remove_task(TASK_WAITCAP)
+		}
+
+		setTaskHud(0, 0.0, 1, 255, 255, 255, 1.0, "Captain leave! Wait %d sec.", CaptainLeaveTime);
+
+		CaptainLeaveTime -= 1.0;
+
+		if(CaptainLeaveTime <= 0.0) {
+			// Выдать нового капитана.
+			new iChoose;
+			static iPlayers[MAX_PLAYERS], iNum;
+			new iRandomPlayers[MAX_PLAYERS], iRandomNum;
+
+			if (!iCaptainA) {
+				get_players(iPlayers, iNum, "che", "TERRORIST");
+				for (new i; i < iNum; i++) {
+					new id = iPlayers[i];
+
+					if (!hns_is_user_role(id, ROLE_TEAM_A)) {
+						continue;
+					}
+
+					iRandomPlayers[iRandomNum] = id;
+					iRandomNum++;
+				}
+
+				if (iRandomNum == 0) {
+					// TODO: Обработать ошибку
+					chat_print(0, "[MATCH] ОШИБКА, НЕТ ИГРОКОВ В КОМАНДЕ ТТ");
+					LogSendMessage("[MATCH] ОШИБКА, НЕТ ИГРОКОВ В КОМАНДЕ ТТ");
+				}
+
+				if (iRandomNum > 1) {
+					iChoose = iRandomPlayers[random(iRandomNum)];
+				} else {
+					iChoose = iRandomPlayers[iRandomNum - 1];
+				}
+
+				hns_set_user_role(iChoose, ROLE_CAP_A);
+				chat_print(0, "[^3HNSRU^1] New captain team TT ^3%n^1", iChoose);
+
+				g_iCaptainFirst = iChoose;
+				g_iCaptainPick = g_iCaptainFirst;
+				pickMenu(g_iCaptainPick, true);
+			}
+
+			iRandomNum = 0;
+			iNum = 0;
+
+			if (!iCaptainB) {
+				get_players(iPlayers, iNum, "che", "CT");
+				for (new i; i < iNum; i++) {
+					new id = iPlayers[i];
+
+					if (!hns_is_user_role(id, ROLE_TEAM_B)) {
+						continue;
+					}
+
+					iRandomPlayers[iRandomNum] = id;
+					iRandomNum++;
+				}
+
+				if (iRandomNum == 0) {
+					// TODO: Обработать ошибку
+					chat_print(0, "[MATCH] ОШИБКА, НЕТ ИГРОКОВ В КОМАНДЕ CТ");
+					LogSendMessage("[MATCH] ОШИБКА, НЕТ ИГРОКОВ В КОМАНДЕ CТ");
+				}
+
+				if (iRandomNum > 1) {
+					iChoose = iRandomPlayers[random(iRandomNum)];
+				} else {
+					iChoose = iRandomPlayers[iRandomNum - 1];
+				}
+
+				hns_set_user_role(iChoose, ROLE_CAP_B);
+				chat_print(0, "[^3HNSRU^1] New captain team CT ^3%n^1", iChoose);
+
+				g_iCaptainSecond = iChoose;
+				g_iCaptainPick = g_iCaptainSecond;
+				pickMenu(g_iCaptainPick, true);
+			}
+		}
+
+	} else {
+		if (task_exists(TASK_WAITLEAVECAP)) {
+			remove_task(TASK_WAITLEAVECAP)
+		}
+	}
+
+}
 
 resetCaptainData() {
 	g_iCaptainPick = 0;

@@ -33,7 +33,7 @@ public training_player_join(id) {
 	TrieGetArray(g_eMatchInfo[e_tLeaveData], getUserKey(id), g_ePlayerInfo[id], PLAYER_INFO);
 
 	if (g_iMatchStatus == MATCH_CAPTAINPICK || g_iMatchStatus == MATCH_TEAMPICK || g_iMatchStatus == MATCH_MAPPICK) {
-		if (g_ePlayerInfo[id][PLAYER_MATCH]) {
+		if (!hns_is_user_role(id, ROLE_SPEC)) {
 			if (g_ePlayerInfo[id][PLAYER_ROLE] == ROLE_TEAM_A || g_ePlayerInfo[id][PLAYER_ROLE] == ROLE_CAP_A) {
 				rg_set_user_team(id, TEAM_TERRORIST);
 				rg_round_respawn(id);
@@ -51,7 +51,20 @@ public training_player_join(id) {
 						g_iCaptainSecond = id;
 						g_iCaptainPick = g_iCaptainSecond;
 					}
+
+					if (task_exists(TASK_WAITLEAVECAP)) {
+						remove_task(TASK_WAITLEAVECAP)
+					}
+					
 					pickMenu(g_iCaptainPick, true);
+				} else if (g_ePlayerInfo[id][PLAYER_ROLE] == ROLE_CAP_A) {
+					if (hns_get_role_num(ROLE_CAP_A) > 1) {
+						g_ePlayerInfo[id][PLAYER_ROLE] = ROLE_TEAM_A;
+					}
+				} else if (g_ePlayerInfo[id][PLAYER_ROLE] == ROLE_CAP_B) {
+					if (hns_get_role_num(ROLE_CAP_B) > 1) {
+						g_ePlayerInfo[id][PLAYER_ROLE] = ROLE_TEAM_B;
+					}
 				}
 			}
 

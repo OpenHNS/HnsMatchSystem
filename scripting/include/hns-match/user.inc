@@ -37,6 +37,23 @@ stock hns_get_captain_role(PLAYER_ROLES:eRole) {
 	return 0;
 }
 
+stock hns_get_role_num(PLAYER_ROLES:eRole) {
+	new iPlayers[MAX_PLAYERS], iNum;
+	get_players(iPlayers, iNum, "ch");
+
+	new out;
+
+	for (new i; i < iNum; i++) {
+		new id = iPlayers[i];
+
+		if (g_ePlayerInfo[id][PLAYER_ROLE] == eRole) {
+			out++;
+		}
+	}
+
+	return out;
+}
+
 // На основе ролей проверяет и распределяет по командам
 stock hns_distribute_roles_teams() {
 	new iPlayers[MAX_PLAYERS], iNum;
@@ -65,6 +82,20 @@ stock hns_distribute_roles_teams() {
 			}
 		}
 	}
+}
+
+// Очистить роли игроков
+stock hns_reset_users_roles() {
+	new iPlayers[MAX_PLAYERS], iNum;
+	get_players(iPlayers, iNum, "ch");
+
+	for (new i; i < iNum; i++) {
+		new id = iPlayers[i];
+
+		g_ePlayerInfo[id][PLAYER_ROLE] = ROLE_SPEC;
+	}
+
+	LogSendMessage("[MATCH] Reset users roles");
 }
 
 stock getUserKey(id) {
