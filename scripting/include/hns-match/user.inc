@@ -24,7 +24,7 @@ stock bool:hns_is_user_role(id, PLAYER_ROLES:eRole) {
 // Получить id капитана указанной роли
 stock hns_get_captain_role(PLAYER_ROLES:eRole) {
 	new iPlayers[MAX_PLAYERS], iNum;
-	get_players(iPlayers, iNum, "c");
+	get_players(iPlayers, iNum, "ch");
 
 	for (new i; i < iNum; i++) {
 		new id = iPlayers[i];
@@ -58,7 +58,7 @@ stock hns_get_role_num(PLAYER_ROLES:eRole) {
 // Рандомный айди игрока указанной роли
 stock hns_get_random_role(PLAYER_ROLES:eRole) {
 	new iPlayers[MAX_PLAYERS], iNum;
-	get_players(iPlayers, iNum, "c");
+	get_players(iPlayers, iNum, "ch");
 
 	new iChoose;
 	new iRandomPlayers[MAX_PLAYERS], iRandomNum;

@@ -25,7 +25,7 @@ public captain_start(id) {
 	g_iCurrentMode = MODE_TRAINING;
 
 	new iPlayers[MAX_PLAYERS], iNum;
-	get_players(iPlayers, iNum, "c");
+	get_players(iPlayers, iNum, "ch");
 	for (new i; i < iNum; i++) {
 		new iPlayer = iPlayers[i];
 
@@ -60,7 +60,7 @@ public chooseCapsMenu(id) {
 	new hMenu = menu_create(szMsg, "chooseCapsHandler");
 
 	new iPlayers[MAX_PLAYERS], iNum, szPlayer[10], iPlayer;
-	get_players(iPlayers, iNum, "c");
+	get_players(iPlayers, iNum, "ch");
 
 	new szBuffer[256];
 	for (new i; i < iNum; i++) {
@@ -232,7 +232,7 @@ public pickMenu(id, bool:bStartWait) {
 	new hMenu = menu_create(szMsg, "pickHandler");
 
 	new iPlayers[MAX_PLAYERS], iNum, szPlayer[10], iPlayer;
-	get_players(iPlayers, iNum, "ce", "SPECTATOR");
+	get_players(iPlayers, iNum, "che", "SPECTATOR");
 
 	new szBuffer[256];
 	for (new i; i < iNum; i++) {
@@ -373,7 +373,7 @@ public WaitPick() {
 		remove_task(TASK_WAITCAP)
 	}
 
-	RandomPickTime = g_iSettings[TIME_RANDOMPICK];
+	RandomPickTime = 5.0;
 
 	LogSendMessage("[MATCH] Wait pick started.");
 
@@ -403,9 +403,16 @@ public wait_function(id) {
 		new iRandomPlayer = hns_get_random_role(ROLE_SPEC);
 		if(iRandomPlayer && (iRandomPlayer != -1)) {
 			new pPlayer = g_iCaptainPick;
-			rg_set_user_team(iRandomPlayer, getUserTeam(pPlayer));
 
+			if (hns_is_user_role(pPlayer, ROLE_CAP_A)) {
+				hns_set_user_role(iRandomPlayer, ROLE_TEAM_A);
+			} else {
+				hns_set_user_role(iRandomPlayer, ROLE_TEAM_B);
+			}
+
+			rg_set_user_team(iRandomPlayer, getUserTeam(pPlayer));
 			rg_round_respawn(iRandomPlayer);
+
 			chat_print(0, "%L", LANG_PLAYER, "PLAYER_CHOOSE_RANDOM", pPlayer, iRandomPlayer);
 
 			next_pick_menu_cap();
@@ -417,6 +424,7 @@ public wait_function(id) {
 			}
 
 			checkFullTeams();
+
 			pickMenu(g_iCaptainPick, true);
 
 			return;
@@ -465,7 +473,7 @@ public next_pick_menu_cap() {
 
 public checkFullTeams() {
 	new iPlayers[MAX_PLAYERS], iNum;
-	get_players(iPlayers, iNum, "c");
+	get_players(iPlayers, iNum, "ch");
 
 	new iPlayersMatch;
 	new iPlayersNotMatch;
@@ -592,7 +600,7 @@ resetCaptainData() {
 	}
 
 	new iPlayers[MAX_PLAYERS], iNum;
-	get_players(iPlayers, iNum, "c");
+	get_players(iPlayers, iNum, "ch");
 
 	for (new i; i < iNum; i++) {
 		new id = iPlayers[i];

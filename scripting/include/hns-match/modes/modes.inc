@@ -55,7 +55,7 @@ public set_cvars_mode(iMode) {
 
 stock set_pause_settings() {
 	new iPlayers[MAX_PLAYERS], iNum;
-	get_players(iPlayers, iNum, "ac");
+	get_players(iPlayers, iNum, "ahc");
 	for (new i; i < iNum; i++) {
 		new iPlayer = iPlayers[i];
 		rg_remove_all_items(iPlayer);

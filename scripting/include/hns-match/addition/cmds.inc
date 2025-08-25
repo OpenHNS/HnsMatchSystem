@@ -622,7 +622,7 @@ public cmdSurrender(id) {
 	}
 
 	new iPlayers[MAX_PLAYERS], iNum;
-	get_players(iPlayers, iNum, "ce", getUserTeam(id) == TEAM_TERRORIST ? "TERRORIST" : "CT");
+	get_players(iPlayers, iNum, "che", getUserTeam(id) == TEAM_TERRORIST ? "TERRORIST" : "CT");
 
 	if (iNum != g_eMatchInfo[e_mTeamSizeTT])
 		return PLUGIN_HANDLED;
@@ -657,8 +657,8 @@ public cmdShowTimers(id) {
 			fnConvertTime(Float:g_eMatchInfo[e_flSidesTime][HNS_TEAM_A], szTimeToWin[HNS_TEAM_A], 23);
 
 			new iPlayers[MAX_PLAYERS], TTsize, CTSize;
-			get_players(iPlayers, TTsize, "ce", "TERRORIST");
-			get_players(iPlayers, CTSize, "ce", "CT");
+			get_players(iPlayers, TTsize, "che", "TERRORIST");
+			get_players(iPlayers, CTSize, "che", "CT");
 			if (g_isTeamTT == HNS_TEAM_A) {
 				chat_print(id, "%L", id, "SCORE_TIME",
 					szTimeToWin[HNS_TEAM_A], TTsize, CTSize, szTimeToWin[HNS_TEAM_B],
