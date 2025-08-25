@@ -54,6 +54,47 @@ stock hns_get_role_num(PLAYER_ROLES:eRole) {
 	return out;
 }
 
+stock hns_get_random_role(PLAYER_ROLES:eRole) {
+	new iPlayers[MAX_PLAYERS], iNum;
+	get_players(iPlayers, iNum, "c");
+
+	new iChoose;
+	new iRandomPlayers[MAX_PLAYERS], iRandomNum;
+
+	for (new i; i < iNum; i++) {
+		new id = iPlayers[i];
+
+		if (!hns_is_user_role(id, eRole)) {
+			continue;
+		}
+
+		if (eRole == ROLE_SPEC) {
+			if (g_bNoplay[id]) {
+				continue;
+			}
+
+			if (g_bHnsBannedInit && e_bBanned[id]) {
+				continue;
+			}
+		}
+
+		iRandomPlayers[iRandomNum] = id;
+		iRandomNum++;
+	}
+
+	if (iRandomNum == 0) {
+		return -1;
+	}
+
+	if (iRandomNum > 1) {
+		iChoose = iRandomPlayers[random(iRandomNum)];
+	} else {
+		iChoose = iRandomPlayers[iRandomNum - 1];
+	}
+
+	return iChoose;
+}
+
 // На основе ролей проверяет и распределяет по командам
 stock hns_distribute_roles_teams() {
 	new iPlayers[MAX_PLAYERS], iNum;
