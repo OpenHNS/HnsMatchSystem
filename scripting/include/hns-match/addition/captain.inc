@@ -358,7 +358,81 @@ public pickHandler(id, hMenu, item) {
 
 	hns_distribute_roles_teams();
 
-	// TODO: Вынести в отдельную функцию
+	next_pick_menu_cap();
+
+	return PLUGIN_HANDLED;
+}
+
+public WaitPick() {
+	if (g_iMatchStatus != MATCH_TEAMPICK) {
+		return PLUGIN_HANDLED;
+	}
+
+	if (task_exists(TASK_WAITCAP)) {
+		remove_task(TASK_WAITCAP)
+	}
+
+	RandomPickTime = g_iSettings[TIME_RANDOMPICK];
+
+	LogSendMessage("[MATCH] Wait pick started.");
+
+	set_task(1.0, "wait_function", .id = TASK_WAITCAP, .flags = "b");
+
+	return PLUGIN_HANDLED;
+}
+
+public wait_function(id) {
+	if (g_iCaptainPick == -1) {
+		if (task_exists(TASK_WAITCAP)) {
+			remove_task(TASK_WAITCAP)
+		}
+		return;
+	}
+
+	if (!is_user_connected(g_iCaptainPick)) {
+		resetCaptainData();
+		return;
+	}
+
+	RandomPickTime -= 1.0;
+	  
+	setTaskHud(0, 0.0, 1, 255, 255, 255, 1.0, "%L", LANG_SERVER, "HUD_WAITPICK", g_iCaptainPick, RandomPickTime);
+
+	if(RandomPickTime <= 0.0) {
+		new randomaizer = GetPickRandom();
+		if(randomaizer) {
+			new pPlayer = g_iCaptainPick;
+			rg_set_user_team(randomaizer, getUserTeam(pPlayer));
+
+			rg_round_respawn(randomaizer);
+			chat_print(0, "%L", LANG_PLAYER, "PLAYER_CHOOSE_RANDOM", pPlayer, randomaizer);
+
+			next_pick_menu_cap();
+
+			show_menu(pPlayer, 0, "^n", 1);
+
+			if (task_exists(TASK_WAITCAP)) {
+				remove_task(TASK_WAITCAP)
+			}
+
+			checkFullTeams();
+			pickMenu(g_iCaptainPick, true);
+
+			return;
+
+		}
+		else {
+			if (task_exists(TASK_WAITCAP)) {
+				remove_task(TASK_WAITCAP)
+			}
+
+			LogSendMessage("[MATCH] wait_function - Players not found");
+			chat_print(0, "[MATCH] wait_function - Players not found");
+		}
+	}
+}
+
+public next_pick_menu_cap() {
 	new iCaptainA = hns_get_captain_role(ROLE_CAP_A);
 	new iCaptainB = hns_get_captain_role(ROLE_CAP_B);
 
@@ -386,145 +460,6 @@ public pickHandler(id, hMenu, item) {
 
 		g_iCaptainPick = -1;
 	}
-	//
-
-	return PLUGIN_HANDLED;
-}
-
-public WaitPick() {
-	if (g_iMatchStatus != MATCH_TEAMPICK) {
-		return PLUGIN_HANDLED;
-	}
-
-	if (task_exists(TASK_WAITCAP)) {
-		remove_task(TASK_WAITCAP)
-	}
-
-	RandomPickTime = g_iSettings[TIME_RANDOMPICK];
-
-	LogSendMessage("[MATCH] Wait pick started.");
-
-	set_task(1.0, "wait_function", .id = TASK_WAITCAP, .flags = "b");
-
-	return PLUGIN_HANDLED;
-}	
-
-public wait_function(id)
-{
-	if (g_iCaptainPick == -1) {
-		if (task_exists(TASK_WAITCAP)) {
-			remove_task(TASK_WAITCAP)
-		}
-		return;
-	}
-
-	if (!is_user_connected(g_iCaptainPick)) {
-		server_print("uslovie wait_function")
-		resetCaptainData();
-		return;
-	}
-
-	RandomPickTime -= 1.0;
-	  
-	setTaskHud(0, 0.0, 1, 255, 255, 255, 1.0, "%L", LANG_SERVER, "HUD_WAITPICK", g_iCaptainPick, RandomPickTime);
-
-	if(RandomPickTime <= 0.0) {
-		new randomaizer = GetPickRandom();
-		if(randomaizer) {
-			new pPlayer = g_iCaptainPick;
-			rg_set_user_team(randomaizer, getUserTeam(pPlayer));
-
-			rg_round_respawn(randomaizer);
-			chat_print(0, "%L", LANG_PLAYER, "PLAYER_CHOOSE_RANDOM", pPlayer, randomaizer);
-
-			// TODO: Вынести в отдельную функцию
-			new iCaptainA = hns_get_captain_role(ROLE_CAP_A);
-			new iCaptainB = hns_get_captain_role(ROLE_CAP_B);
-
-			server_print("[MATCH] wait_function");
-
-			if (iCaptainA && iCaptainB) {
-				g_iCaptainPick = g_iCaptainPick == iCaptainA ? iCaptainB : iCaptainA;
-				get_user_authid(g_iCaptainPick, g_iCaptainPickSteam, charsmax(g_iCaptainPickSteam))
-
-				LogSendMessage("[MATCH] pick (%n), next pick menu (%n)", pPlayer, g_iCaptainPick);
-
-				pickMenu(g_iCaptainPick, true);
-
-				checkFullTeams();
-			} else {
-				CaptainLeaveTime = 10.0;
-		
-				set_task(1.0, "WaitLeaveCap", .id = TASK_WAITLEAVECAP, .flags = "b");
-
-				g_iCaptainPick = -1;
-			}
-			// TODO: Вынести в отдельную функцию
-
-			show_menu(pPlayer, 0, "^n", 1);
-
-			if (task_exists(TASK_WAITCAP)) {
-				remove_task(TASK_WAITCAP)
-			}
-
-			checkFullTeams();
-			pickMenu(g_iCaptainPick, true);
-
-			return;
-
-		}
-		else {
-			if (task_exists(TASK_WAITCAP)) {
-				remove_task(TASK_WAITCAP)
-			}
-
-			LogSendMessage("[MATCH] wait_function - Players not found");
-			chat_print(0, "[MATCH] wait_function - Players not found");
-		}
-	}
-}
-
-
-GetPickRandom() {
-	new iChoose;
-	static iPlayers[MAX_PLAYERS], iNum;
-	get_players(iPlayers, iNum, "ce", "SPECTATOR");
-
-	new iSpecPlayers[MAX_PLAYERS], iSpecNum;
-
-	for (new i; i < iNum; i++) {
-		new id = iPlayers[i]
-		if (!is_user_connected(id)) {
-			continue;
-		}
-
-		if (g_bNoplay[id]) {
-			continue;
-		}
-
-		if (g_bHnsBannedInit && e_bBanned[id]) {
-			continue;
-		}
-
-		if (!hns_is_user_role(id, ROLE_SPEC)) {
-			continue;
-		}
-
-		iSpecPlayers[iSpecNum] = id;
-		iSpecNum++;
-	}
-
-	if (iSpecNum == 0) {
-		return 0;
-	}
-
-	if (iSpecNum > 1) {
-		iChoose = iSpecPlayers[random(iSpecNum)];
-	} else {
-		iChoose = iSpecPlayers[iSpecNum - 1];
-	}
-
-	return iChoose;
 }
 
 public checkFullTeams() {
@@ -554,14 +489,11 @@ public checkFullTeams() {
 	// [Если игроков в матче 10] || [Если нет игроков в спеках] || [(Количество игроков чётное) и (максимум 1 в спеках)]
 	if (iPlayersMatch == 10 || !iPlayersNotMatch || (iPlayersMatch % 2 == 0) && (iPlayersNotMatch <= 1)) {
 		resetCaptainData();
-		server_print("tut x1?")
 		chat_print(0, "%L", LANG_PLAYER, "TEAM_FULL"); // TODO: Чат: Ножевой раунд начнется через 5 сек
 		g_iMatchStatus = MATCH_TEAMKNIFE;
 		kniferound_start(); // TODO: Добавить в худ таймер: Ножевой раунд начнется через %d сек
 	}
 }
-
-// Тут реализовать время ожидания.
 
 public WaitLeaveCap() {
 	if (g_iMatchStatus != MATCH_TEAMPICK) {
@@ -582,7 +514,7 @@ public WaitLeaveCap() {
 		setTaskHud(0, 0.0, 1, 255, 255, 255, 1.0, "Captain leave! Wait %d sec.", CaptainLeaveTime);
 
 		CaptainLeaveTime -= 1.0;
-		
+
 		if(CaptainLeaveTime <= 0.0) {
 			// Выдать нового капитана.
 			new iChoose;
@@ -678,6 +610,48 @@ public WaitLeaveCap() {
 		}
 	}
 
+}
+
+GetPickRandom() {
+	new iChoose;
+	static iPlayers[MAX_PLAYERS], iNum;
+	get_players(iPlayers, iNum, "ce", "SPECTATOR");
+
+	new iSpecPlayers[MAX_PLAYERS], iSpecNum;
+
+	for (new i; i < iNum; i++) {
+		new id = iPlayers[i]
+		if (!is_user_connected(id)) {
+			continue;
+		}
+
+		if (g_bNoplay[id]) {
+			continue;
+		}
+
+		if (g_bHnsBannedInit && e_bBanned[id]) {
+			continue;
+		}
+
+		if (!hns_is_user_role(id, ROLE_SPEC)) {
+			continue;
+		}
+
+		iSpecPlayers[iSpecNum] = id;
+		iSpecNum++;
+	}
+
+	if (iSpecNum == 0) {
+		return 0;
+	}
+
+	if (iSpecNum > 1) {
+		iChoose = iSpecPlayers[random(iSpecNum)];
+	} else {
+		iChoose = iSpecPlayers[iSpecNum - 1];
+	}
+
+	return iChoose;
 }
 
 resetCaptainData() {
