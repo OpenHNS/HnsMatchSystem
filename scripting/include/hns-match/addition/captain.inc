@@ -53,8 +53,6 @@ public chooseCapsMenu(id) {
 	if (g_iMatchStatus != MATCH_CAPTAINPICK)
 		return PLUGIN_HANDLED;
 
-	LogSendMessage("[MATCH] chooseCapsMenu(%n)", id);
-
 	new szMsg[64];
 
 	formatex(szMsg, charsmax(szMsg), "%L", LANG_PLAYER, "MENU_CAP_CHOSE");
@@ -113,8 +111,6 @@ public chooseCapsMenu(id) {
 }
 
 public chooseCapsHandler(id, hMenu, item) {
-	LogSendMessage("[MATCH] chooseCapsHandler (%d)", id);
-
 	if (!is_user_connected(id)) {
 		menu_destroy(hMenu);
 		return PLUGIN_HANDLED;
@@ -157,11 +153,9 @@ public chooseCapsHandler(id, hMenu, item) {
 	new iCaptainA = hns_get_captain_role(ROLE_CAP_A);
 	new iCaptainB = hns_get_captain_role(ROLE_CAP_B);
 
-	LogSendMessage("[MATCH] GET CAPTAINS ROLE (%d) (%d)", iCaptainA, iCaptainB);
-
 	if (!iCaptainA) {
-
 		hns_set_user_role(iPlayer, ROLE_CAP_A);
+		LogSendMessage("[MATCH] Captain pick A (%n)", iPlayer);
 		
 		if (hns_mysql_stats_init()) {
 			chat_print(0, "%L", LANG_PLAYER, "CAP_FIRST_PTS", iPlayer, hns_mysql_stats_data(iPlayer, e_iPts), hns_mysql_stats_skill(iPlayer));
@@ -175,8 +169,8 @@ public chooseCapsHandler(id, hMenu, item) {
 		}
 		chooseCapsMenu(id);
 	} else if (!iCaptainB) {
-
 		hns_set_user_role(iPlayer, ROLE_CAP_B);
+		LogSendMessage("[MATCH] Captain pick B (%n)", iPlayer);
 
 		if (hns_mysql_stats_init()) {
 			chat_print(0, "%L", LANG_PLAYER, "CAP_SECOND_PTS", iPlayer, hns_mysql_stats_data(iPlayer, e_iPts), hns_mysql_stats_skill(iPlayer));
@@ -191,7 +185,6 @@ public chooseCapsHandler(id, hMenu, item) {
 
 		iCaptainB = hns_get_captain_role(ROLE_CAP_B);
 
-
 		if (is_user_connected(iCaptainA) && is_user_connected(iCaptainB)) {
 			g_isTeamTT = HNS_TEAM_A;
 			rg_set_user_team(iCaptainA, TEAM_TERRORIST);
@@ -199,9 +192,14 @@ public chooseCapsHandler(id, hMenu, item) {
 
 			g_iMatchStatus = MATCH_CAPTAINKNIFE;
 
+			LogSendMessage("[MATCH] Captains (%n) (%n) OK! Start captain knife", iCaptainA, iCaptainB);
+
 			kniferound_start();
 		} else {
 			chat_print(0, "%L", LANG_PLAYER, "CAP_HAS_LEFT");
+			
+			LogSendMessage("[MATCH] Captains (%d) (%d) NOT OK! Stop captain pick", iCaptainA, iCaptainB);
+			
 			resetCaptainData();
 		}
 	}
@@ -221,12 +219,11 @@ public pickMenu(id, bool:bStartWait) {
 		return PLUGIN_HANDLED;
 	}
 
-	// TODO: Сбрасывается если /pick?
 	if(bStartWait == true && g_iSettings[RANDOMPICK] == 1) {
 		WaitPick();
 	}
 
-	LogSendMessage("[MATCH] pickMenu (%n)", id);
+	LogSendMessage("[MATCH] Open pickMenu (%n)", id);
 
 	new szMsg[64];
 
@@ -352,44 +349,36 @@ public pickHandler(id, hMenu, item) {
 		hns_set_user_role(iPlayer, ROLE_TEAM_B);
 	}
 
-	hns_distribute_roles_teams();
+	LogSendMessage("[MATCH] Captain (%n) pick (%n)", id, iPlayer);
 
+	// TODO: Надо убрать hns_distribute_roles_teams делает тоже самое.
 	rg_set_user_team(iPlayer, getUserTeam(id));
 	rg_round_respawn(iPlayer);
+	//
 
-	new iPlayers[MAX_PLAYERS], iNum;
-	get_players(iPlayers, iNum, "c");
-
-	for (new i; i < iNum; i++) {
-		new id = iPlayers[i];
-		
-		server_print("[MATCH] DEBUG ROLE %n (%d)", id, g_ePlayerInfo[id][PLAYER_ROLE]);
-	}
+	hns_distribute_roles_teams();
 
 	// TODO: Вынести в отдельную функцию
 	new iCaptainA = hns_get_captain_role(ROLE_CAP_A);
 	new iCaptainB = hns_get_captain_role(ROLE_CAP_B);
 
 	if (iCaptainA && iCaptainB) {
-		// TODO: Придумать
 		g_iCaptainPick = g_iCaptainPick == iCaptainA ? iCaptainB : iCaptainA;
 		get_user_authid(g_iCaptainPick, g_iCaptainPickSteam, charsmax(g_iCaptainPickSteam));
 
-		LogSendMessage("[MATCH] Captain (%n) pick (%n), next pick menu (%n)", id, iPlayer, g_iCaptainPick);
+		LogSendMessage("[MATCH] Captains (%n) (%n) OK! Next pick menu (%n)", iCaptainA, iCaptainB, g_iCaptainPick);
 
 		pickMenu(g_iCaptainPick, true);
 
 		checkFullTeams();
 	} else {
-		// TODO: Придумать если капитан ливнул
-		// Капитан ливнул, 10 сек отчета, если не вернулся то дать другому игроку капитана ?
 		if (!iCaptainA) {
-			LogSendMessage("[HNSRU] Captain team TT leave! Wait join captain 10 sec.");
-			chat_print(0, "[^3HNSRU^1] Captain team TT leave! Wait join captain 10 sec.");
+			chat_print(0, "Captain team TT leave! Wait join captain 10 sec.");
 		} else if (!iCaptainB) {
-			LogSendMessage("[HNSRU] Captain team CT leave! Wait join captain 10 sec.");
-			chat_print(0, "[^3HNSRU^1] Captain team CT leave! Wait join captain 10 sec.");
+			chat_print(0, "Captain team CT leave! Wait join captain 10 sec.");
 		}
+
+		LogSendMessage("[MATCH] Captains (%n) (%n) NOT OK! Next pick menu (-1)", iCaptainA, iCaptainB);
 
 		CaptainLeaveTime = 10.0;
 		
@@ -397,13 +386,12 @@ public pickHandler(id, hMenu, item) {
 
 		g_iCaptainPick = -1;
 	}
-	// TODO: Вынести в отдельную функцию
+	//
 
 	return PLUGIN_HANDLED;
 }
 
-public WaitPick()
-{
+public WaitPick() {
 	if (g_iMatchStatus != MATCH_TEAMPICK) {
 		return PLUGIN_HANDLED;
 	}
@@ -413,6 +401,8 @@ public WaitPick()
 	}
 
 	RandomPickTime = g_iSettings[TIME_RANDOMPICK];
+
+	LogSendMessage("[MATCH] Wait pick started.");
 
 	set_task(1.0, "wait_function", .id = TASK_WAITCAP, .flags = "b");
 
@@ -584,17 +574,6 @@ public WaitLeaveCap() {
 	new iCaptainA = hns_get_captain_role(ROLE_CAP_A);
 	new iCaptainB = hns_get_captain_role(ROLE_CAP_B);
 
-	new iPlayers[MAX_PLAYERS], iNum;
-	get_players(iPlayers, iNum, "c");
-
-	for (new i; i < iNum; i++) {
-		new id = iPlayers[i];
-		
-		server_print("[MATCH] DEBUG ROLE %n (%d)", id, g_ePlayerInfo[id][PLAYER_ROLE]);
-	}
-
-	LogSendMessage("[MATCH] !WaitLeaveCap! (%n) --- (%n)", iCaptainA, iCaptainB);
-
 	if (!iCaptainA || !iCaptainB) {
 		if (task_exists(TASK_WAITCAP)) {
 			remove_task(TASK_WAITCAP)
@@ -603,10 +582,7 @@ public WaitLeaveCap() {
 		setTaskHud(0, 0.0, 1, 255, 255, 255, 1.0, "Captain leave! Wait %d sec.", CaptainLeaveTime);
 
 		CaptainLeaveTime -= 1.0;
-
-
-
-
+		
 		if(CaptainLeaveTime <= 0.0) {
 			// Выдать нового капитана.
 			new iChoose;
