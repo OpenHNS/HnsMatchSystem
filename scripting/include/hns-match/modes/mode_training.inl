@@ -12,22 +12,46 @@ public training_start() {
 }
 
 public training_player_leave(id) {
-	switch (g_iMatchStatus) {
-		case MATCH_CAPTAINPICK: {
-			if (g_ePlayerInfo[id][PLAYER_ROLE] == ROLE_CAP_A || g_ePlayerInfo[id][PLAYER_ROLE] == ROLE_CAP_B) {
-				chat_print(0, "[^3HNSRU^1] Captain ^3%n^1 leave, stop captain mode.", id);
-				captain_stop();
-			}
-		}
-		case MATCH_TEAMPICK: {
-			if (g_ePlayerInfo[id][PLAYER_ROLE] != ROLE_SPEC) {
-				TrieSetArray(g_eMatchInfo[e_tLeaveData], getUserKey(id), g_ePlayerInfo[id], PLAYER_INFO);
-			}
-		}
-	}
+  LogSendMessage("[MATCH] ------- training_player_leave ------");
+  new iPlayers[MAX_PLAYERS], iNum;
+  get_players(iPlayers, iNum, "c");
 
-	arrayset(g_ePlayerInfo[id], 0, PLAYER_INFO);
+  for (new i; i < iNum; i++) {
+    new id = iPlayers[i];
+    
+    LogSendMessage("[MATCH] DEBUG ROLE %n (%d)", id, g_ePlayerInfo[id][PLAYER_ROLE]);
+  }
+
+  switch (g_iMatchStatus) {
+    case MATCH_CAPTAINPICK: {
+      if (g_ePlayerInfo[id][PLAYER_ROLE] == ROLE_CAP_A || g_ePlayerInfo[id][PLAYER_ROLE] == ROLE_CAP_B) {
+        chat_print(0, "[^3HNSRU^1] Captain ^3%n^1 leave, stop captain mode.", id);
+        captain_stop();
+      }
+    }
+    case MATCH_TEAMPICK: {
+      if (g_ePlayerInfo[id][PLAYER_ROLE] != ROLE_SPEC) {
+        TrieSetArray(g_eMatchInfo[e_tLeaveData], getUserKey(id), g_ePlayerInfo[id], PLAYER_INFO);
+      }
+    }
+  }
+
+  LogSendMessage("[MATCH] ------- ------");
+
+  arrayset(g_ePlayerInfo[id], 0, PLAYER_INFO);
+
+  new iPlayersTEST[MAX_PLAYERS], iNumTEST;
+  get_players(iPlayersTEST, iNumTEST, "c");
+
+  for (new i; i < iNumTEST; i++) {
+    new id = iPlayersTEST[i];
+    
+    LogSendMessage("[MATCH] DEBUG ROLE %n (%d)", id, g_ePlayerInfo[id][PLAYER_ROLE]);
+  }
+
+  LogSendMessage("[MATCH] ------- training_player_leave ------");
 }
+
 
 public training_player_join(id) {
 	TrieGetArray(g_eMatchInfo[e_tLeaveData], getUserKey(id), g_ePlayerInfo[id], PLAYER_INFO);

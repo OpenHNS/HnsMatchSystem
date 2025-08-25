@@ -357,6 +357,15 @@ public pickHandler(id, hMenu, item) {
 	rg_set_user_team(iPlayer, getUserTeam(id));
 	rg_round_respawn(iPlayer);
 
+	new iPlayers[MAX_PLAYERS], iNum;
+	get_players(iPlayers, iNum, "c");
+
+	for (new i; i < iNum; i++) {
+		new id = iPlayers[i];
+		
+		server_print("[MATCH] DEBUG ROLE %n (%d)", id, g_ePlayerInfo[id][PLAYER_ROLE]);
+	}
+
 	// TODO: Вынести в отдельную функцию
 	new iCaptainA = hns_get_captain_role(ROLE_CAP_A);
 	new iCaptainB = hns_get_captain_role(ROLE_CAP_B);
@@ -412,7 +421,15 @@ public WaitPick()
 
 public wait_function(id)
 {
+	if (g_iCaptainPick == -1) {
+		if (task_exists(TASK_WAITCAP)) {
+			remove_task(TASK_WAITCAP)
+		}
+		return;
+	}
+
 	if (!is_user_connected(g_iCaptainPick)) {
+		server_print("uslovie wait_function")
 		resetCaptainData();
 		return;
 	}
@@ -433,6 +450,8 @@ public wait_function(id)
 			// TODO: Вынести в отдельную функцию
 			new iCaptainA = hns_get_captain_role(ROLE_CAP_A);
 			new iCaptainB = hns_get_captain_role(ROLE_CAP_B);
+
+			server_print("[MATCH] wait_function");
 
 			if (iCaptainA && iCaptainB) {
 				g_iCaptainPick = g_iCaptainPick == iCaptainA ? iCaptainB : iCaptainA;
@@ -545,6 +564,7 @@ public checkFullTeams() {
 	// [Если игроков в матче 10] || [Если нет игроков в спеках] || [(Количество игроков чётное) и (максимум 1 в спеках)]
 	if (iPlayersMatch == 10 || !iPlayersNotMatch || (iPlayersMatch % 2 == 0) && (iPlayersNotMatch <= 1)) {
 		resetCaptainData();
+		server_print("tut x1?")
 		chat_print(0, "%L", LANG_PLAYER, "TEAM_FULL"); // TODO: Чат: Ножевой раунд начнется через 5 сек
 		g_iMatchStatus = MATCH_TEAMKNIFE;
 		kniferound_start(); // TODO: Добавить в худ таймер: Ножевой раунд начнется через %d сек
@@ -563,6 +583,15 @@ public WaitLeaveCap() {
 
 	new iCaptainA = hns_get_captain_role(ROLE_CAP_A);
 	new iCaptainB = hns_get_captain_role(ROLE_CAP_B);
+
+	new iPlayers[MAX_PLAYERS], iNum;
+	get_players(iPlayers, iNum, "c");
+
+	for (new i; i < iNum; i++) {
+		new id = iPlayers[i];
+		
+		server_print("[MATCH] DEBUG ROLE %n (%d)", id, g_ePlayerInfo[id][PLAYER_ROLE]);
+	}
 
 	LogSendMessage("[MATCH] !WaitLeaveCap! (%n) --- (%n)", iCaptainA, iCaptainB);
 
@@ -668,6 +697,7 @@ public WaitLeaveCap() {
 
 	} else {
 		if (task_exists(TASK_WAITLEAVECAP)) {
+			
 			remove_task(TASK_WAITLEAVECAP)
 		}
 	}
