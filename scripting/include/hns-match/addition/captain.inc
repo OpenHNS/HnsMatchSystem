@@ -11,6 +11,7 @@ new Float:CaptainLeaveTime;
 LogSendMessage("[MATCH]");
 
 // TODO: Если вручную закинули игроков
+// TODO: Если ливнуло 2 капитана
 
 */
 

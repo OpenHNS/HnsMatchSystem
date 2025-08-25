@@ -37,6 +37,7 @@ stock hns_get_captain_role(PLAYER_ROLES:eRole) {
 	return 0;
 }
 
+// Получить количесво указанной роли
 stock hns_get_role_num(PLAYER_ROLES:eRole) {
 	new iPlayers[MAX_PLAYERS], iNum;
 	get_players(iPlayers, iNum, "ch");
@@ -54,6 +55,7 @@ stock hns_get_role_num(PLAYER_ROLES:eRole) {
 	return out;
 }
 
+// Рандомный айди игрока указанной роли
 stock hns_get_random_role(PLAYER_ROLES:eRole) {
 	new iPlayers[MAX_PLAYERS], iNum;
 	get_players(iPlayers, iNum, "c");
@@ -124,6 +126,10 @@ stock hns_distribute_roles_teams() {
 		}
 	}
 }
+
+// stock hns_reroles_teams() {
+
+// }
 
 // Очистить роли игроков
 stock hns_reset_users_roles() {
