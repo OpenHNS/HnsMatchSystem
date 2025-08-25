@@ -7,7 +7,7 @@
 stock cmds_init() {
 	register_clcmd("say", "sayHandle");
 
-	register_clcmd("nightvision", "mainMatchMenu");
+	//register_clcmd("nightvision", "mainMatchMenu");
 
 	register_clcmd("chooseteam", 	"blockCmd");
 	register_clcmd("jointeam", 		"blockCmd");
@@ -202,7 +202,7 @@ public cmdPubMode(id) {
 		return PLUGIN_HANDLED;
 	}
 
-	if (g_iCurrentMode != MODE_TRAINING) {
+	if (g_iCurrentMode != MODE_TRAINING || g_iMatchStatus != MATCH_NONE) {
 		chat_print(id, "%L", id, "PUB_CANC");
 		return PLUGIN_HANDLED;
 	}
@@ -224,7 +224,7 @@ public cmdDMMode(id) {
 		return PLUGIN_HANDLED;
 	}
 
-	if (g_iCurrentMode != MODE_TRAINING) {
+	if (g_iCurrentMode != MODE_TRAINING || g_iMatchStatus != MATCH_NONE) {
 		chat_print(id, "%L", id, "DM_CANC");
 		return PLUGIN_HANDLED;
 	}
@@ -246,7 +246,7 @@ public cmdZMMode(id) {
 		return PLUGIN_HANDLED;
 	}
 
-	if (g_iCurrentMode != MODE_TRAINING) {
+	if (g_iCurrentMode != MODE_TRAINING || g_iMatchStatus != MATCH_NONE) {
 		chat_print(id, "%L", id, "ZM_CANC");
 		return PLUGIN_HANDLED;
 	}
@@ -269,8 +269,9 @@ public cmdBlend(id) {
 		return PLUGIN_HANDLED; 
 	}
 
-	if (g_iCurrentMode != MODE_PUB && g_iCurrentMode != MODE_DM) 
-		return PLUGIN_HANDLED; 
+	if (g_iCurrentMode != MODE_PUB && g_iCurrentMode != MODE_DM) {
+		return PLUGIN_HANDLED;
+	}
 
 	chat_print(0, "%l", "BLEND_TEAMS", id);
 
@@ -621,7 +622,7 @@ public cmdSurrender(id) {
 	}
 
 	new iPlayers[MAX_PLAYERS], iNum;
-	get_players(iPlayers, iNum, "ce", getUserTeam(id) == TEAM_TERRORIST ? "TERRORIST" : "CT");
+	get_players(iPlayers, iNum, "che", getUserTeam(id) == TEAM_TERRORIST ? "TERRORIST" : "CT");
 
 	if (iNum != g_eMatchInfo[e_mTeamSizeTT])
 		return PLUGIN_HANDLED;
@@ -656,8 +657,8 @@ public cmdShowTimers(id) {
 			fnConvertTime(Float:g_eMatchInfo[e_flSidesTime][HNS_TEAM_A], szTimeToWin[HNS_TEAM_A], 23);
 
 			new iPlayers[MAX_PLAYERS], TTsize, CTSize;
-			get_players(iPlayers, TTsize, "ce", "TERRORIST");
-			get_players(iPlayers, CTSize, "ce", "CT");
+			get_players(iPlayers, TTsize, "che", "TERRORIST");
+			get_players(iPlayers, CTSize, "che", "CT");
 			if (g_isTeamTT == HNS_TEAM_A) {
 				chat_print(id, "%L", id, "SCORE_TIME",
 					szTimeToWin[HNS_TEAM_A], TTsize, CTSize, szTimeToWin[HNS_TEAM_B],

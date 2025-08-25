@@ -11,10 +11,13 @@
 #define TASK_STARTED 13339
 
 #define TASK_WAITCAP 13131
+#define TASK_WAITLEAVECAP 15151
 
 #define TASK_SURRENDER 55566
 
 new bool:g_bDebugMode;
+
+new g_szLogPath[64];
 
 new g_PluginId;
 
@@ -111,11 +114,18 @@ enum PLAYER_ROLES {
 enum _: PLAYER_INFO {
 	PLAYER_ROLES:PLAYER_ROLE,
 	bool:PLAYER_MATCH,
+	bool:IS_PICK_ME,
 	PLAYER_TEAM[16],
 	LEAVE_IN_ROUND
 };
 
 new g_ePlayerInfo[MAX_PLAYERS + 1][PLAYER_INFO];
+
+new g_iCaptainPick;
+new g_iCaptainPickSteam[MAX_AUTHID_LENGTH];
+
+new g_iCaptainFirst;
+new g_iCaptainSecond;
 
 new Array:g_aPlayersLoadData;
 

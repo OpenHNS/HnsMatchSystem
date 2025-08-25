@@ -592,13 +592,13 @@ public task_ShowPlayerInfo() {
 					hns_mysql_stats_data(show_id, e_iPts), hns_mysql_stats_skill(show_id));
 				} else if (hns_api_stats_init()) {
 					new szSkill[10];
-					hns_api_stats_rank(show_id, GET_GOOD, szSkill, charsmax(szSkill))
+					hns_api_stats_rank(show_id, szSkill, charsmax(szSkill))
 
 					iLen += format(szHudMess[iLen], sizeof szHudMess - iLen, "\
-					Player: %n (#%d)^n\
-					PTS: %d [%s]^n^n", 
-					show_id, hns_api_stats_place(show_id, GET_GOOD),
-					hns_api_stats_rating(show_id, GET_GOOD), szSkill);
+					Player: %n^n\
+					PTS: %0.f [%s]^n^n", 
+					show_id,
+					hns_api_stats_rating(show_id), szSkill);
 				} else {
 					iLen += format(szHudMess[iLen], sizeof szHudMess - iLen, "\
 					Player: %n^n^n", 
