@@ -61,6 +61,7 @@ new Trie:g_tSaveData;
 new Trie:g_tSaveRoundData;
 
 new g_hApplyStatsForward;
+new g_hSaveLeaveForward;
 
 public plugin_init() {
 	register_plugin("Match: Stats", "1.2", "OpenHNS"); // Garey
@@ -73,7 +74,8 @@ public plugin_init() {
 	RegisterHookChain(RG_CSGameRules_OnRoundFreezeEnd, "rgRoundFreezeEnd", true);
 	RegisterHookChain(RG_PlayerBlind, "rgPlayerBlind");
 
-	g_hApplyStatsForward = CreateMultiForward("hns_apply_stats", ET_CONTINUE);
+	g_hApplyStatsForward = CreateMultiForward("hns_apply_stats", ET_CONTINUE, FP_CELL);
+	g_hSaveLeaveForward = CreateMultiForward("hns_save_leave_stats", ET_CONTINUE, FP_CELL);
 
 	g_tSaveData = TrieCreate();
 	g_tSaveRoundData = TrieCreate();
@@ -295,10 +297,16 @@ public client_putinserver(id) {
 		arrayset(iStats[id], 0, PLAYER_STATS);
 }
 
-public client_disconnected(id) {
+
+public hns_player_leave_inmatch(id) {
+	server_print("hns_player_leave_inmatch (%n)", id);
 	if ((iStats[id][PLR_TEAM] == TEAM_TERRORIST || iStats[id][PLR_TEAM] == TEAM_CT) && (hns_get_mode() == MODE_MIX || hns_get_state() == STATE_PAUSED)) {
 		iStats[id][PLR_STATS_STOPS] = g_iGameStops;
 	}
+
+	ExecuteForward(g_hSaveLeaveForward, _, id);
+	server_print("hns_player_leave_inmatch ExecuteForward (%n)", id);
+
 	TrieSetArray(g_tSaveData, getUserKey(id), iStats[id], PLAYER_STATS);
 	TrieSetArray(g_tSaveRoundData, getUserKey(id), g_StatsRound[id], PLAYER_STATS);
 
@@ -509,7 +517,7 @@ public hns_match_finished() {
 		iStats[id][PLR_STATS_RUNNEDTIME] += g_StatsRound[id][PLR_STATS_RUNNEDTIME];
 	}
 
-	ExecuteForward(g_hApplyStatsForward, _);
+	ExecuteForward(g_hApplyStatsForward, _, 1);
 }
 
 public hns_match_finished_post() {
@@ -528,8 +536,8 @@ public hns_round_end() {
 			remove_task(TASK_TIMER_STATS);
 		}
 	
-		ExecuteForward(g_hApplyStatsForward, _);
-
+		ExecuteForward(g_hApplyStatsForward, _, 0);
+		
 		new iPlayers[MAX_PLAYERS], iNum;
 		get_players(iPlayers, iNum, "ch");
 
