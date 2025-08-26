@@ -299,13 +299,11 @@ public client_putinserver(id) {
 
 
 public hns_player_leave_inmatch(id) {
-	server_print("hns_player_leave_inmatch (%n)", id);
 	if ((iStats[id][PLR_TEAM] == TEAM_TERRORIST || iStats[id][PLR_TEAM] == TEAM_CT) && (hns_get_mode() == MODE_MIX || hns_get_state() == STATE_PAUSED)) {
 		iStats[id][PLR_STATS_STOPS] = g_iGameStops;
 	}
 
 	ExecuteForward(g_hSaveLeaveForward, _, id);
-	server_print("hns_player_leave_inmatch ExecuteForward (%n)", id);
 
 	TrieSetArray(g_tSaveData, getUserKey(id), iStats[id], PLAYER_STATS);
 	TrieSetArray(g_tSaveRoundData, getUserKey(id), g_StatsRound[id], PLAYER_STATS);
@@ -515,6 +513,8 @@ public hns_match_finished() {
 		iStats[id][PLR_STATS_PLAYTIME] += g_StatsRound[id][PLR_STATS_PLAYTIME];
 		iStats[id][PLR_STATS_HIDETIME] += g_StatsRound[id][PLR_STATS_HIDETIME];
 		iStats[id][PLR_STATS_RUNNEDTIME] += g_StatsRound[id][PLR_STATS_RUNNEDTIME];
+
+		arrayset(g_StatsRound[id], 0, PLAYER_STATS);
 	}
 
 	ExecuteForward(g_hApplyStatsForward, _, 1);
@@ -526,6 +526,7 @@ public hns_match_finished_post() {
 
 	for (new i = 0; i < iNum; i++) {
 		new id = iPlayers[i];
+		arrayset(iStats[id], 0, PLAYER_STATS);
 		arrayset(g_StatsRound[id], 0, PLAYER_STATS);
 	}
 }
