@@ -75,6 +75,7 @@ HNS_OWNAGE = %n owned %n's head!
 STATS_TOP = %s Show top — ^3/top
 
 MAPS_NOM = %s ^3%n^1 nominated map: ^3%s^1.
+MAPS_CHAGE = %s ^3%n^1 change map: ^3%s^1.
 
 HUD_ON = %s HUD info is now ^3enabled^1.
 HUD_OFF = %s HUD info is now ^3disabled^1.

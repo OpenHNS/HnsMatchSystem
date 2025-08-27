@@ -156,11 +156,42 @@ public cmdMapsMenuHandler(id, hMenu, item) {
 	new szMap[32];
 	ArrayGetString(g_CurrentMenuArray, mapid, szMap, charsmax(szMap));
 
-	if (hns_get_status() == MATCH_MAPPICK) {
-		client_print_color(0, print_team_blue, "%L", LANG_PLAYER, "MAPS_NOM", g_szPrefix, id, szMap);
+	cmdMapActionMenu(id, szMap);
+
+	return PLUGIN_HANDLED;
+}
+
+public cmdMapActionMenu(id, szMap[]) {
+	new szMsg[64];
+	formatex(szMsg, charsmax(szMsg), "Карта: %s", szMap);
+
+	new hMenu = menu_create(szMsg, "cmdMapActionHandler");
+
+	menu_additem(hMenu, "Номинировать карту", "1");
+	menu_additem(hMenu, "Сменить карту", "2");
+
+	menu_display(id, hMenu, 0);
+}
+
+public cmdMapActionHandler(id, hMenu, item) {
+	if (item == MENU_EXIT) {
+		menu_destroy(hMenu);
+		return PLUGIN_HANDLED;
 	}
 
-	client_print_color(0, print_team_blue, "%L", LANG_PLAYER, "MAPS_NOM", g_szPrefix, id, szMap);
+	new szData[6], szName[64], iAccess, iCallback;
+	menu_item_getinfo(hMenu, item, iAccess, szData, charsmax(szData), szName, charsmax(szName), iCallback);
+	menu_destroy(hMenu);
+
+	new choice = str_to_num(szData);
+
+	if (choice == 1) {
+		client_print_color(0, print_team_blue, "%L", LANG_PLAYER, "MAPS_NOM", g_szPrefix, id, szName);
+	}
+	else if (choice == 2) {
+		client_print_color(0, print_team_blue, "%L", LANG_PLAYER, "MAPS_CHAGE", g_szPrefix, id, szName);
+		engine_changelevel(szName);
+	}
 
 	return PLUGIN_HANDLED;
 }
