@@ -172,7 +172,12 @@ public cmdMapActionMenu(id, szMap[]) {
 	new hMenu = menu_create(szMsg, "cmdMapActionHandler");
 
 	menu_additem(hMenu, "Номинировать карту", "1");
-	menu_additem(hMenu, "Сменить карту", "2");
+
+	if (isUserWatcher(id) || isUserFullWatcher(id) || isUserAdmin(id)) {
+		menu_additem(hMenu, "Сменить карту", "2");
+	} else {
+		menu_additem(hMenu, "\dСменить карту", "2");
+	}
 
 	menu_display(id, hMenu, 0);
 }
@@ -193,8 +198,12 @@ public cmdMapActionHandler(id, hMenu, item) {
 		client_print_color(0, print_team_blue, "%L", LANG_PLAYER, "MAPS_NOM", g_szPrefix, id, szName);
 	}
 	else if (choice == 2) {
-		client_print_color(0, print_team_blue, "%L", LANG_PLAYER, "MAPS_CHAGE", g_szPrefix, id, szName);
-		engine_changelevel(g_SelectedMap[id]);
+		if (isUserWatcher(id) || isUserFullWatcher(id) || isUserAdmin(id)) {
+			client_print_color(0, print_team_blue, "%L", LANG_PLAYER, "MAPS_CHAGE", g_szPrefix, id, szName);
+			engine_changelevel(g_SelectedMap[id]);
+		} else {
+			cmdMapActionMenu(id, g_SelectedMap[id]);
+		}
 	}
 
 	return PLUGIN_HANDLED;
