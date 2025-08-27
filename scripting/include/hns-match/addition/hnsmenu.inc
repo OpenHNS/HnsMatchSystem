@@ -15,7 +15,7 @@ public mainMatchMenu(id) {
 	formatex(szMsg, charsmax(szMsg), "%L", id, "MENU_MIX_TITLE");
 	new hMenu = menu_create(szMsg, "mainMatchMenuHandler");
 
-	if (equali(g_iSettings[KNIFEMAP], g_szMapName)) {
+	if (hns_is_knife_map()) {
 		if (g_iCurrentMode == MODE_TRAINING && g_iMatchStatus == MATCH_NONE)
 			formatex(szMsg, charsmax(szMsg), "%L", id, "MENU_MAIN_CAP");
 		else if (g_iCurrentMode == MODE_KNIFE && g_iMatchStatus == MATCH_TEAMKNIFE && g_eMatchState == STATE_PAUSED)
@@ -37,7 +37,7 @@ public mainMatchMenu(id) {
 	menu_additem(hMenu, szMsg, "1");
 
 
-	if (equali(g_iSettings[KNIFEMAP], g_szMapName)) {
+	if (hns_is_knife_map()) {
 		if (g_iMatchStatus == MATCH_CAPTAINPICK || g_iMatchStatus == MATCH_CAPTAINKNIFE || g_iMatchStatus == MATCH_TEAMPICK)
 			formatex(szMsg, charsmax(szMsg), "%L", id, "MENU_MAIN_NOTSTARTKF");
 		else if (g_iCurrentMode == MODE_KNIFE)
@@ -98,7 +98,7 @@ public mainMatchMenuHandler(id, hMenu, item) {
 	
 	switch (iKey) {
 		case 1: {
-			if (equali(g_iSettings[KNIFEMAP], g_szMapName)) {
+			if (hns_is_knife_map()) {
 				if (g_iCurrentMode == MODE_TRAINING && g_iMatchStatus == MATCH_NONE)
 					cmdCaptain(id);
 				else if (g_iCurrentMode == MODE_KNIFE && g_iMatchStatus == MATCH_TEAMKNIFE && g_eMatchState == STATE_PAUSED)
@@ -119,7 +119,7 @@ public mainMatchMenuHandler(id, hMenu, item) {
 			}
 		}
 		case 2: {
-			if (equali(g_iSettings[KNIFEMAP], g_szMapName)) {
+			if (hns_is_knife_map()) {
 				if (g_iMatchStatus == MATCH_CAPTAINPICK || g_iMatchStatus == MATCH_CAPTAINKNIFE || g_iMatchStatus == MATCH_TEAMPICK)
 					mainMatchMenu(id);
 				else if (g_iCurrentMode == MODE_KNIFE)

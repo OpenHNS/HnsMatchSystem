@@ -362,7 +362,7 @@ public cmdStartMatch(id) {
 		return PLUGIN_HANDLED;
 	} 
 	
-	if (equali(g_szMapName, g_iSettings[KNIFEMAP])) {
+	if (hns_is_knife_map()) {
 		return PLUGIN_HANDLED;
 	}
 
@@ -409,7 +409,7 @@ public cmdCaptain(id) {
 		return PLUGIN_HANDLED;
 	}
 
-	if (!equali(g_szMapName, g_iSettings[KNIFEMAP])) {
+	if (!hns_is_knife_map()) {
 		chat_print(id, "%L", id, "NOT_CAPTAIN");
 		return PLUGIN_HANDLED;
 	}

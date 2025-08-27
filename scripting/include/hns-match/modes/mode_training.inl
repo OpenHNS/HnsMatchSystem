@@ -92,7 +92,7 @@ public training_player_join(id) {
 		return;
 	}
 	
-	if (equali(g_szMapName, g_iSettings[KNIFEMAP])) {
+	if (hns_is_knife_map()) {
 		rg_round_respawn(id);
 		return;
 	}

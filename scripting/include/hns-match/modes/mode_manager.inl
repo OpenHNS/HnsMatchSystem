@@ -12,7 +12,7 @@ public delayed_mode() {
 	PDS_GetCell("match_status", g_iMatchStatus);
 	PDS_GetCell("match_rules", g_iCurrentRules);
 
-	if (equali(g_iSettings[KNIFEMAP], g_szMapName)) {
+	if (hns_is_knife_map()) {
 		g_iMatchStatus = MATCH_NONE;
 		training_start();
 	} else if (g_iMatchStatus == MATCH_MAPPICK || g_iMatchStatus == MATCH_WAITCONNECT) {
@@ -84,7 +84,7 @@ public Task_CheckTime() {
 	get_players(iPlayers, iNum, "ch");
 
 	if (iNum == 0) {
-		// if (equali(g_szMapName, g_iSettings[KNIFEMAP]))
+		// if (hns_is_knife_map())
 		// {
 		// 	server_cmd("changelevel boost_qube02");
 		// }

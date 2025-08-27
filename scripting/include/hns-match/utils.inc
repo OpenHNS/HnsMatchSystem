@@ -172,3 +172,11 @@ public LogSendMessage(szData[1024], any:...) {
 
 	log_to_file(szLogFile, msgFormated)
 }
+
+stock bool:hns_is_knife_map() {
+	if (equali(g_szMapName, g_iSettings[KNIFEMAP])) {
+		return true;
+	} else {
+		return false;
+	}
+}

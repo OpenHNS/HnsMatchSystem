@@ -42,7 +42,7 @@ stock bool:checkPlayer(id) {
 /* SAVE DATA */
 
 public PDS_Save() {
-	if (equali(g_szMapName, g_iSettings[KNIFEMAP])) {
+	if (hns_is_knife_map()) {
 		if (g_szBuffer[0])
 			PDS_SetString("playerslist", g_szBuffer);
 	}
@@ -121,7 +121,7 @@ public Save_players(TeamName:team_winners) {
 /* LOAD DATA */
 
 loadPlayers() {
-	if (!equali(g_szMapName, g_iSettings[KNIFEMAP]))
+	if (!hns_is_knife_map())
 		g_bPlayersListLoaded = PDS_GetString("playerslist", g_szBuffer, charsmax(g_szBuffer));
 
 	if (g_bPlayersListLoaded) {
