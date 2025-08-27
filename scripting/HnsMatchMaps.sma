@@ -10,6 +10,8 @@ new Array:g_ArrKnife;
 
 new Array:g_CurrentMenuArray;
 
+new g_SelectedMap[MAX_PLAYERS + 1][32];
+
 public plugin_precache() {
 	g_ArrKnife = ArrayCreate(32);
 	g_ArrBoost = ArrayCreate(32);
@@ -165,6 +167,8 @@ public cmdMapActionMenu(id, szMap[]) {
 	new szMsg[64];
 	formatex(szMsg, charsmax(szMsg), "Карта: %s", szMap);
 
+	copy(g_SelectedMap[id], charsmax(g_SelectedMap[]), szMap);
+
 	new hMenu = menu_create(szMsg, "cmdMapActionHandler");
 
 	menu_additem(hMenu, "Номинировать карту", "1");
@@ -190,7 +194,7 @@ public cmdMapActionHandler(id, hMenu, item) {
 	}
 	else if (choice == 2) {
 		client_print_color(0, print_team_blue, "%L", LANG_PLAYER, "MAPS_CHAGE", g_szPrefix, id, szName);
-		engine_changelevel(szName);
+		engine_changelevel(g_SelectedMap[id]);
 	}
 
 	return PLUGIN_HANDLED;
