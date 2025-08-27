@@ -16,6 +16,7 @@
 #include <hns_matchsystem_dbmysql.inc>
 #include <hns_matchsystem_api.inc>
 #include <hns_matchsystem_bans.inc>
+#include <hns_matchsystem_maps.inc>
 
 #include <hns-match/globals>
 

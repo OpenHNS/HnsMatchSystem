@@ -37,5 +37,13 @@ public match_system_additons(const szNativeName[], iNativeID, iTrapMode) {
 		return PLUGIN_HANDLED
 	}
 
+	if (equal(szNativeName, "hnsmatch_maps_init")) { 
+		return PLUGIN_HANDLED
+	}
+
+	if (equal(szNativeName, "hnsmatch_maps_is_knife")) { 
+		return PLUGIN_HANDLED
+	}
+
 	return PLUGIN_CONTINUE;
 }

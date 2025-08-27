@@ -174,6 +174,9 @@ public LogSendMessage(szData[1024], any:...) {
 }
 
 stock bool:hns_is_knife_map() {
+	if (hnsmatch_maps_init()) {
+		return hnsmatch_maps_is_knife();
+	}
 	if (equali(g_szMapName, g_iSettings[KNIFEMAP])) {
 		return true;
 	} else {
