@@ -18,8 +18,6 @@ public plugin_natives() {
 
 	register_native("hns_get_rules", "native_get_rules");
 
-	register_native("hns_get_match_teamsize", "native_get_match_teamsize");
-
 	register_native("hns_isboost", "native_hns_isboost");
 
 	register_native("hns_get_score_a", "native_get_score_a");
@@ -75,10 +73,6 @@ public native_set_mode(amxx, params) {
 			mix_start()
 		}
 	}
-}
-
-public native_get_match_teamsize(amxx, params) {
-	return g_eMatchInfo[e_mTeamSize];
 }
 
 public Float:native_get_score_a() {

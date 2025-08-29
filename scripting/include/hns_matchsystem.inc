@@ -5,18 +5,16 @@
 
 #define rg_get_user_team(%0) get_member(%0, m_iTeam)
 
-enum _:HNS_MODES
-{
+enum HNS_MODES {
 	MODE_TRAINING,
 	MODE_KNIFE,
 	MODE_PUB,
 	MODE_DM,
 	MODE_ZM,
 	MODE_MIX
-}
+};
 
-enum MATCH_STATUS
-{
+enum MATCH_STATUS {
 	MATCH_NONE,
 	MATCH_CAPTAINPICK,
 	MATCH_CAPTAINKNIFE,
@@ -25,17 +23,16 @@ enum MATCH_STATUS
 	MATCH_MAPPICK,
 	MATCH_WAITCONNECT,
 	MATCH_STARTED
-}
+};
 
-enum MODE_STATES
-{
-    STATE_DISABLED,
-    STATE_PREPARE,
-    STATE_PAUSED,
-    STATE_ENABLED
-}
+enum MODE_STATES {
+	STATE_DISABLED,
+	STATE_PREPARE,
+	STATE_PAUSED,
+	STATE_ENABLED
+};
 
-enum NATCH_RULES {
+enum MATCH_RULES {
 	RULES_MR,
 	RULES_TIMER,
 	RULES_DUEL
@@ -47,63 +44,26 @@ enum HNS_TEAM {
 }
 
 /*
-* Gets the system prefix.
-*
-* @param szPrefix   Buffer to copy prefix to
-* @param iLen Maximum buffer size
-*
-* @noreturn
-*/
-native hns_get_prefix(szPrefix[], iLen);
-
-/*
-* 
-*
-* 
-* 
-*
-* 
-*/
-native hns_get_flag_watcher();
-
-/*
-* 
-*
-* 
-* 
-*
-* 
-*/
-native hns_get_flag_fullwatcher();
-
-/*
-* 
-*
-* 
-* 
-*
-* 
-*/
-native hns_get_flag_admin();
-
-/*
 * Gets mode system.
 *
-* @return enum HNS_MODES
+* @return HNS_MODES
 */
-native hns_get_mode();
+native HNS_MODES:hns_get_mode();
 
 /*
 * Set mode system.
 *
+* @param iMode HNS_MODES
+*
 * @noreturn
 */
-native hns_set_mode(iMode);
+native hns_set_mode(HNS_MODES:iMode);
+
 
 /*
 * Gets match status.
 *
-* @return type MATCH_STATUS
+* @return MATCH_STATUS
 */
 native MATCH_STATUS:hns_get_status();
 
@@ -114,30 +74,61 @@ native MATCH_STATUS:hns_get_status();
 */
 native MODE_STATES:hns_get_state();
 
+
 /*
 * Gets match rules
 *
-* @return type NATCH_RULES
+* @return type MATCH_RULES
 */
-native NATCH_RULES:hns_get_rules();
+native MATCH_RULES:hns_get_rules();
 
-
-native hns_get_match_teamsize();
+/*
+* Gets the system prefix.
+*
+* @param szPrefix	Buffer to copy prefix to
+* @param iLen		Maximum buffer size
+*
+* @noreturn
+*/
+native hns_get_prefix(szPrefix[], iLen);
 
 native hns_isboost();
 
 native Float:hns_get_score_a();
 
+/*
+* Gets watcher flag
+*
+* @return Bitflag value
+*/
 native Float:hns_get_score_b();
 
 native HNS_TEAM:hns_get_is_team_tt();
 
+/*
+* Gets watcher flag
+*
+* @return Bitflag value
+*/
+native hns_get_flag_watcher();
+
+/*
+* Gets full watcher flag
+*
+* @return Bitflag value
+*/
+native hns_get_flag_fullwatcher();
+
+/*
+* Gets admin flag
+*
+* @return Bitflag value
+*/
+native hns_get_flag_admin();
+
 forward hns_player_leave_inmatch(id);
 
 forward hns_player_join_inmatch(id, bool:bReplaced);
-
-
-forward hns_team_battle_started();
 
 /*
 * Called when the match play begins.

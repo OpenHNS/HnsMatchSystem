@@ -74,8 +74,6 @@ public plugin_init() {
 }
 
 public forward_init() {
-	g_hForwards[TEAM_BATTLE] = CreateMultiForward("hns_team_battle_started", ET_CONTINUE);
-
 	g_hForwards[MATCH_START] = CreateMultiForward("hns_match_started", ET_CONTINUE);
 	g_hForwards[MATCH_RESET_ROUND] = CreateMultiForward("hns_match_reset_round", ET_CONTINUE);
 	g_hForwards[MATCH_FINISH] = CreateMultiForward("hns_match_finished", ET_CONTINUE, FP_CELL);
