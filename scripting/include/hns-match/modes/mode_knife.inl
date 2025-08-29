@@ -123,6 +123,8 @@ public kniferound_roundend(bool:win_ct) {
 		}
 	}
 	ChangeGameplay(GAMEPLAY_TRAINING);
+
+	// TODO: Кайф без state
 }
 
 public kniferound_player_leave(id) {
