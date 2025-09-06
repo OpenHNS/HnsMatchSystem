@@ -173,7 +173,7 @@ public cmdMapActionMenu(id, szMap[]) {
 
 	menu_additem(hMenu, "Номинировать карту", "1");
 
-	if (isUserWatcher(id) || isUserFullWatcher(id) || isUserAdmin(id)) {
+	if (isUserWatcher(id)) {
 		menu_additem(hMenu, "Сменить карту", "2");
 	} else {
 		menu_additem(hMenu, "\dСменить карту", "2");
@@ -198,7 +198,7 @@ public cmdMapActionHandler(id, hMenu, item) {
 		client_print_color(0, print_team_blue, "%L", LANG_PLAYER, "MAPS_NOM", g_szPrefix, id, szName);
 	}
 	else if (choice == 2) {
-		if (isUserWatcher(id) || isUserFullWatcher(id) || isUserAdmin(id)) {
+		if (isUserWatcher(id)) {
 			client_print_color(0, print_team_blue, "%L", LANG_PLAYER, "MAPS_CHAGE", g_szPrefix, id, szName);
 			engine_changelevel(g_SelectedMap[id]);
 		} else {

@@ -264,6 +264,7 @@ public cmdFlash(id) {
 	}
 
 	rg_give_item(id, "weapon_flashbang");
+	//rg_give_item(id, "weapon_smokegrenade");
 	return PLUGIN_HANDLED;
 }
 

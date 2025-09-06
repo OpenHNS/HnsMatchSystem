@@ -373,7 +373,7 @@ public WaitPick() {
 		remove_task(TASK_WAITCAP)
 	}
 
-	RandomPickTime = 5.0;
+	RandomPickTime = 25.0;
 
 	LogSendMessage("[MATCH] Wait pick started.");
 
