@@ -31,7 +31,6 @@ enum _: PLAYER_STATS {
 	PLR_STATS_DMG_TT,
 	Float:PLR_STATS_RUNNED,
 	Float:PLR_STATS_RUNNEDTIME,
-	Float:PLR_STATS_AVG_SPEED,
 	Float:PLR_STATS_FLASHTIME,
 	Float:PLR_STATS_SURVTIME,
 	Float:PLR_STATS_HIDETIME,
@@ -174,15 +173,17 @@ public Float:native_get_stats_runnedtime(amxx, params) {
 
 public Float:native_get_stats_avg_speed(amxx, params) {
 	enum { type = 1, id = 2 };
-	if (get_param(type) == STATS_ROUND) {
-		return g_StatsRound[get_param(id)][PLR_STATS_AVG_SPEED];
+	new Float:runned_time = g_StatsRound[get_param(id)][PLR_STATS_RUNNEDTIME];
+	new Float:run_distance = g_StatsRound[get_param(id)][PLR_STATS_RUNNED];
+
+	if (get_param(type) != STATS_ROUND) {
+		runned_time += iStats[get_param(id)][PLR_STATS_RUNNEDTIME];
+		run_distance += iStats[get_param(id)][PLR_STATS_RUNNED];
 	}
-	new Float:runned_time = iStats[get_param(id)][PLR_STATS_RUNNEDTIME] + g_StatsRound[get_param(id)][PLR_STATS_RUNNEDTIME];
+
 	if (runned_time == 0.0) {
 		return 0.0; // Avoid division by zero
 	}
-	new Float:run_distance = iStats[get_param(id)][PLR_STATS_RUNNED] + g_StatsRound[get_param(id)][PLR_STATS_RUNNED];
-
 	return floatdiv(run_distance, runned_time);
 }
 
@@ -437,10 +438,6 @@ public rgPlayerPreThink(id) {
 				{
 					g_StatsRound[id][PLR_STATS_RUNNED] += vector_length(velocity) * frametime;
 					g_StatsRound[id][PLR_STATS_RUNNEDTIME] += frametime;
-					if(g_StatsRound[id][PLR_STATS_RUNNED])
-					{
-						g_StatsRound[id][PLR_STATS_AVG_SPEED] = g_StatsRound[id][PLR_STATS_RUNNED] / g_StatsRound[id][PLR_STATS_RUNNEDTIME];
-					}
 				}
 				if(is_player_hidding(id))
 				{
@@ -487,35 +484,7 @@ public taskRoundEvent() {
 public hns_match_finished() {
 	new iPlayers[MAX_PLAYERS], iNum;
 	get_players(iPlayers, iNum, "ch");
-
-	for (new i = 0; i < iNum; i++) {
-		new id = iPlayers[i];
-
-		iStats[id][PLR_STATS_OWNAGES] += g_StatsRound[id][PLR_STATS_OWNAGES];
-		iStats[id][PLR_STATS_BHOP_COUNT] += g_StatsRound[id][PLR_STATS_BHOP_COUNT];
-		iStats[id][PLR_STATS_BHOP_PERCENT_SUM] += g_StatsRound[id][PLR_STATS_BHOP_PERCENT_SUM];
-		iStats[id][PLR_STATS_BHOP_PERCENT_SUM] = floatadd(iStats[id][PLR_STATS_BHOP_PERCENT_SUM],  g_StatsRound[id][PLR_STATS_BHOP_PERCENT_SUM]);
-		iStats[id][PLR_STATS_SGS_COUNT] += g_StatsRound[id][PLR_STATS_BHOP_COUNT];
-		iStats[id][PLR_STATS_SGS_PERCENT_SUM] += g_StatsRound[id][PLR_STATS_SGS_PERCENT_SUM];
-		iStats[id][PLR_STATS_SGS_PERCENT_SUM] = floatadd(iStats[id][PLR_STATS_SGS_PERCENT_SUM],  g_StatsRound[id][PLR_STATS_SGS_PERCENT_SUM]);
-		iStats[id][PLR_STATS_DDRUN_COUNT] += g_StatsRound[id][PLR_STATS_BHOP_COUNT];
-		iStats[id][PLR_STATS_DDRUN_PERCENT_SUM] += g_StatsRound[id][PLR_STATS_DDRUN_PERCENT_SUM];
-		iStats[id][PLR_STATS_DDRUN_PERCENT_SUM] = floatadd(iStats[id][PLR_STATS_DDRUN_PERCENT_SUM],  g_StatsRound[id][PLR_STATS_DDRUN_PERCENT_SUM]);
-		iStats[id][PLR_STATS_KILLS] += g_StatsRound[id][PLR_STATS_KILLS];
-		iStats[id][PLR_STATS_DEATHS] += g_StatsRound[id][PLR_STATS_DEATHS];
-		iStats[id][PLR_STATS_ASSISTS] += g_StatsRound[id][PLR_STATS_ASSISTS];
-		iStats[id][PLR_STATS_STABS] += g_StatsRound[id][PLR_STATS_STABS];
-		iStats[id][PLR_STATS_DMG_TT] += g_StatsRound[id][PLR_STATS_DMG_TT];
-		iStats[id][PLR_STATS_DMG_CT] += g_StatsRound[id][PLR_STATS_DMG_CT];
-		iStats[id][PLR_STATS_FLASHTIME] += g_StatsRound[id][PLR_STATS_FLASHTIME];
-		iStats[id][PLR_STATS_RUNNED] += g_StatsRound[id][PLR_STATS_RUNNED];
-		iStats[id][PLR_STATS_SURVTIME] += g_StatsRound[id][PLR_STATS_SURVTIME];
-		iStats[id][PLR_STATS_PLAYTIME] += g_StatsRound[id][PLR_STATS_PLAYTIME];
-		iStats[id][PLR_STATS_HIDETIME] += g_StatsRound[id][PLR_STATS_HIDETIME];
-		iStats[id][PLR_STATS_RUNNEDTIME] += g_StatsRound[id][PLR_STATS_RUNNEDTIME];
-
-		arrayset(g_StatsRound[id], 0, PLAYER_STATS);
-	}
+	collect_stats();
 
 	ExecuteForward(g_hApplyStatsForward, _, 1);
 }
@@ -535,38 +504,9 @@ public hns_round_end() {
 	if (hns_get_mode() == MODE_MIX && hns_get_state() == STATE_ENABLED) {
 		if(task_exists(TASK_TIMER_STATS)) {
 			remove_task(TASK_TIMER_STATS);
-		}
-	
-		ExecuteForward(g_hApplyStatsForward, _, 0);
-		
-		new iPlayers[MAX_PLAYERS], iNum;
-		get_players(iPlayers, iNum, "ch");
-
-		for (new i = 0; i < iNum; i++) {
-			new id = iPlayers[i];
-
-			iStats[id][PLR_STATS_OWNAGES] += g_StatsRound[id][PLR_STATS_OWNAGES];
-			iStats[id][PLR_STATS_BHOP_COUNT] += g_StatsRound[id][PLR_STATS_BHOP_COUNT];
-			iStats[id][PLR_STATS_BHOP_PERCENT_SUM] += g_StatsRound[id][PLR_STATS_BHOP_PERCENT_SUM];
-			iStats[id][PLR_STATS_BHOP_PERCENT_SUM] = floatadd(iStats[id][PLR_STATS_BHOP_PERCENT_SUM],  g_StatsRound[id][PLR_STATS_BHOP_PERCENT_SUM]);
-			iStats[id][PLR_STATS_SGS_COUNT] += g_StatsRound[id][PLR_STATS_BHOP_COUNT];
-			iStats[id][PLR_STATS_SGS_PERCENT_SUM] += g_StatsRound[id][PLR_STATS_SGS_PERCENT_SUM];
-			iStats[id][PLR_STATS_SGS_PERCENT_SUM] = floatadd(iStats[id][PLR_STATS_SGS_PERCENT_SUM],  g_StatsRound[id][PLR_STATS_SGS_PERCENT_SUM]);
-			iStats[id][PLR_STATS_DDRUN_COUNT] += g_StatsRound[id][PLR_STATS_BHOP_COUNT];
-			iStats[id][PLR_STATS_DDRUN_PERCENT_SUM] += g_StatsRound[id][PLR_STATS_DDRUN_PERCENT_SUM];
-			iStats[id][PLR_STATS_DDRUN_PERCENT_SUM] = floatadd(iStats[id][PLR_STATS_DDRUN_PERCENT_SUM],  g_StatsRound[id][PLR_STATS_DDRUN_PERCENT_SUM]);
-			iStats[id][PLR_STATS_KILLS] += g_StatsRound[id][PLR_STATS_KILLS];
-			iStats[id][PLR_STATS_DEATHS] += g_StatsRound[id][PLR_STATS_DEATHS];
-			iStats[id][PLR_STATS_ASSISTS] += g_StatsRound[id][PLR_STATS_ASSISTS];
-			iStats[id][PLR_STATS_STABS] += g_StatsRound[id][PLR_STATS_STABS];
-			iStats[id][PLR_STATS_DMG_TT] += g_StatsRound[id][PLR_STATS_DMG_TT];
-			iStats[id][PLR_STATS_DMG_CT] += g_StatsRound[id][PLR_STATS_DMG_CT];
-			iStats[id][PLR_STATS_FLASHTIME] += g_StatsRound[id][PLR_STATS_FLASHTIME];
-			iStats[id][PLR_STATS_RUNNED] += g_StatsRound[id][PLR_STATS_RUNNED];
-			iStats[id][PLR_STATS_SURVTIME] += g_StatsRound[id][PLR_STATS_SURVTIME];
-
-			arrayset(g_StatsRound[id], 0, PLAYER_STATS);
-		}
+		}		
+		collect_stats();
+		ExecuteForward(g_hApplyStatsForward, _, 0);		
 	}
 }
 
@@ -643,7 +583,7 @@ stock bool:is_player_running(id) {
 	// Don't reset the Z velocity, because it can be used for jumps/ladders
 	//velocity[2] = 0.0;
 
-	if(vector_length(velocity) > 125.0)
+	if(vector_length(velocity) > 200.0)
 		return true;
 
 	return false;
@@ -657,24 +597,59 @@ stock is_player_hidding(id) {
 	
 	new iPlayers[MAX_PLAYERS], iNum;
 	get_players(iPlayers, iNum, "ache", "CT");
-	new bool:visible = false;
+	new Float:origin[3];
+	get_entvar(id, var_origin, origin);
+	new bool:hided = true;
 	for (new i = 0; i < iNum; i++)
 	{
 		new player = iPlayers[i];
-		new Float:origin[3];
-		get_entvar(player, var_origin, origin);
 		if (fm_is_in_viewcone(player, origin) && fm_is_ent_visible(player, id))
 		{
-			visible = true;
+			hided = false;
 			break;
 		}
 	}
 
-	return visible;
+	return hided;
 }
 public Float:get_average_percent(iCount, Float:flPercentSum) {
     if (iCount == 0) {
         return 0.0;
     }
     return floatdiv(flPercentSum, float(iCount));
+}
+
+collect_stats()
+{
+	new iPlayers[MAX_PLAYERS], iNum;
+	get_players(iPlayers, iNum, "ch");
+
+	for (new i = 0; i < iNum; i++) {
+		new id = iPlayers[i];
+
+		iStats[id][PLR_STATS_OWNAGES] += g_StatsRound[id][PLR_STATS_OWNAGES];
+		iStats[id][PLR_STATS_BHOP_COUNT] += g_StatsRound[id][PLR_STATS_BHOP_COUNT];
+		iStats[id][PLR_STATS_BHOP_PERCENT_SUM] += g_StatsRound[id][PLR_STATS_BHOP_PERCENT_SUM];
+		iStats[id][PLR_STATS_BHOP_PERCENT_SUM] = floatadd(iStats[id][PLR_STATS_BHOP_PERCENT_SUM],  g_StatsRound[id][PLR_STATS_BHOP_PERCENT_SUM]);
+		iStats[id][PLR_STATS_SGS_COUNT] += g_StatsRound[id][PLR_STATS_BHOP_COUNT];
+		iStats[id][PLR_STATS_SGS_PERCENT_SUM] += g_StatsRound[id][PLR_STATS_SGS_PERCENT_SUM];
+		iStats[id][PLR_STATS_SGS_PERCENT_SUM] = floatadd(iStats[id][PLR_STATS_SGS_PERCENT_SUM],  g_StatsRound[id][PLR_STATS_SGS_PERCENT_SUM]);
+		iStats[id][PLR_STATS_DDRUN_COUNT] += g_StatsRound[id][PLR_STATS_BHOP_COUNT];
+		iStats[id][PLR_STATS_DDRUN_PERCENT_SUM] += g_StatsRound[id][PLR_STATS_DDRUN_PERCENT_SUM];
+		iStats[id][PLR_STATS_DDRUN_PERCENT_SUM] = floatadd(iStats[id][PLR_STATS_DDRUN_PERCENT_SUM],  g_StatsRound[id][PLR_STATS_DDRUN_PERCENT_SUM]);
+		iStats[id][PLR_STATS_KILLS] += g_StatsRound[id][PLR_STATS_KILLS];
+		iStats[id][PLR_STATS_DEATHS] += g_StatsRound[id][PLR_STATS_DEATHS];
+		iStats[id][PLR_STATS_ASSISTS] += g_StatsRound[id][PLR_STATS_ASSISTS];
+		iStats[id][PLR_STATS_STABS] += g_StatsRound[id][PLR_STATS_STABS];
+		iStats[id][PLR_STATS_DMG_TT] += g_StatsRound[id][PLR_STATS_DMG_TT];
+		iStats[id][PLR_STATS_DMG_CT] += g_StatsRound[id][PLR_STATS_DMG_CT];
+		iStats[id][PLR_STATS_RUNNED] += g_StatsRound[id][PLR_STATS_RUNNED];
+		iStats[id][PLR_STATS_RUNNEDTIME] += g_StatsRound[id][PLR_STATS_RUNNEDTIME];
+		iStats[id][PLR_STATS_PLAYTIME] += g_StatsRound[id][PLR_STATS_PLAYTIME];
+		iStats[id][PLR_STATS_HIDETIME] += g_StatsRound[id][PLR_STATS_HIDETIME];
+		iStats[id][PLR_STATS_FLASHTIME] += g_StatsRound[id][PLR_STATS_FLASHTIME];
+		iStats[id][PLR_STATS_SURVTIME] += g_StatsRound[id][PLR_STATS_SURVTIME];
+
+		arrayset(g_StatsRound[id], 0, PLAYER_STATS);
+	}
 }
