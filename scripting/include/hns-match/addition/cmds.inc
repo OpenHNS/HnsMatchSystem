@@ -7,7 +7,7 @@
 stock cmds_init() {
 	register_clcmd("say", "sayHandle");
 
-	//register_clcmd("nightvision", "mainMatchMenu");
+	register_clcmd("nightvision", "mainMatchMenu");
 
 	register_clcmd("chooseteam", 	"blockCmd");
 	register_clcmd("jointeam", 		"blockCmd");
