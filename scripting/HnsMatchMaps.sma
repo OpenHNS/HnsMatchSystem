@@ -202,8 +202,7 @@ public cmdMapActionHandler(id, hMenu, item) {
 	else if (choice == 2) {
 		if (isUserWatcher(id)) {
 			client_print_color(0, print_team_blue, "%L", LANG_PLAYER, "MAPS_CHAGE", g_szPrefix, id, g_SelectedMap[id]);
-			engine_changelevel(g_SelectedMap[id]);
-			set_task(2.0, "change_map", id + TASK_MAP);
+			set_task(1.0, "change_map", id + TASK_MAP);
 		} else {
 			cmdMapActionMenu(id, g_SelectedMap[id]);
 		}

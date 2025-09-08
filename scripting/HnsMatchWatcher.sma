@@ -40,10 +40,10 @@ public plugin_cfg() {
 	hns_get_prefix(g_sPrefix, charsmax(g_sPrefix));
 }
 
-public client_authorized(id) {
+public client_putinserver(id) {
 	g_eRnw[r_iVotes][id] = 0;
 	g_eRnw[r_bPlayerVote][id] = false;
-	
+
 	new szAuthID[64]; get_user_authid(id, szAuthID, charsmax(szAuthID));
 	if(equal(g_eWatcher[w_szSteamId], szAuthID)) {
 		ActivateWatcher(id);
