@@ -2,6 +2,8 @@
 #include <reapi>
 #include <hns_matchsystem>
 
+#define TASK_MAP 12344
+
 new g_szPrefix[24];
 
 new Array:g_ArrBoost;
@@ -201,10 +203,17 @@ public cmdMapActionHandler(id, hMenu, item) {
 		if (isUserWatcher(id)) {
 			client_print_color(0, print_team_blue, "%L", LANG_PLAYER, "MAPS_CHAGE", g_szPrefix, id, g_SelectedMap[id]);
 			engine_changelevel(g_SelectedMap[id]);
+			set_task(2.0, "change_map", id + TASK_MAP);
 		} else {
 			cmdMapActionMenu(id, g_SelectedMap[id]);
 		}
 	}
 
 	return PLUGIN_HANDLED;
+}
+
+public change_map(idtask) {
+	new id = idtask - TASK_MAP;
+
+	engine_changelevel(g_SelectedMap[id]);
 }
