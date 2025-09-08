@@ -74,9 +74,6 @@ HNS_OWNAGE = %n owned %n's head!
 
 STATS_TOP = %s Show top — ^3/top
 
-MAPS_NOM = %s ^3%n^1 nominated map: ^3%s^1.
-MAPS_CHAGE = %s ^3%n^1 change map: ^3%s^1.
-
 HUD_ON = %s HUD info is now ^3enabled^1.
 HUD_OFF = %s HUD info is now ^3disabled^1.
 ROUNDINFO_ON = %s Round info is now ^3enabled^1.
@@ -129,6 +126,16 @@ RECON_REFUSED_REPLACE = %s ^3%n^1 refused to replace.
 RECON_REPLACE = %s ^3%n^1 was replaced by ^3%n
 RECON_DIDNT_CHOOSE = %s Player ^3%n^1 didn't chose anything.
 RECON_EXPIRED = %s Time expired.
+
+MAPS_MENU_TITLE = Chose map menu:
+MAPS_MENU_KNIFE = Knife maps
+MAPS_MENU_BOOST = Boost maps
+MAPS_MENU_SKILL = Skill maps
+MAPS_ACTION_TITLE = Map: %s
+MAPS_ACTION_NOM = Nominated map
+MAPS_ACTION_CHANGE = Change map
+MAPS_NOM = %s ^3%n^1 nominated map: ^3%s^1.
+MAPS_CHAGE = %s ^3%n^1 change map: ^3%s^1.
 
 [ru]
 
@@ -210,7 +217,6 @@ HNS_OWNAGE = %n запрыгнул на голову %n!
 
 STATS_TOP = %s Показать топ — ^3/top
 
-MAPS_NOM = %s ^3%n^1 номинировал карту: ^3%s^1.
 
 HUD_ON = %s HUD информация: ^3включена^1.
 HUD_OFF = %s HUD информация: ^3выключена^1.
@@ -263,3 +269,13 @@ RECON_REFUSED_REPLACE = %s ^3%n^1 отказался от замены.
 RECON_REPLACE = %s ^3%n^1 был заменен на ^3%n.
 RECON_DIDNT_CHOOSE = %s Игрок ^3%n^1 ничего не выбрал.
 RECON_EXPIRED = %s Время истекло.
+
+MAPS_MENU_TITLE = Выбор меню карт:
+MAPS_MENU_KNIFE = Knife карты
+MAPS_MENU_BOOST = Boost карты
+MAPS_MENU_SKILL = Skill карты
+MAPS_ACTION_TITLE = Карта: %s
+MAPS_ACTION_NOM = Номинировать карту
+MAPS_ACTION_CHANGE = Сменить карту
+MAPS_NOM = %s ^3%n^1 номинировал карту: ^3%s^1.
+MAPS_CHAGE = %s ^3%n^1 сменил карту: ^3%s^1.

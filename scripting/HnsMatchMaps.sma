@@ -66,6 +66,8 @@ public plugin_init() {
 	register_plugin("Match: Maps", "1.2", "OpenHNS");
 
 	RegisterSayCmd("map", "maps", "cmdMapsMenu", 0, "Open mapmenu");
+
+	register_dictionary("match_additons.txt");
 }
 
 public plugin_natives() {
@@ -98,12 +100,18 @@ public plugin_cfg() {
 
 public cmdMapsMenu(id) {
 	new szMsg[64];
-	formatex(szMsg, charsmax(szMsg), "\rВыбор меню карт:");
+	formatex(szMsg, charsmax(szMsg), "\r%L", id, "MAPS_MENU_TITLE");
 
 	new hMenu = menu_create(szMsg, "cmdMapsRootHandler");
-	menu_additem(hMenu, "Knife карты", "1");
-	menu_additem(hMenu, "Boost карты", "2");
-	menu_additem(hMenu, "Skill карты", "3");
+
+	formatex(szMsg, charsmax(szMsg), "%L", id, "MAPS_MENU_KNIFE");
+	menu_additem(hMenu, szMsg, "1");
+
+	formatex(szMsg, charsmax(szMsg), "%L", id, "MAPS_MENU_BOOST");
+	menu_additem(hMenu, szMsg, "2");
+
+	formatex(szMsg, charsmax(szMsg), "%L", id, "MAPS_MENU_SKILL");
+	menu_additem(hMenu, szMsg, "3");
 
 	menu_display(id, hMenu, 0);
 	return PLUGIN_CONTINUE;
@@ -120,12 +128,18 @@ public cmdMapsRootHandler(id, hMenu, item) {
 	new choice = str_to_num(szData);
 	menu_destroy(hMenu);
 
-	if (choice == 1)
-		showMapsMenu(id, g_ArrKnife, "Knife карты:");
-	else if (choice == 2)
-		showMapsMenu(id, g_ArrBoost, "Boost карты:");
-	else if (choice == 3)
-		showMapsMenu(id, g_ArrSkill, "Skill карты:");
+	new szMsg[64];
+
+	if (choice == 1) {
+		formatex(szMsg, charsmax(szMsg), "%L:", id, "MAPS_MENU_KNIFE");
+		showMapsMenu(id, g_ArrKnife, szMsg);
+	} else if (choice == 2) {
+		formatex(szMsg, charsmax(szMsg), "%L:", id, "MAPS_MENU_BOOST");
+		showMapsMenu(id, g_ArrBoost, szMsg);
+	} else if (choice == 3) {
+		formatex(szMsg, charsmax(szMsg), "%L:", id, "MAPS_MENU_SKILL");
+		showMapsMenu(id, g_ArrSkill, szMsg);
+	}
 
 	return PLUGIN_HANDLED;
 }
@@ -167,19 +181,22 @@ public cmdMapsMenuHandler(id, hMenu, item) {
 
 public cmdMapActionMenu(id, szMap[]) {
 	new szMsg[64];
-	formatex(szMsg, charsmax(szMsg), "Карта: %s", szMap);
+	formatex(szMsg, charsmax(szMsg), "%L:", id, "MAPS_ACTION_TITLE", szMap);
 
 	copy(g_SelectedMap[id], charsmax(g_SelectedMap[]), szMap);
 
 	new hMenu = menu_create(szMsg, "cmdMapActionHandler");
 
-	menu_additem(hMenu, "Номинировать карту", "1");
+	formatex(szMsg, charsmax(szMsg), "%L", id, "MAPS_ACTION_NOM");
+	menu_additem(hMenu, szMsg, "1");
 
 	if (isUserWatcher(id)) {
-		menu_additem(hMenu, "Сменить карту", "2");
+		formatex(szMsg, charsmax(szMsg), "%L", id, "MAPS_ACTION_CHANGE");
 	} else {
-		menu_additem(hMenu, "\dСменить карту", "2");
+		formatex(szMsg, charsmax(szMsg), "\d%L", id, "MAPS_ACTION_CHANGE");
 	}
+
+	menu_additem(hMenu, szMsg, "2");
 
 	menu_display(id, hMenu, 0);
 }
