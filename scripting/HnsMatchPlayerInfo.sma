@@ -133,7 +133,7 @@ public plugin_init() {
 
 	RegisterSayCmd("hud", "hudinfo", "cmdHudInfo", 0, "Show hud info");
 	RegisterSayCmd("ri", "roundinfo", "cmdRoundInfo", 0, "Show hud info");
-	RegisterSayCmd("top", "tops", "ShowTop", 0, "Show top");
+	//RegisterSayCmd("top", "tops", "ShowTop", 0, "Show top");
 	RegisterSayCmd("showspec", "speclist", "cmdShowSpec", 0, "On/Off speclist");
 	RegisterSayCmd("spechide", "hidespec", "cmdSpecHide", 0, "Spec hide");
 
@@ -442,19 +442,19 @@ public hns_match_started() {
 
 public hns_match_stopped_post() {
 	client_print_color(0, print_team_blue, "%L", LANG_PLAYER, "STATS_TOP", g_szPrefix);
-	ShowTop(0);
+	//ShowTop(0);
 	reset_best_players();
 }
 
 public hns_match_surrendered() {
 	client_print_color(0, print_team_blue, "%L", LANG_PLAYER, "STATS_TOP", g_szPrefix);
-	ShowTop(0);
+	//ShowTop(0);
 	reset_best_players();
 }
 
 public hns_match_finished() {
 	client_print_color(0, print_team_blue, "%L", LANG_PLAYER, "STATS_TOP", g_szPrefix);
-	ShowTop(0);
+	//ShowTop(0);
 	reset_best_players();
 }
 
