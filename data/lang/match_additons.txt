@@ -6,20 +6,20 @@ PTS_NOT_PLR = %s Pts not counted, less than 6 players.
 PTS_SET_TT = %s Team ^3TT^1 set ^3+15^1 pts.
 PTS_SET_CT = %s Team ^3CT^1 set ^3+15^1 pts.
 
-WTR_LEAVE = %s ^3%n^1 (watcher) is left, wait him or chose new watcher (say ^4rnw^1)...
-WTR_DELETE = %s ^3%n^1 removes ^3%n^1 watcher privileges.
-WTR_DELETE_STEAM = %s ^3%n^1 removes from ^3%n^1 (steamid) watcher privileges.
+WTR_LEAVE = %s ^3%n^1 (watcher) has left, wait or chose a new one (say ^4rnw^1)...
+WTR_DELETE = %s ^3%n^1 removed ^3%n^1 watcher privileges.
+WTR_DELETE_STEAM = %s ^3%n^1 removed ^3%n^1 (steamid) watcher privileges.
 WTR_PLR_DISC = %s Player you chose is disconnected.
 WTR_CHOOSE_NEW = %s ^3%n^1 choose ^3%n^1 as new server watcher.
-WTR_NOT_ADM = %s Can't start vote if admin is online.
+WTR_NOT_ADM = %s Can't start a vote if admin is online.
 WTR_NOT_NEED = %s Need more people on server to vote for watcher... (^3need > 1^1)
 WTR_ALR_VOTE = %s You already voted. Need ^3%d^1 to start vote.
-WTR_VOTE = %s ^3%n^1 wanna change Watcher! Need ^3%d^1 to start vote.
+WTR_VOTE = %s ^3%n^1 want to change Watcher! Need ^3%d^1 to start vote.
 WTR_START = %s Starting vote for new watcher!
-WTR_VOTE_CANCL = %s You have cancel your vote for new Watcher vote.
+WTR_VOTE_CANCL = %s You have cancelled your vote for the new watcher.
 WTR_VOTE_CHOOSE = %s ^3%n^1 voted for ^3%n^1 (^3%d^1)!
-WTR_VOTE_DISC = %s Can't vote player disconnected or can't find!
-WTR_NEW_RANDOM = %s New Watcher ^3%n^1 has randomly choosed between ^3%d^1 players!
+WTR_VOTE_DISC = %s Can't vote, player disconnected or missing!
+WTR_NEW_RANDOM = %s New Watcher ^3%n^1 has been randomly chosen between ^3%d^1 players!
 WTR_NEW = %s New Watcher - ^3%n^1 (^3%d^1 votes)
 
 WTR_MENU_NEW = \rChoose new watcher:
@@ -104,11 +104,11 @@ BAN_TIME_MENU_N = \rSelect ban time^n\dTarget: %n
 BAN_UNBAN_MENU = \rUnban player on match
 
 BAN_DATE_EXPIRED_P = Permanent
-BAN_EXPIRED = %s Player ^3%n^1 has expired match ban.
-BAN_PLAYER = %s ^3%n^1 banned a player ^3%n^1 on match. Expired: ^3%s^1.
-BAN_PLAYER_PERM = %s ^3%n^1 banned a player ^3%n^1 on match. Expired: ^3Permanent^1.
-BAN_PLAYER_OFF = %s ^3%n^1 banned a player ^3%s^1 on match. Expired: ^3%s^1.
-BAN_PLAYER_PERM_OFF = %s ^3%n^1 banned a player ^3%s^1 on match. Expired: ^3Permanent^1.
+BAN_EXPIRED = %s Player ^3%n^1 match ban has expired.
+BAN_PLAYER = %s ^3%n^1 banned a player ^3%n^1 on match. Expiration: ^3%s^1.
+BAN_PLAYER_PERM = %s ^3%n^1 banned a player ^3%n^1 on match. Expiration: ^3Permanent^1.
+BAN_PLAYER_OFF = %s ^3%n^1 banned a player ^3%s^1 on match. Expiration: ^3%s^1.
+BAN_PLAYER_PERM_OFF = %s ^3%n^1 banned a player ^3%s^1 on match. Expiration: ^3Permanent^1.
 UNBAN_PLAYER = %s ^3%n^1 unbanned a player ^3%s^1 on match.
 
 BAN_INFO = You were banned on match!^nAdmin: %s | Steamid: %s^nExpired: %s

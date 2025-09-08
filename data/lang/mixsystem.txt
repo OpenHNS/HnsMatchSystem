@@ -9,7 +9,7 @@ SET_WINTIME     = ^3%n^1 set ^3wintime^1 to ^3%d^1 minutes.
 
 KILL_HIMSELF    = ^3%n^1 killed himself.
 KILL_NOT        = Kill during deathmatch is not available.
-KILL_NOT_MIX    = You need to play ^31.5^1 minutes to kill yourself.
+KILL_NOT_MIX    = You need to play ^31.5^1 minutes to use kill command.
 KILL_WATER      = %s ^3%n^1 dropped in water.
 
 SUR_WAIT        = Wait ^3%s^1 for surrender!
@@ -17,8 +17,8 @@ SUR_PLAYER      = Player ^3%n^1 (^3%s^1) started vote for surrender!
 SUR_NEED        = Need ^3%d/%d^1 votes for surrender!
 SUR_END         = Team ^3%s^1 surrendered!
 
-AFK_PAUSE       = ^3%d^1 players AFK, pausing game.
-AFK_UNPAUSE     = LIVE! All players is here! Unpausing match.
+AFK_PAUSE       = ^3%d^1 players AFK, pausing the game.
+AFK_UNPAUSE     = LIVE! All players are here! Unpausing match.
 
 BAN_PAUSE       = ^3%n^1 banned from matches.
 
@@ -29,31 +29,31 @@ DM_TRANSF       = ^3%n^1 transfered to ^3Terrorist^1.
 MODE_ALREADY    = This mode already started!
 MODE_NOT_MIX    = This command is not available during the match!
 MODE_NOT_SET_DUEL = You need 1 player per team to start a duel.
-MODE_SET_MR     = ^3%n^1 change mode to ^3MR^1!
-MODE_SET_WT     = ^3%n^1 change mode to ^3Wintime^1!
-MODE_SET_DUEL   = ^3%n^1 change mode to ^3Duel^1!
+MODE_SET_MR     = ^3%n^1 changed mode to ^3MR^1!
+MODE_SET_WT     = ^3%n^1 changed mode to ^3Wintime^1!
+MODE_SET_DUEL   = ^3%n^1 changed mode to ^3Duel^1!
 
 GAME_NOTSTARTED = Game not started or already paused (use /unpause)
 GAME_PAUSED     = ^3%n^1 paused the game!
 GAME_UNPAUSED   = ^3%n^1 unpaused the game!
-GAME_SWAP       = ^3%n^1 swap teams!
+GAME_SWAP       = ^3%n^1 swapped teams!
 GAME_RESTART    = ^3%n^1 did restart!
 
 PUB_ACTIVATED   = ^3%n^1 has activated ^3public^1 mode.
 PUB_ALREADY     = Public mode is already running.
-PUB_CANC        = Please disable other mode before public.
+PUB_CANC        = Please, disable other mode to enable public mode.
 
 DM_ACTIVATED    = ^3%n^1 has activated ^3deatchmatch^1 mode.
 DM_ALREADY      = Deatchmatch mode is already running.
-DM_CANC         = Please disable other mode before deathmatch.
+DM_CANC         = Please, disable other mode to enable deathmatch mode.
 
 ZM_ACTIVATED    = ^3%n^1 has activated ^3zombie^1 mode.
 ZM_ALREADY      = Zombie mode is already running.
-ZM_CANC         = Please disable other mode before zombie.
+ZM_CANC         = Please, disable other mode to enable zombie mode.
 
-SET_ZOMBIE      = ^3%n^1 zombie!
+SET_ZOMBIE      = ^3%n^1 is a zombie!
 
-BLEND_TEAMS     = ^3%n^1 blend teams.
+BLEND_TEAMS     = ^3%n^1 blended the teams.
 
 TRANSF_SPEC     = ^3%n^1 transfered all players to ^3spectators^1!
 TRANSF_TT       = ^3%n^1 transfered all players to ^3terrorist's^1!
@@ -65,8 +65,8 @@ TYPE_BOOST      = ^3%n^1 has activated ^3boost^1 mode.
 AA_10           = ^3%n^1 changed ^3airaccelerate^1 to ^310^1.
 AA_100          = ^3%n^1 changed ^3airaccelerate^1 to ^3100^1.
 
-NOT_START_MIX   = Please disable other mode before start mix.
-NOT_START_KNIFE = Please disable other mode before start knife round.
+NOT_START_MIX   = Please, disable other mode to start mix game.
+NOT_START_KNIFE = Please, disable other mode to start knife round.
 
 KNIFE_ALREADY   = Knife round has already started.
 
@@ -87,7 +87,7 @@ SCORE_TIME      = TT [^3%s^1] %d vs %d [^3%s^1] CT (^3%d^1/^3%d^1 rounds) (^3%s^
 SCORE_TIME_WT   = TT [^3%s^1] vs [^3%s^1] CT (^3%s^1 diff)
 SCORE_DUEL      = Score: ^3%n^1 - ^3%d^1 vs ^3%d^1 - ^3%n^1
 SCORE_DUEL_DEF  = Score: TT - ^3%d^1 vs ^3%d^1 - CT
-SCORE_NOT       = Sorry, but game ain't started atm.
+SCORE_NOT       = Sorry, but the game is not live.
 
 SAME_TIMER      = Same Timers! OVERTIME! Playing +2 Rounds.
 
@@ -103,9 +103,9 @@ CAP_SECOND_PTS  = Second captain: ^3%n^1 (^3%d^1 [^3%s^1]).
 CAP_HAS_LEFT    = One of the captains has left, the captain's mode is disabled!
 TEAM_FULL       = The teams are full!
 
-PLAYER_CHOOSE       = Captain ^3%n^1 choose ^3%n^1.
-PLAYER_CHOOSE_PTS   = Captain ^3%n^1 choose ^3%n^1 (^3%d^1 [^3%s^1]).
-PLAYER_CHOOSE_RANDOM = Captain ^3%n^1 chose ^3%n^1 at random!
+PLAYER_CHOOSE       = Captain ^3%n^1 chose ^3%n^1.
+PLAYER_CHOOSE_PTS   = Captain ^3%n^1 chose ^3%n^1 (^3%d^1 [^3%s^1]).
+PLAYER_CHOOSE_RANDOM = Captain ^3%n^1 has been chosen ^3%n^1 at random!
 
 
 HUD_TIMETOWIN   = Last Round!^n TT Need %s Time to Win!
@@ -120,8 +120,8 @@ HUD_WIN_TT      = TT Win! ^n TT's timer is less than TT's team!
 HUD_STARTMIX1   = Going Live in 3 second!
 HUD_STARTMIX2   = Live! Live! Live!^nGood Luck & Have Fun!
 HUD_STARTKNIFE  = Team knife round started.
-HUD_UNPAUSE     = Game Unpause^nLive! Live! Live!
-HUD_PAUSE       = GAME PAUSE
+HUD_UNPAUSE     = Game Unpaused^nLive! Live! Live!
+HUD_PAUSE       = GAME PAUSED
 HUD_START_CAPKF = Captain knife round started.
 HUD_WAITPICK    = %n selects a player, %.f seconds left.
 
