@@ -195,9 +195,11 @@ public cmdMapActionHandler(id, hMenu, item) {
 	new choice = str_to_num(szData);
 
 	if (choice == 1) {
-		client_print_color(0, print_team_blue, "%L", LANG_PLAYER, "MAPS_NOM", g_szPrefix, id, szName);
+		client_print_color(0, print_team_blue, "%L", LANG_PLAYER, "MAPS_NOM", g_szPrefix, id, g_SelectedMap[id]);
 	}
 	else if (choice == 2) {
+		if (isUserWatcher(id) || isUserFullWatcher(id) || isUserAdmin(id)) {
+			client_print_color(0, print_team_blue, "%L", LANG_PLAYER, "MAPS_CHAGE", g_szPrefix, id, g_SelectedMap[id]);
 		if (isUserWatcher(id)) {
 			client_print_color(0, print_team_blue, "%L", LANG_PLAYER, "MAPS_CHAGE", g_szPrefix, id, szName);
 			engine_changelevel(g_SelectedMap[id]);
