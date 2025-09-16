@@ -17,6 +17,7 @@ new Array:g_ArrSkill;
 new Array:g_ArrKnife;
 
 new bool:g_bHasSettings;
+new bool:g_bBoost;
 new Float:g_fRoundTime;
 new g_iFreezeTime;
 new g_iFlash;
@@ -67,16 +68,29 @@ public plugin_precache() {
 		if (section == 1) {
 			parse(szLine, szMap, charsmax(szMap));
 			strtolower(szMap);
+			if (!isMapExist(szMap)) {
+				server_print("HNS-MAPS | Карта %s не найдена в cstrike/maps.", szMap);
+				continue;
+			}
+
 			ArrayPushString(g_ArrKnife, szMap);
 		}
 		else if (section == 2 || section == 3) {
 			parse(szLine, szMap, charsmax(szMap), rt, charsmax(rt), ft, charsmax(ft), flash, charsmax(flash), smoke, charsmax(smoke));
 			strtolower(szMap);
 
+			if (!isMapExist(szMap)) {
+				server_print("HNS-MAPS | Карта %s не найдена в cstrike/maps.", szMap);
+				continue;
+			}
+
 			if (section == 2) ArrayPushString(g_ArrBoost, szMap);
 			else if (section == 3) ArrayPushString(g_ArrSkill, szMap);
 
 			if (equali(szMap, g_szCurrentMap)) {
+				if (section == 2) {
+					g_bBoost = true;
+				}
 				g_fRoundTime = str_to_float(rt);
 				g_iFreezeTime = str_to_num(ft);
 				g_iFlash = str_to_num(flash);
@@ -84,8 +98,8 @@ public plugin_precache() {
 
 				g_bHasSettings = true;
 
-				LogSendMessage("HNS-MAPS | Найдены настройки для %s: round=%.1f, freeze=%d, flash=%d, smoke=%d",
-					g_szCurrentMap, g_fRoundTime, g_iFreezeTime, g_iFlash, g_iSmoke);
+				LogSendMessage("HNS-MAPS | Найдены настройки для %s: round=%.1f, freeze=%d, flash=%d, smoke=%d boost=%d",
+					g_szCurrentMap, g_fRoundTime, g_iFreezeTime, g_iFlash, g_iSmoke, g_bBoost);
 			}
 		}
 	}
@@ -275,21 +289,27 @@ public change_map(idtask) {
 
 stock bool:applyCurrentMapSettings() {
 	if (!g_bHasSettings) {
-        return false;
-    }
+		return false;
+	}
 
 	set_cvar_float("mp_roundtime", g_fRoundTime);
 	set_cvar_num("mp_freezetime", g_iFreezeTime);
 	set_cvar_num("hns_flash", g_iFlash);
 	set_cvar_num("hns_smoke", g_iSmoke);
 
-	LogSendMessage("HNS-MAPS | applyCurrentMapSettings() Загружены настройки для %s: round=%.1f, freeze=%d, flash=%d, smoke=%d",
-		g_szCurrentMap, g_fRoundTime, g_iFreezeTime, g_iFlash, g_iSmoke);
+	if (g_bBoost) {
+		set_cvar_num("hns_boost", 1);
+	} else {
+		set_cvar_num("hns_boost", 0);
+	}
+
+	LogSendMessage("HNS-MAPS | applyCurrentMapSettings() Загружены настройки для %s: round=%.1f, freeze=%d, flash=%d, smoke=%d boost=%d",
+		g_szCurrentMap, g_fRoundTime, g_iFreezeTime, g_iFlash, g_iSmoke, g_bBoost);
 
 	return true;
 }
 
-stock debug_init(dir[32]) {
+stock debug_init(const dir[]) {
 	g_bDebugMode = bool:(plugin_flags() & AMX_FLAG_DEBUG);
 
 	if (g_bDebugMode) {
@@ -303,7 +323,7 @@ stock debug_init(dir[32]) {
 
 stock LogSendMessage(szData[1024], any:...) {
 	if (!g_bDebugMode) {
-		return
+		return;
 	}
 	new szLogFile[128];
 
@@ -319,4 +339,10 @@ stock LogSendMessage(szData[1024], any:...) {
 	vformat(msgFormated, charsmax(msgFormated), szData, 2);
 
 	log_to_file(szLogFile, msgFormated)
+}
+
+stock isMapExist(const szMap[]) {
+	new szPath[128];
+	formatex(szPath, charsmax(szPath), "maps/%s.bsp", szMap);
+	return file_exists(szPath);
 }
