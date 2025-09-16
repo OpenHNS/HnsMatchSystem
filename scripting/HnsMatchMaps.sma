@@ -4,17 +4,31 @@
 
 #define TASK_MAP 12344
 
+new bool:g_bDebugMode;
+
+new g_szLogPath[64];
+
 new g_szPrefix[24];
+
+new g_szCurrentMap[32];
 
 new Array:g_ArrBoost;
 new Array:g_ArrSkill;
 new Array:g_ArrKnife;
+
+new bool:g_bHasSettings;
+new Float:g_fRoundTime;
+new g_iFreezeTime;
+new g_iFlash;
+new g_iSmoke;
 
 new Array:g_CurrentMenuArray;
 
 new g_SelectedMap[MAX_PLAYERS + 1][32];
 
 public plugin_precache() {
+	debug_init("/hnsmatch-maps");
+
 	g_ArrKnife = ArrayCreate(32);
 	g_ArrBoost = ArrayCreate(32);
 	g_ArrSkill = ArrayCreate(32);
@@ -29,41 +43,57 @@ public plugin_precache() {
 		return;
 	}
 
-	new mapName[64], section;
+	new szLine[128], szMap[32];
+	new rt[8], ft[8], flash[8], smoke[8];
+	new section;
+
+	rh_get_mapname(g_szCurrentMap, charsmax(g_szCurrentMap));
 
 	while (!feof(fp)) {
-		fgets(fp, mapName, charsmax(mapName));
-		trim(mapName);
+		fgets(fp, szLine, charsmax(szLine));
+		trim(szLine);
 
-		if (!mapName[0] || mapName[0] == ';')
+		if (!szLine[0] || szLine[0] == ';')
 			continue;
 
-		if (mapName[0] == '[') {
-			if (equali(mapName, "[knife]"))
-				section = 1;
-			else if (equali(mapName, "[boost]"))
-				section = 2;
-			else if (equali(mapName, "[skill]"))
-				section = 3;
-			else
-				section = 0;
+		if (szLine[0] == '[') {
+			if (equali(szLine, "[knife]")) section = 1;
+			else if (equali(szLine, "[boost]")) section = 2;
+			else if (equali(szLine, "[skill]")) section = 3;
+			else section = 0;
 			continue;
 		}
 
-		strtolower(mapName);
+		if (section == 1) {
+			parse(szLine, szMap, charsmax(szMap));
+			strtolower(szMap);
+			ArrayPushString(g_ArrKnife, szMap);
+		}
+		else if (section == 2 || section == 3) {
+			parse(szLine, szMap, charsmax(szMap), rt, charsmax(rt), ft, charsmax(ft), flash, charsmax(flash), smoke, charsmax(smoke));
+			strtolower(szMap);
 
-		if (section == 1)
-			ArrayPushString(g_ArrKnife, mapName);
-		else if (section == 2)
-			ArrayPushString(g_ArrBoost, mapName);
-		else if (section == 3)
-			ArrayPushString(g_ArrSkill, mapName);
+			if (section == 2) ArrayPushString(g_ArrBoost, szMap);
+			else if (section == 3) ArrayPushString(g_ArrSkill, szMap);
+
+			if (equali(szMap, g_szCurrentMap)) {
+				g_fRoundTime = str_to_float(rt);
+				g_iFreezeTime = str_to_num(ft);
+				g_iFlash = str_to_num(flash);
+				g_iSmoke = str_to_num(smoke);
+
+				g_bHasSettings = true;
+
+				LogSendMessage("HNS-MAPS | Найдены настройки для %s: round=%.1f, freeze=%d, flash=%d, smoke=%d",
+					g_szCurrentMap, g_fRoundTime, g_iFreezeTime, g_iFlash, g_iSmoke);
+			}
+		}
 	}
 	fclose(fp);
 }
 
 public plugin_init() {
-	register_plugin("Match: Maps", "1.2", "OpenHNS");
+	register_plugin("Match: Maps", "1.3", "OpenHNS");
 
 	RegisterSayCmd("map", "maps", "cmdMapsMenu", 0, "Open mapmenu");
 
@@ -73,6 +103,7 @@ public plugin_init() {
 public plugin_natives() {
 	register_native("hnsmatch_maps_init", "native_maps_init");
 	register_native("hnsmatch_maps_is_knife", "native_maps_is_knife");
+	register_native("hnsmatch_maps_load_settings", "native_maps_load_settings");
 }
 
 public native_maps_init(amxx, params) {
@@ -92,6 +123,14 @@ public bool:native_maps_is_knife(amxx, params) {
 			return true;
 	}
 	return false;
+}
+
+public bool:native_maps_load_settings(amxx, params) {
+	if (applyCurrentMapSettings()) {
+		return true;
+	} else {
+		return false;
+	}
 }
 
 public plugin_cfg() {
@@ -232,4 +271,52 @@ public change_map(idtask) {
 	new id = idtask - TASK_MAP;
 
 	engine_changelevel(g_SelectedMap[id]);
+}
+
+stock bool:applyCurrentMapSettings() {
+	if (!g_bHasSettings) {
+        return false;
+    }
+
+	set_cvar_float("mp_roundtime", g_fRoundTime);
+	set_cvar_num("mp_freezetime", g_iFreezeTime);
+	set_cvar_num("hns_flash", g_iFlash);
+	set_cvar_num("hns_smoke", g_iSmoke);
+
+	LogSendMessage("HNS-MAPS | applyCurrentMapSettings() Загружены настройки для %s: round=%.1f, freeze=%d, flash=%d, smoke=%d",
+		g_szCurrentMap, g_fRoundTime, g_iFreezeTime, g_iFlash, g_iSmoke);
+
+	return true;
+}
+
+stock debug_init(dir[32]) {
+	g_bDebugMode = bool:(plugin_flags() & AMX_FLAG_DEBUG);
+
+	if (g_bDebugMode) {
+		get_localinfo("amxx_logs", g_szLogPath, charsmax(g_szLogPath));
+		add(g_szLogPath, charsmax(g_szLogPath), dir);
+
+		if (!dir_exists(g_szLogPath))
+			mkdir(g_szLogPath);
+	}
+}
+
+stock LogSendMessage(szData[1024], any:...) {
+	if (!g_bDebugMode) {
+		return
+	}
+	new szLogFile[128];
+
+	new szPath[128];
+	formatex(szPath, charsmax(szPath), "%s", g_szLogPath);
+
+	new szTime[22];
+	get_time("%m_%d", szTime, charsmax(szTime));
+	formatex(szLogFile, charsmax(szLogFile), "%s/%s.log", szPath, szTime);
+
+	new msgFormated[1024];
+
+	vformat(msgFormated, charsmax(msgFormated), szData, 2);
+
+	log_to_file(szLogFile, msgFormated)
 }

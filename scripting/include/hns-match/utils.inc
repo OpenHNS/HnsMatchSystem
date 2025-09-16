@@ -117,16 +117,8 @@ stock decodeText(const text, string[], const length) {
 }
 
 stock loadMapCFG() {
-	new szPath[128];
-	get_configsdir(szPath, 127);
-	format(szPath, 127, "%s/mixsystem", szPath);
-	if (!dir_exists(szPath))
-		mkdir(szPath);
-
-	format(szPath, 127, "%s/mapcfg/%s.cfg", szPath, g_szMapName);
-
-	if (file_exists(szPath)) {
-		server_cmd("exec %s", szPath);
+	if (hnsmatch_maps_load_settings()) {
+		LogSendMessage("HNS-MAIN | loadMapCFG() true - hnsmatch_maps_load_settings()");
 	} else {
 		if (g_iSettings[HNSBOOST]) {
 			set_cvar_num("mp_freezetime", 15);

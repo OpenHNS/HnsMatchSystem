@@ -6,3 +6,5 @@
 native hnsmatch_maps_init();
 
 native bool:hnsmatch_maps_is_knife();
+
+native bool:hnsmatch_maps_load_settings();
