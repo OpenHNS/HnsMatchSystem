@@ -67,7 +67,6 @@ public plugin_precache() {
 
 		if (section == 1) {
 			parse(szLine, szMap, charsmax(szMap));
-			strtolower(szMap);
 			if (!isMapExist(szMap)) {
 				server_print("HNS-MAPS | Карта %s не найдена в cstrike/maps.", szMap);
 				continue;
@@ -77,7 +76,6 @@ public plugin_precache() {
 		}
 		else if (section == 2 || section == 3) {
 			parse(szLine, szMap, charsmax(szMap), rt, charsmax(rt), ft, charsmax(ft), flash, charsmax(flash), smoke, charsmax(smoke));
-			strtolower(szMap);
 
 			if (!isMapExist(szMap)) {
 				server_print("HNS-MAPS | Карта %s не найдена в cstrike/maps.", szMap);
