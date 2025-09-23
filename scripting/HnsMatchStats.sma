@@ -74,7 +74,7 @@ public plugin_init() {
 	RegisterHookChain(RG_PlayerBlind, "rgPlayerBlind");
 
 	g_hApplyStatsForward = CreateMultiForward("hns_apply_stats", ET_CONTINUE, FP_CELL);
-	g_hSaveLeaveForward = CreateMultiForward("hns_save_leave_stats", ET_CONTINUE, FP_CELL);
+	g_hSaveLeaveForward = CreateMultiForward("hns_save_leave_stats", ET_CONTINUE, FP_CELL, FP_CELL);
 
 	g_tSaveData = TrieCreate();
 	g_tSaveRoundData = TrieCreate();
@@ -304,7 +304,7 @@ public hns_player_leave_inmatch(id) {
 		iStats[id][PLR_STATS_STOPS] = g_iGameStops;
 	}
 
-	ExecuteForward(g_hSaveLeaveForward, _, id);
+	ExecuteForward(g_hSaveLeaveForward, _, id, iStats[id][PLR_TEAM]);
 
 	TrieSetArray(g_tSaveData, getUserKey(id), iStats[id], PLAYER_STATS);
 	TrieSetArray(g_tSaveRoundData, getUserKey(id), g_StatsRound[id], PLAYER_STATS);
@@ -474,7 +474,7 @@ public taskRoundEvent() {
 		if(iTeam == TEAM_SPECTATOR)
 			continue;
 		
-		if (iTeam == TEAM_TERRORIST)
+		if (iTeam == TEAM_TERRORIST && is_user_alive(id))
 			g_StatsRound[id][PLR_STATS_SURVTIME] += 0.25;
 
 		g_StatsRound[id][PLR_STATS_PLAYTIME] += 0.25;
