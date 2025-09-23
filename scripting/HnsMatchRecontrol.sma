@@ -1,7 +1,9 @@
 #include <amxmodx>
 #include <reapi>
 #include <hns_matchsystem>
+#include <hns_matchsystem_filter>
 #include <hns_matchsystem_bans>
+#include <hns_matchsystem_api>
 
 #define rg_get_user_team(%0) get_member(%0, m_iTeam)
 
@@ -51,9 +53,11 @@ public plugin_init()
 {
 	register_plugin("Match: ReControl", "1.4", "OpenHNS"); // Thanks Conor, Denzer, Garey
 
-	register_clcmd("drop", "Control");
-	RegisterSayCmd("co", "co", "Control");
-	RegisterSayCmd("control", "con", "Control");
+	if (!hns_api_stats_init()) {
+		register_clcmd("drop", "Control");
+		RegisterSayCmd("co", "co", "Control");
+		RegisterSayCmd("control", "con", "Control");
+	}
 
 	RegisterSayCmd("re", "re", "Replace");
 	RegisterSayCmd("replace", "rep", "Replace");
