@@ -17,6 +17,10 @@ new iPlayersAfk;
 new Float:flAfkOrigin[MAX_PLAYERS + 1][3];
 
 public taskCheckAfk() {
+	if(task_exists(TASK_AFK)) {
+		return;
+	}
+
 	if (g_eMatchState != STATE_ENABLED) {
 		ResetAfkData();
 		return;
@@ -125,6 +129,10 @@ ResetAfkData() {
 
 stock bool:PlayerIsAfk(id) {
 	new Float:origin[3]; get_entvar(id, var_origin, origin);
+
+	if (getUserTeam(id) == TEAM_CT && get_member_game(m_bFreezePeriod)) {
+		return false;
+	}
 
 	if (get_distance_f(flAfkOrigin[id], origin) <= 1.0)
 		return true;
