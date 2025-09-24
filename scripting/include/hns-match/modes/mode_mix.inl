@@ -70,9 +70,9 @@ public mix_restartround() {
 	if (g_eMatchState == STATE_ENABLED) {
 		mix_reverttimer();
 		g_eMatchState = STATE_PREPARE;
-
-		ResetAfkData();
 	}
+
+	ResetAfkData();
 }
 
 
