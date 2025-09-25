@@ -615,7 +615,7 @@ public task_ShowPlayerInfo() {
 				}
 			}
 
-			if (hns_get_mode() == MODE_MIX && hns_get_state() != STATE_PAUSED && hns_get_rules() != RULES_DUEL) {
+			/*if (hns_get_mode() == MODE_MIX && hns_get_state() != STATE_PAUSED && hns_get_rules() != RULES_DUEL) {
 				new szTime[24];
 				fnConvertTime(hns_get_stats_surv(STATS_ALL, show_id), szTime, charsmax(szTime), false);
 				iLen += format(szHudMess[iLen], sizeof szHudMess - iLen, "\
@@ -628,7 +628,7 @@ public task_ShowPlayerInfo() {
 				iLen += format(szHudMess[iLen], sizeof szHudMess - iLen, "\
 				Stabs: %d^n",
 				hns_get_stats_stabs(STATS_ALL, show_id));
-			}
+			}*/
 
 			if (g_bHnsBannedInit) {
 				if (e_bBanned[id]) {

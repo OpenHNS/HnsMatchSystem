@@ -373,7 +373,7 @@ public WaitPick() {
 		remove_task(TASK_WAITCAP)
 	}
 
-	RandomPickTime = 25.0;
+	RandomPickTime = 35.0;
 
 	LogSendMessage("[MATCH] Wait pick started.");
 
@@ -396,9 +396,11 @@ public wait_function(id) {
 	}
 
 	RandomPickTime -= 1.0;
-	  
-	setTaskHud(0, 0.0, 1, 255, 255, 255, 1.0, "%L", LANG_SERVER, "HUD_WAITPICK", g_iCaptainPick, RandomPickTime);
-
+	
+	if (RandomPickTime <= 10) {
+		setTaskHud(0, 0.0, 1, 255, 255, 255, 1.0, "%L", LANG_SERVER, "HUD_WAITPICK", g_iCaptainPick, RandomPickTime);
+	}
+	
 	if(RandomPickTime <= 0.0) {
 		new iRandomPlayer = hns_get_random_role(ROLE_SPEC);
 		if(iRandomPlayer && (iRandomPlayer != -1)) {

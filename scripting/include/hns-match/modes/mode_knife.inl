@@ -88,7 +88,7 @@ public kniferound_roundend(bool:win_ct) {
 			g_iCaptainPick = win_ct ? hns_get_captain_role(ROLE_CAP_B) : hns_get_captain_role(ROLE_CAP_A);
 			get_user_authid(g_iCaptainPick, g_iCaptainPickSteam, charsmax(g_iCaptainPickSteam))
 
-			setTaskHud(0, 2.0, 1, 255, 255, 255, 3.0, fmt("%L", LANG_SERVER, "HUD_CAPWIN", g_iCaptainPick));
+			//setTaskHud(0, 2.0, 1, 255, 255, 255, 3.0, fmt("%L", LANG_SERVER, "HUD_CAPWIN", g_iCaptainPick));
 
 			training_start();
 
