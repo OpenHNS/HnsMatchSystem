@@ -16,6 +16,8 @@ new bool:g_bInvisPlayers[MAX_PLAYERS + 1];
 
 new g_hResetBugForward;
 
+new g_iMsgHookTempEntity;
+
 public plugin_init() {
 	register_plugin("Match: Training", "1.0", "OpenHNS");
 
@@ -40,6 +42,9 @@ public plugin_init() {
 	
 	RegisterHookChain(RG_CSGameRules_FlPlayerFallDamage, "rgFlPlayerFallDamage", true);
 	RegisterHookChain(RG_CBasePlayer_Spawn, "rgPlayerSpawn", false);
+
+	RegisterHookChain(RG_CGrenade_ExplodeFlashbang, "rgExplodeGrenade", .post = false)
+	RegisterHookChain(RG_CGrenade_ExplodeFlashbang, "rgExplodeGrenadePost", .post = true)
 
 	register_forward(FM_AddToFullPack, "fmAddToFullPack", 1);
 	
@@ -390,13 +395,53 @@ public rgPlayerSpawn(id) {
 
 public rgFlPlayerFallDamage(id) {
 	if (hns_get_mode() != MODE_TRAINING && hns_get_state() != STATE_PAUSED) {
-		return HC_CONTINUE
+		return HC_CONTINUE;
 	}
 
 	new dmg = floatround(Float:GetHookChainReturn(ATYPE_FLOAT));
 
 	if(g_bDamage[id]) {
 		client_print_color(id, print_team_blue, "%L", id, "TRNING_DMG", g_szPrefix, dmg);
+	}
+
+	return HC_CONTINUE;
+}
+
+public rgExplodeGrenade(const pGrenade, const tracehandle, const bitsDamageType) {
+	if (hns_get_mode() != MODE_TRAINING && hns_get_state() != STATE_PAUSED) {
+		return HC_CONTINUE;
+	}
+
+	g_iMsgHookTempEntity = register_message(SVC_TEMPENTITY, "Message_TempEntity");
+
+	return HC_CONTINUE;
+}
+
+public rgExplodeGrenadePost(const pGrenade, const tracehandle, const bitsDamageType) {
+	if (hns_get_mode() != MODE_TRAINING && hns_get_state() != STATE_PAUSED) {
+		return HC_CONTINUE;
+	}
+	
+	if (g_iMsgHookTempEntity) {
+		unregister_message(SVC_TEMPENTITY, g_iMsgHookTempEntity);
+		g_iMsgHookTempEntity = 0;
+	}
+	
+	if (pGrenade > 0) {
+		set_entvar(pGrenade, var_nextthink, 0.0);
+		set_entvar(pGrenade, var_flags, FL_KILLME);
+	}
+
+	new pSpark, Float:vecOriginGrenade[3], Float:vecOrigin[3];
+
+	get_entvar(pGrenade, var_origin, vecOriginGrenade);
+	
+	while ((pSpark = rg_find_ent_by_class(pSpark, "spark_shower", true))) {
+		get_entvar(pSpark, var_origin, vecOrigin);
+		
+		if (vecOriginGrenade[0] == vecOrigin[0] && vecOriginGrenade[1] == vecOrigin[1] && vecOriginGrenade[2] == vecOrigin[2]) {
+			set_entvar(pSpark, var_speed, 0.0);
+		}
 	}
 
 	return HC_CONTINUE;
@@ -422,6 +467,20 @@ public fmAddToFullPack(es, e, iEnt, id, hostflags, player, pSet) {
 	}
 	
 	return FMRES_IGNORED;
+}
+
+public Message_TempEntity(const iMsgId, const iMsgType, const pEnt) {
+	new iTempEntityId = get_msg_arg_int(1)
+
+	if (iTempEntityId == TE_DECAL || iTempEntityId == TE_WORLDDECAL) {
+		return PLUGIN_HANDLED;
+	}
+
+	if (iTempEntityId == TE_SPARKS) {
+		return PLUGIN_HANDLED
+	}
+
+	return PLUGIN_CONTINUE;
 }
 
 
