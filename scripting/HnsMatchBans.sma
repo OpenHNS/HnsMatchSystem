@@ -210,6 +210,10 @@ public plugin_end() {
 }
 
 public client_putinserver(id) {
+	arrayset(g_ePlayerInfo[id], 0, PLAYER_DATA);
+	arrayset(g_eBanPlayer[id], 0, PLAYER_DATA);
+	arrayset(g_eBanData[id], 0, BAN_DATA);
+
 	ExecuteForward(g_hBanForwardsInit);
 	
 	SQL_Load(id);
