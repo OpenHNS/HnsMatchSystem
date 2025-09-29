@@ -65,7 +65,9 @@ new g_hSaveLeaveForward;
 public plugin_init() {
 	register_plugin("Match: Stats", "1.2", "OpenHNS"); // Garey
 
-	RegisterHookChain(RG_CBasePlayer_Killed, "rgPlayerKilled", true);
+	RegisterSayCmd("tes", "aas", "cmdTest", 0, "Test");
+
+	RegisterHookChain(RG_CBasePlayer_Killed, "rgPlayerKilled", false);
 	RegisterHookChain(RG_CBasePlayer_TakeDamage, "rgPlayerTakeDamage", false);
 	RegisterHookChain(RG_CBasePlayer_PreThink, "rgPlayerPreThink", true);
 	RegisterHookChain(RG_CSGameRules_RestartRound, "rgRoundStart", true);
@@ -82,6 +84,10 @@ public plugin_init() {
 
 public plugin_cfg() {
 	hns_get_prefix(g_szPrefix, charsmax(g_szPrefix));
+}
+
+public cmdTest(id) {
+	rgPlayerKilled(0, id);
 }
 
 public plugin_natives() {
@@ -365,11 +371,14 @@ public rgPlayerKilled(victim, attacker) {
 	if (hns_get_mode() != MODE_MIX) {
 		return;
 	}
+
+	// client_print_color(0, 0, "rgPlayerKilled (%d %d)", victim, attacker);
 	
 	if (is_user_connected(attacker) && victim != attacker) {
 		g_StatsRound[attacker][PLR_STATS_KILLS]++;
-		g_StatsRound[victim][PLR_STATS_DEATHS]++;
 	}
+
+	g_StatsRound[victim][PLR_STATS_DEATHS]++;
 
 	if (g_iLastAttacker[victim] && g_iLastAttacker[victim] != attacker) {
 		g_StatsRound[g_iLastAttacker[victim]][PLR_STATS_ASSISTS]++;
@@ -506,6 +515,7 @@ public hns_round_end() {
 			remove_task(TASK_TIMER_STATS);
 		}		
 		collect_stats();
+		// client_print_color(0, 0, "g_hApplyStatsForward");
 		ExecuteForward(g_hApplyStatsForward, _, 0);		
 	}
 }
@@ -535,6 +545,7 @@ public rgRoundStart() {
 }
 
 stock ResetPlayerRoundStats(id) {
+	// client_print_color(0, 0, "ResetPlayerRoundStats");
 	if (rg_get_user_team(id) == TEAM_TERRORIST || rg_get_user_team(id) == TEAM_CT) {
 		SetScoreInfo(id);
 	}
@@ -649,6 +660,8 @@ collect_stats()
 		iStats[id][PLR_STATS_HIDETIME] += g_StatsRound[id][PLR_STATS_HIDETIME];
 		iStats[id][PLR_STATS_FLASHTIME] += g_StatsRound[id][PLR_STATS_FLASHTIME];
 		iStats[id][PLR_STATS_SURVTIME] += g_StatsRound[id][PLR_STATS_SURVTIME];
+
+		SetScoreInfo(id);
 
 		arrayset(g_StatsRound[id], 0, PLAYER_STATS);
 	}
