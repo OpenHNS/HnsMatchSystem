@@ -93,8 +93,6 @@ public Save_players(TeamName:team_winners) {
 
 	json_serial_to_string(JSArray, g_szBuffer, charsmax(g_szBuffer), true);
 
-	if (g_bDebugMode) server_print("[MATCH] PLR SAVE | g_szBuffer (%s)", g_szBuffer)
-
 	json_free(JSArray);
 }
 
@@ -135,8 +133,6 @@ loadPlayers() {
 			return;
 		}
 
-		if (g_bDebugMode) server_print("[MATCH] PLR LOAD | g_szBuffer (%s)", g_szBuffer)
-
 		for (new i = 0; i < json_array_get_count(JSArray); i++) {
 			new JSON:JSValue = json_array_get_value(JSArray, i);
 
@@ -145,12 +141,10 @@ loadPlayers() {
 					if (g_bDebugMode) {
 						new szIndexName[16];
 						json_array_get_string(JSArray, i, szIndexName, charsmax(szIndexName))
-						server_print("[MATCH] PLR LOAD | szIndexName (%s)", szIndexName);
 					}
 				}
 				case JSONObject: {
 					if (!g_aPlayersLoadData) {
-						server_print("FAIL")
 						return;
 					}
 
@@ -162,23 +156,18 @@ loadPlayers() {
 
 						new szDataName[32];
 						json_object_get_name(JSValue, j, szDataName, charsmax(szDataName));
-						//if (g_bDebugMode) server_print("[MATCH] PLR LOAD | szDataName (%s)", szDataName)
 
 						if(equal(szDataName, NAME_DATA_AUTH)) { // plr_auth
 							json_get_string(JSData, eTmpPlayer[SAVE_AUTH], charsmax(eTmpPlayer[SAVE_AUTH]));
 							iNumGet++;
-							//if (g_bDebugMode) server_print("[MATCH] PLR LOAD | json_get_string (%s)", eTmpPlayer[SAVE_AUTH])
 						} else if (equal(szDataName, NAME_DATA_TEAM)) { // plr_team
 							eTmpPlayer[SAVE_TEAM] = _:json_get_number(JSData);
-							//if (g_bDebugMode) server_print("[MATCH] PLR LOAD | json_get_number (%d)", eTmpPlayer[SAVE_TEAM])
 							iNumGet++;
 						} else {
 							if (g_bDebugMode) server_print("[MATCH] PLR LOAD | А? )")
 						}
 
 						if (iNumGet == 2) {
-							if (g_bDebugMode) server_print("[MATCH] PLR LOAD | eTmpPlayer (%s %d)", eTmpPlayer[SAVE_AUTH], _:eTmpPlayer[SAVE_TEAM])
-
 							ArrayPushArray(g_aPlayersLoadData, eTmpPlayer);
 
 							arrayset(eTmpPlayer, 0, SAVE_PLAYER_DATA);
