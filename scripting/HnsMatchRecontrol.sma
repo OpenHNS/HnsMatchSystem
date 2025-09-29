@@ -239,7 +239,7 @@ public ReplaceAdmin(id)
 		return;
 	}
 
-	if (~get_user_flags(id) & hns_get_flag_admin())
+	if (!isUserFullWatcher(id))
 	{
 		return;
 	}
@@ -311,7 +311,7 @@ public ReplaceAdmin(id)
 
 public ReplaceAdmin_Handler(id, menu, item)
 {
-	if (~get_user_flags(id) & hns_get_flag_admin())
+	if (!isUserFullWatcher(id))
 	{
 		ResetTransfer(id);
 		menu_destroy(menu);
