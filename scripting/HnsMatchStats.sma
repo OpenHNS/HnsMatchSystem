@@ -68,6 +68,7 @@ public plugin_init() {
 	RegisterSayCmd("tes", "aas", "cmdTest", 0, "Test");
 
 	RegisterHookChain(RG_CBasePlayer_Killed, "rgPlayerKilled", false);
+	RegisterHookChain(RG_CBasePlayer_Killed, "rgPlayerKilledPost", true);
 	RegisterHookChain(RG_CBasePlayer_TakeDamage, "rgPlayerTakeDamage", false);
 	RegisterHookChain(RG_CBasePlayer_PreThink, "rgPlayerPreThink", true);
 	RegisterHookChain(RG_CSGameRules_RestartRound, "rgRoundStart", true);
@@ -299,9 +300,10 @@ public client_putinserver(id) {
 	TrieGetArray(g_tSaveRoundData, getUserKey(id), g_StatsRound[id], PLAYER_STATS);
 
 	if (hns_get_mode() == MODE_MIX || hns_get_state() == STATE_PAUSED) {
-		SetScoreInfo(id);
-	} else
+		SetScoreInfo(id, true);
+	} else {
 		arrayset(iStats[id], 0, PLAYER_STATS);
+	}
 }
 
 
@@ -322,11 +324,20 @@ public hns_player_leave_inmatch(id) {
 }
 
 public hns_match_reset_round() {
+	g_iGameStops++;
+
 	new iPlayers[MAX_PLAYERS], iNum;
 	get_players(iPlayers, iNum, "ch");
 	for (new i; i < iNum; i++) {
 		new iPlayer = iPlayers[i];
-		ResetPlayerRoundStats(iPlayer);
+
+		if (rg_get_user_team(iPlayer) != TEAM_TERRORIST && rg_get_user_team(iPlayer) != TEAM_CT) {
+			continue;
+		}
+
+		arrayset(g_StatsRound[iPlayer], 0, PLAYER_STATS);
+
+		SetScoreInfo(iPlayer, false);
 	}
 }
 
@@ -338,7 +349,7 @@ public hns_match_started() {
 		new id = iPlayers[i];
 		arrayset(iStats[id], 0, PLAYER_STATS);
 		arrayset(g_StatsRound[id], 0, PLAYER_STATS);
-		SetScoreInfo(id);
+		SetScoreInfo(id, false);
 	}
 }
 
@@ -372,17 +383,32 @@ public rgPlayerKilled(victim, attacker) {
 		return;
 	}
 
-	// client_print_color(0, 0, "rgPlayerKilled (%d %d)", victim, attacker);
-	
 	if (is_user_connected(attacker) && victim != attacker) {
 		g_StatsRound[attacker][PLR_STATS_KILLS]++;
 	}
 
-	g_StatsRound[victim][PLR_STATS_DEATHS]++;
+	if (is_user_connected(victim)) {
+		g_StatsRound[victim][PLR_STATS_DEATHS]++;
+	}
 
 	if (g_iLastAttacker[victim] && g_iLastAttacker[victim] != attacker) {
 		g_StatsRound[g_iLastAttacker[victim]][PLR_STATS_ASSISTS]++;
 		g_iLastAttacker[victim] = 0;
+	}
+
+}
+
+public rgPlayerKilledPost(victim, attacker) {
+	if (hns_get_mode() != MODE_MIX) {
+		return;
+	}
+
+	if (is_user_connected(attacker) && victim != attacker) {
+		SetScoreInfo(attacker, true);
+	}
+
+	if (is_user_connected(victim)) {
+		SetScoreInfo(victim, true);
 	}
 }
 
@@ -515,7 +541,6 @@ public hns_round_end() {
 			remove_task(TASK_TIMER_STATS);
 		}		
 		collect_stats();
-		// client_print_color(0, 0, "g_hApplyStatsForward");
 		ExecuteForward(g_hApplyStatsForward, _, 0);		
 	}
 }
@@ -544,29 +569,28 @@ public rgRoundStart() {
 
 }
 
-stock ResetPlayerRoundStats(id) {
-	// client_print_color(0, 0, "ResetPlayerRoundStats");
-	if (rg_get_user_team(id) == TEAM_TERRORIST || rg_get_user_team(id) == TEAM_CT) {
-		SetScoreInfo(id);
+stock SetScoreInfo(id, bool:bRound = false) {
+	new Float:flKills, iDeaths;
+	if (bRound) {
+		flKills = float(iStats[id][PLR_STATS_KILLS] + g_StatsRound[id][PLR_STATS_KILLS]);
+		iDeaths = iStats[id][PLR_STATS_DEATHS] + g_StatsRound[id][PLR_STATS_DEATHS];
+	} else {
+		flKills = float(iStats[id][PLR_STATS_KILLS]);
+		iDeaths = iStats[id][PLR_STATS_DEATHS];
 	}
-	g_iGameStops++;
 
-	arrayset(g_StatsRound[id], 0, PLAYER_STATS);
+	set_entvar(id, var_frags, flKills);
+	set_member(id, m_iDeaths, iDeaths);
+	Msg_Update_ScoreInfo(id, flKills, iDeaths);
 }
 
-stock SetScoreInfo(id) {
-	set_entvar(id, var_frags, float(iStats[id][PLR_STATS_KILLS]));
-	set_member(id, m_iDeaths, iStats[id][PLR_STATS_DEATHS]);
-	Msg_Update_ScoreInfo(id);
-}
-
-stock Msg_Update_ScoreInfo(id) {
+stock Msg_Update_ScoreInfo(id, Float:flKills, iDeaths) {
 	const iMsg_ScoreInfo = 85;
 
 	message_begin(MSG_BROADCAST, iMsg_ScoreInfo);
 	write_byte(id);
-	write_short(0);
-	write_short(0);
+	write_short(floatround(flKills));
+	write_short(iDeaths);
 	write_short(0);
 	write_short(0);
 	message_end();
@@ -661,8 +685,8 @@ collect_stats()
 		iStats[id][PLR_STATS_FLASHTIME] += g_StatsRound[id][PLR_STATS_FLASHTIME];
 		iStats[id][PLR_STATS_SURVTIME] += g_StatsRound[id][PLR_STATS_SURVTIME];
 
-		SetScoreInfo(id);
-
 		arrayset(g_StatsRound[id], 0, PLAYER_STATS);
+
+		SetScoreInfo(id, false);
 	}
 }
