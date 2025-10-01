@@ -6,6 +6,9 @@
 
 new Float:RandomPickTime;
 new Float:CaptainLeaveTime;
+
+forward hns_players_replaced(requested_id, id);
+
 /*
 
 LogSendMessage("[MATCH]");
@@ -620,4 +623,10 @@ resetCaptainData() {
 
 	g_iCaptainFirst = 0;
 	g_iCaptainSecond = 0;
+}
+
+public hns_players_replaced(requested_id, id) {
+	new PLAYER_ROLES:tmpRole = g_ePlayerInfo[requested_id][PLAYER_ROLE];
+	hns_set_user_role(requested_id, g_ePlayerInfo[id][PLAYER_ROLE]);
+	hns_set_user_role(id, tmpRole);
 }
