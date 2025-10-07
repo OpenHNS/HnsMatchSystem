@@ -105,8 +105,8 @@ public taskAfk() {
 		if(task_exists(TASK_AFK))
 			remove_task(TASK_AFK);
 	} else {
-		set_hudmessage(.red = 100, .green = 100, .blue = 100, .x = 0.01, .y = 0.23, .holdtime = 1.0);
-		show_hudmessage(0, "%s", szBuffer);
+		set_dhudmessage(.red = 100, .green = 100, .blue = 100, .x = 0.80, .y = 0.10, .holdtime = 1.05);
+		show_dhudmessage(0, "%s", szBuffer);
 	}
 }
 

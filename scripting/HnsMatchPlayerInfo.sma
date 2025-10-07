@@ -666,8 +666,11 @@ public task_ShowPlayerInfo() {
 				}
 			}
 
+			// if (iSpecNum) {
+			// 	iLen += format(szHudMess[iLen], sizeof szHudMess - iLen, "^nWatching [%d]^n%s", iSpecNum, szSpecMess);
+			// }
 			if (iSpecNum) {
-				iLen += format(szHudMess[iLen], sizeof szHudMess - iLen, "^nWatching [%d]^n%s", iSpecNum, szSpecMess);
+				iLen += format(szHudMess[iLen], sizeof szHudMess - iLen, "^nWatching [%d]", iSpecNum);
 			}
 
 			ShowSyncHudMsg(id, g_MsgSync, "%s", szHudMess);
