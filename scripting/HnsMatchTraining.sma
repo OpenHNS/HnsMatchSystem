@@ -46,7 +46,7 @@ public plugin_init() {
 	RegisterHookChain(RG_CGrenade_ExplodeFlashbang, "rgExplodeGrenade", .post = false)
 	RegisterHookChain(RG_CGrenade_ExplodeFlashbang, "rgExplodeGrenadePost", .post = true)
 
-	register_forward(FM_AddToFullPack, "fmAddToFullPack", 1);
+	//register_forward(FM_AddToFullPack, "fmAddToFullPack", 1);
 	
 	g_hResetBugForward = CreateMultiForward("fwResetBug", ET_IGNORE, FP_CELL);
 
@@ -447,27 +447,27 @@ public rgExplodeGrenadePost(const pGrenade, const tracehandle, const bitsDamageT
 	return HC_CONTINUE;
 }
 
-public fmAddToFullPack(es, e, iEnt, id, hostflags, player, pSet) {
-	if (hns_get_mode() != MODE_TRAINING && hns_get_state() != STATE_PAUSED) {
-		return FMRES_IGNORED;
-	}
+// public fmAddToFullPack(es, e, iEnt, id, hostflags, player, pSet) {
+// 	if (hns_get_mode() != MODE_TRAINING && hns_get_state() != STATE_PAUSED) {
+// 		return FMRES_IGNORED;
+// 	}
 	
-	if (id == iEnt)
-		return FMRES_IGNORED;
+// 	if (id == iEnt)
+// 		return FMRES_IGNORED;
 
-	if (player) {
-		if (is_user_alive(iEnt)) {
-			if (g_bInvisPlayers[id]) {
-				set_es(es, ES_Solid, SOLID_NOT);
-				set_es(es, ES_RenderMode, kRenderTransTexture);
-				set_es(es, ES_RenderAmt, 0);
-				set_es(es, ES_Origin, { 999999999.0, 999999999.0, 999999999.0 });
-			}
-		}
-	}
+// 	if (player) {
+// 		if (is_user_alive(iEnt)) {
+// 			if (g_bInvisPlayers[id]) {
+// 				set_es(es, ES_Solid, SOLID_NOT);
+// 				set_es(es, ES_RenderMode, kRenderTransTexture);
+// 				set_es(es, ES_RenderAmt, 0);
+// 				set_es(es, ES_Origin, { 999999999.0, 999999999.0, 999999999.0 });
+// 			}
+// 		}
+// 	}
 	
-	return FMRES_IGNORED;
-}
+// 	return FMRES_IGNORED;
+// }
 
 public Message_TempEntity(const iMsgId, const iMsgType, const pEnt) {
 	new iTempEntityId = get_msg_arg_int(1)

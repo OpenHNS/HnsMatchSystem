@@ -3,6 +3,8 @@
 public plugin_precache() {
 	engfunc(EngFunc_CreateNamedEntity, engfunc(EngFunc_AllocString, "func_buyzone"));
 	precache_sound(sndUseSound);
+
+	iBeam = precache_model("sprites/laserbeam.spr");
 }
 
 public plugin_cfg() {
@@ -275,7 +277,7 @@ public client_disconnected(id) {
 	arrayset(eAfkData[id], 0, AfkData_s);
 	arrayset(flAfkOrigin[id], 0.0, sizeof(flAfkOrigin[]));
 	g_bSurrenderVoted[id] = false;
-	hook[id] = false;
+	isHook[id] = false;
 }
 
 public Knife_PrimaryAttack(ent)
