@@ -2,6 +2,8 @@
 
 public plugin_precache() {
 	engfunc(EngFunc_CreateNamedEntity, engfunc(EngFunc_AllocString, "func_buyzone"));
+	g_iRegisterSpawn = register_forward(FM_Spawn, "fwdSpawn", 1);
+
 	precache_sound(sndUseSound);
 
 	iBeam = precache_model("sprites/laserbeam.spr");
@@ -31,8 +33,6 @@ public plugin_init() {
 	register_forward(FM_ClientKill, "fwdClientKill");
 	register_forward(FM_GetGameDescription, "fwdGameNameDesc");
 
-	RegisterHookChain(RG_CSGameRules_GetPlayerSpawnSpot, "rgPlayerSpawnPost", true);
-
 	RegisterHookChain(RG_RoundEnd, "rgRoundEnd", false);
 	RegisterHookChain(RG_CBasePlayer_ResetMaxSpeed, "rgResetMaxSpeed", false);
 	RegisterHookChain(RG_CSGameRules_RestartRound, "rgRestartRound", false);
@@ -49,6 +49,8 @@ public plugin_init() {
 	register_message(get_user_msgid("ShowMenu"), "msgShowMenu");
 	register_message(get_user_msgid("VGUIMenu"), "msgVguiMenu");
 	register_message(get_user_msgid("HideWeapon"), "msgHideWeapon");
+
+	unregister_forward(FM_Spawn, g_iRegisterSpawn, 1);
 	
 
 	set_msg_block(get_user_msgid("HudTextArgs"), BLOCK_SET);
@@ -62,6 +64,7 @@ public plugin_init() {
 	forward_init();
 
 	registerMode();
+
 
 	g_eMatchInfo[e_tLeaveData] = TrieCreate();
 
@@ -134,24 +137,21 @@ public fwdGameNameDesc()
 	return FMRES_SUPERCEDE;
 }
 
-public rgPlayerSpawnPost() {
-	new const szRemoveEntities[][] = {
-		"func_hostage_rescue",
-		"info_hostage_rescue",
-		"func_bomb_target",
-		"info_bomb_target",
-		"func_vip_safetyzone",
-		"info_vip_start",
-		"func_escapezone",
-		"hostage_entity",
-		"monster_scientist",
-		"func_buyzone"
-	};
-	
-	for(new iCount = 0, iSize = sizeof(szRemoveEntities); iCount < iSize; iCount++) {
-		remove_entity_m(szRemoveEntities[iCount]);
+public fwdSpawn(entid) {
+	static szClassName[32];
+	if (pev_valid(entid)) {
+		pev(entid, pev_classname, szClassName, 31);
+		if (equal(szClassName, "func_buyzone")) engfunc(EngFunc_RemoveEntity, entid);
+
+		for (new i = 0; i < sizeof g_szDefaultEntities; i++) {
+			if (equal(szClassName, g_szDefaultEntities[i])) {
+				engfunc(EngFunc_RemoveEntity, entid);
+				break;
+			}
+		}
 	}
 }
+
 
 public rgRoundEnd(WinStatus:status, ScenarioEventEndRound:event, Float:tmDelay) {
 	if (event == ROUND_GAME_COMMENCE) {

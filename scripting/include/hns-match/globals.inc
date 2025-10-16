@@ -17,6 +17,19 @@
 
 new bool:g_bDebugMode;
 
+new g_iRegisterSpawn;
+new const g_szDefaultEntities[][] = {
+	"func_hostage_rescue",
+	"func_bomb_target",
+	"info_bomb_target",
+	"hostage_entity",
+	"info_vip_start",
+	"func_vip_safetyzone",
+	"func_escapezone",
+	"armoury_entity",
+	"monster_scentist"
+}
+
 new g_szLogPath[64];
 
 new iBeam;

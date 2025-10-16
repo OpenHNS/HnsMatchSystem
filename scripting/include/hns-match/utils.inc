@@ -134,16 +134,16 @@ stock loadMapCFG() {
 	}
 }
 
-remove_entity_m(const Zone[]) {
-	new iEntity = 0;
-	while ((iEntity = rg_find_ent_by_class(iEntity, Zone))) {
-		set_entvar(iEntity, var_flags, get_entvar(iEntity, var_flags) | FL_KILLME);
-		set_entvar(iEntity, var_nextthink, get_gametime());
-	}
+// remove_entity_m(const Zone[]) {
+// 	new iEntity = 0;
+// 	while ((iEntity = rg_find_ent_by_class(iEntity, Zone))) {
+// 		set_entvar(iEntity, var_flags, get_entvar(iEntity, var_flags) | FL_KILLME);
+// 		set_entvar(iEntity, var_nextthink, get_gametime());
+// 	}
 	
-	set_member_game(m_bMapHasBuyZone, true);
-	set_member_game(m_bMapHasBombZone, false);
-}
+// 	set_member_game(m_bMapHasBuyZone, true);
+// 	set_member_game(m_bMapHasBombZone, false);
+// }
 
 public LogSendMessage(szData[1024], any:...) {
 	if (!g_bDebugMode) {
