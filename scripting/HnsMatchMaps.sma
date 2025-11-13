@@ -3,6 +3,13 @@
 #include <hns_matchsystem>
 
 #define TASK_MAP 12344
+#define SECTION_CHOICE_ALL -1
+
+#define SECTION_NAME_KNIFE "knife"
+#define SECTION_NAME_BOOST "boost"
+#define SECTION_NAME_SKILL "skill"
+#define SECTION_NAME_ALL "__all__"
+#define MAPS_MENU_SLOTS 7
 
 new bool:g_bDebugMode;
 
@@ -12,9 +19,13 @@ new g_szPrefix[24];
 
 new g_szCurrentMap[32];
 
-new Array:g_ArrBoost;
-new Array:g_ArrSkill;
-new Array:g_ArrKnife;
+enum _:SectionData {
+	SectionName[32],
+	SectionMaps
+};
+
+new Array:g_ArrSections;
+new Array:g_ArrAllMaps;
 
 new bool:g_bHasSettings;
 new bool:g_bBoost;
@@ -23,16 +34,20 @@ new g_iFreezeTime;
 new g_iFlash;
 new g_iSmoke;
 
-new Array:g_CurrentMenuArray;
+new g_PlayerMenuArray[MAX_PLAYERS + 1];
+new g_MapMenuOffset[MAX_PLAYERS + 1];
+new g_MapMenuChoice[MAX_PLAYERS + 1][MAPS_MENU_SLOTS];
 
 new g_SelectedMap[MAX_PLAYERS + 1][32];
+new g_SelectedSection[MAX_PLAYERS + 1][32];
 
 public plugin_precache() {
 	debug_init("/hnsmatch-maps");
 
-	g_ArrKnife = ArrayCreate(32);
-	g_ArrBoost = ArrayCreate(32);
-	g_ArrSkill = ArrayCreate(32);
+	g_ArrSections = ArrayCreate(SectionData);
+	g_ArrAllMaps = ArrayCreate(32);
+	g_bHasSettings = false;
+	g_bBoost = false;
 
 	new szPath[128], szFile[160];
 	get_localinfo("amxx_configsdir", szPath, charsmax(szPath));
@@ -46,7 +61,7 @@ public plugin_precache() {
 
 	new szLine[128], szMap[32];
 	new rt[8], ft[8], flash[8], smoke[8];
-	new section;
+	new currentSection = -1;
 
 	rh_get_mapname(g_szCurrentMap, charsmax(g_szCurrentMap));
 
@@ -58,37 +73,37 @@ public plugin_precache() {
 			continue;
 
 		if (szLine[0] == '[') {
-			if (equali(szLine, "[knife]")) section = 1;
-			else if (equali(szLine, "[boost]")) section = 2;
-			else if (equali(szLine, "[skill]")) section = 3;
-			else section = 0;
+			new szSectionName[32];
+			if (extract_section_name(szLine, szSectionName, charsmax(szSectionName))) {
+				currentSection = get_or_create_section(szSectionName);
+			} else {
+				currentSection = -1;
+			}
 			continue;
 		}
 
-		if (section == 1) {
-			parse(szLine, szMap, charsmax(szMap));
-			if (!isMapExist(szMap)) {
-				server_print("HNS-MAPS | Карта %s не найдена в cstrike/maps.", szMap);
-				continue;
-			}
-
-			ArrayPushString(g_ArrKnife, szMap);
+		if (currentSection == -1) {
+			continue;
 		}
-		else if (section == 2 || section == 3) {
-			parse(szLine, szMap, charsmax(szMap), rt, charsmax(rt), ft, charsmax(ft), flash, charsmax(flash), smoke, charsmax(smoke));
 
-			if (!isMapExist(szMap)) {
-				server_print("HNS-MAPS | Карта %s не найдена в cstrike/maps.", szMap);
-				continue;
-			}
+		new sectionData[SectionData];
+		ArrayGetArray(g_ArrSections, currentSection, sectionData);
+		new Array:sectionArray = Array:sectionData[SectionMaps];
 
-			if (section == 2) ArrayPushString(g_ArrBoost, szMap);
-			else if (section == 3) ArrayPushString(g_ArrSkill, szMap);
+		parse(szLine, szMap, charsmax(szMap), rt, charsmax(rt), ft, charsmax(ft), flash, charsmax(flash), smoke, charsmax(smoke));
 
-			if (equali(szMap, g_szCurrentMap)) {
-				if (section == 2) {
-					g_bBoost = true;
-				}
+		if (!isMapExist(szMap)) {
+			server_print("HNS-MAPS | Карта %s не найдена в cstrike/maps.", szMap);
+			continue;
+		}
+
+		ArrayPushString(sectionArray, szMap);
+		add_map_to_all(szMap);
+
+		if (equali(szMap, g_szCurrentMap)) {
+			g_bBoost = bool:equali(sectionData[SectionName], SECTION_NAME_BOOST);
+
+			if (rt[0] && ft[0] && flash[0] && smoke[0]) {
 				g_fRoundTime = str_to_float(rt);
 				g_iFreezeTime = str_to_num(ft);
 				g_iFlash = str_to_num(flash);
@@ -105,9 +120,11 @@ public plugin_precache() {
 }
 
 public plugin_init() {
-	register_plugin("Match: Maps", "1.3", "OpenHNS");
+	register_plugin("Match: Maps", "1.4", "OpenHNS");
 
 	RegisterSayCmd("map", "maps", "cmdMapsMenu", 0, "Open mapmenu");
+	RegisterSayCmd("amx_mapmenu", "amx_mapsmenu", "cmdMapsMenu", 0, "Open mapmenu");
+	register_menucmd(register_menuid("MapsMenu"), 1023, "maps_menu_handler");
 
 	register_dictionary("match_additons.txt");
 }
@@ -123,14 +140,19 @@ public native_maps_init(amxx, params) {
 }
 
 public bool:native_maps_is_knife(amxx, params) {
+	new Array:arrKnife = get_section_array_by_name(SECTION_NAME_KNIFE);
+	if (!arrKnife) {
+		return false;
+	}
+
 	new szMap[32];
 	rh_get_mapname(szMap, charsmax(szMap));
 
 	strtolower(szMap);
 
-	for (new i = 0, iSize = ArraySize(g_ArrKnife); i < iSize; i++) {
+	for (new i = 0, iSize = ArraySize(arrKnife); i < iSize; i++) {
 		new szKnifeMap[32];
-		ArrayGetString(g_ArrKnife, i, szKnifeMap, charsmax(szKnifeMap));
+		ArrayGetString(arrKnife, i, szKnifeMap, charsmax(szKnifeMap));
 		if (strcmp(szMap, szKnifeMap, false) == 0)
 			return true;
 	}
@@ -150,19 +172,43 @@ public plugin_cfg() {
 }
 
 public cmdMapsMenu(id) {
-	new szMsg[64];
+	new szMsg[192];
 	formatex(szMsg, charsmax(szMsg), "\r%L", id, "MAPS_MENU_TITLE");
+
+	new szDescription[192];
+	formatex(szDescription, charsmax(szDescription), "^n\d%L", id, "MAPS_MENU_DESC_TYPE");
+	
+	add(szMsg, charsmax(szMsg), szDescription);
 
 	new hMenu = menu_create(szMsg, "cmdMapsRootHandler");
 
-	formatex(szMsg, charsmax(szMsg), "%L", id, "MAPS_MENU_KNIFE");
-	menu_additem(hMenu, szMsg, "1");
+	new sectionData[SectionData];
+	new szInfo[6];
+	new szSectionLabel[64];
+	new bool:bHasItems;
 
-	formatex(szMsg, charsmax(szMsg), "%L", id, "MAPS_MENU_BOOST");
-	menu_additem(hMenu, szMsg, "2");
+	for (new i = 0, iSize = ArraySize(g_ArrSections); i < iSize; i++) {
+		ArrayGetArray(g_ArrSections, i, sectionData);
+		num_to_str(i, szInfo, charsmax(szInfo));
+		if (!get_section_label(id, sectionData[SectionName], szSectionLabel, charsmax(szSectionLabel), false)) {
+			copy(szSectionLabel, charsmax(szSectionLabel), sectionData[SectionName]);
+		}
+		menu_additem(hMenu, szSectionLabel, szInfo);
+		bHasItems = true;
+	}
 
-	formatex(szMsg, charsmax(szMsg), "%L", id, "MAPS_MENU_SKILL");
-	menu_additem(hMenu, szMsg, "3");
+	if (ArraySize(g_ArrAllMaps)) {
+		num_to_str(SECTION_CHOICE_ALL, szInfo, charsmax(szInfo));
+		formatex(szSectionLabel, charsmax(szSectionLabel), "%L", id, "MAPS_MENU_ALL");
+		menu_additem(hMenu, szSectionLabel, szInfo);
+		bHasItems = true;
+	}
+
+	if (!bHasItems) {
+		menu_destroy(hMenu);
+		client_print_color(id, print_team_red, "%s Нет доступных карт.", g_szPrefix);
+		return PLUGIN_CONTINUE;
+	}
 
 	menu_display(id, hMenu, 0);
 	return PLUGIN_CONTINUE;
@@ -179,60 +225,190 @@ public cmdMapsRootHandler(id, hMenu, item) {
 	new choice = str_to_num(szData);
 	menu_destroy(hMenu);
 
-	new szMsg[64];
+	if (choice == SECTION_CHOICE_ALL) {
+		if (!ArraySize(g_ArrAllMaps)) {
+			return PLUGIN_HANDLED;
+		}
 
-	if (choice == 1) {
-		formatex(szMsg, charsmax(szMsg), "%L:", id, "MAPS_MENU_KNIFE");
-		showMapsMenu(id, g_ArrKnife, szMsg);
-	} else if (choice == 2) {
-		formatex(szMsg, charsmax(szMsg), "%L:", id, "MAPS_MENU_BOOST");
-		showMapsMenu(id, g_ArrBoost, szMsg);
-	} else if (choice == 3) {
-		formatex(szMsg, charsmax(szMsg), "%L:", id, "MAPS_MENU_SKILL");
-		showMapsMenu(id, g_ArrSkill, szMsg);
+		copy(g_SelectedSection[id], charsmax(g_SelectedSection[]), SECTION_NAME_ALL);
+		g_MapMenuOffset[id] = 0;
+
+		showMapsMenu(id, g_ArrAllMaps);
+		return PLUGIN_HANDLED;
 	}
+
+	if (choice < 0 || choice >= ArraySize(g_ArrSections)) {
+		return PLUGIN_HANDLED;
+	}
+
+	new sectionData[SectionData];
+	ArrayGetArray(g_ArrSections, choice, sectionData);
+
+	copy(g_SelectedSection[id], charsmax(g_SelectedSection[]), sectionData[SectionName]);
+	g_MapMenuOffset[id] = 0;
+
+	showMapsMenu(id, Array:sectionData[SectionMaps]);
 
 	return PLUGIN_HANDLED;
 }
 
-showMapsMenu(id, Array:arr, const title[]) {
-	new szMapId[10];
-	new hMenu = menu_create(title, "cmdMapsMenuHandler");
-
-	g_CurrentMenuArray = arr;
-
-	for (new i = 0, iSize = ArraySize(arr), szMap[32]; i < iSize; i++) {
-		ArrayGetString(arr, i, szMap, charsmax(szMap));
-		num_to_str(i, szMapId, charsmax(szMapId));
-		menu_additem(hMenu, szMap, szMapId);
+showMapsMenu(id, Array:arr) {
+	if (!is_user_connected(id)) {
+		return;
 	}
 
-	menu_display(id, hMenu, 0);
+	if (!arr) {
+		return;
+	}
+
+	g_PlayerMenuArray[id] = _:arr;
+
+	new iTotal = ArraySize(arr);
+	if (!iTotal) {
+		client_print_color(id, print_team_red, "%L", id, "MAPS_MENU_NO_MAPS", g_szPrefix);
+		return;
+	}
+
+	new offset = g_MapMenuOffset[id];
+	if (offset >= iTotal) {
+		offset = 0;
+		g_MapMenuOffset[id] = 0;
+	}
+
+	new totalPages = (iTotal + MAPS_MENU_SLOTS - 1) / MAPS_MENU_SLOTS;
+	if (totalPages < 1) {
+		totalPages = 1;
+	}
+
+	new currentPage = offset / MAPS_MENU_SLOTS + 1;
+
+	new szBuffer[512], iLen, iKeys;
+
+	formatex(szBuffer[iLen], charsmax(szBuffer) - iLen, "\r%L \y%d/%d^n", id, "MAPS_MENU_TITLE", currentPage, totalPages);
+	iLen += strlen(szBuffer[iLen]);
+
+	new szSelectedSection[64];
+	if (!get_section_label(id, g_SelectedSection[id], szSelectedSection, charsmax(szSelectedSection), false)) {
+		formatex(szSelectedSection, charsmax(szSelectedSection), "%L", id, "MAPS_MENU_DESC_NONE");
+	}
+
+	formatex(szBuffer[iLen], charsmax(szBuffer) - iLen, "\d%L^n", id, "MAPS_MENU_DESC_SELECTED", szSelectedSection);
+	iLen += strlen(szBuffer[iLen]);
+
+	formatex(szBuffer[iLen], charsmax(szBuffer) - iLen, "\d%L^n^n", id, "MAPS_MENU_DESC_MAP");
+	iLen += strlen(szBuffer[iLen]);
+
+	for (new i = 0; i < MAPS_MENU_SLOTS; i++) {
+		g_MapMenuChoice[id][i] = -1;
+	}
+
+	new shown = 0;
+	for (new i = 0; i < MAPS_MENU_SLOTS && offset + i < iTotal; i++) {
+		new szMap[32];
+		ArrayGetString(arr, offset + i, szMap, charsmax(szMap));
+
+		formatex(szBuffer[iLen], charsmax(szBuffer) - iLen, "\r%d.\w %s^n", i + 1, szMap);
+		iLen += strlen(szBuffer[iLen]);
+
+		iKeys |= (1 << i);
+		g_MapMenuChoice[id][i] = offset + i;
+		shown++;
+	}
+
+	if (currentPage > 1) {
+		formatex(szBuffer[iLen], charsmax(szBuffer) - iLen, "^n\r8.\w %L^n", id, "MAPS_MENU_PREV");
+		iLen += strlen(szBuffer[iLen]);
+		iKeys |= MENU_KEY_8;
+	} else {
+		formatex(szBuffer[iLen], charsmax(szBuffer) - iLen, "^n\r8.\w %L^n", id, "MAPS_MENU_BACK");
+		iLen += strlen(szBuffer[iLen]);
+		iKeys |= MENU_KEY_8;
+	}
+
+	if (offset + shown < iTotal) {
+		formatex(szBuffer[iLen], charsmax(szBuffer) - iLen, "\r9.\w %L^n", id, "MAPS_MENU_NEXT");
+		iLen += strlen(szBuffer[iLen]);
+		iKeys |= MENU_KEY_9;
+	} else {
+		formatex(szBuffer[iLen], charsmax(szBuffer) - iLen, "\r9.\d %L^n", id, "MAPS_MENU_NEXT");
+		iLen += strlen(szBuffer[iLen]);
+	}
+
+	formatex(szBuffer[iLen], charsmax(szBuffer) - iLen, "\r0.\w %L", id, "MAPS_MENU_EXIT");
+	iLen += strlen(szBuffer[iLen]);
+	iKeys |= MENU_KEY_0;
+
+	show_menu(id, iKeys, szBuffer, -1, "MapsMenu");
 }
 
-public cmdMapsMenuHandler(id, hMenu, item) {
-	if (item == MENU_EXIT) {
-		menu_destroy(hMenu);
+public maps_menu_handler(id, iKey) {
+	if (!is_user_connected(id)) {
 		return PLUGIN_HANDLED;
 	}
 
-	new szData[6], szName[64], iAccess, iCallback;
-	menu_item_getinfo(hMenu, item, iAccess, szData, charsmax(szData), szName, charsmax(szName), iCallback);
+	if (!g_PlayerMenuArray[id]) {
+		return PLUGIN_HANDLED;
+	}
 
-	menu_destroy(hMenu);
+	new Array:arr = Array:g_PlayerMenuArray[id];
+	new iTotal = ArraySize(arr);
 
-	new mapid = str_to_num(szData);
-	new szMap[32];
-	ArrayGetString(g_CurrentMenuArray, mapid, szMap, charsmax(szMap));
+	if (!iTotal) {
+		g_PlayerMenuArray[id] = 0;
+		return PLUGIN_HANDLED;
+	}
 
-	cmdMapActionMenu(id, szMap);
+	switch (iKey) {
+		case 0 .. (MAPS_MENU_SLOTS - 1): {
+			new mapIndex = g_MapMenuChoice[id][iKey];
+
+			if (mapIndex < 0 || mapIndex >= iTotal) {
+				showMapsMenu(id, arr);
+				return PLUGIN_HANDLED;
+			}
+
+			new szMap[32];
+			ArrayGetString(arr, mapIndex, szMap, charsmax(szMap));
+
+			cmdMapActionMenu(id, szMap);
+		}
+		case 7: {
+			if (g_MapMenuOffset[id] >= MAPS_MENU_SLOTS) {
+				g_MapMenuOffset[id] -= MAPS_MENU_SLOTS;
+				if (g_MapMenuOffset[id] < 0) {
+					g_MapMenuOffset[id] = 0;
+				}
+				showMapsMenu(id, arr);
+			} else {
+				g_MapMenuOffset[id] = 0;
+				g_PlayerMenuArray[id] = 0;
+				cmdMapsMenu(id);
+			}
+		}
+		case 8: {
+			if (g_MapMenuOffset[id] + MAPS_MENU_SLOTS < iTotal) {
+				g_MapMenuOffset[id] += MAPS_MENU_SLOTS;
+			}
+			showMapsMenu(id, arr);
+		}
+		case 9: {
+			g_MapMenuOffset[id] = 0;
+			g_PlayerMenuArray[id] = 0;
+		}
+	}
 
 	return PLUGIN_HANDLED;
 }
 
 public cmdMapActionMenu(id, szMap[]) {
-	new szMsg[64];
-	formatex(szMsg, charsmax(szMsg), "%L:", id, "MAPS_ACTION_TITLE", szMap);
+	new szMsg[128];
+	formatex(szMsg, charsmax(szMsg), "\r%L", id, "MAPS_MENU_TITLE");
+
+	new szDescription[160];
+	formatex(szDescription, charsmax(szDescription), "^n\d%L^n%L",
+		id, "MAPS_MENU_ACTION_MAP", szMap,
+		id, "MAPS_ACTION_DESC");
+	add(szMsg, charsmax(szMsg), szDescription);
 
 	copy(g_SelectedMap[id], charsmax(g_SelectedMap[]), szMap);
 
@@ -248,6 +424,22 @@ public cmdMapActionMenu(id, szMap[]) {
 	}
 
 	menu_additem(hMenu, szMsg, "2");
+
+	menu_addblank2(hMenu); // 3
+	menu_addblank2(hMenu); // 4
+	menu_addblank2(hMenu); // 5
+	menu_addblank2(hMenu); // 6
+	menu_addblank2(hMenu); // 7
+
+	formatex(szMsg, charsmax(szMsg), "%L", id, "MAPS_MENU_BACK");
+	menu_additem(hMenu, szMsg, "8");
+	
+	menu_addblank2(hMenu); // 9
+
+	formatex(szMsg, charsmax(szMsg), "%L", id, "MAPS_MENU_EXIT");
+	menu_additem(hMenu, szMsg, "0");
+
+	menu_setprop(hMenu, MPROP_PERPAGE, 0);
 
 	menu_display(id, hMenu, 0);
 }
@@ -275,6 +467,13 @@ public cmdMapActionHandler(id, hMenu, item) {
 			cmdMapActionMenu(id, g_SelectedMap[id]);
 		}
 	}
+	else if (choice == 8) {
+		if (g_PlayerMenuArray[id]) {
+			showMapsMenu(id, Array:g_PlayerMenuArray[id]);
+		} else {
+			cmdMapsMenu(id);
+		}
+	}
 
 	return PLUGIN_HANDLED;
 }
@@ -283,6 +482,125 @@ public change_map(idtask) {
 	new id = idtask - TASK_MAP;
 
 	engine_changelevel(g_SelectedMap[id]);
+}
+
+stock bool:extract_section_name(const szLine[], szSection[], len) {
+	if (szLine[0] != '[') {
+		return false;
+	}
+
+	new i = 1, j = 0;
+	while (szLine[i] && szLine[i] != ']' && j < len) {
+		szSection[j++] = szLine[i++];
+	}
+
+	if (szLine[i] != ']') {
+		return false;
+	}
+
+	szSection[j] = EOS;
+	trim(szSection);
+
+	return szSection[0] != EOS;
+}
+
+stock get_or_create_section(const name[]) {
+	new index = get_section_index(name);
+	if (index != -1) {
+		return index;
+	}
+
+	new sectionData[SectionData];
+	copy(sectionData[SectionName], charsmax(sectionData[SectionName]), name);
+	sectionData[SectionMaps] = _:ArrayCreate(32);
+
+	return ArrayPushArray(g_ArrSections, sectionData);
+}
+
+stock get_section_index(const name[]) {
+	new sectionData[SectionData];
+	for (new i = 0, iSize = ArraySize(g_ArrSections); i < iSize; i++) {
+		ArrayGetArray(g_ArrSections, i, sectionData);
+		if (equali(sectionData[SectionName], name)) {
+			return i;
+		}
+	}
+
+	return -1;
+}
+
+stock Array:get_section_array_by_name(const name[]) {
+	new index = get_section_index(name);
+	if (index == -1) {
+		return Array:0;
+	}
+
+	new sectionData[SectionData];
+	ArrayGetArray(g_ArrSections, index, sectionData);
+
+	return Array:sectionData[SectionMaps];
+}
+
+stock add_map_to_all(const szMap[]) {
+	if (!array_contains_string(g_ArrAllMaps, szMap)) {
+		ArrayPushString(g_ArrAllMaps, szMap);
+	}
+}
+
+stock bool:array_contains_string(Array:arr, const value[]) {
+	if (!arr || !value[0]) {
+		return false;
+	}
+
+	new szTemp[32];
+
+	for (new i = 0, iSize = ArraySize(arr); i < iSize; i++) {
+		ArrayGetString(arr, i, szTemp, charsmax(szTemp));
+		if (equali(szTemp, value)) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
+stock bool:get_section_label(id, const sectionName[], szBuffer[], len, bool:bWithColon) {
+	if (len <= 0) {
+		return false;
+	}
+
+	if (!sectionName[0]) {
+		szBuffer[0] = EOS;
+		return false;
+	}
+
+	if (equali(sectionName, SECTION_NAME_ALL)) {
+		formatex(szBuffer, len, bWithColon ? 
+		"%L:" : "%L", id, "MAPS_MENU_ALL");
+		return true;
+	}
+
+	if (equali(sectionName, SECTION_NAME_KNIFE)) {
+		formatex(szBuffer, len, bWithColon ? 
+		"%L:" : "%L", id, "MAPS_MENU_KNIFE");
+		return true;
+	}
+
+	if (equali(sectionName, SECTION_NAME_BOOST)) {
+		formatex(szBuffer, len, bWithColon ? 
+		"%L:" : "%L", id, "MAPS_MENU_BOOST");
+		return true;
+	}
+
+	if (equali(sectionName, SECTION_NAME_SKILL)) {
+		formatex(szBuffer, len, bWithColon ? 
+		"%L:" : "%L", id, "MAPS_MENU_SKILL");
+		return true;
+	}
+
+	formatex(szBuffer, len, bWithColon ? 
+	"%s:" : "%s", sectionName);
+	return true;
 }
 
 stock bool:applyCurrentMapSettings() {

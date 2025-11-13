@@ -57,10 +57,10 @@ public plugin_init()
 		register_clcmd("drop", "Control");
 		RegisterSayCmd("co", "co", "Control");
 		RegisterSayCmd("control", "con", "Control");
+	
+		RegisterSayCmd("re", "re", "Replace");
+		RegisterSayCmd("replace", "rep", "Replace");
 	}
-
-	RegisterSayCmd("re", "re", "Replace");
-	RegisterSayCmd("replace", "rep", "Replace");
 
 	register_clcmd("hns_transfer", "ReplaceAdmin");
 	RegisterSayCmd("rea", "rea", "ReplaceAdmin");
