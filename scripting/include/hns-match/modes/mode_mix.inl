@@ -187,7 +187,11 @@ public taskCheckLeave() {
 		}
 
 		if (g_eMatchInfo[e_tLeaveData] != Invalid_Trie) {
-			TrieClear(g_eMatchInfo[e_tLeaveData]);
+			new iPlayers[MAX_PLAYERS], iCount;
+			get_players(iPlayers, iCount, "ch");
+			for (new i; i < iCount; i++) {
+				TrieDeleteKey(g_eMatchInfo[e_tLeaveData], getUserKey(iPlayers[i]));
+			}
 		}
 
 		g_eMatchInfo[e_mLeaved] = false;
