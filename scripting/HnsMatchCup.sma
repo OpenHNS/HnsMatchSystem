@@ -372,12 +372,19 @@ stock kickNotAllowed(id, const reason[]) {
 	if (!is_user_connected(id))
 		return;
 
+	new name[32], auth[PLAYER_AUTH_LEN];
+	get_user_name(id, name, charsmax(name));
+	get_user_authid(id, auth, charsmax(auth));
+	server_print("[HNS-CUP] Kick %s (%s) reason: %s", name, auth, reason);
+
 	server_cmd("kick #%d ^"%s^"", get_user_userid(id), reason);
 }
 
 stock applyCupPlacement(id, slot, bool:bAdmin, bool:bKnifeMap) {
 	new bool:bSetTeam;
 	new TeamName:targetTeam;
+	new name[32];
+	get_user_name(id, name, charsmax(name));
 
 	switch (slot) {
 		case CUP_TEAM_FIRST: {
@@ -408,6 +415,9 @@ stock applyCupPlacement(id, slot, bool:bAdmin, bool:bKnifeMap) {
 
 	if (bSetTeam && rg_get_user_team(id) != targetTeam) {
 		rg_set_user_team(id, targetTeam);
+		server_print("[HNS-CUP] Assign %s (%d) to %s (admin=%d slot=%d knife=%d)", name, id,
+			targetTeam == TEAM_TERRORIST ? "TT" : (targetTeam == TEAM_CT ? "CT" : "SPEC"),
+			bAdmin, slot, bKnifeMap);
 	}
 }
 
@@ -1064,6 +1074,7 @@ public MapVetoHandler(id, menu, item) {
 		client_print_color(0, print_team_blue, "%s ^3%n^1 забанил карту ^3%s^1.", g_szPrefix, id, szMap);
 	else
 		client_print_color(0, print_team_blue, "%s ^3%s^1 (^3%n^1) забанили карту ^3%s^1.", g_szPrefix, getTeamLabel(g_iSelectedTeams[_:slotTurn]), id, szMap);
+	server_print("[HNS-CUP] Map veto by %s (%d): %s (slot=%d)", getTeamLabel(g_iSelectedTeams[_:slotTurn]), id, szMap, slotTurn);
 
 	new remaining = getRemainingMaps();
 	if (remaining <= g_iVetoTarget) {
@@ -1162,6 +1173,7 @@ stock announceRemainingMaps() {
 		return;
 
 	new szBuffer[256], pos;
+	new szConsole[256], posConsole;
 	for (new i; i < g_iMapCount; i++) {
 		if (g_bMapBanned[i])
 			continue;
@@ -1173,9 +1185,14 @@ stock announceRemainingMaps() {
 			pos += formatex(szBuffer[pos], charsmax(szBuffer) - pos, ", ");
 
 		pos += formatex(szBuffer[pos], charsmax(szBuffer) - pos, "%s", szMap);
+
+		if (posConsole > 0)
+			posConsole += formatex(szConsole[posConsole], charsmax(szConsole) - posConsole, ", ");
+		posConsole += formatex(szConsole[posConsole], charsmax(szConsole) - posConsole, "%s", szMap);
 	}
 
 	client_print_color(0, print_team_blue, "%s Осталось карт: ^3%s^1", g_szPrefix, szBuffer);
+	server_print("[HNS-CUP] Remaining maps: %s", szConsole);
 }
 
 stock getLastRemainingMap() {
