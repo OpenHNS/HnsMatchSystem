@@ -141,7 +141,9 @@ public kniferound_roundend(bool:win_ct) {
 
 			g_eMatchState = STATE_DISABLED;
 
-			// TODO: Старт веты победителю (win_ct)
+			LogSendMessage("[MATCH] hns_cup_set_veto %d", win_ct ? 2 : 1);
+
+			hns_cup_set_veto_turn_by_team(win_ct ? 2 : 1);
 		}
 	}
 	ChangeGameplay(GAMEPLAY_TRAINING);

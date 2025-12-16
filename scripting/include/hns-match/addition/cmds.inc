@@ -504,6 +504,7 @@ public cmdStop(id) {
 				chat_print(0, "%l", "STOP_CAP", id);
 			} else if (g_iMatchStatus == MATCH_CUPPICK) {
 				// TODO: Стоп cup pick ban
+				hns_cup_stop_veto();
 				g_iMatchStatus = MATCH_NONE;
 				training_start();
 			} else if (g_iMatchStatus) {

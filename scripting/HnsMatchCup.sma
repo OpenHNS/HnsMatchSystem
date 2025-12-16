@@ -73,6 +73,9 @@ public plugin_init() {
 
 public plugin_natives() {
 	register_native("hns_cup_enabled", "native_cup_enabled");
+	register_native("hns_cup_stop_veto", "native_stop_veto");
+	register_native("hns_cup_set_veto_turn_by_team", "native_set_veto_turn_by_team");
+	register_native("hns_cup_is_veto_active", "native_is_veto_active");
 }
 
 public plugin_cfg() {
@@ -98,10 +101,12 @@ public PDS_Save() {
 
 public client_authorized(id, const authid[]) {
 	enforcePlayer(id);
+	ensureCaptainOnJoin(id);
 }
 
 public client_putinserver(id) {
 	enforcePlayer(id);
+	ensureCaptainOnJoin(id);
 }
 
 public client_disconnected(id) {
@@ -122,10 +127,6 @@ public cmdCupMenu(id) {
 
 	showCupMenu(id);
 	return PLUGIN_HANDLED;
-}
-
-public cmdCupMaps(id) {
-	return cmdCupMenu(id);
 }
 
 public native_cup_enabled(amxx, params) {
@@ -399,7 +400,9 @@ setForceTeamJoinTask(id, menu_msgid) {
 	static param_menu_msgid[2];
 	param_menu_msgid[0] = menu_msgid;
 
-	set_task(0.1, "taskForceTeamJoin", id, param_menu_msgid, sizeof param_menu_msgid);
+	if (hns_is_knife_map()) {
+		set_task(0.1, "taskForceTeamJoin", id, param_menu_msgid, sizeof param_menu_msgid);
+	}
 }
 
 public taskForceTeamJoin(menu_msgid[], id) {
@@ -420,7 +423,9 @@ stock forceTeamJoin(id, menu_msgid, const team[] = "5", const class[] = "0") {
 	engclient_cmd(id, joinclass, class);
 	set_msg_block(menu_msgid, msg_block);
 
-	set_task(0.2, "taskSetPlayerTeam", id);
+	if (hns_is_knife_map()) {
+		set_task(0.2, "taskSetPlayerTeam", id);
+	}
 }
 
 public taskSetPlayerTeam(id) {
@@ -443,12 +448,14 @@ stock setCupTargetTeam(id, slot, bool:bAdmin) {
 	switch (slot) {
 		case CUP_TEAM_FIRST: {
 			rg_set_user_team(id, TEAM_TERRORIST);
-			rg_round_respawn(id);
+			if (hns_get_mode() == MODE_TRAINING)
+				rg_round_respawn(id);
 			return;
 		}
 		case CUP_TEAM_SECOND: {
 			rg_set_user_team(id, TEAM_CT);
-			rg_round_respawn(id);
+			if (hns_get_mode() == MODE_TRAINING)
+				rg_round_respawn(id);
 			return;
 		}
 	}
@@ -495,6 +502,30 @@ stock getPlayerCupSlot(id) {
 	return -1;
 }
 
+stock bool:isFirstListedTeamMember(id, teamIndex) {
+	if (!is_user_connected(id) || !isValidTeamIndex(teamIndex))
+		return false;
+
+	new eTeam[CupTeamData];
+	ArrayGetArray(g_aCupTeams, teamIndex, eTeam);
+
+	new Array:aPlayers = Array:eTeam[TeamPlayers];
+	if (!aPlayers || ArraySize(aPlayers) <= 0)
+		return false;
+
+	new ePlayer[CupPlayerData];
+	ArrayGetArray(aPlayers, 0, ePlayer);
+
+	new szAuth[PLAYER_AUTH_LEN], szLine[PLAYER_AUTH_LEN];
+	get_user_authid(id, szAuth, charsmax(szAuth));
+	strtolower(szAuth);
+
+	copy(szLine, charsmax(szLine), ePlayer[PlayerAuth]);
+	strtolower(szLine);
+
+	return equal(szAuth, szLine);
+}
+
 stock saveSelectedTeams() {
 	PDS_SetCell(szPdsTeamFirst, g_iSelectedTeams[_:CUP_TEAM_FIRST]);
 	PDS_SetCell(szPdsTeamSecond, g_iSelectedTeams[_:CUP_TEAM_SECOND]);
@@ -523,6 +554,32 @@ stock loadSavedSelections() {
 	enforceAll();
 
 	debugSelectedTeams("PDS_Load");
+}
+
+stock ensureCaptainOnJoin(id) {
+	if (!isCupEnabled())
+		return;
+
+	if (!is_user_connected(id) || is_user_bot(id) || is_user_hltv(id))
+		return;
+
+	new slot = getPlayerCupSlot(id);
+	if (slot == -1)
+		return;
+
+	new teamIndex = g_iSelectedTeams[_:slot];
+	if (!isValidTeamIndex(teamIndex))
+		return;
+
+	if (!isFirstListedTeamMember(id, teamIndex))
+		return;
+
+	new currentCap = g_iVetoCaptains[_:slot];
+	if (currentCap > 0 && is_user_connected(currentCap) && isPlayerFromTeam(currentCap, teamIndex))
+		return;
+
+	g_iVetoCaptains[_:slot] = id;
+	server_print("[HNS-CUP] Auto-assign captain slot=%d -> %d (first listed joined)", slot, id);
 }
 
 stock debugSelectedTeams(const szTag[]) {
@@ -643,6 +700,83 @@ stock cycleVetoFormat() {
 
 	if (g_iVetoFormat < 1 || g_iVetoFormat > 3)
 		g_iVetoFormat = 1;
+}
+
+public native_stop_veto(amxx, params) {
+	if (!g_bVetoActive) {
+		stopMapVeto();
+		server_print("[HNS-CUP] native_stop_veto: veto inactive, stopMapVeto called (no-op).");
+		return 0;
+	}
+
+	stopMapVeto();
+	server_print("[HNS-CUP] native_stop_veto: veto stopped.");
+	return 1;
+}
+
+public native_set_veto_turn_by_team(amxx, params) {
+	if (params < 1)
+		return 0;
+
+	new iParamTeam = get_param(1);
+	new TeamName:desiredTeam;
+
+	switch (iParamTeam) {
+		case 1: desiredTeam = TEAM_TERRORIST;
+		case 2: desiredTeam = TEAM_CT;
+		default: return 0;
+	}
+
+	if (!g_bVetoActive) {
+		new startSlot = (desiredTeam == TEAM_TERRORIST) ? CUP_TEAM_FIRST : CUP_TEAM_SECOND;
+
+		for (new slot = CUP_TEAM_FIRST; slot < CUP_TEAM_TOTAL; slot++) {
+			new cap = g_iVetoCaptains[_:slot];
+			if (!is_user_connected(cap))
+				continue;
+
+			if (rg_get_user_team(cap) == desiredTeam) {
+				startSlot = slot;
+				break;
+			}
+		}
+
+		startMapVeto(0, startSlot);
+
+		if (!g_bVetoActive) {
+			server_print("[HNS-CUP] native_set_veto_turn_by_team: start failed team=%d slot=%d", iParamTeam, startSlot);
+			return 0;
+		}
+
+		server_print("[HNS-CUP] native_set_veto_turn_by_team: started veto team=%d slot=%d cap=%d", iParamTeam, g_iVetoTurn, g_iVetoCaptains[_:g_iVetoTurn]);
+		return 1;
+	}
+
+	new targetSlot = -1;
+	for (new slot = CUP_TEAM_FIRST; slot < CUP_TEAM_TOTAL; slot++) {
+		new cap = g_iVetoCaptains[_:slot];
+		if (!is_user_connected(cap))
+			continue;
+
+		if (rg_get_user_team(cap) == desiredTeam) {
+			targetSlot = slot;
+			break;
+		}
+	}
+
+	if (targetSlot == -1) {
+		server_print("[HNS-CUP] native_set_veto_turn_by_team: no captain found for team=%d.", iParamTeam);
+		return 0;
+	}
+
+	g_iVetoTurn = targetSlot;
+	server_print("[HNS-CUP] native_set_veto_turn_by_team: team=%d slot=%d cap=%d", iParamTeam, targetSlot, g_iVetoCaptains[_:g_iVetoTurn]);
+	showMapVetoMenu(g_iVetoCaptains[_:g_iVetoTurn]);
+	return 1;
+}
+
+public native_is_veto_active(amxx, params) {
+	return g_bVetoActive;
 }
 
 stock getVetoFormatLabel() {
