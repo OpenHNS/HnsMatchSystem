@@ -41,11 +41,12 @@ new const szPdsTeamSecond[] = "hns_cup_team_second";
 new Array:g_aCupMaps;
 new g_iVetoFormat = 1;
 new bool:g_bMapBanned[CUP_MAX_MAPS];
+new bool:g_bMapPicked[CUP_MAX_MAPS];
 new g_iMapCount;
 new bool:g_bVetoActive;
 new g_iVetoCaptains[CUP_TEAM_TOTAL];
-new g_iVetoTarget = 1;
 new g_iVetoTurn;
+new g_iVetoStep;
 
 new g_pCvarCup;
 new g_szPrefix[24];
@@ -271,8 +272,9 @@ stock clearMaps() {
 	g_aCupMaps = Invalid_Array;
 	g_iMapCount = 0;
 	g_bVetoActive = false;
-	g_iVetoTarget = 1;
+	g_iVetoStep = 0;
 	arrayset(g_bMapBanned, false, sizeof g_bMapBanned);
+	arrayset(g_bMapPicked, false, sizeof g_bMapPicked);
 	g_iVetoCaptains[CUP_TEAM_FIRST] = g_iVetoCaptains[CUP_TEAM_SECOND] = -1;
 	g_iVetoTurn = CUP_TEAM_FIRST;
 	remove_task(TASK_VETO_HUD);
@@ -538,14 +540,14 @@ public CupMenuHandler(id, menu, item) {
 			showCaptainPickMenu(id, CUP_TEAM_SECOND);
 			bReopenMenu = false;
 		}
-		case 5: {
-			if (g_bVetoActive) {
-				client_print_color(id, print_team_blue, "%s Формат нельзя менять во время пик/бан.", g_szPrefix);
-			} else {
-				cycleVetoFormat();
-				client_print_color(id, print_team_blue, "%s Формат бана/пика: ^3%s^1", g_szPrefix, getVetoFormatLabel());
-			}
+	case 5: {
+		if (g_bVetoActive) {
+			client_print_color(id, print_team_blue, "%s Формат нельзя менять во время пик/бан.", g_szPrefix);
+		} else {
+			cycleVetoFormat();
+			client_print_color(id, print_team_blue, "%s Формат бана/пика: ^3%s^1", g_szPrefix, getVetoFormatLabel());
 		}
+	}
 		case 6: {
 			resetSelections(true);
 		}
@@ -588,8 +590,8 @@ stock getVetoFormatLabel() {
 	static szLabel[8];
 
 	switch (g_iVetoFormat) {
-		case 2: formatex(szLabel, charsmax(szLabel), "BO2");
-		case 3: formatex(szLabel, charsmax(szLabel), "BO3");
+		case 2: formatex(szLabel, charsmax(szLabel), "BO3");
+		case 3: formatex(szLabel, charsmax(szLabel), "BO5");
 		default: {
 			g_iVetoFormat = 1;
 			formatex(szLabel, charsmax(szLabel), "BO1");
@@ -597,6 +599,24 @@ stock getVetoFormatLabel() {
 	}
 
 	return szLabel;
+}
+
+stock bool:isPickStep() {
+	switch (g_iVetoFormat) {
+		case 2: return (g_iVetoStep == 2 || g_iVetoStep == 3); // BO3 pick phase after 2 bans
+		case 3: return (g_iVetoStep == 2 || g_iVetoStep == 3 || g_iVetoStep == 6 || g_iVetoStep == 7); // BO5 two pick phases
+	}
+
+	return false;
+}
+
+stock getMinMapsForFormat() {
+	switch (g_iVetoFormat) {
+		case 2: return 5; // 2 bans + 2 picks + decider
+		case 3: return 7; // 2 bans + 2 picks + 2 bans + 2 picks + decider
+	}
+
+	return 2; // at least 2 maps for BO1
 }
 
 stock kickNonCupAdmins(id) {
@@ -967,20 +987,17 @@ stock startMapVeto(id, startSlot) {
 	if (startSlot != CUP_TEAM_FIRST && startSlot != CUP_TEAM_SECOND)
 		startSlot = CUP_TEAM_FIRST;
 
-	g_iVetoTarget = g_iVetoFormat;
-	if (g_iVetoTarget < 1)
-		g_iVetoTarget = 1;
-	else if (g_iVetoTarget > 3)
-		g_iVetoTarget = 3;
-
-	if (g_iMapCount <= g_iVetoTarget) {
-		client_print_color(id, print_team_blue, "%s Недостаточно карт для формата ^3%s^1. Добавьте больше карт в ^3%s^1.", g_szPrefix, getVetoFormatLabel(), CUP_MAPS_FILE);
+	new minMaps = getMinMapsForFormat();
+	if (g_iMapCount < minMaps) {
+		client_print_color(id, print_team_blue, "%s Недостаточно карт для формата ^3%s^1 (нужно минимум %d). Добавьте больше карт в ^3%s^1.", g_szPrefix, getVetoFormatLabel(), minMaps, CUP_MAPS_FILE);
 		return;
 	}
 
 	arrayset(g_bMapBanned, false, sizeof g_bMapBanned);
+	arrayset(g_bMapPicked, false, sizeof g_bMapPicked);
 	g_bVetoActive = true;
 	g_iVetoTurn = startSlot;
+	g_iVetoStep = 0;
 
 	remove_task(TASK_VETO_HUD);
 	set_task(1.0, "taskShowVetoHud", TASK_VETO_HUD, .flags = "b");
@@ -995,9 +1012,10 @@ stock stopMapVeto() {
 		return;
 
 	g_bVetoActive = false;
-	g_iVetoTarget = 1;
+	g_iVetoStep = 0;
 	remove_task(TASK_VETO_HUD);
 	arrayset(g_bMapBanned, false, sizeof g_bMapBanned);
+	arrayset(g_bMapPicked, false, sizeof g_bMapPicked);
 	g_iVetoTurn = CUP_TEAM_FIRST;
 
 	show_menu(g_iVetoCaptains[_:CUP_TEAM_FIRST], 0, "^n", 1);
@@ -1017,10 +1035,13 @@ stock showMapVetoMenu(id) {
 		ArrayGetString(g_aCupMaps, i, szMap, charsmax(szMap));
 		num_to_str(i, szInfo, charsmax(szInfo));
 
-		if (g_bMapBanned[i])
+		if (g_bMapBanned[i]) {
 			formatex(szItem, charsmax(szItem), "\r%s [BAN]", szMap);
-		else
+		} else if (g_bMapPicked[i]) {
+			formatex(szItem, charsmax(szItem), "\d%s [PICK]", szMap);
+		} else {
 			formatex(szItem, charsmax(szItem), "%s", szMap);
+		}
 
 		menu_additem(menu, szItem, szInfo);
 	}
@@ -1060,7 +1081,7 @@ public MapVetoHandler(id, menu, item) {
 
 	new mapIndex = str_to_num(szInfo);
 
-	if (mapIndex < 0 || mapIndex >= g_iMapCount || g_bMapBanned[mapIndex]) {
+	if (mapIndex < 0 || mapIndex >= g_iMapCount || g_bMapBanned[mapIndex] || g_bMapPicked[mapIndex]) {
 		showMapVetoMenu(id);
 		return PLUGIN_HANDLED;
 	}
@@ -1068,22 +1089,29 @@ public MapVetoHandler(id, menu, item) {
 	new szMap[MAP_NAME_LEN];
 	ArrayGetString(g_aCupMaps, mapIndex, szMap, charsmax(szMap));
 
-	g_bMapBanned[mapIndex] = true;
+	new bool:bPick = isPickStep();
+	if (bPick) {
+		g_bMapPicked[mapIndex] = true;
+	} else {
+		g_bMapBanned[mapIndex] = true;
+	}
+
 	new slotTurn = g_iVetoTurn;
 	if (slotTurn < CUP_TEAM_FIRST || slotTurn >= CUP_TEAM_TOTAL)
-		client_print_color(0, print_team_blue, "%s ^3%n^1 забанил карту ^3%s^1.", g_szPrefix, id, szMap);
+		client_print_color(0, print_team_blue, "%s ^3%n^1 %s карту ^3%s^1.", g_szPrefix, id, bPick ? "выбрал" : "забанил", szMap);
 	else
-		client_print_color(0, print_team_blue, "%s ^3%s^1 (^3%n^1) забанили карту ^3%s^1.", g_szPrefix, getTeamLabel(g_iSelectedTeams[_:slotTurn]), id, szMap);
-	server_print("[HNS-CUP] Map veto by %s (%d): %s (slot=%d)", getTeamLabel(g_iSelectedTeams[_:slotTurn]), id, szMap, slotTurn);
+		client_print_color(0, print_team_blue, "%s ^3%s^1 (^3%n^1) %s карту ^3%s^1.", g_szPrefix, getTeamLabel(g_iSelectedTeams[_:slotTurn]), id, bPick ? "выбрали" : "забанили", szMap);
+	server_print("[HNS-CUP] Map %s by %s (%d): %s (slot=%d)", bPick ? "pick" : "ban", getTeamLabel(g_iSelectedTeams[_:slotTurn]), id, szMap, slotTurn);
 
-	new remaining = getRemainingMaps();
-	if (remaining <= g_iVetoTarget) {
+	g_iVetoStep++;
+
+	g_iVetoTurn = (g_iVetoTurn == CUP_TEAM_FIRST) ? CUP_TEAM_SECOND : CUP_TEAM_FIRST;
+
+	if (getRemainingMaps() <= 1) {
 		announceRemainingMaps();
 		stopMapVeto();
 		return PLUGIN_HANDLED;
 	}
-
-	g_iVetoTurn = (g_iVetoTurn == CUP_TEAM_FIRST) ? CUP_TEAM_SECOND : CUP_TEAM_FIRST;
 
 	new nextCap = g_iVetoCaptains[_:g_iVetoTurn];
 	if (!is_user_connected(nextCap)) {
@@ -1161,7 +1189,7 @@ stock getCaptainNameLabel(slot) {
 stock getRemainingMaps() {
 	new count;
 	for (new i; i < g_iMapCount; i++) {
-		if (!g_bMapBanned[i])
+		if (!g_bMapBanned[i] && !g_bMapPicked[i])
 			count++;
 	}
 	return count;
@@ -1175,7 +1203,7 @@ stock announceRemainingMaps() {
 	new szBuffer[256], pos;
 	new szConsole[256], posConsole;
 	for (new i; i < g_iMapCount; i++) {
-		if (g_bMapBanned[i])
+		if (g_bMapBanned[i] || g_bMapPicked[i])
 			continue;
 
 		new szMap[MAP_NAME_LEN];
@@ -1197,7 +1225,7 @@ stock announceRemainingMaps() {
 
 stock getLastRemainingMap() {
 	for (new i; i < g_iMapCount; i++) {
-		if (!g_bMapBanned[i])
+		if (!g_bMapBanned[i] && !g_bMapPicked[i])
 			return i;
 	}
 	return -1;
