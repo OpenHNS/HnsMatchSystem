@@ -16,14 +16,25 @@ public mainMatchMenu(id) {
 	new hMenu = menu_create(szMsg, "mainMatchMenuHandler");
 
 	if (hns_is_knife_map()) {
-		if (g_iCurrentMode == MODE_TRAINING && g_iMatchStatus == MATCH_NONE)
-			formatex(szMsg, charsmax(szMsg), "%L", id, "MENU_MAIN_CAP");
-		else if (g_iCurrentMode == MODE_KNIFE && g_iMatchStatus == MATCH_TEAMKNIFE && g_eMatchState == STATE_PAUSED)
-			formatex(szMsg, charsmax(szMsg), "%L", id, "MENU_MAIN_UNPAUSEKF");
-		else if (g_iMatchStatus == MATCH_CAPTAINPICK || g_iMatchStatus == MATCH_CAPTAINKNIFE || g_iMatchStatus == MATCH_TEAMPICK)
-			formatex(szMsg, charsmax(szMsg), "%L", id, "MENU_MAIN_STOPCAP");
-		else
-			formatex(szMsg, charsmax(szMsg), "%L", id, "MENU_MAIN_NOTCAP");
+		if (!hns_cup_enabled()) {
+			if (g_iCurrentMode == MODE_TRAINING && g_iMatchStatus == MATCH_NONE)
+				formatex(szMsg, charsmax(szMsg), "%L", id, "MENU_MAIN_CAP");
+			else if (g_iCurrentMode == MODE_KNIFE && g_iMatchStatus == MATCH_TEAMKNIFE && g_eMatchState == STATE_PAUSED)
+				formatex(szMsg, charsmax(szMsg), "%L", id, "MENU_MAIN_UNPAUSEKF");
+			else if (g_iMatchStatus == MATCH_CAPTAINPICK || g_iMatchStatus == MATCH_CAPTAINKNIFE || g_iMatchStatus == MATCH_TEAMPICK)
+				formatex(szMsg, charsmax(szMsg), "%L", id, "MENU_MAIN_STOPCAP");
+			else
+				formatex(szMsg, charsmax(szMsg), "%L", id, "MENU_MAIN_NOTCAP");
+		} else {
+			if (g_iCurrentMode == MODE_TRAINING && g_iMatchStatus == MATCH_NONE)
+				formatex(szMsg, charsmax(szMsg), "Start pick/ban knife");
+			else if (g_iCurrentMode == MODE_KNIFE && g_iMatchStatus == MATCH_CUPKNIFE) 
+				formatex(szMsg, charsmax(szMsg), "\rStop pick/ban knife");
+			else if (g_iMatchStatus == MATCH_CUPPICK)
+				formatex(szMsg, charsmax(szMsg), "\rStop pick/ban");
+			else
+				formatex(szMsg, charsmax(szMsg), "ELSE Start pick/ban knife");
+		}
 	} else {
 		if (g_iCurrentMode == MODE_PUB || g_iCurrentMode == MODE_DM || g_iCurrentMode == MODE_ZM)
 			formatex(szMsg, charsmax(szMsg), "%L", id, "MENU_MAIN_STOPCUSTOM");
@@ -99,14 +110,25 @@ public mainMatchMenuHandler(id, hMenu, item) {
 	switch (iKey) {
 		case 1: {
 			if (hns_is_knife_map()) {
-				if (g_iCurrentMode == MODE_TRAINING && g_iMatchStatus == MATCH_NONE)
-					cmdCaptain(id);
-				else if (g_iCurrentMode == MODE_KNIFE && g_iMatchStatus == MATCH_TEAMKNIFE && g_eMatchState == STATE_PAUSED)
-					cmdStopPause(id);
-				else if (g_iMatchStatus == MATCH_CAPTAINPICK || g_iMatchStatus == MATCH_CAPTAINKNIFE|| g_iMatchStatus == MATCH_TEAMPICK)
-					cmdStop(id);
-				else
-					mainMatchMenu(id);
+				if (!hns_cup_enabled()) {
+					if (g_iCurrentMode == MODE_TRAINING && g_iMatchStatus == MATCH_NONE)
+						cmdCaptain(id);
+					else if (g_iCurrentMode == MODE_KNIFE && g_iMatchStatus == MATCH_TEAMKNIFE && g_eMatchState == STATE_PAUSED)
+						cmdStopPause(id);
+					else if (g_iMatchStatus == MATCH_CAPTAINPICK || g_iMatchStatus == MATCH_CAPTAINKNIFE || g_iMatchStatus == MATCH_TEAMPICK)
+						cmdStop(id);
+					else
+						mainMatchMenu(id);
+				} else {
+					if (g_iCurrentMode == MODE_TRAINING && g_iMatchStatus == MATCH_NONE)
+						cmdKnifePickBan(id);
+					else if (g_iCurrentMode == MODE_KNIFE && g_iMatchStatus == MATCH_CUPKNIFE) 
+						cmdStop(id);
+					else if (g_iMatchStatus == MATCH_CUPPICK)
+						cmdStop(id);
+					else
+						cmdKnifePickBan(id);
+				}
 			} else {
 				if (g_iCurrentMode == MODE_PUB || g_iCurrentMode == MODE_DM || g_iCurrentMode == MODE_ZM || g_iMatchStatus == MATCH_WAITCONNECT) { // beta
 					cmdStop(id);

@@ -687,6 +687,12 @@ public get_matchstats_str(MATCH_STATUS:iStatus) {
 		case MATCH_TEAMPICK: {
 			formatex(szOut, charsmax(szOut), "Team pick");
 		}
+		case MATCH_CUPKNIFE: {
+			formatex(szOut, charsmax(szOut), "Pick/Ban knife");
+		}
+		case MATCH_CUPPICK: {
+			formatex(szOut, charsmax(szOut), "Pick/Ban map");
+		}
 		case MATCH_TEAMKNIFE: {
 			formatex(szOut, charsmax(szOut), "Knife round");
 		}

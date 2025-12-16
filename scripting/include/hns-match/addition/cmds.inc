@@ -391,7 +391,7 @@ public cmdKnifeRound(id) {
 		return PLUGIN_HANDLED;
 	}
 
-	if (g_iMatchStatus == MATCH_CAPTAINKNIFE || g_iMatchStatus == MATCH_TEAMKNIFE) {
+	if (g_iMatchStatus == MATCH_CAPTAINKNIFE || g_iMatchStatus == MATCH_TEAMKNIFE || g_iMatchStatus == MATCH_CUPKNIFE) {
 		chat_print(id, "%L", id, "KNIFE_ALREADY");
 		return PLUGIN_HANDLED;
 	}
@@ -404,6 +404,30 @@ public cmdKnifeRound(id) {
 	return PLUGIN_HANDLED;
 }
 
+public cmdKnifePickBan(id) {
+	if (!isUserWatcher(id)) {
+		return PLUGIN_HANDLED;
+	}
+
+	if (g_iCurrentMode != MODE_TRAINING) {
+		chat_print(id, "Пожалуйста, отключите другой режим перед запуском ножевого Pick/Ban.");
+		return PLUGIN_HANDLED;
+	}
+
+	if (g_iMatchStatus == MATCH_CAPTAINKNIFE || g_iMatchStatus == MATCH_TEAMKNIFE || g_iMatchStatus == MATCH_CUPKNIFE) {
+		chat_print(id, "Ножевой раунд Pick/Ban уже запущен.");
+		return PLUGIN_HANDLED;
+	}
+
+	chat_print(id, "^3%n^1 запустил ^3ножевой Pick/Ban^1 раунд!", id);
+
+	g_iMatchStatus = MATCH_CUPKNIFE;
+	kniferound_start();
+
+	return PLUGIN_HANDLED;
+}
+
+
 public cmdCaptain(id) {
 	if (!isUserWatcher(id)) {
 		return PLUGIN_HANDLED;
@@ -411,6 +435,10 @@ public cmdCaptain(id) {
 
 	if (!hns_is_knife_map()) {
 		chat_print(id, "%L", id, "NOT_CAPTAIN");
+		return PLUGIN_HANDLED;
+	}
+
+	if (hns_cup_enabled()) {
 		return PLUGIN_HANDLED;
 	}
 
@@ -460,6 +488,9 @@ public cmdStop(id) {
 			if (g_iMatchStatus == MATCH_CAPTAINKNIFE) {
 				resetCaptainData();
 				chat_print(0, "%l", "STOP_CAP", id);
+			} else if (g_iMatchStatus == MATCH_CUPKNIFE) {
+				// TODO: Стоп cup knife
+			
 			} else {
 				chat_print(0, "%l", "STOP_KNIFE", id);
 			}
@@ -471,6 +502,10 @@ public cmdStop(id) {
 				g_iMatchStatus = MATCH_NONE;
 				training_start();
 				chat_print(0, "%l", "STOP_CAP", id);
+			} else if (g_iMatchStatus == MATCH_CUPPICK) {
+				// TODO: Стоп cup pick ban
+				g_iMatchStatus = MATCH_NONE;
+				training_start();
 			} else if (g_iMatchStatus) {
 				g_iMatchStatus = MATCH_NONE;
 			}

@@ -26,7 +26,7 @@ public taskCheckAfk() {
 		return;
 	}
 
-	if (g_iCurrentMode != MODE_MIX && g_iMatchStatus != MATCH_TEAMKNIFE) {
+	if (g_iCurrentMode != MODE_MIX && g_iMatchStatus != MATCH_TEAMKNIFE && g_iMatchStatus != MATCH_CUPKNIFE) {
 		ResetAfkData();
 		return;
 	}

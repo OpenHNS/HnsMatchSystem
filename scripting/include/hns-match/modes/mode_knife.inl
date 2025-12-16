@@ -76,6 +76,19 @@ public kniferound_roundstart() {
 			set_task(2.0, "taskSaveAfk");
 			set_task(4.0, "taskCheckAfk");
 		}
+		case MATCH_CUPKNIFE: {
+			setTaskHud(0, 2.0, 1, 255, 255, 255, 3.0, "Pick/Ban knife started!");
+			
+			chat_print(0, "Started ^3knife Pick/Ban^1 round!");
+
+			g_eMatchState = STATE_ENABLED;
+
+			ChangeGameplay(GAMEPLAY_KNIFE);
+
+			ResetAfkData();
+			set_task(2.0, "taskSaveAfk");
+			set_task(4.0, "taskCheckAfk");
+		}
 		default: {
 			ChangeGameplay(GAMEPLAY_TRAINING);
 		}
@@ -120,6 +133,15 @@ public kniferound_roundend(bool:win_ct) {
 			Save_players(win_ct ? TEAM_CT : TEAM_TERRORIST);
 
 			StartVoteRules();
+		}
+		case MATCH_CUPKNIFE: {
+			training_start();
+
+			g_iMatchStatus = MATCH_CUPPICK;
+
+			g_eMatchState = STATE_DISABLED;
+
+			// TODO: Старт веты победителю (win_ct)
 		}
 	}
 	ChangeGameplay(GAMEPLAY_TRAINING);

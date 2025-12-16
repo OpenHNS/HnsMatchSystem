@@ -17,6 +17,7 @@
 #include <hns_matchsystem_api.inc>
 #include <hns_matchsystem_bans.inc>
 #include <hns_matchsystem_maps.inc>
+#include <hns_matchsystem_cup.inc>
 
 #include <hns-match/globals>
 
