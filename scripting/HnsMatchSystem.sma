@@ -369,6 +369,10 @@ public taskSetPlayerTeam(id) {
 	if (!is_user_connected(id))
 		return;
 
+	if (hns_is_knife_map() && hns_cup_enabled()) {
+		return;
+	}
+
 	if (g_ModFuncs[g_iCurrentMode][MODEFUNC_PLAYER_JOIN])
 		ExecuteForward(g_ModFuncs[g_iCurrentMode][MODEFUNC_PLAYER_JOIN], _, id);
 }

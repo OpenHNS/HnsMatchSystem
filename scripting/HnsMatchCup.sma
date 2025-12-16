@@ -42,6 +42,8 @@ new Array:g_aCupMaps;
 new g_iVetoFormat = 1;
 new bool:g_bMapBanned[CUP_MAX_MAPS];
 new bool:g_bMapPicked[CUP_MAX_MAPS];
+new g_iPickedOrder[CUP_MAX_MAPS];
+new g_iPickedCount;
 new g_iMapCount;
 new bool:g_bVetoActive;
 new g_iVetoCaptains[CUP_TEAM_TOTAL];
@@ -65,6 +67,8 @@ public plugin_init() {
 	g_tActiveAuths = TrieCreate();
 	resetSelections(false, false);
 
+	register_message(get_user_msgid("ShowMenu"), "msgShowMenu");
+	register_message(get_user_msgid("VGUIMenu"), "msgVguiMenu");
 }
 
 public plugin_natives() {
@@ -93,11 +97,11 @@ public PDS_Save() {
 }
 
 public client_authorized(id, const authid[]) {
-	enforcePlayer(id, true);
+	enforcePlayer(id);
 }
 
 public client_putinserver(id) {
-	enforcePlayer(id, true);
+	enforcePlayer(id);
 }
 
 public client_disconnected(id) {
@@ -328,11 +332,11 @@ stock rebuildActiveAuths() {
 stock enforceAll() {
 	for (new id = 1; id <= MaxClients; id++) {
 		if (is_user_connected(id))
-			enforcePlayer(id, true);
+			enforcePlayer(id);
 	}
 }
 
-stock enforcePlayer(id, bool:bApplyPlacement = false) {
+stock enforcePlayer(id) {
 	if (!isCupEnabled())
 		return;
 
@@ -342,32 +346,13 @@ stock enforcePlayer(id, bool:bApplyPlacement = false) {
 	if (is_user_bot(id) || is_user_hltv(id))
 		return;
 
-	new bool:bKnifeMap = hns_is_knife_map();
 	new bool:bAdmin = isCupAdmin(id);
 	new slot = getPlayerCupSlot(id);
 
-	if (bKnifeMap && slot == -1 && !bAdmin) {
+	if (!bAdmin && slot == -1) {
 		kickNotAllowed(id, "Cup mode enabled. Only admins or selected teams can join.");
 		return;
 	}
-
-	if (!bApplyPlacement)
-		return;
-
-	applyCupPlacement(id, slot, bAdmin, bKnifeMap);
-
-	if (bAdmin || slot != -1)
-		return;
-
-	if (g_tActiveAuths == Invalid_Trie || TrieGetSize(g_tActiveAuths) == 0)
-		return;
-
-	new szAuth[PLAYER_AUTH_LEN];
-	get_user_authid(id, szAuth, charsmax(szAuth));
-	strtolower(szAuth);
-
-	if (!TrieKeyExists(g_tActiveAuths, szAuth) && bKnifeMap)
-		kickNotAllowed(id, "Cup mode enabled. You are not on the lineup list.");
 }
 
 stock kickNotAllowed(id, const reason[]) {
@@ -382,46 +367,120 @@ stock kickNotAllowed(id, const reason[]) {
 	server_cmd("kick #%d ^"%s^"", get_user_userid(id), reason);
 }
 
-stock applyCupPlacement(id, slot, bool:bAdmin, bool:bKnifeMap) {
-	new bool:bSetTeam;
-	new TeamName:targetTeam;
-	new name[32];
-	get_user_name(id, name, charsmax(name));
+public msgShowMenu(msgid, dest, id) {
+	if (!shouldAutoJoin(id))
+		return PLUGIN_CONTINUE;
 
-	switch (slot) {
-		case CUP_TEAM_FIRST: {
-			targetTeam = TEAM_TERRORIST;
-			bSetTeam = true;
-		}
-		case CUP_TEAM_SECOND: {
-			targetTeam = TEAM_CT;
-			bSetTeam = true;
-		}
+	static team_select[] = "#Team_Select";
+	static menu_text_code[sizeof team_select];
+	get_msg_arg_string(4, menu_text_code, sizeof menu_text_code - 1);
+	if (!equal(menu_text_code, team_select))
+		return (PLUGIN_CONTINUE);
+
+	setForceTeamJoinTask(id, msgid);
+
+	return PLUGIN_HANDLED;
+}
+
+public msgVguiMenu(msgid, dest, id) {
+	if (get_msg_arg_int(1) != 2 || !shouldAutoJoin(id))
+		return (PLUGIN_CONTINUE);
+
+	setForceTeamJoinTask(id, msgid);
+
+	return PLUGIN_HANDLED;
+}
+
+bool:shouldAutoJoin(id) {
+	return (!get_user_team(id) && !task_exists(id));
+}
+
+setForceTeamJoinTask(id, menu_msgid) {
+	static param_menu_msgid[2];
+	param_menu_msgid[0] = menu_msgid;
+
+	set_task(0.1, "taskForceTeamJoin", id, param_menu_msgid, sizeof param_menu_msgid);
+}
+
+public taskForceTeamJoin(menu_msgid[], id) {
+	forceTeamJoin(id, menu_msgid[0], "5", "5");
+}
+
+stock forceTeamJoin(id, menu_msgid, const team[] = "5", const class[] = "0") {
+	static jointeam[] = "jointeam";
+	if (class[0] == '0') {
+		engclient_cmd(id, jointeam, team);
+		return;
 	}
 
-	if (bAdmin && slot == -1) {
-		targetTeam = TEAM_SPECTATOR;
-		bSetTeam = true;
-	}
+	static msg_block, joinclass[] = "joinclass";
+	msg_block = get_msg_block(menu_msgid);
+	set_msg_block(menu_msgid, BLOCK_SET);
+	engclient_cmd(id, jointeam, team);
+	engclient_cmd(id, joinclass, class);
+	set_msg_block(menu_msgid, msg_block);
 
-	if (bKnifeMap && !bSetTeam) {
-		targetTeam = TEAM_SPECTATOR;
-		bSetTeam = true;
-	} else if (!bKnifeMap && bAdmin && !bSetTeam) {
-		targetTeam = TEAM_SPECTATOR;
-		bSetTeam = true;
-	}
+	set_task(0.2, "taskSetPlayerTeam", id);
+}
 
-	if (!bKnifeMap && !bSetTeam)
+public taskSetPlayerTeam(id) {
+	if (!is_user_connected(id))
 		return;
 
-	if (bSetTeam && rg_get_user_team(id) != targetTeam) {
-		rg_set_user_team(id, targetTeam);
-		server_print("[HNS-CUP] Assign %s (%d) to %s (admin=%d slot=%d knife=%d)", name, id,
-			targetTeam == TEAM_TERRORIST ? "TT" : (targetTeam == TEAM_CT ? "CT" : "SPEC"),
-			bAdmin, slot, bKnifeMap);
+	new bool:bAdmin = isCupAdmin(id);
+	new slot = getPlayerCupSlot(id);
+
+	setCupTargetTeam(id, slot, bAdmin);
+
+	new name[32];
+	get_user_name(id, name, charsmax(name));
+	server_print("[HNS-CUP] Assign %s (%d) to %s (admin=%d slot=%d)", name, id,
+		getUserTeam(id) == TEAM_TERRORIST ? "TT" : (getUserTeam(id) == TEAM_CT ? "CT" : "SPEC"),
+		bAdmin, slot);
+}
+
+stock setCupTargetTeam(id, slot, bool:bAdmin) {
+	switch (slot) {
+		case CUP_TEAM_FIRST: {
+			rg_set_user_team(id, TEAM_TERRORIST);
+			rg_round_respawn(id);
+			return;
+		}
+		case CUP_TEAM_SECOND: {
+			rg_set_user_team(id, TEAM_CT);
+			rg_round_respawn(id);
+			return;
+		}
+	}
+
+	if (bAdmin) {
+		setTeam(id, TEAM_SPECTATOR);
+		set_entvar(id, var_solid, SOLID_NOT);
+		set_entvar(id, var_movetype, MOVETYPE_FLY);
 	}
 }
+
+setTeam(id, TeamName:iTeam) {
+	set_member(id, m_bTeamChanged, false);
+
+	if (is_user_alive(id))
+		user_silentkill(id);
+
+	switch (iTeam) {
+		case TEAM_TERRORIST: {
+			rg_internal_cmd(id, "jointeam", "1");
+			rg_internal_cmd(id, "joinclass", "5");
+		}
+		case TEAM_CT: {
+			rg_internal_cmd(id, "jointeam", "2");
+			rg_internal_cmd(id, "joinclass", "5");
+		}
+		case TEAM_SPECTATOR: {
+			rg_internal_cmd(id, "jointeam", "6");
+		}
+	}
+}
+
 
 stock getPlayerCupSlot(id) {
 	if (!is_user_connected(id))
@@ -617,6 +676,32 @@ stock getMinMapsForFormat() {
 	}
 
 	return 2; // at least 2 maps for BO1
+}
+
+stock addPickedMap(mapIndex) {
+	if (mapIndex < 0 || mapIndex >= g_iMapCount)
+		return;
+
+	if (g_iPickedCount >= CUP_MAX_MAPS)
+		return;
+
+	g_iPickedOrder[g_iPickedCount] = mapIndex;
+	g_iPickedCount++;
+}
+
+stock formatOrdinalLabel(number, buffer[], len) {
+	new rem100 = number % 100;
+	if (rem100 >= 11 && rem100 <= 13) {
+		formatex(buffer, len, "%dth", number);
+		return;
+	}
+
+	switch (number % 10) {
+		case 1: formatex(buffer, len, "%dst", number);
+		case 2: formatex(buffer, len, "%dnd", number);
+		case 3: formatex(buffer, len, "%drd", number);
+		default: formatex(buffer, len, "%dth", number);
+	}
 }
 
 stock kickNonCupAdmins(id) {
@@ -995,6 +1080,8 @@ stock startMapVeto(id, startSlot) {
 
 	arrayset(g_bMapBanned, false, sizeof g_bMapBanned);
 	arrayset(g_bMapPicked, false, sizeof g_bMapPicked);
+	arrayset(g_iPickedOrder, -1, sizeof g_iPickedOrder);
+	g_iPickedCount = 0;
 	g_bVetoActive = true;
 	g_iVetoTurn = startSlot;
 	g_iVetoStep = 0;
@@ -1016,6 +1103,8 @@ stock stopMapVeto() {
 	remove_task(TASK_VETO_HUD);
 	arrayset(g_bMapBanned, false, sizeof g_bMapBanned);
 	arrayset(g_bMapPicked, false, sizeof g_bMapPicked);
+	arrayset(g_iPickedOrder, -1, sizeof g_iPickedOrder);
+	g_iPickedCount = 0;
 	g_iVetoTurn = CUP_TEAM_FIRST;
 
 	show_menu(g_iVetoCaptains[_:CUP_TEAM_FIRST], 0, "^n", 1);
@@ -1028,7 +1117,10 @@ stock showMapVetoMenu(id) {
 	if (!g_bVetoActive || !is_user_connected(id))
 		return;
 
-	new menu = menu_create("\rВыбор карты (бан)", "MapVetoHandler");
+	new szTitle[64];
+	formatex(szTitle, charsmax(szTitle), isPickStep() ? "\yВыбор карты (пик)" : "\rВыбор карты (бан)");
+
+	new menu = menu_create(szTitle, "MapVetoHandler");
 
 	new szInfo[8], szItem[64], szMap[MAP_NAME_LEN];
 	for (new i; i < g_iMapCount; i++) {
@@ -1092,6 +1184,7 @@ public MapVetoHandler(id, menu, item) {
 	new bool:bPick = isPickStep();
 	if (bPick) {
 		g_bMapPicked[mapIndex] = true;
+		addPickedMap(mapIndex);
 	} else {
 		g_bMapBanned[mapIndex] = true;
 	}
@@ -1132,6 +1225,7 @@ public taskShowVetoHud() {
 
 	new remaining = getRemainingMaps();
 	new hud[1024], pos;
+	new bool:bShowPickedFirst = (g_iVetoFormat > 1);
 
 	if (remaining <= 1) {
 		new idx = getLastRemainingMap();
@@ -1141,8 +1235,24 @@ public taskShowVetoHud() {
 			formatex(hud, charsmax(hud), "Карта: %s", szMap);
 		}
 	} else {
+		if (bShowPickedFirst && g_iPickedCount > 0) {
+			for (new i; i < g_iPickedCount && pos < charsmax(hud); i++) {
+				new idx = g_iPickedOrder[i];
+				if (idx < 0 || idx >= g_iMapCount)
+					continue;
+
+				new szMap[MAP_NAME_LEN], szOrdinal[8];
+				ArrayGetString(g_aCupMaps, idx, szMap, charsmax(szMap));
+				formatOrdinalLabel(i + 1, szOrdinal, charsmax(szOrdinal));
+				pos += formatex(hud[pos], charsmax(hud) - pos, "[%s] %s^n", szOrdinal, szMap);
+			}
+
+			if (pos > 0 && remaining > 0 && pos < charsmax(hud))
+				pos += formatex(hud[pos], charsmax(hud) - pos, "^n");
+		}
+
 		for (new i; i < g_iMapCount; i++) {
-			if (g_bMapBanned[i])
+			if (g_bMapBanned[i] || g_bMapPicked[i])
 				continue;
 
 			new szMap[MAP_NAME_LEN];
@@ -1200,27 +1310,70 @@ stock announceRemainingMaps() {
 	if (remaining <= 0)
 		return;
 
+	if (g_iVetoFormat == 1) {
+		new idx = getLastRemainingMap();
+		if (idx != -1) {
+			new szMap[MAP_NAME_LEN];
+			ArrayGetString(g_aCupMaps, idx, szMap, charsmax(szMap));
+			client_print_color(0, print_team_blue, "%s Выбрана карта: ^3%s^1", g_szPrefix, szMap);
+			server_print("[HNS-CUP] Picked map (BO1): %s", szMap);
+		}
+		return;
+	}
+
 	new szBuffer[256], pos;
 	new szConsole[256], posConsole;
-	for (new i; i < g_iMapCount; i++) {
-		if (g_bMapBanned[i] || g_bMapPicked[i])
+	for (new i; i < g_iPickedCount; i++) {
+		new idx = g_iPickedOrder[i];
+		if (idx < 0 || idx >= g_iMapCount)
 			continue;
 
-		new szMap[MAP_NAME_LEN];
-		ArrayGetString(g_aCupMaps, i, szMap, charsmax(szMap));
+		new szMap[MAP_NAME_LEN], szOrdinal[8];
+		ArrayGetString(g_aCupMaps, idx, szMap, charsmax(szMap));
+		formatOrdinalLabel(i + 1, szOrdinal, charsmax(szOrdinal));
 
 		if (pos > 0)
 			pos += formatex(szBuffer[pos], charsmax(szBuffer) - pos, ", ");
-
-		pos += formatex(szBuffer[pos], charsmax(szBuffer) - pos, "%s", szMap);
+		pos += formatex(szBuffer[pos], charsmax(szBuffer) - pos, "[%s] %s", szOrdinal, szMap);
 
 		if (posConsole > 0)
 			posConsole += formatex(szConsole[posConsole], charsmax(szConsole) - posConsole, ", ");
-		posConsole += formatex(szConsole[posConsole], charsmax(szConsole) - posConsole, "%s", szMap);
+		posConsole += formatex(szConsole[posConsole], charsmax(szConsole) - posConsole, "[%s] %s", szOrdinal, szMap);
 	}
 
-	client_print_color(0, print_team_blue, "%s Осталось карт: ^3%s^1", g_szPrefix, szBuffer);
-	server_print("[HNS-CUP] Remaining maps: %s", szConsole);
+	if (pos == 0) {
+		for (new i; i < g_iMapCount; i++) {
+			if (g_bMapBanned[i] || g_bMapPicked[i])
+				continue;
+
+			new szMap[MAP_NAME_LEN];
+			ArrayGetString(g_aCupMaps, i, szMap, charsmax(szMap));
+
+			if (pos > 0)
+				pos += formatex(szBuffer[pos], charsmax(szBuffer) - pos, ", ");
+			pos += formatex(szBuffer[pos], charsmax(szBuffer) - pos, "%s", szMap);
+
+			if (posConsole > 0)
+				posConsole += formatex(szConsole[posConsole], charsmax(szConsole) - posConsole, ", ");
+			posConsole += formatex(szConsole[posConsole], charsmax(szConsole) - posConsole, "%s", szMap);
+		}
+	}
+
+	new szDecider[MAP_NAME_LEN];
+	if (remaining == 1) {
+		new deciderIdx = getLastRemainingMap();
+		if (deciderIdx != -1) {
+			ArrayGetString(g_aCupMaps, deciderIdx, szDecider, charsmax(szDecider));
+		}
+	}
+
+	if (szDecider[0]) {
+		client_print_color(0, print_team_blue, "%s Выбранные карты: ^3%s^1. Десайдер: ^3%s^1", g_szPrefix, szBuffer, szDecider);
+		server_print("[HNS-CUP] Picked maps: %s. Decider: %s", szConsole, szDecider);
+	} else {
+		client_print_color(0, print_team_blue, "%s Выбранные карты: ^3%s^1", g_szPrefix, szBuffer);
+		server_print("[HNS-CUP] Picked maps: %s", szConsole);
+	}
 }
 
 stock getLastRemainingMap() {
@@ -1283,4 +1436,9 @@ stock bool:hns_is_knife_map() {
 	}
 
 	return false;
+}
+
+
+stock TeamName:getUserTeam(id) {
+	return get_member(id, m_iTeam);
 }
