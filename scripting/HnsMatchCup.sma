@@ -1,4 +1,3 @@
-// Tournament / Cup mode controller: keeps a whitelist of two selected teams and admins with flag q.
 #include <amxmodx>
 #include <amxmisc>
 #include <hns_matchsystem>
@@ -29,27 +28,18 @@ enum _:CupTeamData {
 	Array:TeamPlayers
 };
 
-enum CupMenuAction {
-	MenuSelectFirst,
-	MenuSelectSecond,
-	MenuCaptainFirst,
-	MenuCaptainSecond,
-	MenuStartVeto,
-	MenuStopVeto,
-	MenuClear,
-	MenuReload
-};
-
 new Array:g_aCupTeams;
 new Trie:g_tActiveAuths;
 new g_iSelectedTeams[CUP_TEAM_TOTAL];
 new g_iMenuSelectSlot[MAX_PLAYERS + 1];
 
 new Array:g_aCupMaps;
+new g_iVetoFormat = 1;
 new bool:g_bMapBanned[CUP_MAX_MAPS];
 new g_iMapCount;
 new bool:g_bVetoActive;
 new g_iVetoCaptains[CUP_TEAM_TOTAL];
+new g_iVetoTarget = 1;
 new g_iVetoTurn;
 
 new g_pCvarCup;
@@ -65,9 +55,6 @@ public plugin_init() {
 	RegisterSayCmd("cup", "cup", "cmdCupMenu", ADMIN_LEVEL_E, "Open tournament cup menu");
 	RegisterSayCmd("cupmenu", "cupm", "cmdCupMenu", ADMIN_LEVEL_E, "Open tournament cup menu");
 	register_concmd("cupmenu", "cmdCupMenu", ADMIN_LEVEL_E, "Open tournament cup menu");
-
-	RegisterSayCmd("cupmaps", "cupmaps", "cmdCupMaps", ADMIN_LEVEL_E, "Open tournament cup map veto menu");
-	register_concmd("cupmaps", "cmdCupMaps", ADMIN_LEVEL_E, "Open tournament cup map veto menu");
 
 	g_tActiveAuths = TrieCreate();
 	resetSelections(false);
@@ -102,7 +89,7 @@ public client_putinserver(id) {
 public client_disconnected(id) {
 	if (g_bVetoActive && (id == g_iVetoCaptains[CUP_TEAM_FIRST] || id == g_iVetoCaptains[CUP_TEAM_SECOND])) {
 		stopMapVeto();
-		client_print_color(0, print_team_red, "%s Капитан вышел. Вето карт остановлено.", g_szPrefix);
+		client_print_color(0, print_team_blue, "%s Капитан вышел. Pick/Ban карт остановлено.", g_szPrefix);
 	}
 }
 
@@ -111,7 +98,7 @@ public cmdCupMenu(id) {
 		return PLUGIN_HANDLED;
 
 	if (!isCupEnabled()) {
-		client_print_color(id, print_team_red, "%s hns_cup выключен.", g_szPrefix);
+		client_print_color(id, print_team_blue, "%s hns_cup выключен.", g_szPrefix);
 		return PLUGIN_HANDLED;
 	}
 
@@ -268,6 +255,7 @@ stock clearMaps() {
 	g_aCupMaps = Invalid_Array;
 	g_iMapCount = 0;
 	g_bVetoActive = false;
+	g_iVetoTarget = 1;
 	arrayset(g_bMapBanned, false, sizeof g_bMapBanned);
 	g_iVetoCaptains[CUP_TEAM_FIRST] = g_iVetoCaptains[CUP_TEAM_SECOND] = -1;
 	g_iVetoTurn = CUP_TEAM_FIRST;
@@ -359,24 +347,34 @@ stock kickNotAllowed(id, const reason[]) {
 }
 
 stock showCupMenu(id) {
-	new szTitle[128];
-	formatex(szTitle, charsmax(szTitle), "\rCup mode");
+	new szMsg[128];
+	formatex(szMsg, charsmax(szMsg), "\rCup меню");
 
-	new menu = menu_create(szTitle, "CupMenuHandler");
+	new hMenu = menu_create(szMsg, "CupMenuHandler");
 
-	menu_additem(menu, fmt("Team A: %s", getTeamLabel(g_iSelectedTeams[_:CUP_TEAM_FIRST])), fmt("%d", MenuSelectFirst));
-	menu_additem(menu, fmt("Team B: %s", getTeamLabel(g_iSelectedTeams[_:CUP_TEAM_SECOND])), fmt("%d", MenuSelectSecond));
+	formatex(szMsg, charsmax(szMsg), "Команда 1: \y%s", getTeamLabel(g_iSelectedTeams[_:CUP_TEAM_FIRST]));
+	menu_additem(hMenu, szMsg, "1");
+	formatex(szMsg, charsmax(szMsg), "Команда 2: \y%s", getTeamLabel(g_iSelectedTeams[_:CUP_TEAM_SECOND]));
+	menu_additem(hMenu, szMsg, "2");
+	formatex(szMsg, charsmax(szMsg), "Капитан \d%s\w: \y%s", getTeamLabel(g_iSelectedTeams[_:CUP_TEAM_FIRST]), getCaptainNameLabel(CUP_TEAM_FIRST));
+	menu_additem(hMenu, szMsg, "3");
+	formatex(szMsg, charsmax(szMsg), "Капитан \d%s\w: \y%s", getTeamLabel(g_iSelectedTeams[_:CUP_TEAM_SECOND]), getCaptainNameLabel(CUP_TEAM_SECOND));
+	menu_additem(hMenu, szMsg, "4");
 
-	menu_additem(menu, fmt("Капитан %s: %s", getTeamLabel(g_iSelectedTeams[_:CUP_TEAM_FIRST]), getCaptainNameLabel(CUP_TEAM_FIRST)), fmt("%d", MenuCaptainFirst));
-	menu_additem(menu, fmt("Капитан %s: %s", getTeamLabel(g_iSelectedTeams[_:CUP_TEAM_SECOND]), getCaptainNameLabel(CUP_TEAM_SECOND)), fmt("%d", MenuCaptainSecond));
+	formatex(szMsg, charsmax(szMsg), "Формат бана/пика: \r%s", getVetoFormatLabel());
+	menu_additem(hMenu, szMsg, "5");
+	formatex(szMsg, charsmax(szMsg), "Очистить значения (команды, капитаны)");
+	menu_additem(hMenu, szMsg, "6");
+	formatex(szMsg, charsmax(szMsg), "Обновить конфиги (карты, команды)");
+	menu_additem(hMenu, szMsg, "7");
+	formatex(szMsg, charsmax(szMsg), g_bVetoActive ? "\rОстановить pick/ban" : "Старт pick/ban");
+	menu_additem(hMenu, szMsg, "8");
+	formatex(szMsg, charsmax(szMsg), "Кикнуть всех, кроме админов");
+	menu_additem(hMenu, szMsg, "9");
 
-	menu_additem(menu, g_bVetoActive ? "\yВето уже запущено" : "Старт вето карт", fmt("%d", MenuStartVeto));
-	menu_additem(menu, "Остановить вето", fmt("%d", MenuStopVeto));
+	menu_setprop(hMenu, MPROP_EXITNAME, "Выход");
 
-	menu_additem(menu, "Clear selections", fmt("%d", MenuClear));
-	menu_additem(menu, "Reload configs (teams + maps)", fmt("%d", MenuReload));
-
-	menu_display(id, menu);
+	menu_display(id, hMenu);
 }
 
 public CupMenuHandler(id, menu, item) {
@@ -385,38 +383,112 @@ public CupMenuHandler(id, menu, item) {
 		return PLUGIN_HANDLED;
 	}
 
+	new bool:bReopenMenu = true;
+
 	new szInfo[8], szTmp[2], access, callback;
 	menu_item_getinfo(menu, item, access, szInfo, charsmax(szInfo), szTmp, charsmax(szTmp), callback);
 
-	new CupMenuAction:action = CupMenuAction:str_to_num(szInfo);
-
-	switch (action) {
-		case MenuSelectFirst: showSelectMenu(id, CUP_TEAM_FIRST);
-		case MenuSelectSecond: showSelectMenu(id, CUP_TEAM_SECOND);
-		case MenuCaptainFirst: showCaptainPickMenu(id, CUP_TEAM_FIRST);
-		case MenuCaptainSecond: showCaptainPickMenu(id, CUP_TEAM_SECOND);
-		case MenuStartVeto: startMapVeto(id);
-		case MenuStopVeto: stopMapVeto();
-		case MenuClear: resetSelections(true);
-		case MenuReload: {
+	switch (str_to_num(szInfo)) {
+		case 1: {
+			showSelectMenu(id, CUP_TEAM_FIRST);
+			bReopenMenu = false;
+		}
+		case 2: {
+			showSelectMenu(id, CUP_TEAM_SECOND);
+			bReopenMenu = false;
+		}
+		case 3: {
+			showCaptainPickMenu(id, CUP_TEAM_FIRST);
+			bReopenMenu = false;
+		}
+		case 4: {
+			showCaptainPickMenu(id, CUP_TEAM_SECOND);
+			bReopenMenu = false;
+		}
+		case 5: {
+			if (g_bVetoActive) {
+				client_print_color(id, print_team_blue, "%s Формат нельзя менять во время пик/бан.", g_szPrefix);
+			} else {
+				cycleVetoFormat();
+				client_print_color(id, print_team_blue, "%s Формат бана/пика: ^3%s^1", g_szPrefix, getVetoFormatLabel());
+			}
+		}
+		case 6: {
+			resetSelections(true);
+		}
+		case 7: {
 			loadCupConfig();
 			loadCupMapsConfig();
-			client_print_color(id, print_team_grey, "%s Конфиги перезагружены.", g_szPrefix);
+			client_print_color(id, print_team_blue, "%s Конфиги перезагружены.", g_szPrefix);
+		}
+		case 8: {
+			if (g_bVetoActive) {
+				stopMapVeto();
+				client_print_color(id, print_team_blue, "%s Пик/бан остановлен.", g_szPrefix);
+			} else {
+				showStartVetoMenu(id);
+				bReopenMenu = false;
+			}
+		}
+		case 9: {
+			kickNonCupAdmins(id);
 		}
 	}
 
 	menu_destroy(menu);
 
 	// For selection we open a new menu, for other actions re-open main menu.
-	if (action != MenuSelectFirst && action != MenuSelectSecond && isCupAdmin(id) && isCupEnabled())
+	if (bReopenMenu && isCupAdmin(id) && isCupEnabled())
 		showCupMenu(id);
 
 	return PLUGIN_HANDLED;
 }
 
+stock cycleVetoFormat() {
+	g_iVetoFormat++;
+
+	if (g_iVetoFormat < 1 || g_iVetoFormat > 3)
+		g_iVetoFormat = 1;
+}
+
+stock getVetoFormatLabel() {
+	static szLabel[8];
+
+	switch (g_iVetoFormat) {
+		case 2: formatex(szLabel, charsmax(szLabel), "BO2");
+		case 3: formatex(szLabel, charsmax(szLabel), "BO3");
+		default: {
+			g_iVetoFormat = 1;
+			formatex(szLabel, charsmax(szLabel), "BO1");
+		}
+	}
+
+	return szLabel;
+}
+
+stock kickNonCupAdmins(id) {
+	new players[MAX_PLAYERS], num;
+	get_players(players, num, "ch");
+
+	new kicked;
+	for (new i; i < num; i++) {
+		new pid = players[i];
+		if (isCupAdmin(pid))
+			continue;
+
+		kicked++;
+		server_cmd("kick #%d ^"Only admins^"", get_user_userid(pid));
+	}
+
+	if (kicked > 0)
+		client_print_color(0, print_team_blue, "%s ^3%d^1 игроков кикнуто. Остались только админы.", g_szPrefix, kicked);
+	else
+		client_print_color(id, print_team_blue, "%s Некого кикать, на сервере только админы.", g_szPrefix);
+}
+
 stock showSelectMenu(id, slot) {
 	if (!g_bConfigLoaded || g_aCupTeams == Invalid_Array || ArraySize(g_aCupTeams) == 0) {
-		client_print_color(id, print_team_red, "%s Cup teams are not loaded.", g_szPrefix);
+		client_print_color(id, print_team_blue, "%s Cup teams are not loaded.", g_szPrefix);
 		return;
 	}
 
@@ -471,7 +543,7 @@ public CupTeamSelectHandler(id, menu, item) {
 
 	new otherSlot = (slot == CUP_TEAM_FIRST) ? CUP_TEAM_SECOND : CUP_TEAM_FIRST;
 	if (g_iSelectedTeams[otherSlot] == teamIndex) {
-		client_print_color(id, print_team_red, "%s Team already selected in another slot.", g_szPrefix);
+		client_print_color(id, print_team_blue, "%s Team already selected in another slot.", g_szPrefix);
 		showSelectMenu(id, slot);
 		return PLUGIN_HANDLED;
 	}
@@ -480,7 +552,7 @@ public CupTeamSelectHandler(id, menu, item) {
 
 	new szTeamName[TEAM_NAME_LEN];
 	getTeamName(teamIndex, szTeamName, charsmax(szTeamName));
-	client_print_color(id, print_team_grey, "%s %s set for slot %s.", g_szPrefix, szTeamName, slot == CUP_TEAM_FIRST ? "A" : "B");
+	client_print_color(id, print_team_blue, "%s ^3%s^1 set for slot ^3%s^1.", g_szPrefix, szTeamName, slot == CUP_TEAM_FIRST ? "A" : "B");
 
 	assignDefaultCaptainForSlot(slot);
 
@@ -588,7 +660,7 @@ stock showCaptainPickMenu(id, slot) {
 	formatex(title, charsmax(title), "\rКапитан %s", getTeamLabel(g_iSelectedTeams[_:slot]));
 
 	if (!isValidTeamIndex(g_iSelectedTeams[_:slot])) {
-		client_print_color(id, print_team_red, "%s Сначала выберите команду.", g_szPrefix);
+		client_print_color(id, print_team_blue, "%s Сначала выберите команду.", g_szPrefix);
 		return;
 	}
 
@@ -641,21 +713,21 @@ public CupCaptainPickHandler(id, menu, item) {
 	}
 
 	if (!is_user_connected(pid)) {
-		client_print_color(id, print_team_red, "%s Игрок вышел.", g_szPrefix);
+		client_print_color(id, print_team_blue, "%s Игрок вышел.", g_szPrefix);
 		if (isCupAdmin(id))
 			showCupMenu(id);
 		return PLUGIN_HANDLED;
 	}
 
 	if (!isPlayerFromTeam(pid, g_iSelectedTeams[_:slot])) {
-		client_print_color(id, print_team_red, "%s Игрок не из выбранной команды.", g_szPrefix);
+		client_print_color(id, print_team_blue, "%s Игрок не из выбранной команды.", g_szPrefix);
 		if (isCupAdmin(id))
 			showCupMenu(id);
 		return PLUGIN_HANDLED;
 	}
 
 	g_iVetoCaptains[_:slot] = pid;
-	client_print_color(0, print_team_grey, "%s Капитан %s: %n", g_szPrefix, getTeamLabel(g_iSelectedTeams[_:slot]), pid);
+	client_print_color(0, print_team_blue, "%s Капитан ^3%s^1: ^3%n^1", g_szPrefix, getTeamLabel(g_iSelectedTeams[_:slot]), pid);
 
 	if (isCupAdmin(id))
 		showCupMenu(id);
@@ -663,14 +735,70 @@ public CupCaptainPickHandler(id, menu, item) {
 	return PLUGIN_HANDLED;
 }
 
-stock startMapVeto(id) {
+stock showStartVetoMenu(id) {
 	if (!isCupEnabled()) {
-		client_print_color(id, print_team_red, "%s hns_cup выключен.", g_szPrefix);
+		client_print_color(id, print_team_blue, "%s hns_cup выключен.", g_szPrefix);
+		return;
+	}
+
+	if (g_bVetoActive) {
+		client_print_color(id, print_team_blue, "%s Пик/бан уже идёт.", g_szPrefix);
 		return;
 	}
 
 	if (!isValidTeamIndex(g_iSelectedTeams[_:CUP_TEAM_FIRST]) || !isValidTeamIndex(g_iSelectedTeams[_:CUP_TEAM_SECOND])) {
-		client_print_color(id, print_team_red, "%s Выберите обе команды перед стартом вето.", g_szPrefix);
+		client_print_color(id, print_team_blue, "%s Выберите обе команды перед стартом Pick/Ban.", g_szPrefix);
+		return;
+	}
+
+	new menu = menu_create("\rКто начинает бан/пик?", "CupStartVetoHandler");
+
+	new szInfo[4], szItem[96];
+	for (new slot = CUP_TEAM_FIRST; slot < CUP_TEAM_TOTAL; slot++) {
+		num_to_str(slot, szInfo, charsmax(szInfo));
+		formatex(szItem, charsmax(szItem), "%s", getTeamLabel(g_iSelectedTeams[_:slot]));
+		menu_additem(menu, szItem, szInfo);
+	}
+
+	menu_display(id, menu);
+}
+
+public CupStartVetoHandler(id, menu, item) {
+	if (item == MENU_EXIT) {
+		menu_destroy(menu);
+		if (isCupAdmin(id) && isCupEnabled())
+			showCupMenu(id);
+		return PLUGIN_HANDLED;
+	}
+
+	new szInfo[8], szTmp[2], access, callback;
+	menu_item_getinfo(menu, item, access, szInfo, charsmax(szInfo), szTmp, charsmax(szTmp), callback);
+	menu_destroy(menu);
+
+	new startSlot = str_to_num(szInfo);
+	if (startSlot != CUP_TEAM_FIRST && startSlot != CUP_TEAM_SECOND) {
+		client_print_color(id, print_team_blue, "%s Неизвестный выбор команды.", g_szPrefix);
+		if (isCupAdmin(id) && isCupEnabled())
+			showCupMenu(id);
+		return PLUGIN_HANDLED;
+	}
+
+	startMapVeto(id, startSlot);
+
+	if (!g_bVetoActive && isCupAdmin(id) && isCupEnabled())
+		showCupMenu(id);
+
+	return PLUGIN_HANDLED;
+}
+
+stock startMapVeto(id, startSlot) {
+	if (!isCupEnabled()) {
+		client_print_color(id, print_team_blue, "%s hns_cup выключен.", g_szPrefix);
+		return;
+	}
+
+	if (!isValidTeamIndex(g_iSelectedTeams[_:CUP_TEAM_FIRST]) || !isValidTeamIndex(g_iSelectedTeams[_:CUP_TEAM_SECOND])) {
+		client_print_color(id, print_team_blue, "%s Выберите обе команды перед стартом Pick/Ban.", g_szPrefix);
 		return;
 	}
 
@@ -680,28 +808,42 @@ stock startMapVeto(id) {
 		assignDefaultCaptainForSlot(CUP_TEAM_SECOND);
 
 	if (g_bVetoActive) {
-		client_print_color(id, print_team_grey, "%s Вето карт уже идёт.", g_szPrefix);
+		client_print_color(id, print_team_blue, "%s Pick/Ban карт уже идёт.", g_szPrefix);
 		return;
 	}
 
 	if (g_iMapCount < 2 || g_aCupMaps == Invalid_Array) {
-		client_print_color(id, print_team_red, "%s Недостаточно карт в %s.", g_szPrefix, CUP_MAPS_FILE);
+		client_print_color(id, print_team_blue, "%s Недостаточно карт в ^3%s^1.", g_szPrefix, CUP_MAPS_FILE);
 		return;
 	}
 
 	if (!is_user_connected(g_iVetoCaptains[_:CUP_TEAM_FIRST]) || !is_user_connected(g_iVetoCaptains[_:CUP_TEAM_SECOND])) {
-		client_print_color(id, print_team_red, "%s Укажите обоих капитанов перед стартом вето.", g_szPrefix);
+		client_print_color(id, print_team_blue, "%s Укажите обоих капитанов перед стартом Pick/Ban.", g_szPrefix);
+		return;
+	}
+
+	if (startSlot != CUP_TEAM_FIRST && startSlot != CUP_TEAM_SECOND)
+		startSlot = CUP_TEAM_FIRST;
+
+	g_iVetoTarget = g_iVetoFormat;
+	if (g_iVetoTarget < 1)
+		g_iVetoTarget = 1;
+	else if (g_iVetoTarget > 3)
+		g_iVetoTarget = 3;
+
+	if (g_iMapCount <= g_iVetoTarget) {
+		client_print_color(id, print_team_blue, "%s Недостаточно карт для формата ^3%s^1. Добавьте больше карт в ^3%s^1.", g_szPrefix, getVetoFormatLabel(), CUP_MAPS_FILE);
 		return;
 	}
 
 	arrayset(g_bMapBanned, false, sizeof g_bMapBanned);
 	g_bVetoActive = true;
-	g_iVetoTurn = CUP_TEAM_FIRST;
+	g_iVetoTurn = startSlot;
 
 	remove_task(TASK_VETO_HUD);
 	set_task(1.0, "taskShowVetoHud", TASK_VETO_HUD, .flags = "b");
 
-	client_print_color(0, print_team_grey, "%s Старт вето карт. Первым банит капитан A (%n).", g_szPrefix, g_iVetoCaptains[_:CUP_TEAM_FIRST]);
+	client_print_color(0, print_team_blue, "%s Старт pick/ban. Формат: ^3%s^1. Первым выбирает капитан ^3%s^1 (^3%n^1).", g_szPrefix, getVetoFormatLabel(), getTeamLabel(g_iSelectedTeams[_:startSlot]), g_iVetoCaptains[_:startSlot]);
 
 	showMapVetoMenu(g_iVetoCaptains[_:g_iVetoTurn]);
 }
@@ -711,13 +853,15 @@ stock stopMapVeto() {
 		return;
 
 	g_bVetoActive = false;
+	g_iVetoTarget = 1;
 	remove_task(TASK_VETO_HUD);
 	arrayset(g_bMapBanned, false, sizeof g_bMapBanned);
+	g_iVetoTurn = CUP_TEAM_FIRST;
 
 	show_menu(g_iVetoCaptains[_:CUP_TEAM_FIRST], 0, "^n", 1);
 	show_menu(g_iVetoCaptains[_:CUP_TEAM_SECOND], 0, "^n", 1);
 
-	client_print_color(0, print_team_grey, "%s Вето карт остановлено.", g_szPrefix);
+	client_print_color(0, print_team_blue, "%s Pick/Ban карт остановлено.", g_szPrefix);
 }
 
 stock showMapVetoMenu(id) {
@@ -785,17 +929,13 @@ public MapVetoHandler(id, menu, item) {
 	g_bMapBanned[mapIndex] = true;
 	new slotTurn = g_iVetoTurn;
 	if (slotTurn < CUP_TEAM_FIRST || slotTurn >= CUP_TEAM_TOTAL)
-		client_print_color(0, print_team_blue, "%s %n забанил карту %s.", g_szPrefix, id, szMap);
+		client_print_color(0, print_team_blue, "%s ^3%n^1 забанил карту ^3%s^1.", g_szPrefix, id, szMap);
 	else
-		client_print_color(0, print_team_blue, "%s %s (%n) забанили карту %s.", g_szPrefix, getTeamLabel(g_iSelectedTeams[_:slotTurn]), id, szMap);
+		client_print_color(0, print_team_blue, "%s ^3%s^1 (^3%n^1) забанили карту ^3%s^1.", g_szPrefix, getTeamLabel(g_iSelectedTeams[_:slotTurn]), id, szMap);
 
 	new remaining = getRemainingMaps();
-	if (remaining <= 1) {
-		new lastIndex = getLastRemainingMap();
-		if (lastIndex != -1) {
-			ArrayGetString(g_aCupMaps, lastIndex, szMap, charsmax(szMap));
-			client_print_color(0, print_team_grey, "%s Осталась карта: %s", g_szPrefix, szMap);
-		}
+	if (remaining <= g_iVetoTarget) {
+		announceRemainingMaps();
 		stopMapVeto();
 		return PLUGIN_HANDLED;
 	}
@@ -804,7 +944,7 @@ public MapVetoHandler(id, menu, item) {
 
 	new nextCap = g_iVetoCaptains[_:g_iVetoTurn];
 	if (!is_user_connected(nextCap)) {
-		client_print_color(0, print_team_red, "%s Капитан отсоединился. Вето остановлено.", g_szPrefix);
+		client_print_color(0, print_team_blue, "%s Капитан отсоединился. Pick/Ban остановлено.", g_szPrefix);
 		stopMapVeto();
 		return PLUGIN_HANDLED;
 	}
@@ -850,7 +990,7 @@ stock bool:isValidTeamIndex(index) {
 
 stock getTeamName(index, buffer[], len) {
 	if (!isValidTeamIndex(index)) {
-		formatex(buffer, len, "Not selected");
+		formatex(buffer, len, "не выбрана");
 		return;
 	}
 
@@ -882,6 +1022,28 @@ stock getRemainingMaps() {
 			count++;
 	}
 	return count;
+}
+
+stock announceRemainingMaps() {
+	new remaining = getRemainingMaps();
+	if (remaining <= 0)
+		return;
+
+	new szBuffer[256], pos;
+	for (new i; i < g_iMapCount; i++) {
+		if (g_bMapBanned[i])
+			continue;
+
+		new szMap[MAP_NAME_LEN];
+		ArrayGetString(g_aCupMaps, i, szMap, charsmax(szMap));
+
+		if (pos > 0)
+			pos += formatex(szBuffer[pos], charsmax(szBuffer) - pos, ", ");
+
+		pos += formatex(szBuffer[pos], charsmax(szBuffer) - pos, "%s", szMap);
+	}
+
+	client_print_color(0, print_team_blue, "%s Осталось карт: ^3%s^1", g_szPrefix, szBuffer);
 }
 
 stock getLastRemainingMap() {
