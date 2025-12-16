@@ -1,6 +1,9 @@
 #include <amxmodx>
 #include <amxmisc>
+#include <reapi>
 #include <hns_matchsystem>
+#include <hns_matchsystem_maps>
+#include <PersistentDataStorage>
 
 #define TEAM_NAME_LEN 32
 #define MAP_NAME_LEN 32
@@ -24,7 +27,7 @@ enum _:CupPlayerData {
 };
 
 enum _:CupTeamData {
-	TeamName[TEAM_NAME_LEN],
+	CupTeamName[TEAM_NAME_LEN],
 	Array:TeamPlayers
 };
 
@@ -32,6 +35,8 @@ new Array:g_aCupTeams;
 new Trie:g_tActiveAuths;
 new g_iSelectedTeams[CUP_TEAM_TOTAL];
 new g_iMenuSelectSlot[MAX_PLAYERS + 1];
+new const szPdsTeamFirst[] = "hns_cup_team_first";
+new const szPdsTeamSecond[] = "hns_cup_team_second";
 
 new Array:g_aCupMaps;
 new g_iVetoFormat = 1;
@@ -57,7 +62,8 @@ public plugin_init() {
 	register_concmd("cupmenu", "cmdCupMenu", ADMIN_LEVEL_E, "Open tournament cup menu");
 
 	g_tActiveAuths = TrieCreate();
-	resetSelections(false);
+	resetSelections(false, false);
+
 }
 
 public plugin_natives() {
@@ -68,22 +74,29 @@ public plugin_cfg() {
 	hns_get_prefix(g_szPrefix, charsmax(g_szPrefix));
 	loadCupConfig();
 	loadCupMapsConfig();
+	loadSavedSelections();
 }
 
 public plugin_end() {
-	clearTeams();
+	saveSelectedTeams();
+	clearTeams(false);
 	clearMaps();
 
 	if (g_tActiveAuths)
 		TrieDestroy(g_tActiveAuths);
 }
 
+public PDS_Save() {
+	log_amx("HNS-CUP | PDS_Save forward fired");
+	saveSelectedTeams();
+}
+
 public client_authorized(id, const authid[]) {
-	enforcePlayer(id);
+	enforcePlayer(id, true);
 }
 
 public client_putinserver(id) {
-	enforcePlayer(id);
+	enforcePlayer(id, true);
 }
 
 public client_disconnected(id) {
@@ -130,7 +143,7 @@ stock bool:isCupAdmin(id) {
 }
 
 stock loadCupConfig() {
-	clearTeams();
+	clearTeams(true);
 
 	new szPath[128], szFile[160];
 	get_localinfo("amxx_configsdir", szPath, charsmax(szPath));
@@ -139,7 +152,7 @@ stock loadCupConfig() {
 	new fp = fopen(szFile, "rt");
 	if (!fp) {
 		log_amx("HNS-CUP | Config file %s not found.", szFile);
-		resetSelections(true);
+		resetSelections(true, false);
 		return;
 	}
 
@@ -157,7 +170,7 @@ stock loadCupConfig() {
 		if (szLine[0] == '[') {
 			if (extractSectionName(szLine, szSection, charsmax(szSection))) {
 				new eTeam[CupTeamData];
-				copy(eTeam[TeamName], charsmax(eTeam[TeamName]), szSection);
+				copy(eTeam[CupTeamName], charsmax(eTeam[CupTeamName]), szSection);
 				eTeam[TeamPlayers] = ArrayCreate(CupPlayerData);
 				currentTeam = ArrayPushArray(g_aCupTeams, eTeam);
 			} else {
@@ -185,13 +198,15 @@ stock loadCupConfig() {
 
 	g_bConfigLoaded = (g_aCupTeams != Invalid_Array && ArraySize(g_aCupTeams) > 0);
 
-	resetSelections(true);
+	resetSelections(true, false);
 
 	if (!g_bConfigLoaded) {
 		log_amx("HNS-CUP | %s loaded but no teams were found.", szFile);
 	} else {
 		log_amx("HNS-CUP | Loaded %d teams from %s", ArraySize(g_aCupTeams), szFile);
 	}
+
+	debugSelectedTeams("After loadCupConfig");
 }
 
 stock loadCupMapsConfig() {
@@ -231,7 +246,7 @@ stock loadCupMapsConfig() {
 	}
 }
 
-stock clearTeams() {
+stock clearTeams(bool:bResetSelections = true) {
 	if (g_aCupTeams != Invalid_Array) {
 		for (new i = 0, iSize = ArraySize(g_aCupTeams); i < iSize; i++) {
 			new eTeam[CupTeamData];
@@ -244,7 +259,8 @@ stock clearTeams() {
 
 	g_aCupTeams = Invalid_Array;
 	g_bConfigLoaded = false;
-	resetSelections(false);
+	if (bResetSelections)
+		resetSelections(false, false);
 }
 
 stock clearMaps() {
@@ -262,7 +278,7 @@ stock clearMaps() {
 	remove_task(TASK_VETO_HUD);
 }
 
-stock resetSelections(bool:bEnforce) {
+stock resetSelections(bool:bEnforce, bool:bSave = true) {
 	if (g_bVetoActive)
 		stopMapVeto();
 
@@ -274,6 +290,9 @@ stock resetSelections(bool:bEnforce) {
 	g_iVetoCaptains[CUP_TEAM_FIRST] = g_iVetoCaptains[CUP_TEAM_SECOND] = -1;
 
 	rebuildActiveAuths();
+
+	if (bSave)
+		saveSelectedTeams();
 
 	if (bEnforce && isCupEnabled())
 		enforceAll();
@@ -296,7 +315,10 @@ stock rebuildActiveAuths() {
 		for (new i = 0, iSize = ArraySize(aPlayers); i < iSize; i++) {
 			new ePlayer[CupPlayerData];
 			ArrayGetArray(aPlayers, i, ePlayer);
-			TrieSetCell(g_tActiveAuths, ePlayer[PlayerAuth], 1);
+			new szAuth[PLAYER_AUTH_LEN];
+			copy(szAuth, charsmax(szAuth), ePlayer[PlayerAuth]);
+			strtolower(szAuth);
+			TrieSetCell(g_tActiveAuths, szAuth, 1);
 		}
 	}
 }
@@ -304,11 +326,11 @@ stock rebuildActiveAuths() {
 stock enforceAll() {
 	for (new id = 1; id <= MaxClients; id++) {
 		if (is_user_connected(id))
-			enforcePlayer(id);
+			enforcePlayer(id, true);
 	}
 }
 
-stock enforcePlayer(id) {
+stock enforcePlayer(id, bool:bApplyPlacement = false) {
 	if (!isCupEnabled())
 		return;
 
@@ -318,24 +340,31 @@ stock enforcePlayer(id) {
 	if (is_user_bot(id) || is_user_hltv(id))
 		return;
 
-	if (isCupAdmin(id))
-		return;
+	new bool:bKnifeMap = hns_is_knife_map();
+	new bool:bAdmin = isCupAdmin(id);
+	new slot = getPlayerCupSlot(id);
 
-	if (g_iSelectedTeams[_:CUP_TEAM_FIRST] == -1 && g_iSelectedTeams[_:CUP_TEAM_SECOND] == -1) {
-		kickNotAllowed(id, "Cup mode enabled. Only admins are allowed.");
+	if (bKnifeMap && slot == -1 && !bAdmin) {
+		kickNotAllowed(id, "Cup mode enabled. Only admins or selected teams can join.");
 		return;
 	}
 
-	if (g_tActiveAuths == Invalid_Trie || TrieGetSize(g_tActiveAuths) == 0) {
-		kickNotAllowed(id, "Cup mode enabled. Only selected teams can join.");
+	if (!bApplyPlacement)
 		return;
-	}
+
+	applyCupPlacement(id, slot, bAdmin, bKnifeMap);
+
+	if (bAdmin || slot != -1)
+		return;
+
+	if (g_tActiveAuths == Invalid_Trie || TrieGetSize(g_tActiveAuths) == 0)
+		return;
 
 	new szAuth[PLAYER_AUTH_LEN];
 	get_user_authid(id, szAuth, charsmax(szAuth));
 	strtolower(szAuth);
 
-	if (!TrieKeyExists(g_tActiveAuths, szAuth))
+	if (!TrieKeyExists(g_tActiveAuths, szAuth) && bKnifeMap)
 		kickNotAllowed(id, "Cup mode enabled. You are not on the lineup list.");
 }
 
@@ -344,6 +373,100 @@ stock kickNotAllowed(id, const reason[]) {
 		return;
 
 	server_cmd("kick #%d ^"%s^"", get_user_userid(id), reason);
+}
+
+stock applyCupPlacement(id, slot, bool:bAdmin, bool:bKnifeMap) {
+	new bool:bSetTeam;
+	new TeamName:targetTeam;
+
+	switch (slot) {
+		case CUP_TEAM_FIRST: {
+			targetTeam = TEAM_TERRORIST;
+			bSetTeam = true;
+		}
+		case CUP_TEAM_SECOND: {
+			targetTeam = TEAM_CT;
+			bSetTeam = true;
+		}
+	}
+
+	if (bAdmin && slot == -1) {
+		targetTeam = TEAM_SPECTATOR;
+		bSetTeam = true;
+	}
+
+	if (bKnifeMap && !bSetTeam) {
+		targetTeam = TEAM_SPECTATOR;
+		bSetTeam = true;
+	} else if (!bKnifeMap && bAdmin && !bSetTeam) {
+		targetTeam = TEAM_SPECTATOR;
+		bSetTeam = true;
+	}
+
+	if (!bKnifeMap && !bSetTeam)
+		return;
+
+	if (bSetTeam && rg_get_user_team(id) != targetTeam) {
+		rg_set_user_team(id, targetTeam);
+	}
+}
+
+stock getPlayerCupSlot(id) {
+	if (!is_user_connected(id))
+		return -1;
+
+	if (isPlayerFromTeam(id, g_iSelectedTeams[_:CUP_TEAM_FIRST]))
+		return CUP_TEAM_FIRST;
+
+	if (isPlayerFromTeam(id, g_iSelectedTeams[_:CUP_TEAM_SECOND]))
+		return CUP_TEAM_SECOND;
+
+	return -1;
+}
+
+stock saveSelectedTeams() {
+	PDS_SetCell(szPdsTeamFirst, g_iSelectedTeams[_:CUP_TEAM_FIRST]);
+	PDS_SetCell(szPdsTeamSecond, g_iSelectedTeams[_:CUP_TEAM_SECOND]);
+
+	debugSelectedTeams("PDS_Save");
+}
+
+stock loadSavedSelections() {
+	new iFirst = -1, iSecond = -1;
+	new bool:bGotFirst = PDS_GetCell(szPdsTeamFirst, iFirst);
+	new bool:bGotSecond = PDS_GetCell(szPdsTeamSecond, iSecond);
+	log_amx("HNS-CUP | PDS_GetCell first=%d (got=%d) second=%d (got=%d)", iFirst, bGotFirst, iSecond, bGotSecond);
+
+	if (!isValidTeamIndex(iFirst))
+		iFirst = -1;
+	if (!isValidTeamIndex(iSecond))
+		iSecond = -1;
+
+	g_iSelectedTeams[_:CUP_TEAM_FIRST] = iFirst;
+	g_iSelectedTeams[_:CUP_TEAM_SECOND] = iSecond;
+
+	assignDefaultCaptainForSlot(CUP_TEAM_FIRST);
+	assignDefaultCaptainForSlot(CUP_TEAM_SECOND);
+
+	rebuildActiveAuths();
+	enforceAll();
+
+	debugSelectedTeams("PDS_Load");
+}
+
+stock debugSelectedTeams(const szTag[]) {
+	new szFirst[TEAM_NAME_LEN], szSecond[TEAM_NAME_LEN];
+	getTeamName(g_iSelectedTeams[_:CUP_TEAM_FIRST], szFirst, charsmax(szFirst));
+	getTeamName(g_iSelectedTeams[_:CUP_TEAM_SECOND], szSecond, charsmax(szSecond));
+
+	log_amx("HNS-CUP | %s first_idx=%d (%s) second_idx=%d (%s)",
+		szTag,
+		g_iSelectedTeams[_:CUP_TEAM_FIRST], szFirst,
+		g_iSelectedTeams[_:CUP_TEAM_SECOND], szSecond);
+	server_print("[HNS-CUP] %s first_idx=%d (%s) second_idx=%d (%s)",
+		szTag,
+		g_iSelectedTeams[_:CUP_TEAM_FIRST], szFirst,
+		g_iSelectedTeams[_:CUP_TEAM_SECOND], szSecond);
 }
 
 stock showCupMenu(id) {
@@ -505,7 +628,7 @@ stock showSelectMenu(id, slot) {
 		num_to_str(i, szInfo, charsmax(szInfo));
 
 		new Array:aPlayers = Array:eTeam[TeamPlayers];
-		formatex(szItem, charsmax(szItem), "%s \y(%d)", eTeam[TeamName], aPlayers ? ArraySize(aPlayers) : 0);
+		formatex(szItem, charsmax(szItem), "%s \y(%d)", eTeam[CupTeamName], aPlayers ? ArraySize(aPlayers) : 0);
 		menu_additem(menu, szItem, szInfo);
 	}
 
@@ -557,6 +680,7 @@ public CupTeamSelectHandler(id, menu, item) {
 	assignDefaultCaptainForSlot(slot);
 
 	rebuildActiveAuths();
+	saveSelectedTeams();
 
 	if (isCupEnabled())
 		enforceAll();
@@ -644,11 +768,19 @@ stock bool:isAuthInTeam(const szAuth[], teamIndex) {
 	if (!aPlayers)
 		return false;
 
+	new szAuthLower[PLAYER_AUTH_LEN];
+	copy(szAuthLower, charsmax(szAuthLower), szAuth);
+	strtolower(szAuthLower);
+
 	for (new i = 0, iSize = ArraySize(aPlayers); i < iSize; i++) {
 		new ePlayer[CupPlayerData];
 		ArrayGetArray(aPlayers, i, ePlayer);
 
-		if (equal(ePlayer[PlayerAuth], szAuth))
+		new szLine[PLAYER_AUTH_LEN];
+		copy(szLine, charsmax(szLine), ePlayer[PlayerAuth]);
+		strtolower(szLine);
+
+		if (equal(szLine, szAuthLower))
 			return true;
 	}
 
@@ -996,7 +1128,7 @@ stock getTeamName(index, buffer[], len) {
 
 	new eTeam[CupTeamData];
 	ArrayGetArray(g_aCupTeams, index, eTeam);
-	formatex(buffer, len, "%s", eTeam[TeamName]);
+	formatex(buffer, len, "%s", eTeam[CupTeamName]);
 }
 
 stock getTeamLabel(index) {
@@ -1098,4 +1230,12 @@ stock bool:parsePlayerLine(const szLine[], szAuth[], authLen, szNick[], nickLen)
 
 	strtolower(szAuth);
 	return true;
+}
+
+stock bool:hns_is_knife_map() {
+	if (hnsmatch_maps_init()) {
+		return hnsmatch_maps_is_knife();
+	}
+
+	return false;
 }
