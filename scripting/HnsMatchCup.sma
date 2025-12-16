@@ -372,6 +372,11 @@ public msgShowMenu(msgid, dest, id) {
 	if (!shouldAutoJoin(id))
 		return PLUGIN_CONTINUE;
 
+	if (!hnsmatch_maps_is_knife()) {
+		server_print("[HNS-CUP] НЕ НОЖЕВОЙ 1");
+		return PLUGIN_CONTINUE;
+	}
+
 	static team_select[] = "#Team_Select";
 	static menu_text_code[sizeof team_select];
 	get_msg_arg_string(4, menu_text_code, sizeof menu_text_code - 1);
@@ -387,6 +392,11 @@ public msgVguiMenu(msgid, dest, id) {
 	if (get_msg_arg_int(1) != 2 || !shouldAutoJoin(id))
 		return (PLUGIN_CONTINUE);
 
+	if (!hnsmatch_maps_is_knife()) {
+		server_print("[HNS-CUP] НЕ НОЖЕВОЙ 1");
+		return PLUGIN_CONTINUE;
+	}
+
 	setForceTeamJoinTask(id, msgid);
 
 	return PLUGIN_HANDLED;
@@ -400,9 +410,7 @@ setForceTeamJoinTask(id, menu_msgid) {
 	static param_menu_msgid[2];
 	param_menu_msgid[0] = menu_msgid;
 
-	if (hns_is_knife_map()) {
-		set_task(0.1, "taskForceTeamJoin", id, param_menu_msgid, sizeof param_menu_msgid);
-	}
+	set_task(0.1, "taskForceTeamJoin", id, param_menu_msgid, sizeof param_menu_msgid);
 }
 
 public taskForceTeamJoin(menu_msgid[], id) {
@@ -423,9 +431,7 @@ stock forceTeamJoin(id, menu_msgid, const team[] = "5", const class[] = "0") {
 	engclient_cmd(id, joinclass, class);
 	set_msg_block(menu_msgid, msg_block);
 
-	if (hns_is_knife_map()) {
-		set_task(0.2, "taskSetPlayerTeam", id);
-	}
+	set_task(0.2, "taskSetPlayerTeam", id);
 }
 
 public taskSetPlayerTeam(id) {
@@ -557,6 +563,11 @@ stock loadSavedSelections() {
 }
 
 stock ensureCaptainOnJoin(id) {
+	if (!hnsmatch_maps_is_knife()) {
+		server_print("[HNS-CUP] НЕ НОЖЕВОЙ 3");
+		return;
+	}
+
 	if (!isCupEnabled())
 		return;
 
