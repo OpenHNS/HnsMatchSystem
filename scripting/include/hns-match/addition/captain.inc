@@ -215,6 +215,10 @@ public pickMenu(id, bool:bStartWait) {
 		return PLUGIN_HANDLED;
 	}
 
+	if (hns_cup_enabled()) {
+		return PLUGIN_CONTINUE;
+	}
+
 	if (g_iMatchStatus != MATCH_TEAMPICK) {
 		return PLUGIN_HANDLED;
 	}

@@ -470,6 +470,10 @@ public cmdStop(id) {
 		return PLUGIN_HANDLED;
 	}
 
+	if (hns_cup_is_veto_active()) {
+		hns_cup_stop_veto();
+	}
+
 	if (g_iCurrentMode == MODE_TRAINING && g_iMatchStatus == MATCH_NONE) {
 		//g_bPlayersListLoaded = false;
 		return PLUGIN_HANDLED;
@@ -587,6 +591,10 @@ public cmdRestartRound(id) {
 
 public cmdSwapTeams(id) {
 	if (!isUserWatcher(id)) {
+		return PLUGIN_HANDLED;
+	}
+
+	if (hns_cup_enabled() && hns_is_knife_map()) {
 		return PLUGIN_HANDLED;
 	}
 

@@ -132,7 +132,9 @@ public kniferound_roundend(bool:win_ct) {
 
 			Save_players(win_ct ? TEAM_CT : TEAM_TERRORIST);
 
-			StartVoteRules();
+			if (!hns_cup_enabled()) {
+				StartVoteRules();
+			}
 		}
 		case MATCH_CUPKNIFE: {
 			training_start();

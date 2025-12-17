@@ -302,6 +302,10 @@ public msgShowMenu(msgid, dest, id) {
 	if (!shouldAutoJoin(id))
 		return PLUGIN_CONTINUE;
 
+	if (hns_is_knife_map() && hns_cup_enabled()) {
+		return PLUGIN_CONTINUE;
+	}
+
 	static team_select[] = "#Team_Select";
 	static menu_text_code[sizeof team_select];
 	get_msg_arg_string(4, menu_text_code, sizeof menu_text_code - 1);
@@ -316,6 +320,10 @@ public msgShowMenu(msgid, dest, id) {
 public msgVguiMenu(msgid, dest, id) {
 	if (get_msg_arg_int(1) != 2 || !shouldAutoJoin(id))
 		return (PLUGIN_CONTINUE);
+	
+	if (hns_is_knife_map() && hns_cup_enabled()) {
+		return PLUGIN_CONTINUE;
+	}
 
 	setForceTeamJoinTask(id, msgid);
 
@@ -368,10 +376,6 @@ stock forceTeamJoin(id, menu_msgid, team[] = "5", class[] = "0") {
 public taskSetPlayerTeam(id) {
 	if (!is_user_connected(id))
 		return;
-
-	if (hns_is_knife_map() && hns_cup_enabled()) {
-		return;
-	}
 
 	if (g_ModFuncs[g_iCurrentMode][MODEFUNC_PLAYER_JOIN])
 		ExecuteForward(g_ModFuncs[g_iCurrentMode][MODEFUNC_PLAYER_JOIN], _, id);

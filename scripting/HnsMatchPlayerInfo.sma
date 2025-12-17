@@ -9,6 +9,7 @@
 #include <hns_matchsystem_api>
 #include <hns_matchsystem_stats>
 #include <hns_matchsystem_bans>
+#include <hns_matchsystem_cup>
 
 #define TASK_SHOWBEST 1328
 
@@ -586,6 +587,10 @@ public task_ShowPlayerInfo() {
 		new show_id = is_user_alive(id) ? id : get_entvar(id, var_iuser2);
 
 		if (!show_id) {
+			continue;
+		}
+
+		if (hns_cup_enabled()) {
 			continue;
 		}
 
