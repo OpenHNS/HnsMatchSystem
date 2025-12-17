@@ -14,6 +14,8 @@
 #define CUP_MAPS_FILE "hns-cup-maps.ini"
 #define CUP_MAX_MAPS 64
 #define TASK_VETO_HUD 91212
+#define CUP_PASS_OPTIONS 6
+#define CUP_PASS_LEN 5
 
 enum {
 	CUP_TEAM_FIRST,
@@ -54,6 +56,14 @@ new g_iVetoStep;
 new g_pCvarCup;
 new g_szPrefix[24];
 new bool:g_bConfigLoaded;
+new const g_szPassOptions[CUP_PASS_OPTIONS][CUP_PASS_LEN] = {
+	"2332",
+	"4412",
+	"4223",
+	"1362",
+	"9312",
+	"3422"
+};
 
 public plugin_init() {
 	register_plugin("Match: Cup", "0.1", "OpenHNS");
@@ -64,6 +74,7 @@ public plugin_init() {
 	RegisterSayCmd("cup", "cups", "cmdCupMenu", ADMIN_LEVEL_E, "Open tournament cup menu");
 	RegisterSayCmd("cap", "caps", "cmdCupMenu", ADMIN_LEVEL_E, "Open tournament cup menu");
 	register_concmd("cupmenu", "cmdCupMenu", ADMIN_LEVEL_E, "Open tournament cup menu");
+	RegisterSayCmd("pass", "pass", "cmdPassMenu", ADMIN_LEVEL_E, "Cup password menu");
 
 	RegisterSayCmd("pick", "pickmap", "cmdCupPickMenu", 0, "Reopen pick/ban menu for captain turn");
 
@@ -150,6 +161,19 @@ public cmdCupPickMenu(id) {
 	}
 
 	showMapVetoMenu(id);
+	return PLUGIN_HANDLED;
+}
+
+public cmdPassMenu(id) {
+	if (!isCupAdmin(id))
+		return PLUGIN_HANDLED;
+
+	if (!isCupEnabled()) {
+		client_print_color(id, print_team_blue, "%s hns_cup выключен.", g_szPrefix);
+		return PLUGIN_HANDLED;
+	}
+
+	showPassMenu(id);
 	return PLUGIN_HANDLED;
 }
 
@@ -723,8 +747,10 @@ stock showCupMenu(id) {
 	menu_additem(hMenu, szMsg, "7");
 	formatex(szMsg, charsmax(szMsg), g_bVetoActive ? "\rОстановить pick/ban" : "Старт pick/ban");
 	menu_additem(hMenu, szMsg, "8");
-	formatex(szMsg, charsmax(szMsg), "Кикнуть всех, кроме админов");
+	formatex(szMsg, charsmax(szMsg), "Пароль сервера");
 	menu_additem(hMenu, szMsg, "9");
+	formatex(szMsg, charsmax(szMsg), "Кикнуть всех, кроме админов");
+	menu_additem(hMenu, szMsg, "10");
 
 	menu_setprop(hMenu, MPROP_EXITNAME, "Выход");
 
@@ -784,6 +810,10 @@ public CupMenuHandler(id, menu, item) {
 			}
 		}
 		case 9: {
+			showPassMenu(id);
+			bReopenMenu = false;
+		}
+		case 10: {
 			kickNonCupAdmins(id);
 		}
 	}
@@ -793,6 +823,78 @@ public CupMenuHandler(id, menu, item) {
 	// For selection we open a new menu, for other actions re-open main menu.
 	if (bReopenMenu && isCupAdmin(id) && isCupEnabled())
 		showCupMenu(id);
+
+	return PLUGIN_HANDLED;
+}
+
+stock showPassMenu(id) {
+
+	new szMsg[128], szPass[16];
+
+	get_cvar_string("sv_password", szPass, charsmax(szPass));
+	if (!szPass[0]) {
+		copy(szPass, charsmax(szPass), "none");
+	}
+
+	formatex(szMsg, charsmax(szMsg), "\rPassword server menu^n\wCurrent: \y%s", szPass);
+	new hMenu = menu_create(szMsg, "CupPassHandler");
+
+	formatex(szMsg, charsmax(szMsg), "\yReset password^n");
+	menu_additem(hMenu, szMsg, "1");
+
+	new szInfo[8];
+	for (new i = 0; i < CUP_PASS_OPTIONS; i++) {
+		formatex(szMsg, charsmax(szMsg), "Set password: \y%s", g_szPassOptions[i]);
+		num_to_str(i + 2, szInfo, charsmax(szInfo));
+		menu_additem(hMenu, szMsg, szInfo);
+	}
+
+	formatex(szMsg, charsmax(szMsg), "Back");
+	menu_additem(hMenu, szMsg, "8");
+	
+	menu_addblank2(hMenu); // 9
+
+	formatex(szMsg, charsmax(szMsg), "Exit");
+	menu_additem(hMenu, szMsg, "0");
+
+
+	menu_setprop(hMenu, MPROP_PERPAGE, 0);
+
+	menu_display(id, hMenu, 0);
+}
+
+public CupPassHandler(id, menu, item) {
+	if (item == MENU_EXIT) {
+		menu_destroy(menu);
+		if (isCupAdmin(id) && isCupEnabled())
+			showCupMenu(id);
+		return PLUGIN_HANDLED;
+	}
+
+	new szInfo[8], szTmp[2], access, callback;
+	menu_item_getinfo(menu, item, access, szInfo, charsmax(szInfo), szTmp, charsmax(szTmp), callback);
+	menu_destroy(menu);
+
+	switch (str_to_num(szInfo)) {
+		case 1: {
+			set_cvar_string("sv_password", "");
+			client_print_color(id, print_team_blue, "%s Пароль сервера сброшен.", g_szPrefix);
+		}
+		case 8: {
+			if (isCupAdmin(id) && isCupEnabled())
+				showCupMenu(id);
+		}
+		case 0: {
+			return PLUGIN_HANDLED;
+		}
+		default: {
+			new iIndex = str_to_num(szInfo) - 2;
+			if (iIndex >= 0 && iIndex < CUP_PASS_OPTIONS) {
+				set_cvar_string("sv_password", g_szPassOptions[iIndex]);
+				client_print_color(id, print_team_blue, "%s Пароль сервера установлен на ^3%s^1.", g_szPrefix, g_szPassOptions[iIndex]);
+			}
+		}
+	}
 
 	return PLUGIN_HANDLED;
 }

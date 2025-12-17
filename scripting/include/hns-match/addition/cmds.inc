@@ -114,6 +114,57 @@ public sayHandle(id) {
 		return PLUGIN_CONTINUE;
 	}
 
+	if (equali(szArgs, "/tt", 10) || equali(szArgs, "/ct", 10)) {
+		trim(szTarget);
+
+		if (!isUserWatcher(id))
+			return PLUGIN_HANDLED;
+
+		if (g_iCurrentMode != MODE_MIX)
+			return PLUGIN_HANDLED;
+
+		new bIsTT = equali(szArgs, "/tt", 10);
+		new szMinutes[12], szSeconds[12];
+		replace(szTarget, charsmax(szTarget), ":", " ");
+		replace(szTarget, charsmax(szTarget), ".", " ");
+
+		if (parse(szTarget, szMinutes, charsmax(szMinutes), szSeconds, charsmax(szSeconds)) < 2) {
+			chat_print(id, "Неверный синтаксис. Пример: ^3/%s 15:43^1", bIsTT ? "tt" : "ct");
+			return PLUGIN_HANDLED;
+		}
+
+		if (!szMinutes[0] || !szSeconds[0] || !is_str_num(szMinutes) || !is_str_num(szSeconds)) {
+			chat_print(id, "Неверный синтаксис. Пример: ^3/%s 15:43^1", bIsTT ? "tt" : "ct");
+			return PLUGIN_HANDLED;
+		}
+
+		new iMinutes = str_to_num(szMinutes);
+		new iSeconds = str_to_num(szSeconds);
+
+		if (iSeconds >= 60) {
+			chat_print(id, "Неверный синтаксис. Пример: ^3/%s 15:43^1", bIsTT ? "tt" : "ct");
+			return PLUGIN_HANDLED;
+		}
+
+		new HNS_TEAM:iTeam = bIsTT ? g_isTeamTT : HNS_TEAM:!g_isTeamTT;
+		new Float:flInputTime = float(iMinutes) * 60.0 + float(iSeconds);
+		new Float:flTeamTime = flInputTime;
+		if (g_iCurrentRules == RULES_TIMER) {
+			new Float:flCapTime = floatmul(g_eMatchInfo[e_mWintime], 60.0);
+			flTeamTime = flCapTime - flInputTime;
+		}
+		g_eMatchInfo[e_flSidesTime][iTeam] = flTeamTime;
+
+		new szTime[8];
+		formatex(szTime, charsmax(szTime), "%02d:%02d", iMinutes, iSeconds);
+		if (bIsTT) {
+			chat_print(0, "^3%n^1 set ^3TT^1 time to ^3%s^1.", id, szTime)
+		} else {
+			chat_print(0, "^3%n^1 set ^3CT^1 time to ^3%s^1.", id, szTime);
+		}
+		return PLUGIN_CONTINUE;
+	}
+
 	return PLUGIN_CONTINUE;
 }
 

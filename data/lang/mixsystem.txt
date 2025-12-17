@@ -6,6 +6,9 @@ STATUS_PLAY     = ^3%n^1 is now ^3available^1 for pick. [^3PLAY^1]
 SET_ROUNDTIME   = ^3%n^1 set ^3roundtime^1 to ^3%.2f^1 minutes.
 SET_MAXROUNDS   = ^3%n^1 set ^3maxrounds^1 to ^3%d^1 (^3%d^1 rounds).
 SET_WINTIME     = ^3%n^1 set ^3wintime^1 to ^3%d^1 minutes.
+SET_TT_TIME     = ^3%n^1 set ^3TT^1 time to ^3%s^1.
+SET_CT_TIME     = ^3%n^1 set ^3CT^1 time to ^3%s^1.
+TIME_SYNTAX     = Invalid syntax. Example: ^3/%s 15:43^1
 
 KILL_HIMSELF    = ^3%n^1 killed himself.
 KILL_NOT        = Kill during deathmatch is not available.
@@ -194,6 +197,9 @@ STATUS_PLAY     = ^3%n^1 выставил статус ^1играю^1. [^3PLAY^1
 SET_ROUNDTIME   = ^3%n^1 установил ^3roundtime^1 на ^3%.2f^1 минут.
 SET_MAXROUNDS   = ^3%n^1 установил ^3maxrounds^1 на ^3%d^1 (^3%d^1 раундов).
 SET_WINTIME     = ^3%n^1 установил ^3wintime^1 на ^3%d^1 минут.
+SET_TT_TIME     = ^3%n^1 установил время ^3TT^1 на ^3%s^1.
+SET_CT_TIME     = ^3%n^1 установил время ^3CT^1 на ^3%s^1.
+TIME_SYNTAX     = Неверный синтаксис. Пример: ^3/%s 15:43^1
 
 KILL_HIMSELF    = ^3%n^1 убил сам себя.
 KILL_NOT        = Не доступно для режима ДМ.
