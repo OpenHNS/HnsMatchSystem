@@ -425,6 +425,10 @@ public cmdStartMatch(id) {
 		remove_task(TASK_WAIT);
 	}
 
+	if (task_exists(TASK_WAIT_CUP)) {
+		remove_task(TASK_WAIT_CUP);
+	}
+
 	chat_print(0, "%l", "START_MIX", id);
 
 	mix_start();
@@ -532,6 +536,10 @@ public cmdStop(id) {
 
 	if (task_exists(TASK_WAIT)) {
 		remove_task(TASK_WAIT)
+	}
+
+	if (task_exists(TASK_WAIT_CUP)) {
+		remove_task(TASK_WAIT_CUP)
 	}
 
 	switch (g_iCurrentMode) {

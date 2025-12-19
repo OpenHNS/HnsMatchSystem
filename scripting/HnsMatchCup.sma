@@ -1667,7 +1667,7 @@ stock announceRemainingMaps() {
 			ClearDHUDMessages();
 
 			set_dhudmessage(255, 255, 255, -1.0, 0.15, 0, 0.0, 5.0, 0.1, 0.1);
-			show_dhudmessage(0, "Play map: %s", szMap);
+			show_dhudmessage(0, "Picked Map: %s", szMap);
 		}
 		return;
 	}
@@ -1725,11 +1725,11 @@ stock announceRemainingMaps() {
 	if (szDecider[0]) {
 		client_print_color(0, print_team_blue, "%s Выбранные карты: ^3%s^1. Десайдер: ^3%s^1", g_szPrefix, szBuffer, szDecider);
 		server_print("[HNS-CUP] Picked maps: %s. Decider: %s", szConsole, szDecider);
-		show_dhudmessage(0, "Play maps: %s Decider: %s", szBuffer, szDecider);
+		show_dhudmessage(0, "Picked Map(s): %s Decider: %s", szBuffer, szDecider);
 	} else {
 		client_print_color(0, print_team_blue, "%s Выбранные карты: ^3%s^1", g_szPrefix, szBuffer);
 		server_print("[HNS-CUP] Picked maps: %s", szConsole);
-		show_dhudmessage(0, "Play maps: %s Decider: %s", szBuffer);
+		show_dhudmessage(0, "Picked Map(s): %s Decider: %s", szBuffer);
 	}
 }
 

@@ -24,7 +24,6 @@ public plugin_init() {
 
 	cvars_init();
 	init_gameplay();
-	mode_init();
 	InitGameModes();
 
 	cmds_init();

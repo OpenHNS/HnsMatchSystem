@@ -2,6 +2,7 @@
 #include <reapi>
 #include <fakemeta>
 #include <hns_matchsystem>
+#include <hns_matchsystem_cup>
 
 new g_szPrefix[24];
 
@@ -265,7 +266,11 @@ public cmdUsp(id) {
 
 public cmdFlash(id) {
 	if (hns_get_mode() != MODE_TRAINING && hns_get_state() != STATE_PAUSED) {
-		return PLUGIN_HANDLED
+		return PLUGIN_HANDLED;
+	}
+	
+	if (!is_user_connected(id)) {
+		return PLUGIN_HANDLED;
 	}
 
 	rg_give_item(id, "weapon_flashbang");
@@ -394,11 +399,28 @@ public rgPlayerSpawn(id) {
 }
 
 public rgFlPlayerFallDamage(id) {
+	new Float:flDamage = Float:GetHookChainReturn(ATYPE_FLOAT);
+	new dmg = floatround(flDamage, floatround_floor);
+	new hp = floatround(get_entvar(id, var_health), floatround_floor);
+
+	new hpLeft = hp - dmg
+	if (hpLeft < 0) {
+		hpLeft = 0;
+	}
+
+	if (hns_get_mode() == MODE_MIX && hns_cup_enabled()) {
+		new iPlayers[MAX_PLAYERS], iNum;
+		get_players(iPlayers, iNum, "ce", "SPECTATOR");
+		if (dmg >= 1.0) {
+			for (new i; i < iNum; i++) {
+				client_print_color(iPlayers[i], print_team_blue, "%s ^3%n^1 have taken ^3%i^1 fall damage. HP left ^3%i^1.", g_szPrefix, id, dmg, hpLeft);
+			}
+		}
+	}
+
 	if (hns_get_mode() != MODE_TRAINING && hns_get_state() != STATE_PAUSED) {
 		return HC_CONTINUE;
 	}
-
-	new dmg = floatround(Float:GetHookChainReturn(ATYPE_FLOAT));
 
 	if(g_bDamage[id]) {
 		client_print_color(id, print_team_blue, "%L", id, "TRNING_DMG", g_szPrefix, dmg);

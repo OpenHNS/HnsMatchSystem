@@ -18,6 +18,10 @@ public kniferound_start() {
 }
 
 public kniferound_stop() {
+	if(task_exists(HUD_PAUSE)) {
+		remove_task(HUD_PAUSE);
+	}
+	
 	g_iMatchStatus = MATCH_NONE;
 	training_start();
 }

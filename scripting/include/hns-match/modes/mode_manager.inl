@@ -19,8 +19,13 @@ public delayed_mode() {
 		g_iMatchStatus = MATCH_WAITCONNECT;
 		training_start();
 		if (g_aPlayersLoadData) {
-			flWaitPlayersTime = 180.0;
-			set_task(1.0, "wait_players", .id = TASK_WAIT, .flags = "b");
+			if (hns_cup_enabled()) {
+				flWaitPlayersTime = 245.0;
+				set_task(1.0, "wait_players_cup", .id = TASK_WAIT_CUP, .flags = "b");
+			} else {
+				flWaitPlayersTime = 180.0;
+				set_task(1.0, "wait_players", .id = TASK_WAIT, .flags = "b");
+			}
 		}
 	} else if (g_iCurrentGameplay == GAMEPLAY_HNS && g_iCurrentMode == MODE_PUB) {
 		pub_start();
@@ -67,6 +72,35 @@ public wait_players() {
 			}
 		}
 	}
+
+	return PLUGIN_HANDLED;
+}
+
+public wait_players_cup() {
+	if (g_iMatchStatus == MATCH_STARTED) {
+		if(task_exists(TASK_WAIT_CUP)) {
+			remove_task(TASK_WAIT_CUP);
+		}
+		return PLUGIN_HANDLED;
+	}
+
+	if (flWaitPlayersTime <= 0.0) {
+		mix_start();
+
+		if(task_exists(TASK_WAIT)) {
+			remove_task(TASK_WAIT);
+		}
+
+		return PLUGIN_HANDLED;
+	}
+
+	flWaitPlayersTime -= 1.0;
+
+	new sTime[24];
+	fnConvertTime(flWaitPlayersTime, sTime, charsmax(sTime), false);
+	
+	set_dhudmessage(255, 255, 255, -1.0, 0.2, 0, 0.0, 0.9, 0.1, 0.1);
+	show_dhudmessage(0, "%s^nWarmup, get ready to start the game.", sTime);
 
 	return PLUGIN_HANDLED;
 }
