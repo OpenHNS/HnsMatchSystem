@@ -4,6 +4,7 @@
 #include <hns_matchsystem_filter>
 #include <hns_matchsystem_bans>
 #include <hns_matchsystem_api>
+#include <hns_matchsystem_cup>
 
 #define rg_get_user_team(%0) get_member(%0, m_iTeam)
 
@@ -53,6 +54,7 @@ public plugin_init()
 {
 	register_plugin("Match: ReControl", "1.4", "OpenHNS"); // Thanks Conor, Denzer, Garey
 
+	// TODO: Сделать кваром
 	if (!hns_api_stats_init()) {
 		register_clcmd("drop", "Control");
 		RegisterSayCmd("co", "co", "Control");
@@ -101,20 +103,28 @@ public client_disconnected(id)
 	}
 }
 
-public Control(id)
-{
+public Control(id) {
+	if (hns_cup_enabled()) {
+		client_print_color(id, print_team_blue, "%L", LANG_PLAYER, "CUP_NOT", g_szPrefix);
+		return PLUGIN_HANDLED;
+	}
+
 	g_ControlType[id] = TYPE_CONTROL;
 	Menu(id);
 	
-	return;
+	return PLUGIN_HANDLED;
 }
 
-public Replace(id)
-{
+public Replace(id) {
+	if (hns_cup_enabled()) {
+		client_print_color(id, print_team_blue, "%L", LANG_PLAYER, "CUP_NOT", g_szPrefix);
+		return PLUGIN_HANDLED;
+	}
+
 	g_ControlType[id] = TYPE_REPLACE;
 	Menu(id);
 	
-	return;
+	return PLUGIN_HANDLED;
 }
 
 public Menu(id)
@@ -234,13 +244,16 @@ public MenuHandler(id, m_Menu, szKeys)
 
 public ReplaceAdmin(id)
 {
-	if (!is_user_connected(id))
-	{
+	if (!is_user_connected(id)) {
 		return;
 	}
 
-	if (!isUserFullWatcher(id))
-	{
+	if (!isUserFullWatcher(id)) {
+		return;
+	}
+
+	if (hns_cup_enabled()) {
+		client_print_color(id, print_team_blue, "%L", LANG_PLAYER, "CUP_NOT", g_szPrefix);
 		return;
 	}
 

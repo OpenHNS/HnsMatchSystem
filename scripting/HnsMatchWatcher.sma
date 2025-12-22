@@ -2,6 +2,9 @@
 #include <amxmisc>
 #include <hns_matchsystem>
 
+#include <hns_matchsystem_filter>
+#include <hns_matchsystem_cup>
+
 #define RATIO 0.66
 
 new const g_szFileName[] = "watcher.ini";
@@ -25,7 +28,7 @@ enum _:RNW {
 new g_eRnw[RNW];
 
 public plugin_init() {
-	register_plugin("Match: Watcher", "1.1", "OpenHNS"); // Garey
+	register_plugin("Match: Watcher", "1.2", "OpenHNS"); // Garey
 
 	RegisterSayCmd("rnw", "rocknewwatcher", "cmdRnw", 0, "Rock new watchers");
 	RegisterSayCmd("unrnw", "nornw", "cmdUnRnw", 0, "Cancel vote new watchers");
@@ -288,6 +291,11 @@ public ActivateWatcher(id) {
 }
 
 public cmdRnw(id) {
+	if (hns_cup_enabled()) {
+		client_print_color(id, print_team_blue, "%L", LANG_PLAYER, "CUP_NOT", g_sPrefix);
+		return PLUGIN_CONTINUE;
+	}
+
 	new iPlayers = get_playersnum();
 	
 	if(iPlayers <= 1) {
@@ -320,21 +328,37 @@ public cmdRnw(id) {
 }
 
 public cmdUnRnw(id) {
+	if (hns_cup_enabled()) {
+		client_print_color(id, print_team_blue, "%L", LANG_PLAYER, "CUP_NOT", g_sPrefix);
+		return PLUGIN_CONTINUE;
+	}
+
 	if(g_eRnw[r_bPlayerVote][id])
 	{
 		client_print_color(id, print_team_blue, "%L", id, "WTR_VOTE_CANCL", g_sPrefix);
 		g_eRnw[r_bPlayerVote][id] = false;
 		g_eRnw[r_iNeedVote]--;
 	}
+
+	return PLUGIN_CONTINUE;
 }
 
 public StartVote() {
 	g_eRnw[r_bIsVote] = true;
 	arrayset(g_eRnw[r_bPlayerVote], false, sizeof(g_eRnw[r_bPlayerVote]));
 	g_eRnw[r_iNeedVote] = 0;
+
+	new iPlayers[MAX_PLAYERS], iNum;
+	get_players(iPlayers, iNum, "ch");
+	
 	for(new i = 1; i <= MaxClients; i++) {
-		if(is_user_connected(i))
-			voteWatcherMenu(i);
+		new id = iPlayers[i];
+
+		if (!is_user_connected(id)) {
+			continue;
+		}
+
+		voteWatcherMenu(id);
 	}
 	
 	set_task(15.0, "check_votes");

@@ -79,6 +79,7 @@ public plugin_init() {
 	set_task(1.0, "HudTask", .flags = "b");
 }
 
+// TODO: Перенести в cup
 public HudTask() {
 	if (g_iCurrentMode == MODE_MIX && hns_cup_enabled()) {
 		new szTimeToWin[HNS_TEAM][24], szTimeDiff[24];

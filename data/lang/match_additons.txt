@@ -150,6 +150,8 @@ MAPS_ACTION_CHANGE = Change map
 MAPS_NOM = %s ^3%n^1 nominated map: ^3%s^1.
 MAPS_CHAGE = %s ^3%n^1 change map: ^3%s^1.
 
+CUP_NOT = This functionality is not available while Tournament Mode is enabled.
+
 [ru]
 
 PTS_RANK = %s Ваш ранг: ^3%d^1 (Птс: ^3%d^1 | Побед: ^3%d^1 | Поражений: ^3%d^1 | Скилл: ^3%s^1)
@@ -305,3 +307,5 @@ MAPS_ACTION_NOM = Номинировать карту
 MAPS_ACTION_CHANGE = Сменить карту
 MAPS_NOM = %s ^3%n^1 номинировал карту: ^3%s^1.
 MAPS_CHAGE = %s ^3%n^1 сменил карту: ^3%s^1.
+
+CUP_NOT = %s Данный функционал недоступен при включённом турнирном режиме.
