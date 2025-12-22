@@ -2,7 +2,9 @@
 #include <reapi>
 #include <fakemeta>
 #include <hns_matchsystem>
-#include <hns_matchsystem_cup>
+#include <hns_matchsystem_filter>
+
+native hns_cup_enabled();
 
 new g_szPrefix[24];
 
@@ -18,6 +20,12 @@ new bool:g_bInvisPlayers[MAX_PLAYERS + 1];
 new g_hResetBugForward;
 
 new g_iMsgHookTempEntity;
+
+public plugin_natives() {
+	set_native_filter("match_system_additons");
+
+
+}
 
 public plugin_init() {
 	register_plugin("Match: Training", "1.0", "OpenHNS");
@@ -274,7 +282,7 @@ public cmdFlash(id) {
 	}
 
 	rg_give_item(id, "weapon_flashbang");
-	//rg_give_item(id, "weapon_smokegrenade");
+	rg_give_item(id, "weapon_smokegrenade");
 	return PLUGIN_HANDLED;
 }
 

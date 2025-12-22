@@ -44,6 +44,9 @@ public match_system_additons(const szNativeName[], iNativeID, iTrapMode) {
 	if (equal(szNativeName, "hnsmatch_maps_is_knife")) { 
 		return PLUGIN_HANDLED
 	}
+	if (equal(szNativeName, "hns_cup_enabled")) { 
+		return PLUGIN_HANDLED
+	}
 
 	return PLUGIN_CONTINUE;
 }

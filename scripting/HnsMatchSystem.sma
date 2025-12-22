@@ -75,6 +75,41 @@ public plugin_init() {
 	server_cmd("exec %s", szPath);
 
 	g_bDebugMode = bool:(plugin_flags() & AMX_FLAG_DEBUG);
+
+	set_task(1.0, "HudTask", .flags = "b");
+}
+
+public HudTask() {
+	if (g_iCurrentMode == MODE_MIX && hns_cup_enabled()) {
+		new szTimeToWin[HNS_TEAM][24], szTimeDiff[24];
+
+		new Float:fTimeDiff = floatabs(g_eMatchInfo[e_flSidesTime][g_isTeamTT] - g_eMatchInfo[e_flSidesTime][HNS_TEAM:!g_isTeamTT]);
+		fnConvertTime(fTimeDiff, szTimeDiff, charsmax(szTimeDiff), false);
+
+		new Float:flCapTime = floatmul(g_eMatchInfo[e_mWintime], 60.0);
+		new Float:flTimeToWinA = floatsub(flCapTime, Float:g_eMatchInfo[e_flSidesTime][HNS_TEAM_A]);
+		new Float:flTimeToWinB = floatsub(flCapTime, Float:g_eMatchInfo[e_flSidesTime][HNS_TEAM_B]);
+		fnConvertTime(flTimeToWinA, szTimeToWin[HNS_TEAM_A], 23, false);
+		fnConvertTime(flTimeToWinB, szTimeToWin[HNS_TEAM_B], 23, false);
+
+		new iPlayers[MAX_PLAYERS], iNum;
+		get_players(iPlayers, iNum, "ce", "SPECTATOR");
+		for (new id, i = 0; i < iNum; i++) {
+			id = iPlayers[i];
+
+			if (!is_user_hltv(id)) {
+				continue;
+			}
+
+			set_hudmessage(0, 190, 255, -1.0, 0.98, 0, 0.0, 1.0, 0.1, 0.1, -1);
+			if (g_isTeamTT == HNS_TEAM_A) {
+				show_hudmessage(id, "TT [%s] vs [%s] CT (%s diff)", szTimeToWin[HNS_TEAM_A], szTimeToWin[HNS_TEAM_B], szTimeDiff);
+			} else {
+				show_hudmessage(id, "TT [%s] vs [%s] CT (%s diff)", szTimeToWin[HNS_TEAM_B], szTimeToWin[HNS_TEAM_A], szTimeDiff);
+			}
+		}
+
+	}
 }
 
 public forward_init() {
