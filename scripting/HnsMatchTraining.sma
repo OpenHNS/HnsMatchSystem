@@ -40,7 +40,7 @@ public plugin_init() {
 	RegisterSayCmd("noclip", "clip", "CmdClipMode");
 	RegisterSayCmd("showdamage", "showdmg", "CmdShowDamage");
 	RegisterSayCmd("angles", "ang", "CmdSaveAngles");
-	RegisterSayCmd("invis", "inv", "cmdInvis");
+	// RegisterSayCmd("invis", "inv", "cmdInvis");
 
 	RegisterSayCmd("weapons", "weap", "cmdWeapons");
 	RegisterSayCmd("scout", "sc", "cmdScout");
@@ -220,21 +220,21 @@ public CmdSaveAngles(id) {
 	return PLUGIN_HANDLED;
 }
 
-public cmdInvis(id) {
-	if (hns_get_mode() != MODE_TRAINING && hns_get_state() != STATE_PAUSED) {
-		return PLUGIN_HANDLED
-	}
+// public cmdInvis(id) {
+// 	if (hns_get_mode() != MODE_TRAINING && hns_get_state() != STATE_PAUSED) {
+// 		return PLUGIN_HANDLED
+// 	}
 
-	g_bInvisPlayers[id] = !g_bInvisPlayers[id];
+// 	g_bInvisPlayers[id] = !g_bInvisPlayers[id];
 
-	if (g_bInvisPlayers[id]) {
-		client_print_color(id, print_team_blue, "%L", id, "TRNING_INVIS_ON", g_szPrefix);
-	} else {
-		client_print_color(id, print_team_blue, "%L", id, "TRNING_INVIS_OFF", g_szPrefix);
-	}
+// 	if (g_bInvisPlayers[id]) {
+// 		client_print_color(id, print_team_blue, "%L", id, "TRNING_INVIS_ON", g_szPrefix);
+// 	} else {
+// 		client_print_color(id, print_team_blue, "%L", id, "TRNING_INVIS_OFF", g_szPrefix);
+// 	}
 
-	return PLUGIN_HANDLED;
-}
+// 	return PLUGIN_HANDLED;
+// }
 
 public cmdWeapons(id) {
 	if (hns_get_mode() != MODE_TRAINING && hns_get_state() != STATE_PAUSED) {
@@ -337,13 +337,13 @@ public hns_training_menu(id) {
 
 	menu_additem(hMenu, szMsg, "6");
 
-	if (g_bInvisPlayers[id]) {
-		formatex(szMsg, charsmax(szMsg), "%L", LANG_PLAYER, "MENU_TRNING_INVIS_ON");
-	} else {
-		formatex(szMsg, charsmax(szMsg), "%L", LANG_PLAYER, "MENU_TRNING_INVIS_OFF");
-	}
+	// if (g_bInvisPlayers[id]) {
+	// 	formatex(szMsg, charsmax(szMsg), "%L", LANG_PLAYER, "MENU_TRNING_INVIS_ON");
+	// } else {
+	// 	formatex(szMsg, charsmax(szMsg), "%L", LANG_PLAYER, "MENU_TRNING_INVIS_OFF");
+	// }
 
-	menu_additem(hMenu, szMsg, "7");
+	// menu_additem(hMenu, szMsg, "7");
 
 	formatex(szMsg, charsmax(szMsg), "%L", LANG_PLAYER, "MENU_TRNING_WEAPONS");
 	menu_additem(hMenu, szMsg, "8");
@@ -384,9 +384,9 @@ public hns_training_menu_code(id, hMenu, item) {
 		case 6: {
 			CmdSaveAngles(id);
 		}
-		case 7: {
-			cmdInvis(id);
-		}
+		// case 7: {
+		// 	cmdInvis(id);
+		// }
 		case 8: {
 			cmdWeapons(id);
 		}
