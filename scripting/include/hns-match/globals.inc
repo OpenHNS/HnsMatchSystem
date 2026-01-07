@@ -5,6 +5,7 @@
 #define _globals_included
 
 #define TASK_TIMER 54345
+#define TASK_POINTS 54445
 #define HUD_PAUSE 23931
 
 #define TASK_WAIT 12319
@@ -40,7 +41,8 @@ new g_PluginId;
 enum NATCH_RULES {
 	RULES_MR,
 	RULES_TIMER,
-	RULES_DUEL
+	RULES_DUEL,
+	RULES_POINTS
 }
 
 new NATCH_RULES:g_iCurrentRules;

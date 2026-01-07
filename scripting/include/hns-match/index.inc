@@ -11,6 +11,7 @@
 #include <reapi>
 #include <json>
 #include <PersistentDataStorage>
+#include <msgstocks>
 
 #include <hns_matchsystem_filter.inc>
 #include <hns_matchsystem_dbmysql.inc>

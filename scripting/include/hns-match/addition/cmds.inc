@@ -21,6 +21,7 @@ stock cmds_init() {
 	RegisterSayCmd("mr", 		"maxround", 	"cmdMrMode",		iWatcherAccess, "Choose MR mode");
 	RegisterSayCmd("timer", 	"wintime", 		"cmdWintimeMode",	iWatcherAccess, "Choose Wintime mode");
 	RegisterSayCmd("duel", 		"versus", 		"cmdDuelMode",		iWatcherAccess, "Choose 1x1 mode");
+	RegisterSayCmd("points", 	"pts", 			"cmdPointsMode",	iWatcherAccess, "Choose Points 1vs1 mode");
 	RegisterSayCmd("pub", 		"public", 		"cmdPubMode", 		iWatcherAccess, "Public mode");
 	RegisterSayCmd("dm", 		"deathmatch", 	"cmdDMMode", 		iWatcherAccess, "DeathMatch mode");
 	RegisterSayCmd("zm", 		"zombie", 		"cmdZMMode", 		iWatcherAccess, "Zombie mode");
@@ -239,6 +240,32 @@ public cmdDuelMode(id) {
 
 	chat_print(0, "%l", "MODE_SET_DUEL", id);
 	g_iCurrentRules = RULES_DUEL;
+
+	return PLUGIN_HANDLED;
+}
+
+public cmdPointsMode(id) {
+	if (!isUserWatcher(id)) {
+		return PLUGIN_HANDLED;
+	}
+
+	if (g_iCurrentRules == RULES_POINTS) {
+		chat_print(0, "Points 1vs1 already enabled.");
+		return PLUGIN_HANDLED;
+	}
+
+	if (g_iCurrentMode == MODE_MIX) {
+		chat_print(0, "%l", "MODE_NOT_MIX");
+		return PLUGIN_HANDLED;
+	}
+
+	if (get_num_players_in_match() > 2) {
+		chat_print(0, "%l", "MODE_NOT_SET_DUEL");
+		return PLUGIN_HANDLED;
+	}
+
+	chat_print(0, "Points 1vs1 mode enabled by %n.", id);
+	g_iCurrentRules = RULES_POINTS;
 
 	return PLUGIN_HANDLED;
 }
@@ -822,8 +849,15 @@ public cmdShowTimers(id) {
 				} else {
 					chat_print(id, "%L", id, "SCORE_DUEL_DEF", g_eMatchInfo[e_iSidesRounds][HNS_TEAM_B], g_eMatchInfo[e_iSidesRounds][HNS_TEAM_A]);
 				}
-			}
+			}	
 		}	
+		case RULES_POINTS: {
+			new Float:pointsTT = g_eMatchInfo[e_flSidesTime][g_isTeamTT];
+			new Float:pointsCT = g_eMatchInfo[e_flSidesTime][HNS_TEAM:!g_isTeamTT];
+			new iRound = (g_eMatchInfo[e_iSidesRounds][HNS_TEAM_A] + g_eMatchInfo[e_iSidesRounds][HNS_TEAM_B]) + 1;
+			new iMaxRounds = g_iSettings[MAXROUNDS] * 2;
+			chat_print(id, "Points 1vs1: TT %.1f / CT %.1f | Round %d/%d", pointsTT, pointsCT, iRound, iMaxRounds);
+		}
 	}
 
 	return PLUGIN_HANDLED;

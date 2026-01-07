@@ -57,7 +57,14 @@ public mix_freezeend() {
 		}
 	}
 
-	set_task(0.25, "taskRoundEvent", .id = TASK_TIMER, .flags = "b");
+	if (g_iCurrentRules == RULES_POINTS) {
+		if (task_exists(TASK_POINTS)) {
+			remove_task(TASK_POINTS);
+		}
+		set_task(0.5, "taskPoints1v1", .id = TASK_POINTS, .flags = "b");
+	} else {
+		set_task(0.25, "taskRoundEvent", .id = TASK_TIMER, .flags = "b");
+	}
 
 	if(g_eMatchInfo[e_mLeaved]) {
 		set_task(1.0, "mix_pause");
@@ -126,6 +133,9 @@ public mix_stop() {
 public mix_roundstart() {
 	if(task_exists(TASK_TIMER)) {
 		remove_task(TASK_TIMER);
+	}
+	if(task_exists(TASK_POINTS)) {
+		remove_task(TASK_POINTS);
 	}
 
 	if (g_eMatchState == STATE_PREPARE) {
@@ -251,6 +261,21 @@ public MixFinishedDuel() {
 	ExecuteForward(g_hForwards[MATCH_FINISH_POST], _, 1);
 }
 
+public MixFinishedPoints(iWinTeam) {
+	ExecuteForward(g_hForwards[MATCH_FINISH], _, iWinTeam);
+
+	new Float:pointsDiff = floatabs(g_eMatchInfo[e_flSidesTime][g_isTeamTT] - g_eMatchInfo[e_flSidesTime][HNS_TEAM:!g_isTeamTT]);
+	chat_print(0, "Points 1vs1 winner: %s (diff %.1f)", iWinTeam == 1 ? "TT" : "CT", pointsDiff);
+
+	setTaskHud(0, 1.0, 1, 255, 255, 255, 4.0, "%L", LANG_SERVER, "HUD_GAMEOVER");
+
+	match_reset_data();
+
+	training_start();
+
+	ExecuteForward(g_hForwards[MATCH_FINISH_POST], _, iWinTeam);
+}
+
 public mix_roundend(bool:win_ct) {
 	if (g_eMatchState != STATE_ENABLED) {
 		return;
@@ -260,6 +285,9 @@ public mix_roundend(bool:win_ct) {
 
 	if(task_exists(TASK_TIMER)) {
 		remove_task(TASK_TIMER);
+	}
+	if(task_exists(TASK_POINTS)) {
+		remove_task(TASK_POINTS);
 	}
 
 	switch (g_iCurrentRules) {
@@ -333,6 +361,28 @@ public mix_roundend(bool:win_ct) {
 				MixFinishedDuel();
 			}
 		}
+		case RULES_POINTS: {
+			g_eMatchInfo[e_iSidesRounds][g_isTeamTT]++;
+
+			if (g_eMatchInfo[e_iSidesRounds][g_isTeamTT] + g_eMatchInfo[e_iSidesRounds][HNS_TEAM:!g_isTeamTT] >= g_iSettings[MAXROUNDS] * 2) {
+				new HNS_TEAM:win_team = HNS_TEAM:-1;
+				if (g_eMatchInfo[e_flSidesTime][g_isTeamTT] > g_eMatchInfo[e_flSidesTime][HNS_TEAM:!g_isTeamTT]) {
+					win_team = g_isTeamTT;
+				} else if (g_eMatchInfo[e_flSidesTime][g_isTeamTT] < g_eMatchInfo[e_flSidesTime][HNS_TEAM:!g_isTeamTT]) {
+					win_team = HNS_TEAM:!g_isTeamTT;
+				}
+
+				if (win_team != HNS_TEAM:-1) {
+					MixFinishedPoints(win_team == g_isTeamTT ? 1 : 2);
+				} else {
+					hns_swap_teams();
+					chat_print(0, "Points tied. Adding extra rounds.");
+					g_iSettings[MAXROUNDS] += 2;
+				}
+			} else {
+				hns_swap_teams();
+			}
+		}
 	}
 }
 
@@ -370,6 +420,81 @@ public taskRoundEvent() {
 	}
 }
 
+public taskPoints1v1() {
+	if (g_iCurrentMode != MODE_MIX || g_iCurrentRules != RULES_POINTS || g_eMatchState != STATE_ENABLED) {
+		if (task_exists(TASK_POINTS)) {
+			remove_task(TASK_POINTS);
+		}
+		return;
+	}
+
+	new ttPlayers[MAX_PLAYERS], ctPlayers[MAX_PLAYERS], ttNum, ctNum;
+	get_players(ttPlayers, ttNum, "ahe", "TERRORIST");
+	get_players(ctPlayers, ctNum, "ahe", "CT");
+
+	if (ttNum != 1 || ctNum != 1) {
+		// TODO: учитывать ситуацию, когда игроков больше или один отсутствует.
+		return;
+	}
+
+	new ttOrigin[3], ctOrigin[3];
+	get_user_origin(ttPlayers[0], ttOrigin);
+	get_user_origin(ctPlayers[0], ctOrigin);
+
+	new iDistance = get_distance(ttOrigin, ctOrigin);
+	new iDist1 = g_iSettings[POINTS_DISTANCE_1];
+	new iDist2 = g_iSettings[POINTS_DISTANCE_2];
+	new iDist3 = g_iSettings[POINTS_DISTANCE_3];
+
+	new Float:pointsAdd = 0.0;
+	new iRange = 0;
+
+	if (iDistance <= iDist1) {
+		pointsAdd = g_iSettings[POINTS_ADD_1];
+		iRange = 1;
+	} else if (iDistance <= iDist2) {
+		pointsAdd = g_iSettings[POINTS_ADD_2];
+		iRange = 2;
+	} else if (iDistance <= iDist3) {
+		pointsAdd = g_iSettings[POINTS_ADD_3];
+		iRange = 3;
+	}
+
+	if (g_iSettings[POINTS_B_DEBUG]) {
+		new r, g, b;
+		switch (iRange) {
+			case 1: { r = 0; g = 255; b = 0; }
+			case 2: { r = 255; g = 200; b = 0; }
+			case 3: { r = 255; g = 120; b = 0; }
+			default: { r = 255; g = 0; b = 0; }
+		}
+		te_create_beam_between_entities(ttPlayers[0], ctPlayers[0], iBeam, 0, 10, 5, 5, 0, r, g, b, 150, 0);
+	}
+
+	if (g_iSettings[POINTS_D_DEBUG]) {
+		new axis[3];
+
+		axis[0] = ttOrigin[0] + iDist1;
+		axis[1] = ttOrigin[1];
+		axis[2] = ttOrigin[2];
+		te_create_beam_disk(ttOrigin, iBeam, axis, 0, 10, 5, 3, 0, 0, 255, 0, 120, 0);
+
+		axis[0] = ttOrigin[0] + iDist2;
+		axis[1] = ttOrigin[1];
+		axis[2] = ttOrigin[2];
+		te_create_beam_disk(ttOrigin, iBeam, axis, 0, 10, 5, 3, 0, 255, 200, 0, 120, 0);
+
+		axis[0] = ttOrigin[0] + iDist3;
+		axis[1] = ttOrigin[1];
+		axis[2] = ttOrigin[2];
+		te_create_beam_disk(ttOrigin, iBeam, axis, 0, 10, 5, 3, 0, 255, 0, 0, 120, 0);
+	}
+
+	if (pointsAdd > 0.0) {
+		g_eMatchInfo[e_flSidesTime][g_isTeamTT] += pointsAdd;
+	}
+}
+
 
 public mix_reverttimer() {
 	if (g_eMatchState != STATE_ENABLED) {
@@ -378,6 +503,9 @@ public mix_reverttimer() {
 
 	if(task_exists(TASK_TIMER)) {
 		remove_task(TASK_TIMER);
+	}
+	if(task_exists(TASK_POINTS)) {
+		remove_task(TASK_POINTS);
 	}
 
 	g_eMatchInfo[e_flSidesTime][g_isTeamTT] -= g_flRoundTime;
@@ -465,6 +593,9 @@ stock match_reset_data(bool:bMatchFinish = false) {
 
 	if(task_exists(TASK_TIMER)) {
 		remove_task(TASK_TIMER);
+	}
+	if(task_exists(TASK_POINTS)) {
+		remove_task(TASK_POINTS);
 	}
 
 	if(task_exists(HUD_PAUSE)) {

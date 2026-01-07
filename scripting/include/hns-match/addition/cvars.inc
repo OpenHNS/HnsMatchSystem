@@ -22,6 +22,14 @@ enum _: CVARS
 	WATCHER_FLAG[4],
 	FULL_WATCHER_FLAG[4],
 	ADMIN_FLAG[4],
+	POINTS_DISTANCE_1,
+	POINTS_DISTANCE_2,
+	POINTS_DISTANCE_3,
+	Float:POINTS_ADD_1,
+	Float:POINTS_ADD_2,
+	Float:POINTS_ADD_3,
+	POINTS_B_DEBUG,
+	POINTS_D_DEBUG,
 }
 
 new pCvar[CVARS];
@@ -89,6 +97,30 @@ stock cvars_init() {
 
 	pCvar[ADMIN_FLAG] = create_cvar("hns_admin_flag", "d", FCVAR_NONE, "Admin access flag");
 	bind_pcvar_string(pCvar[ADMIN_FLAG], g_iSettings[ADMIN_FLAG], charsmax(g_iSettings[ADMIN_FLAG]));
+
+	pCvar[POINTS_DISTANCE_1] = create_cvar("hns_points_distance_1", "150", FCVAR_NONE, "Points 1vs1 distance 1 (units)", true, 0.0, true, 2000.0);
+	bind_pcvar_num(pCvar[POINTS_DISTANCE_1], g_iSettings[POINTS_DISTANCE_1]);
+
+	pCvar[POINTS_DISTANCE_2] = create_cvar("hns_points_distance_2", "250", FCVAR_NONE, "Points 1vs1 distance 2 (units)", true, 0.0, true, 2000.0);
+	bind_pcvar_num(pCvar[POINTS_DISTANCE_2], g_iSettings[POINTS_DISTANCE_2]);
+
+	pCvar[POINTS_DISTANCE_3] = create_cvar("hns_points_distance_3", "350", FCVAR_NONE, "Points 1vs1 distance 3 (units)", true, 0.0, true, 2000.0);
+	bind_pcvar_num(pCvar[POINTS_DISTANCE_3], g_iSettings[POINTS_DISTANCE_3]);
+
+	pCvar[POINTS_ADD_1] = _:create_cvar("hns_points_add_1", "0.5", FCVAR_NONE, "Points 1vs1 add for distance 1", true, 0.0, true, 5.0);
+	bind_pcvar_float(_:pCvar[POINTS_ADD_1], g_iSettings[POINTS_ADD_1]);
+
+	pCvar[POINTS_ADD_2] = _:create_cvar("hns_points_add_2", "0.3", FCVAR_NONE, "Points 1vs1 add for distance 2", true, 0.0, true, 5.0);
+	bind_pcvar_float(_:pCvar[POINTS_ADD_2], g_iSettings[POINTS_ADD_2]);
+
+	pCvar[POINTS_ADD_3] = _:create_cvar("hns_points_add_3", "0.1", FCVAR_NONE, "Points 1vs1 add for distance 3", true, 0.0, true, 5.0);
+	bind_pcvar_float(_:pCvar[POINTS_ADD_3], g_iSettings[POINTS_ADD_3]);
+
+	pCvar[POINTS_B_DEBUG] = create_cvar("hns_points_b_debug", "0", FCVAR_NONE, "Points 1vs1 beam debug (0/1)", true, 0.0, true, 1.0);
+	bind_pcvar_num(pCvar[POINTS_B_DEBUG], g_iSettings[POINTS_B_DEBUG]);
+
+	pCvar[POINTS_D_DEBUG] = create_cvar("hns_points_d_debug", "0", FCVAR_NONE, "Points 1vs1 disk debug (0/1)", true, 0.0, true, 1.0);
+	bind_pcvar_num(pCvar[POINTS_D_DEBUG], g_iSettings[POINTS_D_DEBUG]);
 }
 
 stock cvar_update_wintime(Float:flWintime) {
