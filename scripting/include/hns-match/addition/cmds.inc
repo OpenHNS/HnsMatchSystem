@@ -852,11 +852,35 @@ public cmdShowTimers(id) {
 			}	
 		}	
 		case RULES_POINTS: {
-			new Float:pointsTT = g_eMatchInfo[e_flSidesTime][g_isTeamTT];
-			new Float:pointsCT = g_eMatchInfo[e_flSidesTime][HNS_TEAM:!g_isTeamTT];
+			new Float:flScoreA = Float:g_eMatchInfo[e_flSidesTime][HNS_TEAM_A];
+			new Float:flScoreB = Float:g_eMatchInfo[e_flSidesTime][HNS_TEAM_B];
+
+			new iPlayers[MAX_PLAYERS], iNum;
+			new hnsteamname[HNS_TEAM];
+	
+			get_players(iPlayers, iNum, "h");
+
+			for (new j; j < iNum; j++) {
+				if (!g_ePlayerInfo[iPlayers[j]][PLAYER_MATCH]) {
+					continue;                }
+				if (g_isTeamTT == HNS_TEAM_A) {
+					if (getUserTeam(iPlayers[j]) == TEAM_TERRORIST) {                        
+						hnsteamname[HNS_TEAM_A] = iPlayers[j];
+					} else if (getUserTeam(iPlayers[j]) == TEAM_CT) {                        
+						hnsteamname[HNS_TEAM_B] = iPlayers[j];
+					}               
+				} else {
+					if (getUserTeam(iPlayers[j]) == TEAM_CT) {                        
+						hnsteamname[HNS_TEAM_A] = iPlayers[j];
+					} else if (getUserTeam(iPlayers[j]) == TEAM_TERRORIST) {                       
+						hnsteamname[HNS_TEAM_B] = iPlayers[j];
+					}                
+				}
+			}	
+
 			new iRound = (g_eMatchInfo[e_iSidesRounds][HNS_TEAM_A] + g_eMatchInfo[e_iSidesRounds][HNS_TEAM_B]) + 1;
 			new iMaxRounds = g_iSettings[MAXROUNDS] * 2;
-			chat_print(id, "Points 1vs1: TT %.1f / CT %.1f | Round %d/%d", pointsTT, pointsCT, iRound, iMaxRounds);
+			chat_print(id, "Points: ^3%n^1 ^4%.1f^1 vs ^4%.1f^1 ^3%n^1 | Round ^3%d/%d", hnsteamname[HNS_TEAM_A], flScoreA, flScoreB, hnsteamname[HNS_TEAM_B], iRound, iMaxRounds);
 		}
 	}
 

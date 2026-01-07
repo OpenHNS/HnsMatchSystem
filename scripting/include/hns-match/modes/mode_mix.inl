@@ -434,6 +434,8 @@ public taskPoints1v1() {
 
 	if (ttNum != 1 || ctNum != 1) {
 		// TODO: учитывать ситуацию, когда игроков больше или один отсутствует.
+		g_iPointsDistance = 0;
+		g_iPlayerDistance = 0;
 		return;
 	}
 
@@ -445,6 +447,8 @@ public taskPoints1v1() {
 	new iDist1 = g_iSettings[POINTS_DISTANCE_1];
 	new iDist2 = g_iSettings[POINTS_DISTANCE_2];
 	new iDist3 = g_iSettings[POINTS_DISTANCE_3];
+	g_iPointsDistance = points_calc_distance_value(iDistance, iDist1, iDist2, iDist3);
+	g_iPlayerDistance = iDistance;
 
 	new Float:pointsAdd = 0.0;
 	new iRange = 0;
@@ -464,35 +468,71 @@ public taskPoints1v1() {
 		new r, g, b;
 		switch (iRange) {
 			case 1: { r = 0; g = 255; b = 0; }
-			case 2: { r = 255; g = 200; b = 0; }
-			case 3: { r = 255; g = 120; b = 0; }
+			case 2: { r = 255; g = 255; b = 0; }
+			case 3: { r = 255; g = 255; b = 255; }
 			default: { r = 255; g = 0; b = 0; }
 		}
-		te_create_beam_between_entities(ttPlayers[0], ctPlayers[0], iBeam, 0, 10, 5, 5, 0, r, g, b, 150, 0);
+		te_create_beam_between_entities(ttPlayers[0], ctPlayers[0], iBeam, 0, 10, 5, 1, 0, r, g, b, 150, 0);
 	}
 
 	if (g_iSettings[POINTS_D_DEBUG]) {
-		new axis[3];
-
-		axis[0] = ttOrigin[0] + iDist1;
-		axis[1] = ttOrigin[1];
-		axis[2] = ttOrigin[2];
-		te_create_beam_disk(ttOrigin, iBeam, axis, 0, 10, 5, 3, 0, 0, 255, 0, 120, 0);
-
-		axis[0] = ttOrigin[0] + iDist2;
-		axis[1] = ttOrigin[1];
-		axis[2] = ttOrigin[2];
-		te_create_beam_disk(ttOrigin, iBeam, axis, 0, 10, 5, 3, 0, 255, 200, 0, 120, 0);
-
-		axis[0] = ttOrigin[0] + iDist3;
-		axis[1] = ttOrigin[1];
-		axis[2] = ttOrigin[2];
-		te_create_beam_disk(ttOrigin, iBeam, axis, 0, 10, 5, 3, 0, 255, 0, 0, 120, 0);
+		points_draw_debug_lines(ttOrigin, iDist1, 0, 255, 0);
+		points_draw_debug_lines(ttOrigin, iDist2, 255, 255, 0);
+		points_draw_debug_lines(ttOrigin, iDist3, 255, 255, 255);
 	}
 
 	if (pointsAdd > 0.0) {
 		g_eMatchInfo[e_flSidesTime][g_isTeamTT] += pointsAdd;
 	}
+}
+
+stock points_calc_distance_value(iDistance, iDist1, iDist2, iDist3) {
+	if (iDist1 <= 0 || iDist2 <= iDist1 || iDist3 <= iDist2) {
+		return 0;
+	}
+
+	if (iDistance <= iDist1) {
+		return floatround(float(iDistance) / float(iDist1) * 3.0, floatround_floor);
+	}
+
+	if (iDistance <= iDist2) {
+		return 3 + floatround(float(iDistance - iDist1) / float(iDist2 - iDist1) * 4.0, floatround_floor);
+	}
+
+	if (iDistance <= iDist3) {
+		return 7 + floatround(float(iDistance - iDist2) / float(iDist3 - iDist2) * 3.0, floatround_floor);
+	}
+
+	return 10;
+}
+
+stock points_draw_debug_lines(origin[3], iDistance, r, g, b) {
+	new endpos[3];
+
+	endpos[0] = origin[0] + iDistance;
+	endpos[1] = origin[1];
+	endpos[2] = origin[2];
+	te_create_beam_between_points(origin, endpos, iBeam, 0, 10, 5, 3, 0, r, g, b, 150, 0);
+
+	endpos[0] = origin[0] - iDistance;
+	endpos[1] = origin[1];
+	endpos[2] = origin[2];
+	te_create_beam_between_points(origin, endpos, iBeam, 0, 10, 5, 3, 0, r, g, b, 150, 0);
+
+	endpos[0] = origin[0];
+	endpos[1] = origin[1] + iDistance;
+	endpos[2] = origin[2];
+	te_create_beam_between_points(origin, endpos, iBeam, 0, 10, 5, 3, 0, r, g, b, 150, 0);
+
+	endpos[0] = origin[0];
+	endpos[1] = origin[1] - iDistance;
+	endpos[2] = origin[2];
+	te_create_beam_between_points(origin, endpos, iBeam, 0, 10, 5, 3, 0, r, g, b, 150, 0);
+
+	endpos[0] = origin[0];
+	endpos[1] = origin[1];
+	endpos[2] = origin[2] - iDistance;
+	te_create_beam_between_points(origin, endpos, iBeam, 0, 10, 5, 3, 0, r, g, b, 150, 0);
 }
 
 
@@ -582,6 +622,8 @@ stock match_reset_data(bool:bMatchFinish = false) {
 	g_eMatchInfo[e_iSidesRounds][HNS_TEAM_B] = 0;
 	g_eMatchInfo[e_iSidesRounds][HNS_TEAM_A] = 0;
 	g_eMatchInfo[e_mLeaved] = false;
+	g_iPointsDistance = 0;
+	g_iPlayerDistance = 0;
 
 	if (g_eMatchInfo[e_mWintime] == 0.0) {
 		cvar_update_wintime(15.0);

@@ -99,6 +99,8 @@ new g_eSurrenderData[SurrenderData_s];
 new bool:g_bNoplay[MAX_PLAYERS + 1];
 
 new Float:g_flRoundTime;
+new g_iPointsDistance;
+new g_iPlayerDistance;
 
 new g_szMapName[32]
 new g_iHostageEnt;
