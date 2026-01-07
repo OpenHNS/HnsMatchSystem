@@ -76,7 +76,7 @@ public LuckyTransferToTT(id) {
 
 GetRandomCT() {
 	static iPlayers[32], iCTNum
-	get_players(iPlayers, iCTNum, "ache", "CT");
+	get_players(iPlayers, iCTNum, "ahe", "CT");
 
 	if (!iCTNum)
 		return 0
