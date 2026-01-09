@@ -76,7 +76,7 @@ public mix_freezeend() {
 		if (task_exists(TASK_POINTS)) {
 			remove_task(TASK_POINTS);
 		}
-		set_task(0.5, "taskPoints1v1", .id = TASK_POINTS, .flags = "b");
+		set_task(0.25, "taskPoints1v1", .id = TASK_POINTS, .flags = "b");
 	} else {
 		set_task(0.25, "taskRoundEvent", .id = TASK_TIMER, .flags = "b");
 	}
@@ -297,7 +297,7 @@ public MixFinishedPoints(HNS_TEAM:hns_team) {
 		return;
 	}
 
-	ExecuteForward(g_hForwards[MATCH_FINISH], _, 0);
+	//ExecuteForward(g_hForwards[MATCH_FINISH], _, 0);
 
 	new Float:flScoreA = Float:g_eMatchInfo[e_flSidesTime][HNS_TEAM_A];
 	new Float:flScoreB = Float:g_eMatchInfo[e_flSidesTime][HNS_TEAM_B];
@@ -519,7 +519,7 @@ public taskPoints1v1() {
 		g_eMatchInfo[e_flSidesTime][g_isTeamTT] += pointsAdd;
 	}
 
-	g_flPointsMatchTime -= 0.5;
+	g_flPointsMatchTime -= 0.25;
 	if (g_flPointsMatchTime <= 0) {
 		if (g_eMatchInfo[e_flSidesTime][HNS_TEAM_A] > g_eMatchInfo[e_flSidesTime][HNS_TEAM_B]) {
 			MixFinishedPoints(HNS_TEAM_A);

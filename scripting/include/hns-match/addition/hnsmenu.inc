@@ -461,7 +461,11 @@ public menuSelectMode(id) {
 	formatex(szMsg, charsmax(szMsg), "%L", id, "MENU_MODE_DUEL");
 	menu_additem(hMenu, szMsg, "3");
 
-	formatex(szMsg, charsmax(szMsg), "Points 1vs1");
+	if (!isUserAdmin(id)) {
+		formatex(szMsg, charsmax(szMsg), "\dPoints 1vs1");
+	} else {
+		formatex(szMsg, charsmax(szMsg), "Points 1vs1");
+	}
 	menu_additem(hMenu, szMsg, "4");
 		
 	menu_setprop(hMenu, MPROP_EXIT, MEXIT_ALL);
@@ -494,7 +498,11 @@ public HandlerSelectMode(id, hMenu, item) {
 			cmdDuelMode(id);
 		}
 		case 4: {
-			cmdPointsMode(id);
+			if (!isUserAdmin(id)) {
+				menuSelectMode(id)
+			} else {
+				cmdPointsMode(id);
+			}
 		}
 	}
 

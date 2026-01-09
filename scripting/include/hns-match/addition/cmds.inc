@@ -21,7 +21,7 @@ stock cmds_init() {
 	RegisterSayCmd("mr", 		"maxround", 	"cmdMrMode",		iWatcherAccess, "Choose MR mode");
 	RegisterSayCmd("timer", 	"wintime", 		"cmdWintimeMode",	iWatcherAccess, "Choose Wintime mode");
 	RegisterSayCmd("duel", 		"versus", 		"cmdDuelMode",		iWatcherAccess, "Choose 1x1 mode");
-	RegisterSayCmd("points", 	"pts", 			"cmdPointsMode",	iWatcherAccess, "Choose Points 1vs1 mode");
+	RegisterSayCmd("points", 	"point", 		"cmdPointsMode",	iWatcherAccess, "Choose Points 1vs1 mode");
 	RegisterSayCmd("pub", 		"public", 		"cmdPubMode", 		iWatcherAccess, "Public mode");
 	RegisterSayCmd("dm", 		"deathmatch", 	"cmdDMMode", 		iWatcherAccess, "DeathMatch mode");
 	RegisterSayCmd("zm", 		"zombie", 		"cmdZMMode", 		iWatcherAccess, "Zombie mode");
@@ -245,7 +245,7 @@ public cmdDuelMode(id) {
 }
 
 public cmdPointsMode(id) {
-	if (!isUserWatcher(id)) {
+	if (!isUserAdmin(id)) {
 		return PLUGIN_HANDLED;
 	}
 
