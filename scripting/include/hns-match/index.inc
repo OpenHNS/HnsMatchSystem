@@ -40,6 +40,7 @@
 #include <hns-match/modes/mode_dm.inl>
 #include <hns-match/modes/mode_zombie.inl>
 #include <hns-match/modes/mode_mix.inl>
+#include <hns-match/modes/mode_mix_duel.inl>
 #include <hns-match/modes/mode_manager.inl>
 
 #include <hns-match/addition/cmds>

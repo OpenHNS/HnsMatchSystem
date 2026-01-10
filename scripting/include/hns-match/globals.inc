@@ -5,7 +5,6 @@
 #define _globals_included
 
 #define TASK_TIMER 54345
-#define TASK_POINTS 54445
 #define HUD_PAUSE 23931
 
 #define TASK_WAIT 12319
@@ -99,12 +98,9 @@ new g_eSurrenderData[SurrenderData_s];
 new bool:g_bNoplay[MAX_PLAYERS + 1];
 
 new Float:g_flRoundTime;
-new Float:g_flPointsMatchTime;
-new Float:g_flPointsMatchTimeSnap;
-new g_iPointsDistance;
-new Float:g_flPointsSnap[HNS_TEAM];
-new HNS_TEAM:g_iPointsTeamSnap;
+
 new g_iPlayerDistance;
+new g_iPointsDistance;
 
 new g_szMapName[32]
 new g_iHostageEnt;

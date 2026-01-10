@@ -24,8 +24,6 @@ public mix_start() {
 	g_eMatchState = STATE_PREPARE;
 
 	g_isTeamTT = HNS_TEAM_A;
-	g_flPointsMatchTime = g_eMatchInfo[e_mWintime] * 60.0;
-	points_save_state();
 
 	g_eSurrenderData[e_sFlDelay] = get_gametime() + g_iSettings[SURTIMEDELAY];
 
@@ -34,13 +32,7 @@ public mix_start() {
 	loadMapCFG();
 
 	if (g_iCurrentRules == RULES_POINTS) {
-		g_iSettings[FLASH] = 1;
-		g_iSettings[SMOKE] = 0;
-		server_cmd("mp_freezetime 0");
-		server_cmd("mp_forcecamera 0");
-		server_cmd("mp_round_infinite 1");
-		server_cmd("mp_roundrespawn_time -1");
-		server_cmd("mp_roundtime 0");
+		duel_start();
 	}
 
 
@@ -73,10 +65,7 @@ public mix_freezeend() {
 	}
 
 	if (g_iCurrentRules == RULES_POINTS) {
-		if (task_exists(TASK_POINTS)) {
-			remove_task(TASK_POINTS);
-		}
-		set_task(0.25, "taskPoints1v1", .id = TASK_POINTS, .flags = "b");
+		duel_freezeend();
 	} else {
 		set_task(0.25, "taskRoundEvent", .id = TASK_TIMER, .flags = "b");
 	}
@@ -95,7 +84,7 @@ public mix_restartround() {
 	}
 
 	if (g_iCurrentRules == RULES_POINTS) {
-		points_restore_state();
+		duel_restartround();
 	}
 
 	ResetAfkData();
@@ -112,7 +101,7 @@ public mix_pause() {
 	g_eMatchState = STATE_PAUSED;
 
 	if (g_iCurrentRules == RULES_POINTS) {
-		points_restore_state();
+		duel_pause();
 	}
 
 	ChangeGameplay(GAMEPLAY_TRAINING);
@@ -141,7 +130,7 @@ public mix_swap() {
 	g_isTeamTT = HNS_TEAM:!g_isTeamTT;
 
 	if (g_iCurrentRules == RULES_POINTS) {
-		points_save_state();
+		duel_swap();
 	}
 
 	ResetAfkData();
@@ -161,15 +150,13 @@ public mix_roundstart() {
 	if(task_exists(TASK_TIMER)) {
 		remove_task(TASK_TIMER);
 	}
-	if(task_exists(TASK_POINTS)) {
-		remove_task(TASK_POINTS);
-	}
 
 	if (g_eMatchState == STATE_PREPARE) {
 		g_eMatchState = STATE_ENABLED;
 	}
 
 	if (g_iCurrentRules == RULES_POINTS) {
+		duel_roundstart();
 		return;
 	}
 
@@ -292,48 +279,12 @@ public MixFinishedDuel() {
 	ExecuteForward(g_hForwards[MATCH_FINISH_POST], _, 1);
 }
 
-public MixFinishedPoints(HNS_TEAM:hns_team) {
-	if (g_iCurrentRules != RULES_POINTS) {
-		return;
-	}
-
-	//ExecuteForward(g_hForwards[MATCH_FINISH], _, 0);
-
-	new Float:flScoreA = Float:g_eMatchInfo[e_flSidesTime][HNS_TEAM_A];
-	new Float:flScoreB = Float:g_eMatchInfo[e_flSidesTime][HNS_TEAM_B];
-
-	new ttPlayers[MAX_PLAYERS], ctPlayers[MAX_PLAYERS], ttNum, ctNum;
-	get_players(ttPlayers, ttNum, "he", "TERRORIST");
-	get_players(ctPlayers, ctNum, "he", "CT");
-
-	new iPlayerA, iPlayerB;
-	if (g_isTeamTT == HNS_TEAM_A) {
-		iPlayerA = ttPlayers[0];
-		iPlayerB = ctPlayers[0];
-	} else {
-		iPlayerA = ctPlayers[0];
-		iPlayerB = ttPlayers[0];
-	}
-
-	chat_print(0, "Points: ^3%n^1 ^4%.1f^1 vs ^4%.1f^1 ^3%n^1 | Winner: ^3%n^1 ^3%.1f^1", 
-		iPlayerA, flScoreA, flScoreB, iPlayerB, 
-		hns_team == HNS_TEAM_A ? iPlayerA : iPlayerB,
-		hns_team == HNS_TEAM_A ? flScoreA : flScoreB);
-
-	setTaskHud(0, 1.0, 1, 255, 255, 255, 4.0, "%L", LANG_SERVER, "HUD_GAMEOVER");
-
-	match_reset_data();
-
-	training_start();
-
-	ExecuteForward(g_hForwards[MATCH_FINISH_POST], _, 0);
-}
-
 public mix_roundend(bool:win_ct) {
 	if (g_eMatchState != STATE_ENABLED) {
 		return;
 	}
 	if (g_iCurrentRules == RULES_POINTS) {
+		duel_roundend();
 		return;
 	}
 
@@ -341,9 +292,6 @@ public mix_roundend(bool:win_ct) {
 
 	if(task_exists(TASK_TIMER)) {
 		remove_task(TASK_TIMER);
-	}
-	if(task_exists(TASK_POINTS)) {
-		remove_task(TASK_POINTS);
 	}
 
 	switch (g_iCurrentRules) {
@@ -454,101 +402,12 @@ public taskRoundEvent() {
 	}
 }
 
-public taskPoints1v1() {
-	if (g_iCurrentMode != MODE_MIX || g_iCurrentRules != RULES_POINTS || g_eMatchState != STATE_ENABLED) {
-		if (task_exists(TASK_POINTS)) {
-			remove_task(TASK_POINTS);
-		}
-		return;
-	}
-
-	new ttPlayers[MAX_PLAYERS], ctPlayers[MAX_PLAYERS], ttNum, ctNum;
-	get_players(ttPlayers, ttNum, "ahe", "TERRORIST");
-	get_players(ctPlayers, ctNum, "ahe", "CT");
-
-	if (ttNum != 1 || ctNum != 1) {
-		// TODO: учитывать ситуацию, когда игроков больше или один отсутствует.
-		g_iPointsDistance = 0;
-		g_iPlayerDistance = 0;
-		return;
-	}
-
-	new ttOrigin[3], ctOrigin[3];
-	get_user_origin(ttPlayers[0], ttOrigin);
-	get_user_origin(ctPlayers[0], ctOrigin);
-
-	new iDistance = get_distance(ttOrigin, ctOrigin);
-	new iDist1 = g_iSettings[POINTS_DISTANCE_1];
-	new iDist2 = g_iSettings[POINTS_DISTANCE_2];
-	new iDist3 = g_iSettings[POINTS_DISTANCE_3];
-	g_iPointsDistance = points_calc_distance_value(iDistance, iDist1, iDist2, iDist3);
-	g_iPlayerDistance = iDistance;
-
-	new Float:pointsAdd = 0.0;
-	new iRange = 0;
-
-	if (iDistance <= iDist1) {
-		pointsAdd = g_iSettings[POINTS_ADD_1];
-		iRange = 1;
-	} else if (iDistance <= iDist2) {
-		pointsAdd = g_iSettings[POINTS_ADD_2];
-		iRange = 2;
-	} else if (iDistance <= iDist3) {
-		pointsAdd = g_iSettings[POINTS_ADD_3];
-		iRange = 3;
-	}
-
-	if (g_iSettings[POINTS_B_DEBUG]) {
-		new r, g, b;
-		switch (iRange) {
-			case 1: { r = 0; g = 255; b = 0; }
-			case 2: { r = 255; g = 255; b = 0; }
-			case 3: { r = 255; g = 255; b = 255; }
-			default: { r = 255; g = 0; b = 0; }
-		}
-		te_create_beam_between_entities(ttPlayers[0], ctPlayers[0], iBeam, 0, 10, 5, 1, 0, r, g, b, 150, 0);
-	}
-
-	if (g_iSettings[POINTS_D_DEBUG]) {
-		points_draw_debug_lines(ttOrigin, iDist1, 0, 255, 0);
-		points_draw_debug_lines(ttOrigin, iDist2, 255, 255, 0);
-		points_draw_debug_lines(ttOrigin, iDist3, 255, 255, 255);
-	}
-
-	if (pointsAdd > 0.0) {
-		g_eMatchInfo[e_flSidesTime][g_isTeamTT] += pointsAdd;
-	}
-
-	g_flPointsMatchTime -= 0.25;
-	if (g_flPointsMatchTime <= 0) {
-		if (g_eMatchInfo[e_flSidesTime][HNS_TEAM_A] > g_eMatchInfo[e_flSidesTime][HNS_TEAM_B]) {
-			MixFinishedPoints(HNS_TEAM_A);
-		} else {
-			MixFinishedPoints(HNS_TEAM_B);
-		}
-	}
-}
-
 public mix_killed(victim, killer) {
 	if (g_iCurrentRules != RULES_POINTS || g_eMatchState != STATE_ENABLED) {
 		return;
 	}
 
-	new TeamName:preVictimTeam = getUserTeam(victim);
-	new TeamName:preKillerTeam = TEAM_UNASSIGNED;
-	if (killer && killer != victim && is_user_connected(killer)) {
-		preKillerTeam = getUserTeam(killer);
-	}
-
-	dm_killed(victim, killer);
-
-	if (preKillerTeam == TEAM_CT && killer != victim) {
-		g_isTeamTT = HNS_TEAM:!g_isTeamTT;
-		points_save_state();
-	} else if (preVictimTeam == TEAM_TERRORIST && getUserTeam(victim) == TEAM_CT) {
-		g_isTeamTT = HNS_TEAM:!g_isTeamTT;
-		points_save_state();
-	}
+	duel_killed(victim, killer);
 }
 
 public mix_falldamage(id, Float:flDmg) {
@@ -556,13 +415,7 @@ public mix_falldamage(id, Float:flDmg) {
 		return;
 	}
 
-	new TeamName:preTeam = getUserTeam(id);
-	dm_falldamage(id, flDmg);
-
-	if (preTeam == TEAM_TERRORIST && getUserTeam(id) == TEAM_CT) {
-		g_isTeamTT = HNS_TEAM:!g_isTeamTT;
-		points_save_state();
-	}
+	duel_falldamage(id, Float:flDmg);
 }
 
 stock points_calc_distance_value(iDistance, iDist1, iDist2, iDist3) {
@@ -585,62 +438,6 @@ stock points_calc_distance_value(iDistance, iDist1, iDist2, iDist3) {
 	return 10;
 }
 
-stock points_save_state() {
-	if (g_iCurrentRules != RULES_POINTS) {
-		return;
-	}
-
-	g_flPointsMatchTimeSnap = g_flPointsMatchTime;
-	g_flPointsSnap[HNS_TEAM_A] = Float:g_eMatchInfo[e_flSidesTime][HNS_TEAM_A];
-	g_flPointsSnap[HNS_TEAM_B] = Float:g_eMatchInfo[e_flSidesTime][HNS_TEAM_B];
-	g_iPointsTeamSnap = g_isTeamTT;
-
-	cmdShowTimers(0);
-}
-
-stock points_restore_state() {
-	if (g_iCurrentRules != RULES_POINTS) {
-		return;
-	}
-
-	g_flPointsMatchTime = g_flPointsMatchTimeSnap;
-	g_eMatchInfo[e_flSidesTime][HNS_TEAM_A] = g_flPointsSnap[HNS_TEAM_A];
-	g_eMatchInfo[e_flSidesTime][HNS_TEAM_B] = g_flPointsSnap[HNS_TEAM_B];
-	g_isTeamTT = g_iPointsTeamSnap;
-	g_iPointsDistance = 0;
-	g_iPlayerDistance = 0;
-}
-
-stock points_draw_debug_lines(origin[3], iDistance, r, g, b) {
-	new endpos[3];
-
-	endpos[0] = origin[0] + iDistance;
-	endpos[1] = origin[1];
-	endpos[2] = origin[2];
-	te_create_beam_between_points(origin, endpos, iBeam, 0, 10, 5, 3, 0, r, g, b, 150, 0);
-
-	endpos[0] = origin[0] - iDistance;
-	endpos[1] = origin[1];
-	endpos[2] = origin[2];
-	te_create_beam_between_points(origin, endpos, iBeam, 0, 10, 5, 3, 0, r, g, b, 150, 0);
-
-	endpos[0] = origin[0];
-	endpos[1] = origin[1] + iDistance;
-	endpos[2] = origin[2];
-	te_create_beam_between_points(origin, endpos, iBeam, 0, 10, 5, 3, 0, r, g, b, 150, 0);
-
-	endpos[0] = origin[0];
-	endpos[1] = origin[1] - iDistance;
-	endpos[2] = origin[2];
-	te_create_beam_between_points(origin, endpos, iBeam, 0, 10, 5, 3, 0, r, g, b, 150, 0);
-
-	endpos[0] = origin[0];
-	endpos[1] = origin[1];
-	endpos[2] = origin[2] - iDistance;
-	te_create_beam_between_points(origin, endpos, iBeam, 0, 10, 5, 3, 0, r, g, b, 150, 0);
-}
-
-
 public mix_reverttimer() {
 	if (g_eMatchState != STATE_ENABLED) {
 		return;
@@ -649,9 +446,8 @@ public mix_reverttimer() {
 	if(task_exists(TASK_TIMER)) {
 		remove_task(TASK_TIMER);
 	}
-	if(task_exists(TASK_POINTS)) {
-		remove_task(TASK_POINTS);
-	}
+
+	duel_reverttimer();
 
 	g_eMatchInfo[e_flSidesTime][g_isTeamTT] -= g_flRoundTime;
 
@@ -727,13 +523,6 @@ stock match_reset_data(bool:bMatchFinish = false) {
 	g_eMatchInfo[e_iSidesRounds][HNS_TEAM_B] = 0;
 	g_eMatchInfo[e_iSidesRounds][HNS_TEAM_A] = 0;
 	g_eMatchInfo[e_mLeaved] = false;
-	g_flPointsMatchTime = g_eMatchInfo[e_mWintime] * 60.0;
-	g_flPointsMatchTimeSnap = g_eMatchInfo[e_mWintime] * 60.0;
-	g_iPointsDistance = 0;
-	g_iPlayerDistance = 0;
-	g_flPointsSnap[HNS_TEAM_A] = 0.0;
-	g_flPointsSnap[HNS_TEAM_B] = 0.0;
-	g_iPointsTeamSnap = HNS_TEAM_A;
 
 	if (g_eMatchInfo[e_mWintime] == 0.0) {
 		cvar_update_wintime(15.0);
@@ -745,9 +534,6 @@ stock match_reset_data(bool:bMatchFinish = false) {
 
 	if(task_exists(TASK_TIMER)) {
 		remove_task(TASK_TIMER);
-	}
-	if(task_exists(TASK_POINTS)) {
-		remove_task(TASK_POINTS);
 	}
 
 	if(task_exists(HUD_PAUSE)) {
