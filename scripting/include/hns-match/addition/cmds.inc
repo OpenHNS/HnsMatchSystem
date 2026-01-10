@@ -245,7 +245,7 @@ public cmdDuelMode(id) {
 }
 
 public cmdPointsMode(id) {
-	if (!isUserAdmin(id)) {
+	if (!isUserWatcher(id)) {
 		return PLUGIN_HANDLED;
 	}
 

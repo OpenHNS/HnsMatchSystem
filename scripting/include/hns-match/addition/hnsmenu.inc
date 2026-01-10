@@ -461,7 +461,7 @@ public menuSelectMode(id) {
 	formatex(szMsg, charsmax(szMsg), "%L", id, "MENU_MODE_DUEL");
 	menu_additem(hMenu, szMsg, "3");
 
-	if (!isUserAdmin(id)) {
+	if (!isUserWatcher(id)) {
 		formatex(szMsg, charsmax(szMsg), "\dPoints 1vs1");
 	} else {
 		formatex(szMsg, charsmax(szMsg), "Points 1vs1");
@@ -498,7 +498,7 @@ public HandlerSelectMode(id, hMenu, item) {
 			cmdDuelMode(id);
 		}
 		case 4: {
-			if (!isUserAdmin(id)) {
+			if (!isUserWatcher(id)) {
 				menuSelectMode(id)
 			} else {
 				cmdPointsMode(id);

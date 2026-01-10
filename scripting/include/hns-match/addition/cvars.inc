@@ -116,7 +116,7 @@ stock cvars_init() {
 	pCvar[POINTS_ADD_3] = _:create_cvar("hns_points_add_3", "0.05", FCVAR_NONE, "Points 1vs1 add for distance 3", true, 0.0, true, 5.0);
 	bind_pcvar_float(_:pCvar[POINTS_ADD_3], g_iSettings[POINTS_ADD_3]);
 
-	pCvar[POINTS_B_DEBUG] = create_cvar("hns_points_b_debug", "0", FCVAR_NONE, "Points 1vs1 beam debug (0/1)", true, 0.0, true, 1.0);
+	pCvar[POINTS_B_DEBUG] = create_cvar("hns_points_b_debug", "1", FCVAR_NONE, "Points 1vs1 beam debug (0/1)", true, 0.0, true, 1.0);
 	bind_pcvar_num(pCvar[POINTS_B_DEBUG], g_iSettings[POINTS_B_DEBUG]);
 
 	pCvar[POINTS_D_DEBUG] = create_cvar("hns_points_d_debug", "0", FCVAR_NONE, "Points 1vs1 distance lines debug (0/1)", true, 0.0, true, 1.0);
