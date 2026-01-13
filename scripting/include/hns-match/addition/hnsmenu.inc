@@ -261,6 +261,9 @@ public settingsMatchMenu(id) {
 		case RULES_DUEL: {
 			formatex(szMsg, charsmax(szMsg), "%L", id, "MENU_STNGS_DUEL", g_iSettings[DUELROUNDS]);
 		}
+		case RULES_POINTS: {
+			formatex(szMsg, charsmax(szMsg), "%L", id, "MENU_STNGS_MAXROUND", g_iSettings[MAXROUNDS], g_iSettings[MAXROUNDS] * 2);
+		}
 	}
 	
 	menu_additem(hMenu, szMsg, "3");
@@ -350,6 +353,14 @@ public settingsMatchMenuHandler(id, hMenu, item) {
 						g_iSettings[DUELROUNDS] = 4;
 					else if (g_iSettings[DUELROUNDS] >= 4)
 						g_iSettings[DUELROUNDS] = 2;
+				}
+				case RULES_POINTS: {
+					if (g_iSettings[MAXROUNDS] <= 6)
+						g_iSettings[MAXROUNDS] = 8;
+					else if (g_iSettings[MAXROUNDS] <= 8)
+						g_iSettings[MAXROUNDS] = 10;
+					else if (g_iSettings[MAXROUNDS] >= 10)
+						g_iSettings[MAXROUNDS] = 6;
 				}
 			}
 
@@ -449,6 +460,13 @@ public menuSelectMode(id) {
 
 	formatex(szMsg, charsmax(szMsg), "%L", id, "MENU_MODE_DUEL");
 	menu_additem(hMenu, szMsg, "3");
+
+	if (!isUserWatcher(id)) {
+		formatex(szMsg, charsmax(szMsg), "\dPoints 1vs1");
+	} else {
+		formatex(szMsg, charsmax(szMsg), "Points 1vs1");
+	}
+	menu_additem(hMenu, szMsg, "4");
 		
 	menu_setprop(hMenu, MPROP_EXIT, MEXIT_ALL);
 	
@@ -478,6 +496,13 @@ public HandlerSelectMode(id, hMenu, item) {
 		}
 		case 3: {
 			cmdDuelMode(id);
+		}
+		case 4: {
+			if (!isUserWatcher(id)) {
+				menuSelectMode(id)
+			} else {
+				cmdPointsMode(id);
+			}
 		}
 	}
 

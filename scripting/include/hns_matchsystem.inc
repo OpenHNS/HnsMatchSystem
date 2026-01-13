@@ -37,7 +37,8 @@ enum MODE_STATES {
 enum MATCH_RULES {
 	RULES_MR,
 	RULES_TIMER,
-	RULES_DUEL
+	RULES_DUEL,
+	RULES_POINTS
 }
 
 enum HNS_TEAM {
@@ -106,6 +107,10 @@ native Float:hns_get_score_a();
 native Float:hns_get_score_b();
 
 native HNS_TEAM:hns_get_is_team_tt();
+
+native hns_get_point_distance();
+
+native hns_get_players_distance();
 
 /*
 * Gets watcher flag

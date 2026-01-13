@@ -44,7 +44,20 @@ public match_system_additons(const szNativeName[], iNativeID, iTrapMode) {
 	if (equal(szNativeName, "hnsmatch_maps_is_knife")) { 
 		return PLUGIN_HANDLED
 	}
+
 	if (equal(szNativeName, "hns_cup_enabled")) { 
+		return PLUGIN_HANDLED
+	}
+
+	if (equal(szNativeName, "hns_cup_is_veto_active")) { 
+		return PLUGIN_HANDLED
+	}
+
+	if (equal(szNativeName, "hns_cup_stop_veto")) { 
+		return PLUGIN_HANDLED
+	}
+
+	if (equal(szNativeName, "hns_cup_set_veto_turn_by_team")) { 
 		return PLUGIN_HANDLED
 	}
 

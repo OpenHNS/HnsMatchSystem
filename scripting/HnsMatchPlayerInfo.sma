@@ -594,7 +594,98 @@ public task_ShowPlayerInfo() {
 			continue;
 		}
 
-		if (g_HudOnOff[id]) {
+		if (hns_get_mode() == MODE_MIX && hns_get_rules() == RULES_POINTS) {
+			set_hudmessage(.red = 100, .green = 100, .blue = 100, .x = 0.01, .y = 0.25, .holdtime = 1.0);
+			new szHudMess[1024], iLen;
+
+			new Float:flScoreA = hns_get_score_a();
+			new Float:flScoreB = hns_get_score_b();
+
+			new iPointPlayers[MAX_PLAYERS], iPointNum;
+			new hnsteamname[HNS_TEAM];
+	
+			get_players(iPointPlayers, iPointNum, "h");
+
+			for (new j; j < iPointNum; j++) {
+				if (hns_get_is_team_tt() == HNS_TEAM_A) {
+					if (rg_get_user_team(iPointPlayers[j]) == TEAM_TERRORIST) {                        
+						hnsteamname[HNS_TEAM_A] = iPointPlayers[j];
+					} else if (rg_get_user_team(iPointPlayers[j]) == TEAM_CT) {                        
+						hnsteamname[HNS_TEAM_B] = iPointPlayers[j];
+					}               
+				} else {
+					if (rg_get_user_team(iPointPlayers[j]) == TEAM_CT) {                        
+						hnsteamname[HNS_TEAM_A] = iPointPlayers[j];
+					} else if (rg_get_user_team(iPointPlayers[j]) == TEAM_TERRORIST) {                       
+						hnsteamname[HNS_TEAM_B] = iPointPlayers[j];
+					}                
+				}
+			}
+
+			//if(is_user_connected(hnsteamname[HNS_TEAM_A]) && is_user_connected(hnsteamname[HNS_TEAM_B])) {
+				iLen += format(szHudMess[iLen], sizeof szHudMess - iLen, "\
+				%0.1f : %n ^n\
+				%0.1f : %n ^n\
+				^nDistance %d ^n",
+				flScoreA, hnsteamname[HNS_TEAM_A],
+				flScoreB, hnsteamname[HNS_TEAM_B],
+				hns_get_players_distance());
+			//}
+
+			new iDistance = hns_get_point_distance();
+			if (iDistance < 0) {
+				iDistance = 0;
+			} else if (iDistance > 10) {
+				iDistance = 10;
+			}
+
+			new szDistance[16];
+			new iPos;
+			for (new k = 1; k <= 10; k++) {
+				szDistance[iPos++] = (k <= iDistance) ? '-' : ' ';
+				if (k == 3 || k == 7) {
+					szDistance[iPos++] = '|';
+				}
+			}
+			szDistance[iPos] = EOS;
+			iLen += format(szHudMess[iLen], sizeof szHudMess - iLen, "%s^n", szDistance);
+
+			new szSpecMess[512], iSpecLen;
+			new iSpecNum;
+			for (new j = 0; j < MAX_PLAYERS; j++) {
+				if (!g_eSpecPlayers[id][SHOW_SPEC]) {
+					break;
+				}
+
+				if (!g_eSpecPlayers[j][IS_SPEC]) {
+					continue;
+				}
+
+				if (g_eSpecPlayers[j][SPEC_HIDE]) {
+					continue;
+				}
+
+				if (!is_user_connected(j)) {
+					continue;
+				}
+
+				if (g_eSpecPlayers[j][SPEC_TARGET] == show_id) {
+					iSpecNum++;
+					iSpecLen += format(szSpecMess[iSpecLen], sizeof szSpecMess - iSpecLen, "%n%s^n", j, g_eSpecPlayers[j][IS_POV] ? "" : " [3rd Person]");
+				}
+			}
+
+			// if (iSpecNum) {
+			// 	iLen += format(szHudMess[iLen], sizeof szHudMess - iLen, "^nWatching [%d]^n%s", iSpecNum, szSpecMess);
+			// }
+			if (iSpecNum) {
+				iLen += format(szHudMess[iLen], sizeof szHudMess - iLen, "^nWatching [%d]", iSpecNum);
+			}
+
+			ShowSyncHudMsg(id, g_MsgSync, "%s", szHudMess);
+		}
+
+		if (g_HudOnOff[id] && hns_get_rules() != RULES_POINTS) {
 			set_hudmessage(.red = 100, .green = 100, .blue = 100, .x = 0.01, .y = 0.25, .holdtime = 1.0);
 			new szHudMess[1024], iLen;
 			if (show_id != id) {
@@ -620,7 +711,7 @@ public task_ShowPlayerInfo() {
 				}
 			}
 
-			if (hns_get_mode() == MODE_MIX && hns_get_state() != STATE_PAUSED && hns_get_rules() != RULES_DUEL) {
+			if (hns_get_mode() == MODE_MIX && hns_get_state() != STATE_PAUSED && hns_get_rules() != RULES_DUEL && hns_get_rules() != RULES_POINTS) {
 				new szTime[24];
 				fnConvertTime(hns_get_stats_surv(STATS_ALL, show_id), szTime, charsmax(szTime), false);
 				iLen += format(szHudMess[iLen], sizeof szHudMess - iLen, "\
@@ -629,7 +720,7 @@ public task_ShowPlayerInfo() {
 				szTime,
 				hns_get_stats_stabs(STATS_ALL, show_id));
 			}
-			else  if (hns_get_mode() == MODE_MIX && hns_get_state() != STATE_PAUSED && hns_get_rules() == RULES_DUEL) {
+			else  if (hns_get_mode() == MODE_MIX && hns_get_state() != STATE_PAUSED && hns_get_rules() == RULES_DUEL && hns_get_rules() != RULES_POINTS) {
 				iLen += format(szHudMess[iLen], sizeof szHudMess - iLen, "\
 				Stabs: %d^n",
 				hns_get_stats_stabs(STATS_ALL, show_id));

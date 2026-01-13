@@ -25,6 +25,9 @@ public plugin_natives() {
 
 	register_native("hns_get_is_team_tt", "native_get_is_team_tt");
 
+	register_native("hns_get_point_distance", "native_get_point_distance");
+	register_native("hns_get_players_distance", "native_get_players_distance");
+
 	set_native_filter("match_system_additons");
 }
 
@@ -85,6 +88,14 @@ public Float:native_get_score_b() {
 
 public HNS_TEAM:native_get_is_team_tt() {
 	return g_isTeamTT;
+}
+
+public native_get_point_distance() {
+	return g_iPointsDistance;
+}
+
+public native_get_players_distance() {
+	return g_iPlayerDistance;
 }
 
 public native_hns_isboost() {

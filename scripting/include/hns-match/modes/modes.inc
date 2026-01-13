@@ -77,7 +77,9 @@ stock set_unpause_settings() {
 
 	setTaskHud(0, 1.0, 1, 255, 255, 255, 3.0, "%L", LANG_SERVER, "HUD_UNPAUSE");
 	rg_send_audio(0, "fvox/activated.wav");
-	server_cmd("sv_alltalk 3");
+	if (g_iCurrentRules != RULES_POINTS) {
+		server_cmd("sv_alltalk 3");
+	}
 }
 
 public taskHudPaused() { // убить таск

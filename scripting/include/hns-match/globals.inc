@@ -40,7 +40,8 @@ new g_PluginId;
 enum NATCH_RULES {
 	RULES_MR,
 	RULES_TIMER,
-	RULES_DUEL
+	RULES_DUEL,
+	RULES_POINTS
 }
 
 new NATCH_RULES:g_iCurrentRules;
@@ -97,6 +98,9 @@ new g_eSurrenderData[SurrenderData_s];
 new bool:g_bNoplay[MAX_PLAYERS + 1];
 
 new Float:g_flRoundTime;
+
+new g_iPlayerDistance;
+new g_iPointsDistance;
 
 new g_szMapName[32]
 new g_iHostageEnt;
