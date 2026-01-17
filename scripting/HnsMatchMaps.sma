@@ -31,6 +31,7 @@ new Array:g_ArrAllMaps;
 
 new bool:g_bHasSettings;
 new bool:g_bBoost;
+new bool:g_bKnifeMap;
 new Float:g_fRoundTime;
 new g_iFreezeTime;
 new g_iFlash;
@@ -49,12 +50,15 @@ new Array:g_ArrNominatedCounts;
 public plugin_precache() {
 	debug_init("/hnsmatch-maps");
 
+	destroy_maps_arrays();
+
 	g_ArrSections = ArrayCreate(SectionData);
 	g_ArrAllMaps = ArrayCreate(32);
 	g_ArrNominatedMaps = ArrayCreate(32);
 	g_ArrNominatedCounts = ArrayCreate(1);
 	g_bHasSettings = false;
 	g_bBoost = false;
+	g_bKnifeMap = false;
 
 	new szPath[128], szFile[160];
 	get_localinfo("amxx_configsdir", szPath, charsmax(szPath));
@@ -108,6 +112,10 @@ public plugin_precache() {
 		add_map_to_all(szMap);
 
 		if (equali(szMap, g_szCurrentMap)) {
+			if (equali(sectionData[SectionName], SECTION_NAME_KNIFE)) {
+				g_bKnifeMap = true;
+			}
+
 			g_bBoost = bool:equali(sectionData[SectionName], SECTION_NAME_BOOST);
 
 			if (rt[0] && ft[0] && flash[0] && smoke[0]) {
@@ -149,7 +157,7 @@ public native_maps_init(amxx, params) {
 public bool:native_maps_is_knife(amxx, params) {
 	new Array:arrKnife = get_section_array_by_name(SECTION_NAME_KNIFE);
 	if (!arrKnife) {
-		return false;
+		return g_bKnifeMap;
 	}
 
 	new szMap[32];
@@ -176,6 +184,10 @@ public bool:native_maps_load_settings(amxx, params) {
 
 public plugin_cfg() {
 	hns_get_prefix(g_szPrefix, charsmax(g_szPrefix));
+}
+
+public plugin_end() {
+	destroy_maps_arrays();
 }
 
 public cmdMapsMenu(id) {
@@ -554,6 +566,36 @@ stock bool:extract_section_name(const szLine[], szSection[], len) {
 	return szSection[0] != EOS;
 }
 
+stock destroy_maps_arrays() {
+	if (g_ArrSections != Invalid_Array) {
+		new sectionData[SectionData];
+		for (new i = 0, iSize = ArraySize(g_ArrSections); i < iSize; i++) {
+			ArrayGetArray(g_ArrSections, i, sectionData);
+			new Array:sectionArray = Array:sectionData[SectionMaps];
+			if (sectionArray != Invalid_Array) {
+				ArrayDestroy(sectionArray);
+			}
+		}
+		ArrayDestroy(g_ArrSections);
+		g_ArrSections = Invalid_Array;
+	}
+
+	if (g_ArrAllMaps != Invalid_Array) {
+		ArrayDestroy(g_ArrAllMaps);
+		g_ArrAllMaps = Invalid_Array;
+	}
+
+	if (g_ArrNominatedMaps != Invalid_Array) {
+		ArrayDestroy(g_ArrNominatedMaps);
+		g_ArrNominatedMaps = Invalid_Array;
+	}
+
+	if (g_ArrNominatedCounts != Invalid_Array) {
+		ArrayDestroy(g_ArrNominatedCounts);
+		g_ArrNominatedCounts = Invalid_Array;
+	}
+}
+
 stock get_or_create_section(const name[]) {
 	new index = get_section_index(name);
 	if (index != -1) {
@@ -568,6 +610,10 @@ stock get_or_create_section(const name[]) {
 }
 
 stock get_section_index(const name[]) {
+	if (g_ArrSections == Invalid_Array) {
+		return -1;
+	}
+
 	new sectionData[SectionData];
 	for (new i = 0, iSize = ArraySize(g_ArrSections); i < iSize; i++) {
 		ArrayGetArray(g_ArrSections, i, sectionData);

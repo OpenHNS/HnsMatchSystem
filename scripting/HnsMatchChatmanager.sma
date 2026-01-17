@@ -121,6 +121,10 @@ public plugin_cfg() {
 	LoadPlayersPrefixes();
 }
 
+public plugin_end() {
+	destroy_prefixes();
+}
+
 LoadPlayersPrefixes() {
 	new dir[128]; get_localinfo("amxx_configsdir", dir, charsmax(dir));
 	new file_name[128]; formatex(file_name, charsmax(file_name), "%s/%s", dir, FILE_PREFIXES);
@@ -129,7 +133,9 @@ LoadPlayersPrefixes() {
 		log_amx("Prefixes file doesn't exist!");
 		return;
 	}
-	
+
+	destroy_prefixes();
+
 	g_tSteamPrefixes = TrieCreate();
 	g_tNamePrefixes = TrieCreate();
 	g_aFlagPrefixes = ArrayCreate(FLAG_PREFIX_INFO);
@@ -165,6 +171,27 @@ LoadPlayersPrefixes() {
 		}
 		fclose(file);
 	}
+}
+
+stock destroy_prefixes() {
+	if (g_tSteamPrefixes) {
+		TrieDestroy(g_tSteamPrefixes);
+		g_tSteamPrefixes = Invalid_Trie;
+	}
+
+	if (g_tNamePrefixes) {
+		TrieDestroy(g_tNamePrefixes);
+		g_tNamePrefixes = Invalid_Trie;
+	}
+
+	if (g_aFlagPrefixes) {
+		ArrayDestroy(g_aFlagPrefixes);
+		g_aFlagPrefixes = Invalid_Array;
+	}
+
+	g_iTrieSteamSize = 0;
+	g_iTrieNameSize = 0;
+	g_iArrayFlagSize = 0;
 }
 
 public plugin_natives() {
