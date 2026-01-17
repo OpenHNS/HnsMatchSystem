@@ -348,6 +348,10 @@ public mix_roundend(bool:win_ct) {
 			if (!iNum) {
 				new Float:roundtime = get_round_time() * 60.0;
 				g_eMatchInfo[e_flSidesTime][g_isTeamTT] += roundtime - g_flRoundTime;
+
+				if (g_eMatchInfo[e_flSidesTime][g_isTeamTT] <= 0.0) {
+					g_eMatchInfo[e_flSidesTime][g_isTeamTT] = 0.0;
+				}
 			}
 
 			if (win_ct) {

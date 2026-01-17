@@ -27,6 +27,10 @@ enum _:RNW {
 
 new g_eRnw[RNW];
 
+public plugin_natives() {
+	set_native_filter("match_system_additons");
+}
+
 public plugin_init() {
 	register_plugin("Match: Watcher", "1.2", "OpenHNS"); // Garey
 

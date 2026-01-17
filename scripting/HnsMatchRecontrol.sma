@@ -50,6 +50,10 @@ new g_saveData[MAX_PLAYERS + 1][Data];
 
 new g_hReplaceForward;
 
+public plugin_natives() {
+	set_native_filter("match_system_additons");
+}
+
 public plugin_init()
 {
 	register_plugin("Match: ReControl", "1.4", "OpenHNS"); // Thanks Conor, Denzer, Garey
