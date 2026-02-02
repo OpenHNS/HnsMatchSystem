@@ -5,6 +5,9 @@
 
 #define rg_get_user_team(%0) get_member(%0, m_iTeam)
 
+/**
+ * Game Modes.
+ */
 enum HNS_MODES {
 	MODE_TRAINING,
 	MODE_KNIFE,
@@ -14,6 +17,25 @@ enum HNS_MODES {
 	MODE_MIX
 };
 
+/**
+* Returns the game mode.
+*
+* @return		Mode status (HNS_MODES)
+*/
+native HNS_MODES:hns_get_mode();
+
+/**
+* Sets the game mode.
+*
+* @param iMode		Mode status (HNS_MODES)
+*
+* @noreturn
+*/
+native hns_set_mode(HNS_MODES:iMode);
+
+/**
+ * Match statuses.
+ */
 enum MATCH_STATUS {
 	MATCH_NONE,
 	MATCH_CAPTAINPICK,
@@ -27,48 +49,20 @@ enum MATCH_STATUS {
 	MATCH_STARTED
 }
 
+/**
+* Returns the match status
+*
+* @return		Match status (MATCH_STATUS)
+*/
+native MATCH_STATUS:hns_get_status();
+
+
 enum MODE_STATES {
 	STATE_DISABLED,
 	STATE_PREPARE,
 	STATE_PAUSED,
 	STATE_ENABLED
 };
-
-enum MATCH_RULES {
-	RULES_MR,
-	RULES_TIMER,
-	RULES_DUEL,
-	RULES_POINTS
-}
-
-enum HNS_TEAM {
-	HNS_TEAM_B,
-	HNS_TEAM_A
-}
-
-/*
-* Gets mode system.
-*
-* @return HNS_MODES
-*/
-native HNS_MODES:hns_get_mode();
-
-/*
-* Set mode system.
-*
-* @param iMode HNS_MODES
-*
-* @noreturn
-*/
-native hns_set_mode(HNS_MODES:iMode);
-
-
-/*
-* Gets match status.
-*
-* @return MATCH_STATUS
-*/
-native MATCH_STATUS:hns_get_status();
 
 /*
 * Gets match state
@@ -77,6 +71,12 @@ native MATCH_STATUS:hns_get_status();
 */
 native MODE_STATES:hns_get_state();
 
+enum MATCH_RULES {
+	RULES_MR,
+	RULES_TIMER,
+	RULES_DUEL,
+	RULES_POINTS
+}
 
 /*
 * Gets match rules
@@ -84,6 +84,13 @@ native MODE_STATES:hns_get_state();
 * @return type MATCH_RULES
 */
 native MATCH_RULES:hns_get_rules();
+
+enum HNS_TEAM {
+	HNS_TEAM_B,
+	HNS_TEAM_A
+}
+
+
 
 /*
 * Gets the system prefix.

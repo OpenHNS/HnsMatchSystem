@@ -2,9 +2,8 @@
 #include <reapi>
 #include <fakemeta>
 #include <hns_matchsystem>
+#include <hns_matchsystem_cup>
 #include <hns_matchsystem_filter>
-
-native hns_cup_enabled();
 
 new g_szPrefix[24];
 
@@ -23,8 +22,6 @@ new g_iMsgHookTempEntity;
 
 public plugin_natives() {
 	set_native_filter("match_system_additons");
-
-
 }
 
 public plugin_init() {
@@ -52,8 +49,8 @@ public plugin_init() {
 	RegisterHookChain(RG_CSGameRules_FlPlayerFallDamage, "rgFlPlayerFallDamage", true);
 	RegisterHookChain(RG_CBasePlayer_Spawn, "rgPlayerSpawn", false);
 
-	RegisterHookChain(RG_CGrenade_ExplodeFlashbang, "rgExplodeGrenade", .post = false)
-	RegisterHookChain(RG_CGrenade_ExplodeFlashbang, "rgExplodeGrenadePost", .post = true)
+	RegisterHookChain(RG_CGrenade_ExplodeFlashbang, "rgExplodeGrenade", false)
+	RegisterHookChain(RG_CGrenade_ExplodeFlashbang, "rgExplodeGrenadePost", true)
 
 	//register_forward(FM_AddToFullPack, "fmAddToFullPack", 1);
 	
@@ -282,7 +279,7 @@ public cmdFlash(id) {
 	}
 
 	rg_give_item(id, "weapon_flashbang");
-	rg_give_item(id, "weapon_smokegrenade");
+	//rg_give_item(id, "weapon_smokegrenade");
 	return PLUGIN_HANDLED;
 }
 
@@ -431,7 +428,9 @@ public rgFlPlayerFallDamage(id) {
 	}
 
 	if(g_bDamage[id]) {
-		client_print_color(id, print_team_blue, "%L", id, "TRNING_DMG", g_szPrefix, dmg);
+		if (dmg >= 1.0) {
+			client_print_color(id, print_team_blue, "%L", id, "TRNING_DMG", g_szPrefix, dmg);
+		}
 	}
 
 	return HC_CONTINUE;
