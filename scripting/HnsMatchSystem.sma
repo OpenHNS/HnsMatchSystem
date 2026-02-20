@@ -18,7 +18,7 @@ public plugin_cfg() {
 }
 
 public plugin_init() {
-	g_PluginId = register_plugin("Hide'n'Seek Match System", "2.0.5.1", "OpenHNS"); // Спасибо: Cultura, Garey, Medusa, Ruffman, Conor, Juice
+	g_PluginId = register_plugin("Hide'n'Seek Match System", "2.2.0", "OpenHNS"); // Спасибо: Cultura, Garey, Medusa, Ruffman, Conor, Juice
 
 	rh_get_mapname(g_szMapName, charsmax(g_szMapName));
 
