@@ -26,68 +26,17 @@ Counter-Strike Hide'n'Seek Match System plugins.
 - Surrender
 - AFK, Player leave contol
 
-## Установка
+## Установка / Настройка
  
-1. Скомпилируйте плагин.
+### [1. Установка системы на сервер](https://github.com/OpenHNS/HnsMatchSystem/wiki/1.-%D0%A3%D1%81%D1%82%D0%B0%D0%BD%D0%BE%D0%B2%D0%BA%D0%B0-%D1%81%D0%B8%D1%81%D1%82%D0%B5%D0%BC%D1%8B-%D0%BD%D0%B0-%D1%81%D0%B5%D1%80%D0%B2%D0%B5%D1%80)
 
-2. Скопируйте скомпилированный файл `.amxx` в директорию: `amxmodx/plugins/`
+### [2. Настройка конфигурации карт для миксов](https://github.com/OpenHNS/HnsMatchSystem/wiki/2.-%D0%9D%D0%B0%D1%81%D1%82%D1%80%D0%BE%D0%B9%D0%BA%D0%B0-%D0%BA%D0%BE%D0%BD%D1%84%D0%B8%D0%B3%D1%83%D1%80%D0%B0%D1%86%D0%B8%D0%B8-%D0%BA%D0%B0%D1%80%D1%82-%D0%B4%D0%BB%D1%8F-%D0%BC%D0%B8%D0%BA%D1%81%D0%BE%D0%B2)
 
-3. Скопируйте содержимое папки `configs/` в директорию: `amxmodx/configs/`
+### [(Опционально) 3. Настройка PTS ‐ Mysql бд](https://github.com/OpenHNS/HnsMatchSystem/wiki/3.--%D0%9D%D0%B0%D1%81%D1%82%D1%80%D0%BE%D0%B9%D0%BA%D0%B0-PTS-%E2%80%90-Mysql-%D0%B1%D0%B4)
 
-4. Скопируйте содержимое папки `data/lang/` в директорию: `amxmodx/data/lang/`
+### [4. Настройка привилегий Watcher Full watcher](https://github.com/OpenHNS/HnsMatchSystem/wiki/4.-%D0%9D%D0%B0%D1%81%D1%82%D1%80%D0%BE%D0%B9%D0%BA%D0%B0-%D0%BF%D1%80%D0%B8%D0%B2%D0%B8%D0%BB%D0%B5%D0%B3%D0%B8%D0%B9-Watcher-Full-watcher)
 
-5. Скопируйте содержимое папки `modules/` (Если у вас сервер на линуксе, то берем файл `.so` , если винда `.dll`) в директорию: `amxmodx/modules/`
-
-6. Пропишите `.amxx` в файле `amxmodx/configs/plugins.ini`
-
-7. Перезапустите сервер или поменяйте карту.
-
-## Настройка
-
-- Настройка птc
-
-    1. Открыть файл `configs/mixsystem/hnsmatch-sql.cfg`
-    2. Вписать туда данные для базы данных
-    3. Поменять карту.
-
-- Настройка конфигов для карты
-    1. Заходим в папку `configs/mixsystem/mapcfg/`
-    2. Создаем файл с названием карты (rayish_brick-world.cfg)
-    3. Вписываем в файл нужные настройки:
-
-            mp_roundtime "2.5"
-            mp_freezetime "5" 
-            hns_flash "1"
-            hns_smoke "1"
-    4. Сохраняем. Теперь у нас при старте микса на карте rayish_brick-world будут выставляться настройки автоматически.
-
-- Ножевая карта
-    1. Открываем файл `configs/mixsystem/matchsystem.cfg`
-    2. Изменяем квар hns_knifemap под вашу ножевую карту.
-    3. Все, теперь на указанной вами карте будут проходить капитан и кнайф моды, рекомендую ножевую карту ставить первой в списке карт `maps.ini`
-
-- Watcher
-
-    Для начало:
-    1. Открываем файл `configs/mixsystem/matchsystem.cfg`
-    2. Изменяем квар hns_watcher_flag, который будет использоваться для ватчера (Обычный f - ADMIN_MAP).
-    3. Сохраняем. 
-
-    Для watcher'а необходимо настроить `configs/cmdaccess.ini`, а именно сделать доступным для флага (в зависимости от значения квара) следующие команды:
-
-        "amx_slay" 	"f" ; admincmd.amxx
-        "amx_slap" 	"f" ; admincmd.amxx
-        "amx_map" 	"f" ; admincmd.amxx
-        "amx_slapmenu" 	"f" ; plmenu.amxx
-        "amx_teammenu" 	"f" ; plmenu.amxx
-        "amx_mapmenu" 	"f" ; mapsmenu.amxx  
-- Full Watcher
-
-    1. Открываем файл `configs/mixsystem/matchsystem.cfg`
-    2. Изменяем квар hns_fullwatcher_flag, который будет использоваться для полного ватчера (Обычный m - ADMIN_LEVEL_A).
-    3. Сохраняем.          
-
-## Описание
+## Описание (Актуализировать)
     
 - Watcher
 
@@ -129,7 +78,7 @@ Counter-Strike Hide'n'Seek Match System plugins.
     У игрока, который бегает полный раунд или игрок из противоположной команды разбивается, плюс очко в сторону игрока за ТТ.   
     Тот игрок, который наберёт 3 очка за тт выигрывает.    
 
-## Плагины
+## Плагины (Актуализировать)
 - HnsMatchSystem.sma - Основной плагин мода
 - HnsMatchBans.sma - Плагин для банов на матчах
 - HnsMatchStats.sma - Плагин статистики микса
@@ -144,86 +93,9 @@ Counter-Strike Hide'n'Seek Match System plugins.
 - HnsMatchWatcher.sma - Watcher система, позволяет игрокам становиться/голосовать за watcher
 - HnsMatchMapRules.sma - Плагин для установления правил для карт (убийство в воде на карте de_piranesi) 
 
-## Cvars
+## Команды / Cvars
 
-| Cvar                 | Default    | Description |
-| :------------------- | :--------: | :--------------------------------------------------- |
-| hns_rules            | 0          | Режим по умолчанию (0 - MR 1 - Timer) |
-| hns_wintime          | 15         | Время для победы |
-| hns_rounds           | 6          | Кол-во раундов для победы |
-| hns_duel             | 3          | Кол-во выигранных раундов для победы |
-| hns_boost            | 0          | Включить/Отключить буст режим |
-| hns_onehpmode        | 0          | Включить/Отключить 1 хп режим |
-| hns_flash	           | 1          | Кол-во флешек (Плагин сам изменяет) |
-| hns_smoke            | 1          | Кол-во дыма (Плагин сам изменяет) |
-| hns_last             | 1          | Включить/Отключить выдачу гранат последнему ТТ |
-| hns_dmrespawn        | 3          | Время (в секундах), в течение которого игрок возродится в режиме DM |
-| hns_survotetime      | 10         | Время (в секундах), в течение которого идет голосование (surrender) |
-| hns_randompick       | 1          | Включить/Отключить случайный выбор игроков |
-| hns_knifemap         | 35hp_2     | Ножевая карта |
-| hns_prefix           | MATCH      | Префикс системы |
-| hns_gamename         | Hide'n'Seek | Геймнейм сервера |
-| hns_watcher_flag     | f          | Флаг Ватчера |
-| hns_fullwatcher_flag | m          | Флаг Фулл-ватчера |
-| hns_admin_flag       | d          | Флаг Администратора |
-
-## Команды
-
-- Команды в чат
-
-- Watcher (ADMIN_MAP)
-
-| Commands | Description |
-| :------------------- |  :--------------------------------------------------- |
-| mix | Админ меню |
-| mode / type | Мод меню |
-| timer / wintime | Изменить режим микса на Таймер |
-| mr / maxround | Изменить режим микса на Мр |
-| training | Тренировочное меню |
-| pub / public | Паблик мод |
-| dm / deathmatch | ДМ мод |
-| specall | Перенести всех за наблюдателей |
-| ttall | Перенести всех за ТТ |
-| ctall | Перенести всех за КТ |
-| startmix / start | Запустить матч |
-| kniferound / kf | Запустить ножевой раунд |
-| captain / cap | Запустить капитан мод |
-| stop / cancel | Остановить текущий режим  |
-| skill | Скилл мод |
-| boost | Буст мод |
-| duel | Дуэль мод |
-| rr / restart | Рестарт раунда |
-| swap / swap | Поменять команды местами |
-| pause / ps | Пауза |
-| live / unpause | Запуск |
-| mr 5 | Выставить кол-во раундов |
-
-- Player
-
-| Commands | Description |
-| :------------------- |  :--------------------------------------------------- |
-| hideknife / showknife / knife | Спрятать, Показать нож |
-| surrender / sur | Голосование за сдачу |
-| score / s | Счет |
-| pick | Меню пика |
-| back / spec | Перейти или вернуться за наблюдателей |
-| np / noplay | Не играю |
-| ip / play | Играю |
-| checkpoint / cp | Чекпоинт |
-| teleport / tp | Телепорт к чекпоинту |
-| gocheck / gc | Телепорт к чекпоинту |
-| showdmg / showdamade | Дамаг |
-| noclip / clip | Ноуклип |
-| respawn / resp | Заспавниться |
-| top / tops | Топ игроков за матч |
-| map / maps | Показать список карт |
-| rank / me | Показать свою статистику птс |
-| pts / ptstop | Показать топ игроков по птс |
-| hud / hudinfo | Отключить/Включить худ |
-| rnw / rocknewwatcher | Голосовать за нового watcher |
-| wt / watcher | Передать/Назначить нового watcher |
-| speclist / showpec | Включить/выключить speclist |
-| spechide / hidespec | Включить/выключить spechide |
+### [5. Команды и CVAR микс системы](https://github.com/OpenHNS/HnsMatchSystem/wiki/5.-%D0%9A%D0%BE%D0%BC%D0%B0%D0%BD%D0%B4%D1%8B-%D0%B8-CVAR-%D0%BC%D0%B8%D0%BA%D1%81-%D1%81%D0%B8%D1%81%D1%82%D0%B5%D0%BC%D1%8B)
 
 ## Благодарности / Aвторы других плагинов
 [Garey](https://github.com/Garey27)
