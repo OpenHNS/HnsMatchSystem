@@ -33,6 +33,10 @@ public match_system_additons(const szNativeName[], iNativeID, iTrapMode) {
 		return PLUGIN_HANDLED
 	}
 
+	if (equal(szNativeName, "hnsmatch_maps_load_settings")) { 
+		return PLUGIN_HANDLED
+	}
+
 	if (equal(szNativeName, "hns_cup_enabled") || equal(szNativeName, "hns_cup_is_veto_active") || equal(szNativeName, "hns_cup_stop_veto") || equal(szNativeName, "hns_cup_set_veto_turn_by_team")) { 
 		return PLUGIN_HANDLED
 	}

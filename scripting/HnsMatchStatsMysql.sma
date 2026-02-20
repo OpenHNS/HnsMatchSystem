@@ -340,7 +340,7 @@ public SQLPlayersSelectHandler(Handle:hQuery, id) {
 	new szNewName[MAX_NAME_LENGTH];
 	new szNewNameSQL[MAX_NAME_LENGTH * 2]
 	get_user_name(id, szNewName, charsmax(szNewName));
-	SQL_QuoteString(Empty_Handle, szNewNameSQL, charsmax(szNewNameSQL), fmt("%s", szNewNameSQL));
+	SQL_QuoteString(Empty_Handle, szNewNameSQL, charsmax(szNewNameSQL), szNewName);
 
 	new szOldName[MAX_NAME_LENGTH];
 	SQL_ReadResult(hQuery, tempName, szOldName, charsmax(szOldName));
