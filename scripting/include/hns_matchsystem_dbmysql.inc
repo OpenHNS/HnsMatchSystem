@@ -21,11 +21,11 @@ enum _:PTS_DATA {
 * Returns MySQL stats value by type.
 *
 * @param id		Client index
-* @param PTS_DATA	Requested field type
+* @param iType		Requested field type (PTS_DATA)
 *
 * @return		Integer value for requested field
 */
-native hns_mysql_stats_data(id, _:PTS_DATA);
+native hns_mysql_stats_data(id, _:PTS_DATA:iType);
 
 enum _:SKILL_INFO
 {
