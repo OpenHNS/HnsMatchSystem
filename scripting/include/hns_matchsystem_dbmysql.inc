@@ -10,7 +10,7 @@
 */
 native hns_mysql_stats_init();
 
-enum _:PTS_DATA {
+enum PTS_DATA {
 	e_iPts,
     e_iWins,
     e_iLoss,
@@ -25,7 +25,7 @@ enum _:PTS_DATA {
 *
 * @return		Integer value for requested field
 */
-native hns_mysql_stats_data(id, _:PTS_DATA:iType);
+native hns_mysql_stats_data(id, PTS_DATA:iType);
 
 enum _:SKILL_INFO
 {
@@ -54,7 +54,9 @@ new const g_eSkillData[][SKILL_INFO] = {
 
 stock hns_mysql_stats_skill(id) {
 	new iPts = hns_mysql_stats_data(id, e_iPts);
-	new szSkill[10];
+	static szSkill[10];
+	szSkill[0] = EOS;
+
 	for (new i; i < sizeof(g_eSkillData); i++) {
 		if (iPts >= g_eSkillData[i][SKILL_PTS]) {
 			formatex(szSkill, charsmax(szSkill), "%s", g_eSkillData[i][SKILL_LVL]);
