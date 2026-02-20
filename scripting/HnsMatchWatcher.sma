@@ -300,6 +300,10 @@ public cmdRnw(id) {
 		return PLUGIN_CONTINUE;
 	}
 
+	if (g_eRnw[r_bIsVote]) {
+		return PLUGIN_CONTINUE;
+	}
+
 	new iPlayers = get_playersnum();
 	
 	if(iPlayers <= 1) {

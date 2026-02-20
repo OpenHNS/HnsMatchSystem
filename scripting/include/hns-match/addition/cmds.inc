@@ -702,7 +702,7 @@ public cmdStartPause(id) {
 		return PLUGIN_HANDLED;
 	}
 
-	if ((g_iCurrentMode != MODE_MIX || g_iCurrentMode != MODE_KNIFE) && g_eMatchState == STATE_PAUSED) {
+	if ((g_iCurrentMode != MODE_MIX && g_iCurrentMode != MODE_KNIFE) || g_eMatchState == STATE_PAUSED) {
 		return PLUGIN_HANDLED;
 	}
 
@@ -719,7 +719,7 @@ public cmdStopPause(id) {
 		return PLUGIN_HANDLED;
 	}
 	
-	if ((g_iCurrentMode != MODE_MIX || g_iCurrentMode != MODE_KNIFE) && g_eMatchState != STATE_PAUSED) {
+	if ((g_iCurrentMode != MODE_MIX && g_iCurrentMode != MODE_KNIFE) || g_eMatchState != STATE_PAUSED) {
 		return PLUGIN_HANDLED;
 	}
 

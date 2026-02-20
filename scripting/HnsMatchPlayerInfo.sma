@@ -652,7 +652,7 @@ public task_ShowPlayerInfo() {
 
 			new szSpecMess[512], iSpecLen;
 			new iSpecNum;
-			for (new j = 0; j < MAX_PLAYERS; j++) {
+			for (new j = 1; j <= MaxClients; j++) {
 				if (!g_eSpecPlayers[id][SHOW_SPEC]) {
 					break;
 				}
@@ -739,7 +739,7 @@ public task_ShowPlayerInfo() {
 
 			new szSpecMess[512], iSpecLen;
 			new iSpecNum;
-			for (new j = 0; j < MAX_PLAYERS; j++) {
+			for (new j = 1; j <= MaxClients; j++) {
 				if (!g_eSpecPlayers[id][SHOW_SPEC]) {
 					break;
 				}
