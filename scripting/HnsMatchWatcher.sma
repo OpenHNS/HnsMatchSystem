@@ -98,13 +98,13 @@ public WatcherMenu(id) {
 
 	menu_additem(hMenu, szMsg, "5");
 
-	if (isUserFullWatcher(id)) {
-		formatex(szMsg, charsmax(szMsg), "%L", LANG_PLAYER, "WTR_MENU_MIXBANMENUS");
-	} else {
-		formatex(szMsg, charsmax(szMsg), "\d%L", LANG_PLAYER, "WTR_MENU_NOT_MIXBANMENUS");
-	}
+	// if (isUserFullWatcher(id)) {
+	// 	formatex(szMsg, charsmax(szMsg), "%L", LANG_PLAYER, "WTR_MENU_MIXBANMENUS");
+	// } else {
+	// 	formatex(szMsg, charsmax(szMsg), "\d%L", LANG_PLAYER, "WTR_MENU_NOT_MIXBANMENUS");
+	// }
 
-	menu_additem(hMenu, szMsg, "6");
+	// menu_additem(hMenu, szMsg, "6");
 
 	// if (isUserFullWatcher(id)) {
 	// 	formatex(szMsg, charsmax(szMsg), "%L", LANG_PLAYER, "WTR_MENU_BLACKLIST");
@@ -148,13 +148,13 @@ public codeWatcherMenu(id, hMenu, item) {
 				WatcherMenu(id);
 			}
 		}
-		case 6: {
-			if (isUserFullWatcher(id)) {
-				client_cmd(id, "hns_bans_menu");
-			} else {
-				WatcherMenu(id);
-			}
-		}
+		// case 6: {
+		// 	if (isUserFullWatcher(id)) {
+		// 		client_cmd(id, "hns_bans_menu");
+		// 	} else {
+		// 		WatcherMenu(id);
+		// 	}
+		// }
 		// case 5: {
 		// 	if (get_user_flags(id) & FULL_ACCESS) {
 		// 		//client_cmd(id, ""); // Вызов блэклист меню
@@ -355,7 +355,7 @@ public StartVote() {
 	new iPlayers[MAX_PLAYERS], iNum;
 	get_players(iPlayers, iNum, "ch");
 	
-	for(new i = 1; i <= MaxClients; i++) {
+	for (new i; i < iNum; i++) {
 		new id = iPlayers[i];
 
 		if (!is_user_connected(id)) {
@@ -424,7 +424,13 @@ public codeVoteWatcherMenu(id, hMenu, item) {
 
 public check_votes() {
 	new iPlayers[MAX_PLAYERS], iNum;
-	get_players(iPlayers, iNum);
+	get_players(iPlayers, iNum, "ch");
+
+	if (!iNum) {
+		g_eRnw[r_bIsVote] = false;
+		arrayset(g_eRnw[r_iVotes], 0, sizeof(g_eRnw[r_iVotes]));
+		return;
+	}
 
 	new iCandiates[MAX_PLAYERS], cnum;
 	
@@ -447,7 +453,7 @@ public check_votes() {
 	}
 
 	if(cnum > 1) {
-		iNewWatcher = iCandiates[random_num(1, cnum)];
+		iNewWatcher = iCandiates[random_num(0, cnum - 1)];
 		client_print_color(0, print_team_blue, "%L", LANG_PLAYER, "WTR_NEW_RANDOM", g_sPrefix, iNewWatcher, cnum);
 	} else {	
 		client_print_color(0, print_team_blue, "%L", LANG_PLAYER, "WTR_NEW", g_sPrefix, iNewWatcher, iMaxVotes);

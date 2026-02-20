@@ -789,17 +789,23 @@ public hns_match_finished(iWinTeam) {
 			new iPlayers[MAX_PLAYERS], iNum;
 			if (iWinTeam == 1) {
 				get_players(iPlayers, iNum, "che", "TERRORIST");
-
-				for(new i; i < iNum; i++) {
-					new id = iPlayers[i];
-					SQLPtsSetWin(id, PTS_WIN);
+				for (new i; i < iNum; i++) {
+					SQLPtsSetWin(iPlayers[i], PTS_WIN);
 				}
-			} else {
-				get_players(iPlayers, iNum, "che", "CT");
 
-				for(new i; i < iNum; i++) {
-					new id = iPlayers[i];
-					SQLPtsSetLose(id, PTS_LOSS);
+				get_players(iPlayers, iNum, "che", "CT");
+				for (new i; i < iNum; i++) {
+					SQLPtsSetLose(iPlayers[i], PTS_LOSS);
+				}
+			} else if (iWinTeam == 2) {
+				get_players(iPlayers, iNum, "che", "CT");
+				for (new i; i < iNum; i++) {
+					SQLPtsSetWin(iPlayers[i], PTS_WIN);
+				}
+
+				get_players(iPlayers, iNum, "che", "TERRORIST");
+				for (new i; i < iNum; i++) {
+					SQLPtsSetLose(iPlayers[i], PTS_LOSS);
 				}
 			}
 		}
