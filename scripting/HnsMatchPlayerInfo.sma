@@ -594,7 +594,7 @@ public task_ShowPlayerInfo() {
 			continue;
 		}
 
-		if (hns_get_mode() == MODE_MIX && hns_get_rules() == RULES_POINTS) {
+		if (hns_get_mode() == MODE_MIX && hns_get_rules() == RULES_DUEL) {
 			set_hudmessage(.red = 100, .green = 100, .blue = 100, .x = 0.01, .y = 0.25, .holdtime = 1.0);
 			new szHudMess[1024], iLen;
 
@@ -685,7 +685,7 @@ public task_ShowPlayerInfo() {
 			ShowSyncHudMsg(id, g_MsgSync, "%s", szHudMess);
 		}
 
-		if (g_HudOnOff[id] && hns_get_rules() != RULES_POINTS) {
+		if (g_HudOnOff[id] && hns_get_rules() != RULES_DUEL) {
 			set_hudmessage(.red = 100, .green = 100, .blue = 100, .x = 0.01, .y = 0.25, .holdtime = 1.0);
 			new szHudMess[1024], iLen;
 			if (show_id != id) {
@@ -711,7 +711,7 @@ public task_ShowPlayerInfo() {
 				}
 			}
 
-			if (hns_get_mode() == MODE_MIX && hns_get_state() != STATE_PAUSED && hns_get_rules() != RULES_DUEL && hns_get_rules() != RULES_POINTS) {
+			if (hns_get_mode() == MODE_MIX && hns_get_state() != STATE_PAUSED && hns_get_rules() != RULES_DUEL) {
 				new szTime[24];
 				fnConvertTime(hns_get_stats_surv(STATS_ALL, show_id), szTime, charsmax(szTime), false);
 				iLen += format(szHudMess[iLen], sizeof szHudMess - iLen, "\
@@ -720,12 +720,6 @@ public task_ShowPlayerInfo() {
 				szTime,
 				hns_get_stats_stabs(STATS_ALL, show_id));
 			}
-			else  if (hns_get_mode() == MODE_MIX && hns_get_state() != STATE_PAUSED && hns_get_rules() == RULES_DUEL && hns_get_rules() != RULES_POINTS) {
-				iLen += format(szHudMess[iLen], sizeof szHudMess - iLen, "\
-				Stabs: %d^n",
-				hns_get_stats_stabs(STATS_ALL, show_id));
-			}
-
 			if (g_bHnsBannedInit) {
 				if (e_bBanned[id]) {
 					iLen += format(szHudMess[iLen], sizeof szHudMess - iLen, "You are banned from matches: %s^n", secondsToDHM(g_iBanExpired[id] - get_systime()));

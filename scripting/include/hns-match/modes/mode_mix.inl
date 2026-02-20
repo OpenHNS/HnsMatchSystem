@@ -31,7 +31,7 @@ public mix_start() {
 
 	loadMapCFG();
 
-	if (g_iCurrentRules == RULES_POINTS) {
+	if (g_iCurrentRules == RULES_DUEL) {
 		duel_start();
 	}
 
@@ -64,7 +64,7 @@ public mix_freezeend() {
 		}
 	}
 
-	if (g_iCurrentRules == RULES_POINTS) {
+	if (g_iCurrentRules == RULES_DUEL) {
 		duel_freezeend();
 	} else {
 		set_task(0.25, "taskRoundEvent", .id = TASK_TIMER, .flags = "b");
@@ -83,7 +83,7 @@ public mix_restartround() {
 		g_eMatchState = STATE_PREPARE;
 	}
 
-	if (g_iCurrentRules == RULES_POINTS) {
+	if (g_iCurrentRules == RULES_DUEL) {
 		duel_restartround();
 	}
 
@@ -100,7 +100,7 @@ public mix_pause() {
 
 	g_eMatchState = STATE_PAUSED;
 
-	if (g_iCurrentRules == RULES_POINTS) {
+	if (g_iCurrentRules == RULES_DUEL) {
 		duel_pause();
 	}
 
@@ -129,7 +129,7 @@ public mix_unpause() {
 public mix_swap() {
 	g_isTeamTT = HNS_TEAM:!g_isTeamTT;
 
-	if (g_iCurrentRules == RULES_POINTS) {
+	if (g_iCurrentRules == RULES_DUEL) {
 		duel_swap();
 	}
 
@@ -155,7 +155,7 @@ public mix_roundstart() {
 		g_eMatchState = STATE_ENABLED;
 	}
 
-	if (g_iCurrentRules == RULES_POINTS) {
+	if (g_iCurrentRules == RULES_DUEL) {
 		duel_roundstart();
 		return;
 	}
@@ -262,28 +262,11 @@ public MixFinishedWT() {
 	ExecuteForward(g_hForwards[MATCH_FINISH_POST], _, 1);
 }
 
-public MixFinishedDuel() {
-	ExecuteForward(g_hForwards[MATCH_FINISH], _, 1);
-	
-	new iPlayers[MAX_PLAYERS], iNum;
-	get_players(iPlayers, iNum, "che", "TERRORIST");
-
-	chat_print(0, "%L", LANG_PLAYER, "DUEL_WIN", iPlayers[0]);
-	
-	setTaskHud(0, 1.0, 1, 255, 255, 255, 4.0, "%L", LANG_SERVER, "HUD_GAMEOVER");
-
-	match_reset_data(true);
-
-	training_start();
-
-	ExecuteForward(g_hForwards[MATCH_FINISH_POST], _, 1);
-}
-
 public mix_roundend(bool:win_ct) {
 	if (g_eMatchState != STATE_ENABLED) {
 		return;
 	}
-	if (g_iCurrentRules == RULES_POINTS) {
+	if (g_iCurrentRules == RULES_DUEL) {
 		duel_roundend();
 		return;
 	}
@@ -358,17 +341,6 @@ public mix_roundend(bool:win_ct) {
 				hns_swap_teams();
 			}
 		}
-		case RULES_DUEL: {
-			if (win_ct) {
-				hns_swap_teams();
-			} else {
-				g_eMatchInfo[e_iSidesRounds][g_isTeamTT]++
-			}
-			
-			if(g_eMatchInfo[e_iSidesRounds][g_isTeamTT] >= g_iSettings[DUELROUNDS]) {
-				MixFinishedDuel();
-			}
-		}
 	}
 }
 
@@ -407,7 +379,7 @@ public taskRoundEvent() {
 }
 
 public mix_killed(victim, killer) {
-	if (g_iCurrentRules != RULES_POINTS || g_eMatchState != STATE_ENABLED) {
+	if (g_iCurrentRules != RULES_DUEL || g_eMatchState != STATE_ENABLED) {
 		return;
 	}
 
@@ -415,7 +387,7 @@ public mix_killed(victim, killer) {
 }
 
 public mix_falldamage(id, Float:flDmg) {
-	if (g_iCurrentRules != RULES_POINTS || g_eMatchState != STATE_ENABLED) {
+	if (g_iCurrentRules != RULES_DUEL || g_eMatchState != STATE_ENABLED) {
 		return;
 	}
 

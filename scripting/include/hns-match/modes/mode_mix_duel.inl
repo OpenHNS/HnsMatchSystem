@@ -1,5 +1,5 @@
 // Для новой дуэли нужен свой матч мод (по типу wintime или mr)
-// В HnsMatchSystem новая дуэль проверяется значением RULES_POINTS
+// В HnsMatchSystem новая дуэль проверяется значением RULES_DUEL
 
 #define TASK_POINTS 54445 // Таск для крутилки поинтов
 
@@ -108,7 +108,7 @@ public duel_falldamage(id, Float:flDmg) {
 
 
 public taskDuelPoints() {
-	if (g_iCurrentMode != MODE_MIX || g_iCurrentRules != RULES_POINTS || g_eMatchState != STATE_ENABLED) {
+	if (g_iCurrentMode != MODE_MIX || g_iCurrentRules != RULES_DUEL || g_eMatchState != STATE_ENABLED) {
 		if (task_exists(TASK_POINTS)) {
 			remove_task(TASK_POINTS);
 		}
@@ -183,11 +183,12 @@ public taskDuelPoints() {
 }
 
 stock MixFinishedPoints(HNS_TEAM:hns_team) {
-	if (g_iCurrentRules != RULES_POINTS) {
+	if (g_iCurrentRules != RULES_DUEL) {
 		return;
 	}
 
-	//ExecuteForward(g_hForwards[MATCH_FINISH], _, 0);
+	new iWinTeam = (hns_team == g_isTeamTT) ? 1 : 2;
+	ExecuteForward(g_hForwards[MATCH_FINISH], _, iWinTeam);
 
 	new Float:flScoreA = Float:g_eMatchInfo[e_flSidesTime][HNS_TEAM_A];
 	new Float:flScoreB = Float:g_eMatchInfo[e_flSidesTime][HNS_TEAM_B];
@@ -216,11 +217,11 @@ stock MixFinishedPoints(HNS_TEAM:hns_team) {
 
 	training_start();
 
-	ExecuteForward(g_hForwards[MATCH_FINISH_POST], _, 0);
+	ExecuteForward(g_hForwards[MATCH_FINISH_POST], _, iWinTeam);
 }
 
 stock points_save_state() {
-	if (g_iCurrentRules != RULES_POINTS) {
+	if (g_iCurrentRules != RULES_DUEL) {
 		return;
 	}
 
@@ -233,7 +234,7 @@ stock points_save_state() {
 }
 
 stock points_restore_state() {
-	if (g_iCurrentRules != RULES_POINTS) {
+	if (g_iCurrentRules != RULES_DUEL) {
 		return;
 	}
 
@@ -289,4 +290,3 @@ stock points_draw_debug_lines(origin[3], iDistance, r, g, b) {
 	endpos[2] = origin[2] - iDistance;
 	te_create_beam_between_points(origin, endpos, iBeam, 0, 10, 5, 3, 0, r, g, b, 150, 0);
 }
-

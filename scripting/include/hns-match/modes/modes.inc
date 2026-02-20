@@ -77,7 +77,7 @@ stock set_unpause_settings() {
 
 	setTaskHud(0, 1.0, 1, 255, 255, 255, 3.0, "%L", LANG_SERVER, "HUD_UNPAUSE");
 	rg_send_audio(0, "fvox/activated.wav");
-	if (g_iCurrentRules != RULES_POINTS) {
+	if (g_iCurrentRules != RULES_DUEL) {
 		server_cmd("sv_alltalk 3");
 	}
 }

@@ -21,7 +21,6 @@ stock cmds_init() {
 	RegisterSayCmd("mr", 		"maxround", 	"cmdMrMode",		iWatcherAccess, "Choose MR mode");
 	RegisterSayCmd("timer", 	"wintime", 		"cmdWintimeMode",	iWatcherAccess, "Choose Wintime mode");
 	RegisterSayCmd("duel", 		"versus", 		"cmdDuelMode",		iWatcherAccess, "Choose 1x1 mode");
-	RegisterSayCmd("points", 	"point", 		"cmdPointsMode",	iWatcherAccess, "Choose Points 1vs1 mode");
 	RegisterSayCmd("pub", 		"public", 		"cmdPubMode", 		iWatcherAccess, "Public mode");
 	RegisterSayCmd("dm", 		"deathmatch", 	"cmdDMMode", 		iWatcherAccess, "DeathMatch mode");
 	RegisterSayCmd("zm", 		"zombie", 		"cmdZMMode", 		iWatcherAccess, "Zombie mode");
@@ -240,32 +239,6 @@ public cmdDuelMode(id) {
 
 	chat_print(0, "%l", "MODE_SET_DUEL", id);
 	g_iCurrentRules = RULES_DUEL;
-
-	return PLUGIN_HANDLED;
-}
-
-public cmdPointsMode(id) {
-	if (!isUserWatcher(id)) {
-		return PLUGIN_HANDLED;
-	}
-
-	if (g_iCurrentRules == RULES_POINTS) {
-		chat_print(0, "Points 1vs1 already enabled.");
-		return PLUGIN_HANDLED;
-	}
-
-	if (g_iCurrentMode == MODE_MIX) {
-		chat_print(0, "%l", "MODE_NOT_MIX");
-		return PLUGIN_HANDLED;
-	}
-
-	if (get_num_players_in_match() > 2) {
-		chat_print(0, "%l", "MODE_NOT_SET_DUEL");
-		return PLUGIN_HANDLED;
-	}
-
-	chat_print(0, "Points 1vs1 mode enabled by %n.", id);
-	g_iCurrentRules = RULES_POINTS;
 
 	return PLUGIN_HANDLED;
 }
@@ -814,44 +787,6 @@ public cmdShowTimers(id) {
 			}
 		}
 		case RULES_DUEL: {
-			new iPlayers[MAX_PLAYERS], iNum;
-			new hnsteamname[HNS_TEAM];
-	
-			get_players(iPlayers, iNum, "ch");
-
-			for (new j; j < iNum; j++) {
-				if (!g_ePlayerInfo[iPlayers[j]][PLAYER_MATCH]) {
-					continue;                }
-				if (g_isTeamTT == HNS_TEAM_A) {
-					if (getUserTeam(iPlayers[j]) == TEAM_TERRORIST) {                        
-						hnsteamname[HNS_TEAM_A] = iPlayers[j];
-					} else if (getUserTeam(iPlayers[j]) == TEAM_CT) {                        
-						hnsteamname[HNS_TEAM_B] = iPlayers[j];
-					}               
-				} else {
-					if (getUserTeam(iPlayers[j]) == TEAM_CT) {                        
-						hnsteamname[HNS_TEAM_A] = iPlayers[j];
-					} else if (getUserTeam(iPlayers[j]) == TEAM_TERRORIST) {                       
-						hnsteamname[HNS_TEAM_B] = iPlayers[j];
-					}                
-				}
-			}	
-
-			if(is_user_connected(hnsteamname[HNS_TEAM_A]) && is_user_connected(hnsteamname[HNS_TEAM_B])) { // TODO
-				if (g_isTeamTT == HNS_TEAM_A) {
-					chat_print(id, "%L", id, "SCORE_DUEL", hnsteamname[HNS_TEAM_A], g_eMatchInfo[e_iSidesRounds][HNS_TEAM_A], g_eMatchInfo[e_iSidesRounds][HNS_TEAM_B], hnsteamname[HNS_TEAM_B]);
-				} else {
-					chat_print(id, "%L", id, "SCORE_DUEL", hnsteamname[HNS_TEAM_B], g_eMatchInfo[e_iSidesRounds][HNS_TEAM_B], g_eMatchInfo[e_iSidesRounds][HNS_TEAM_A], hnsteamname[HNS_TEAM_A]);
-				}
-			}  else {
-				if (g_isTeamTT == HNS_TEAM_A) {
-					chat_print(id, "%L", id, "SCORE_DUEL_DEF", g_eMatchInfo[e_iSidesRounds][HNS_TEAM_A], g_eMatchInfo[e_iSidesRounds][HNS_TEAM_B]);
-				} else {
-					chat_print(id, "%L", id, "SCORE_DUEL_DEF", g_eMatchInfo[e_iSidesRounds][HNS_TEAM_B], g_eMatchInfo[e_iSidesRounds][HNS_TEAM_A]);
-				}
-			}	
-		}	
-		case RULES_POINTS: {
 			new Float:flScoreA = Float:g_eMatchInfo[e_flSidesTime][HNS_TEAM_A];
 			new Float:flScoreB = Float:g_eMatchInfo[e_flSidesTime][HNS_TEAM_B];
 

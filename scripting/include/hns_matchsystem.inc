@@ -74,8 +74,7 @@ native MODE_STATES:hns_get_state();
 enum MATCH_RULES {
 	RULES_MR,
 	RULES_TIMER,
-	RULES_DUEL,
-	RULES_POINTS
+	RULES_DUEL
 }
 
 /*

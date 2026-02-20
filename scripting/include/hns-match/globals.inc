@@ -40,8 +40,7 @@ new g_PluginId;
 enum NATCH_RULES {
 	RULES_MR,
 	RULES_TIMER,
-	RULES_DUEL,
-	RULES_POINTS
+	RULES_DUEL
 }
 
 new NATCH_RULES:g_iCurrentRules;
