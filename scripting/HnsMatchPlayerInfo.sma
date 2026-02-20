@@ -532,6 +532,7 @@ public ShowTop(player) {
 		fS = float(hns_get_stats_stabs(STATS_ALL, id));
 		fD = float(hns_get_stats_deaths(STATS_ALL, id));
 		fA = float(hns_get_stats_assists(STATS_ALL, id));
+		new Float:fSDA = (fD > 0.0) ? floatdiv(floatadd(fS, fA), fD) : floatadd(fS, fA);
 
 		fnConvertTime(hns_get_stats_surv(STATS_ALL, id), surv_time, 23);
 		fnConvertTime(hns_get_stats_flashtime(STATS_ALL, id), flash_time, 23);
@@ -545,7 +546,7 @@ public ShowTop(player) {
 		<td>%d</td> \
 		</tr>",
 			id,
-			floatdiv(floatadd(fS, fA), fD),
+			fSDA,
 			surv_time,
 			hns_get_stats_dmg_tt(STATS_ALL, id) + hns_get_stats_dmg_ct(STATS_ALL, id),
 			hns_get_stats_runned(STATS_ALL, id) / 1000.0,

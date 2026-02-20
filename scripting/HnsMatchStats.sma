@@ -664,14 +664,11 @@ collect_stats()
 
 		iStats[id][PLR_STATS_OWNAGES] += g_StatsRound[id][PLR_STATS_OWNAGES];
 		iStats[id][PLR_STATS_BHOP_COUNT] += g_StatsRound[id][PLR_STATS_BHOP_COUNT];
-		iStats[id][PLR_STATS_BHOP_PERCENT_SUM] += g_StatsRound[id][PLR_STATS_BHOP_PERCENT_SUM];
-		iStats[id][PLR_STATS_BHOP_PERCENT_SUM] = floatadd(iStats[id][PLR_STATS_BHOP_PERCENT_SUM],  g_StatsRound[id][PLR_STATS_BHOP_PERCENT_SUM]);
-		iStats[id][PLR_STATS_SGS_COUNT] += g_StatsRound[id][PLR_STATS_BHOP_COUNT];
-		iStats[id][PLR_STATS_SGS_PERCENT_SUM] += g_StatsRound[id][PLR_STATS_SGS_PERCENT_SUM];
-		iStats[id][PLR_STATS_SGS_PERCENT_SUM] = floatadd(iStats[id][PLR_STATS_SGS_PERCENT_SUM],  g_StatsRound[id][PLR_STATS_SGS_PERCENT_SUM]);
-		iStats[id][PLR_STATS_DDRUN_COUNT] += g_StatsRound[id][PLR_STATS_BHOP_COUNT];
-		iStats[id][PLR_STATS_DDRUN_PERCENT_SUM] += g_StatsRound[id][PLR_STATS_DDRUN_PERCENT_SUM];
-		iStats[id][PLR_STATS_DDRUN_PERCENT_SUM] = floatadd(iStats[id][PLR_STATS_DDRUN_PERCENT_SUM],  g_StatsRound[id][PLR_STATS_DDRUN_PERCENT_SUM]);
+		iStats[id][PLR_STATS_BHOP_PERCENT_SUM] = floatadd(iStats[id][PLR_STATS_BHOP_PERCENT_SUM], g_StatsRound[id][PLR_STATS_BHOP_PERCENT_SUM]);
+		iStats[id][PLR_STATS_SGS_COUNT] += g_StatsRound[id][PLR_STATS_SGS_COUNT];
+		iStats[id][PLR_STATS_SGS_PERCENT_SUM] = floatadd(iStats[id][PLR_STATS_SGS_PERCENT_SUM], g_StatsRound[id][PLR_STATS_SGS_PERCENT_SUM]);
+		iStats[id][PLR_STATS_DDRUN_COUNT] += g_StatsRound[id][PLR_STATS_DDRUN_COUNT];
+		iStats[id][PLR_STATS_DDRUN_PERCENT_SUM] = floatadd(iStats[id][PLR_STATS_DDRUN_PERCENT_SUM], g_StatsRound[id][PLR_STATS_DDRUN_PERCENT_SUM]);
 		iStats[id][PLR_STATS_KILLS] += g_StatsRound[id][PLR_STATS_KILLS];
 		iStats[id][PLR_STATS_DEATHS] += g_StatsRound[id][PLR_STATS_DEATHS];
 		iStats[id][PLR_STATS_ASSISTS] += g_StatsRound[id][PLR_STATS_ASSISTS];

@@ -338,15 +338,13 @@ public SQLPlayersSelectHandler(Handle:hQuery, id) {
 	g_iPlayerSQLID[id] = SQL_ReadResult(hQuery, tempSQLID);
 
 	new szNewName[MAX_NAME_LENGTH];
-	new szNewNameSQL[MAX_NAME_LENGTH * 2]
 	get_user_name(id, szNewName, charsmax(szNewName));
-	SQL_QuoteString(Empty_Handle, szNewNameSQL, charsmax(szNewNameSQL), szNewName);
 
 	new szOldName[MAX_NAME_LENGTH];
 	SQL_ReadResult(hQuery, tempName, szOldName, charsmax(szOldName));
 
-	if (!equal(szNewNameSQL, szOldName))
-		SQLPlayersName(id, szNewNameSQL);
+	if (!equal(szNewName, szOldName))
+		SQLPlayersName(id, szNewName);
 	
 	new szNewIp[MAX_IP_LENGTH]; 
 	get_user_ip(id, szNewIp, charsmax(szNewIp), true);
@@ -404,6 +402,7 @@ public SQLPlayersInsertHandler(Handle:hQuery, id) {
 	g_iPlayerSQLID[id] = SQL_GetInsertId(hQuery);
 
 	SQLPtsSelect(id);
+	SQLOwnageSelect(id);
 
 	return PLUGIN_HANDLED;
 }
