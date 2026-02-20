@@ -32,11 +32,11 @@ Counter-Strike Hide'n'Seek Match System plugins.
 
 ### [2. Настройка конфигурации карт для миксов](https://github.com/OpenHNS/HnsMatchSystem/wiki/2.-%D0%9D%D0%B0%D1%81%D1%82%D1%80%D0%BE%D0%B9%D0%BA%D0%B0-%D0%BA%D0%BE%D0%BD%D1%84%D0%B8%D0%B3%D1%83%D1%80%D0%B0%D1%86%D0%B8%D0%B8-%D0%BA%D0%B0%D1%80%D1%82-%D0%B4%D0%BB%D1%8F-%D0%BC%D0%B8%D0%BA%D1%81%D0%BE%D0%B2)
 
-### [(Опционально) 3. Настройка PTS ‐ Mysql бд](https://github.com/OpenHNS/HnsMatchSystem/wiki/3.--%D0%9D%D0%B0%D1%81%D1%82%D1%80%D0%BE%D0%B9%D0%BA%D0%B0-PTS-%E2%80%90-Mysql-%D0%B1%D0%B4)
+### [3. (Опционально) Настройка PTS ‐ Mysql бд](https://github.com/OpenHNS/HnsMatchSystem/wiki/3.--%D0%9D%D0%B0%D1%81%D1%82%D1%80%D0%BE%D0%B9%D0%BA%D0%B0-PTS-%E2%80%90-Mysql-%D0%B1%D0%B4)
 
 ### [4. Настройка привилегий Watcher Full watcher](https://github.com/OpenHNS/HnsMatchSystem/wiki/4.-%D0%9D%D0%B0%D1%81%D1%82%D1%80%D0%BE%D0%B9%D0%BA%D0%B0-%D0%BF%D1%80%D0%B8%D0%B2%D0%B8%D0%BB%D0%B5%D0%B3%D0%B8%D0%B9-Watcher-Full-watcher)
 
-## Описание (Актуализировать)
+## Описание
     
 - Watcher
 
@@ -74,24 +74,29 @@ Counter-Strike Hide'n'Seek Match System plugins.
 
 - Матч - Дуэль режим
 
-    Игроки играют до трёх раундов (чтобы счёт был у тт 3)   
-    У игрока, который бегает полный раунд или игрок из противоположной команды разбивается, плюс очко в сторону игрока за ТТ.   
-    Тот игрок, который наберёт 3 очка за тт выигрывает.    
+    Дм режим, дается минут 15 на всю игру.
+    Между игроками показывает линию, которая отражает дистанцию игроков.  
+    Есть 3 дистанции.
+    Зелёная - примерно 100 юнитов, за нее даётся оч много очков.
+    Жёлтая - примерно 250 юнитов даётся много очков
+    Белая - примерно 400 юнитов, дается мало очков.
+    Ну и Красная - больше 400 юнитов очков не даёт вообще.
+    Ну и суть такова: Нужно набрать больше очков.
+    Чем ближе ты к противнику, тем больше это ценится. 
 
-## Плагины (Актуализировать)
-- HnsMatchSystem.sma - Основной плагин мода
-- HnsMatchBans.sma - Плагин для банов на матчах
-- HnsMatchStats.sma - Плагин статистики микса
-- HnsMatchPlayerInfo.sma - Hud информация игрока
-- HnsMatchSql.sma - Плагин для взаимодействия с БД
-- HnsMatchPts.sma - Плагин для ПТС (не работает без Sql плагина)
-- HnsMatchOwnage.sma - Плагин для подсчета Ownage (не работает без Sql плагина)
-- HnsMatchChatmanager.sma - Измененый ЧМ, показывает префикс ранга (скилла)
-- HnsMatchMaps.sma - Список карт для игроков (/maps)
-- HnsMatchTraining.sma - Трейнинг меню (Чектоинты)
-- HnsMatchReControl.sma - Плагин для замены/передачи контроля/замены админом игрока
-- HnsMatchWatcher.sma - Watcher система, позволяет игрокам становиться/голосовать за watcher
-- HnsMatchMapRules.sma - Плагин для установления правил для карт (убийство в воде на карте de_piranesi) 
+## Плагины
+- HnsMatchSystem.sma - Основной плагин системы
+- HnsMatchStats.sma - Статистика матча (kills/deaths/dmg/survival и т.д.)
+- HnsMatchStatsMysql.sma - MySQL/PTS статистика (`/rank`, `/pts`)
+- HnsMatchOwnage.sma - Подсчет ownage (работает вместе с MySQL-статистикой)
+- HnsMatchPlayerInfo.sma - HUD/round info/speclist
+- HnsMatchChatmanager.sma - Chat manager и форматирование сообщений
+- HnsMatchMaps.sma - Список карт и карта-настройки (`/maps`)
+- HnsMatchMapRules.sma - Правила для отдельных карт
+- HnsMatchTraining.sma - Тренировочный режим (cp/tp/respawn/noclip)
+- HnsMatchRecontrol.sma - Замена/передача контроля игрока
+- HnsMatchWatcher.sma - Система watcher и голосование за watcher
+- HnsMatchBans.amxx - Плагин банов матч-системы (бинарный модуль в сборке)
 
 ## Команды / Cvars
 

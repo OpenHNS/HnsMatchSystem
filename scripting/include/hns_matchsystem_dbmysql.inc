@@ -3,15 +3,28 @@
 #endif
 #define _hns_matchsystem_dbmysql_included
 
+/**
+* Returns MySQL stats module init state.
+*
+* @return		1 if module is available, otherwise 0
+*/
 native hns_mysql_stats_init();
 
 enum _:PTS_DATA {
 	e_iPts,
     e_iWins,
     e_iLoss,
-    e_iTop
+	e_iTop
 };
 
+/**
+* Returns MySQL stats value by type.
+*
+* @param id		Client index
+* @param PTS_DATA	Requested field type
+*
+* @return		Integer value for requested field
+*/
 native hns_mysql_stats_data(id, _:PTS_DATA);
 
 enum _:SKILL_INFO
@@ -50,6 +63,20 @@ stock hns_mysql_stats_skill(id) {
 	return szSkill;
 }
 
+/**
+* Returns player's ownage value from MySQL stats module.
+*
+* @param id		Client index
+*
+* @return		Ownage value
+*/
 native hns_mysql_stats_get_ownage(id);
 
+/**
+* Requests ownage update for player in MySQL stats module.
+*
+* @param id		Client index
+*
+* @noreturn
+*/
 native hns_mysql_stats_set_ownage(id);

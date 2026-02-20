@@ -9,7 +9,7 @@ enum _:TYPE_STATS
 	STATS_ALL = 1
 }
 
-/*
+/**
 * Gets players kills.
 *
 * @param type Stats type: TYPE_STATS
@@ -19,7 +19,7 @@ enum _:TYPE_STATS
 */
 native hns_get_stats_kills(type, id);
 
-/*
+/**
 * Gets players deaths.
 *
 * @param type Stats type: TYPE_STATS
@@ -29,7 +29,7 @@ native hns_get_stats_kills(type, id);
 */
 native hns_get_stats_deaths(type, id);
 
-/*
+/**
 * Gets players assists.
 *
 * @param type Stats type: TYPE_STATS
@@ -39,7 +39,7 @@ native hns_get_stats_deaths(type, id);
 */
 native hns_get_stats_assists(type, id);
 
-/*
+/**
 * Gets players stabs.
 *
 * @param type Stats type: TYPE_STATS
@@ -49,7 +49,7 @@ native hns_get_stats_assists(type, id);
 */
 native hns_get_stats_stabs(type, id);
 
-/*
+/**
 * Gets players damage CT.
 *
 * @param type Stats type: TYPE_STATS
@@ -59,7 +59,7 @@ native hns_get_stats_stabs(type, id);
 */
 native hns_get_stats_dmg_ct(type, id);
 
-/*
+/**
 * Gets players damage TT.
 *
 * @param type Stats type: TYPE_STATS
@@ -70,7 +70,7 @@ native hns_get_stats_dmg_ct(type, id);
 native hns_get_stats_dmg_tt(type, id);
 
 
-/*
+/**
 * Gets players runned distance.
 *
 * @param type Stats type: TYPE_STATS
@@ -80,7 +80,7 @@ native hns_get_stats_dmg_tt(type, id);
 */
 native Float:hns_get_stats_runned(type, id);
 
-/*
+/**
 * Gets players runned time.
 *
 * @param type Stats type: TYPE_STATS
@@ -90,7 +90,7 @@ native Float:hns_get_stats_runned(type, id);
 */
 native Float:hns_get_stats_runnedtime(type, id);
 
-/*
+/**
 * Gets players avg speed.
 *
 * @param type Stats type: TYPE_STATS
@@ -100,7 +100,7 @@ native Float:hns_get_stats_runnedtime(type, id);
 */
 native Float:hns_get_stats_avg_speed(type, id);
 
-/*
+/**
 * Gets players flash time.
 *
 * @param type Stats type: TYPE_STATS
@@ -110,7 +110,7 @@ native Float:hns_get_stats_avg_speed(type, id);
 */
 native Float:hns_get_stats_flashtime(type, id);
 
-/*
+/**
 * Gets players hide time.
 *
 * @param type Stats type: TYPE_STATS
@@ -121,7 +121,7 @@ native Float:hns_get_stats_flashtime(type, id);
 native Float:hns_get_stats_hidetime(type, id);
 
 
-/*
+/**
 * Gets players play time. (How many seconds the player was in the active game)
 *
 * @param type Stats type: TYPE_STATS
@@ -129,9 +129,9 @@ native Float:hns_get_stats_hidetime(type, id);
 *
 * @return float
 */
-
 native Float:hns_get_stats_playtime(type, id);
-/*
+
+/**
 * Gets players survive time.
 *
 * @param type Stats type: TYPE_STATS
@@ -141,7 +141,7 @@ native Float:hns_get_stats_playtime(type, id);
 */
 native Float:hns_get_stats_surv(type, id);
 
-/*
+/**
 * Gets players ownages.
 *
 * @param type Stats type: TYPE_STATS
@@ -152,7 +152,7 @@ native Float:hns_get_stats_surv(type, id);
 native hns_get_stats_ownages(type, id);
 
 
-/*
+/**
 * Get the number of bhops in sessions
 *
 * @param type Stats type: TYPE_STATS
@@ -162,7 +162,7 @@ native hns_get_stats_ownages(type, id);
 */
 native hns_get_stats_bhop_count(type, id);
 
-/*
+/**
 * Get the percentage of perfect bhops in sessions
 *
 * @param type Stats type: TYPE_STATS
@@ -172,7 +172,7 @@ native hns_get_stats_bhop_count(type, id);
 */
 native Float:hns_get_stats_bhop_percent(type, id);
 
-/*
+/**
 * Get the number of sgs in sessions
 *
 * @param type Stats type: TYPE_STATS
@@ -182,7 +182,7 @@ native Float:hns_get_stats_bhop_percent(type, id);
 */
 native hns_get_stats_sgs_count(type, id);
 
-/*
+/**
 * Get the percentage of perfect sgs in sessions
 *
 * @param type Stats type: TYPE_STATS
@@ -192,7 +192,7 @@ native hns_get_stats_sgs_count(type, id);
 */
 native Float:hns_get_stats_sgs_percent(type, id);
 
-/*
+/**
 * Get the number of ddrun in sessions
 *
 * @param type Stats type: TYPE_STATS
@@ -202,7 +202,7 @@ native Float:hns_get_stats_sgs_percent(type, id);
 */
 native hns_get_stats_ddrun_count(type, id);
 
-/*
+/**
 * Get the percentage of perfect ddrun in sessions
 *
 * @param type Stats type: TYPE_STATS
@@ -212,6 +212,21 @@ native hns_get_stats_ddrun_count(type, id);
 */
 native Float:hns_get_stats_ddrun_percent(type, id);
 
+/**
+* Called when round/match stats should be applied.
+*
+* @param iIsEndMatch	Non-zero value if match is finished
+*
+* @noreturn
+*/
 forward hns_apply_stats(iIsEndMatch);
 
+/**
+* Called when player leaves active match and stats should be saved.
+*
+* @param id		Player index
+* @param iTeam		Player team (TeamName)
+*
+* @noreturn
+*/
 forward hns_save_leave_stats(id, TeamName:iTeam);

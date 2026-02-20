@@ -7,7 +7,22 @@ new bool:g_bHnsBannedInit = false; // Включен ли плагин hns bans
 new bool:e_bBanned[MAX_PLAYERS + 1]; // Забанен ли игрок
 new g_iBanExpired[MAX_PLAYERS + 1]; // Секунды до конца бана
 
+/**
+* Called when bans module is initialized.
+*
+* @noreturn
+*/
 forward hns_banned_init();
+
+/**
+* Called when player's match-ban status is updated.
+*
+* @param id		Player index
+* @param bBanned	Player ban state
+* @param iBanExpired	Unix time when ban expires
+*
+* @noreturn
+*/
 forward hns_player_banned(id, bool:bBanned, iBanExpired);
 
 public hns_banned_init() {

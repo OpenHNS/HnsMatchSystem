@@ -1,5 +1,7 @@
+## [README in Russian](https://github.com/WessTorn/HnsMatchSystem/blob/main/README.md)
+
 ## HnsMatchSystem
-Counter-Strike Hide'n'Seek Match System plugins
+Counter-Strike Hide'n'Seek Match System plugins.
 
 ## Requirements
 
@@ -11,184 +13,101 @@ Counter-Strike Hide'n'Seek Match System plugins
 | [ReSemiclip](https://github.com/rehlds/resemiclip/releases) | [![Download](https://img.shields.io/github/v/release/rehlds/resemiclip?include_prereleases&style=flat-square)](https://github.com/rehlds/resemiclip/releases) |
 | [AMXModX (v1.9 or v1.10)](https://www.amxmodx.org/downloads-new.php) | [![Download](https://img.shields.io/badge/AMXModX-%3E%3D1.9.0-blue?style=flat-square)](https://www.amxmodx.org/downloads-new.php) |
 | [ReAPI](https://github.com/rehlds/reapi) | [![Download](https://img.shields.io/github/v/release/rehlds/reapi?include_prereleases&style=flat-square)](https://github.com/rehlds/reapi) |
+| [MySQL (Optional)](https://dev.mysql.com/downloads/mysql/) | [![Download](https://img.shields.io/badge/MySQL-Latest-blue?style=flat-square)](https://dev.mysql.com/downloads/mysql/) |
 
-## Characteristics
-- Public / DeathMatch / Knife / Captain mode
-- MR / Wintime match system
-- Watcher (admin) menu (N)
-- System is admin dependent
-- Surrender
-- AFK, Player leave contol
+## Features
 
-## Installation
- 
-1. Compile the plugin.
+- Public / DeathMatch / Zombie warmup modes.
+- Knife / Captain team setup modes.
+- MR / Wintime / 1x1 match modes.
+- Watcher (admin) menu (`N`).
+- Admin-driven match flow.
+- Surrender vote.
+- AFK and player-leave control.
 
-2. Copy the compiled `.amxx` file to the directory: `amxmodx / plugins /`
+## Installation / Setup
 
-3. Copy the contents of the `configs/` folder to the directory: `amxmodx/configs/`
+### [1. Install the system on server](https://github.com/OpenHNS/HnsMatchSystem/wiki/1.-%D0%A3%D1%81%D1%82%D0%B0%D0%BD%D0%BE%D0%B2%D0%BA%D0%B0-%D1%81%D0%B8%D1%81%D1%82%D0%B5%D0%BC%D1%8B-%D0%BD%D0%B0-%D1%81%D0%B5%D1%80%D0%B2%D0%B5%D1%80)
 
-4. Copy the contents of the `data/lang/` folder to the directory: `amxmodx/data/lang/`
+### [2. Configure map settings for mixes](https://github.com/OpenHNS/HnsMatchSystem/wiki/2.-%D0%9D%D0%B0%D1%81%D1%82%D1%80%D0%BE%D0%B9%D0%BA%D0%B0-%D0%BA%D0%BE%D0%BD%D1%84%D0%B8%D0%B3%D1%83%D1%80%D0%B0%D1%86%D0%B8%D0%B8-%D0%BA%D0%B0%D1%80%D1%82-%D0%B4%D0%BB%D1%8F-%D0%BC%D0%B8%D0%BA%D1%81%D0%BE%D0%B2)
 
-5. Copy the contents of the `modules/` folder (If you have a server on Linux, then we take the `.so` file, if the Windows `.dll`) into the directory: `amxmodx/modules/`
+### [3. (Optional) Configure PTS / MySQL database](https://github.com/OpenHNS/HnsMatchSystem/wiki/3.--%D0%9D%D0%B0%D1%81%D1%82%D1%80%D0%BE%D0%B9%D0%BA%D0%B0-PTS-%E2%80%90-Mysql-%D0%B1%D0%B4)
 
-6. Add `.amxx` in the file `amxmodx/configs/plugins.ini`
-
-7. Restart the server or change the map.
-
-## Customization
-
-- Configuring pts
-    1. open the file `configs/mixsystem/hnsmatch-sql.cfg`.
-    2. Write the data for the database there
-    3. Change the map.
-
-- Customizing the configs for the map
-    1. Go to the `configs/mixsystem/mapcfg/` folder.
-    2. Create a file with the name of the map (rayish_brick-world.cfg)
-    3. Write the necessary settings in the file:
-
-            mp_roundtime "2.5"
-            mp_freezetime "5" 
-            hns_flash "1"
-            hns_smoke "1"
-    4. Save. Now we will have the settings automatically set on the rayish_brick-world map when the mix starts.
-- Knife map
-    1. open the file `configs/mixsystem/matchsystem.cfg`.
-    2. Change the hns_knifemap quark to your knife map.
-    3. All, now on the map you specified will be held captain and knaif mods, I recommend to put the knife map first in the list of maps `maps.ini`.
-- Watcher
-
-    For watcher `configs/cmdaccess.ini` must be configured, namely to make the following commands available for flag f:
-
-        "amx_slay" "f" ; admincmd.amxx
-        "amx_slap" "f" ; admincmd.amxx.
-        "amx_map" "f" ; admincmd.amxx.
-        "amx_slapmenu" "f" ; plmenu.amxx.
-        "amx_teammenu" "f" ; plmenu.amxx.
-        "amx_mapmenu" "f" ; mapsmenu.amxx
+### [4. Configure Watcher / Full Watcher privileges](https://github.com/OpenHNS/HnsMatchSystem/wiki/4.-%D0%9D%D0%B0%D1%81%D1%82%D1%80%D0%BE%D0%B9%D0%BA%D0%B0-%D0%BF%D1%80%D0%B8%D0%B2%D0%B8%D0%BB%D0%B5%D0%B3%D0%B8%D0%B9-Watcher-Full-watcher)
 
 ## Description
-    
-- Watcher
-    The system is not automatic, in order for players to start mixes, there is a plugin 'HnsMatchWatcher.amxx'. 
 
-    Watcher is the player who starts the mixes.     
-    
+- Watcher
+
+    The system is not fully automatic. To let players start mixes, the project uses `HnsMatchWatcher.amxx`.
+
+    Watcher is the player who starts and controls the mix flow.
+
+- Full Watcher
+
+    Full Watcher has all Watcher privileges plus extra actions (for example, kicking players, mix bans, and watcher-right management).
+
 - Starting a mix
 
-    In order to start a match game, you need to change the map to a knife map, start the captain mod and select 2 captains.
-    
-    Then the captains play a knife round and select players to teams.
-    
-    After the knife round is played and the winners of the knife round must choose a map and Watcher or Admin must change the map.
-    
-    After changing the map, the system will wait for the players and start the mix.
-    
+    To start a match, change the map to a knife map, start captain mode, and select 2 captains.
+
+    Captains play the knife round and pick players into teams.
+
+    After that, knife-round winners choose the map, and Watcher/Admin changes to that map.
+
+    After map change, the system waits for players and starts the mix.
+
 - Match - Maxround mode
 
-    The game has a total of even number of rounds (14) (hns_rounds * 2). Teams are given a timer which is 00:00.
+    The match has an even total round count (`hns_rounds * 2`). Both teams start with `00:00` timer.
 
-    The timer is increased for the team playing for terrorists. Teams change each round.
+    Timer increases for the Terrorist side. Teams swap every round.
 
-    At the end of the rounds (14), the team with the higher timer wins.
+    After all rounds are played, the team with the higher timer wins.
 
 - Match - Wintime mode
 
-    Teams are given a certain amount of time (15).
-    The team that plays for the terrorists has their time taken away.
-    The team that runs out of time wins.
+    Teams get a fixed amount of time (`hns_wintime`).
+    Time is reduced for the Terrorist side.
+    Team whose timer reaches zero wins.
+
+- Match - Duel mode
+
+    This is a points-based duel mode with a match timer.
+    The system shows a line between players that reflects their distance.
+
+    There are 3 scoring distance zones:
+    - Green: about 100 units, gives a lot of points.
+    - Yellow: about 250 units, gives medium points.
+    - White: about 400 units, gives low points.
+    - Red: above ~400 units, gives 0 points.
+
+    Goal: score more points than opponent.
+    The closer you are to the opponent, the more points you get.
 
 ## Plugins
-- HnsMatchSystem.sma - Main mod plugin
-- HnsMatchStats.sma - Mix statistics plugin
-- HnsMatchPlayerInfo.sma - Hud player info
-- HnsMatchSql.sma - Plugin for interacting with the database
-- HnsMatchPts.sma - Plugin for PTS (does not work without Sql plugin)
-- HnsMatchOwnage.sma - Plugin for calculating Ownage (does not work without Sql plugin)
-- HnsMatchChatmanager.sma - Modified HM, shows rank (skill) prefix.
-- HnsMatchHideKnife.sma - Show/hide knife
-- HnsMatchMaps.sma - List of maps for players (/maps)
-- HnsMatchTraining.sma - Training menu (Checkpoints)
-- HnsMatchWatcher.sma - Watcher system, allows players to become/vote for watcher
 
-## Cvars
+- HnsMatchSystem.sma - Core system plugin
+- HnsMatchStats.sma - Match statistics (kills/deaths/dmg/survival, etc.)
+- HnsMatchStatsMysql.sma - MySQL/PTS statistics (`/rank`, `/pts`)
+- HnsMatchOwnage.sma - Ownage counter (used together with MySQL stats)
+- HnsMatchPlayerInfo.sma - HUD/round info/speclist
+- HnsMatchChatmanager.sma - Chat manager and message formatting
+- HnsMatchMaps.sma - Map list and map settings (`/maps`)
+- HnsMatchMapRules.sma - Rules for specific maps
+- HnsMatchTraining.sma - Training mode (cp/tp/respawn/noclip)
+- HnsMatchRecontrol.sma - Player replace/control transfer plugin
+- HnsMatchWatcher.sma - Watcher system and watcher voting
+- HnsMatchBans.amxx - Match bans plugin (binary module in release build)
 
-| Cvar | Default | Description |
-| :------------------- | :--------: | :--------------------------------------------------- |
-| hns_rules           | 0         | Match rules (0 - MR 1 - Timer) |
-| hns_wintime           | 15         | Time to win |
-| hns_rounds | 6 | rounds to win |
-| hns_boost | 0 | Enable/Disable Boost Mode |
-| hns_onehpmode | 0 | Enable/Disable 1hpmode |
-| hns_flash | 1 | Number of flash drives (plugin changes itself) |
-| hns_smoke | 1 | smoke packs (plugin modifies itself) |
-| hns_last | 1 | Enable/disable grenades to the last TT |
-| hns_dmrespawn | 3 | Time (in seconds) for the player to revive in DM mode |
-| hns_survotetime | 10 | Time (in seconds) for surrender |
-| hns_randompick | 1 | Enable/disable random player selection |
-| hns_knifemap | 35hp_2 | Knifemap |
-| hns_prefix | MATCH | System prefix |
-| hns_gamename | Hide'n'Seek | GameName server |
+## Commands / Cvars
 
-## Commands
+### [5. Mix system commands and CVAR](https://github.com/OpenHNS/HnsMatchSystem/wiki/5.-%D0%9A%D0%BE%D0%BC%D0%B0%D0%BD%D0%B4%D1%8B-%D0%B8-CVAR-%D0%BC%D0%B8%D0%BA%D1%81-%D1%81%D0%B8%D1%81%D1%82%D0%B5%D0%BC%D1%8B)
 
-- Chat commands
+## Credits / Authors of other plugins
 
-- Watcher (ADMIN_MAP)
-
-| Commands | Description |
-| :------------------- | :--------------------------------------------------- |
-| mix | admin menu |
-| mode / type | mod menu |
-| timer / wintime | Change the mix mode to Timer |
-| mr / maxround | Change the mix mode to MR |
-| training | training menu |
-| pub / public | public | public mod |
-| dm / deathmatch | DM mod |
-| specall | move everyone behind the observers |
-| ttall | move everyone to ttall |
-| ctall | move all for CT |
-| startmix / start | start the match |
-| kniferound / kf | start a knife round |
-| captain / cap | start captain mod |
-| stop / cancel | stop the current mode |
-| skill | skill | skill mod |
-| boost | boost mod |
-| rr / restart | restart round |
-| swap / swap | swap | swap teams |
-| pause / ps | pause |
-| live / unpause | start |
-| mr | Set the number of rounds |
-
-- Player
-
-| Commands | Description |
-| :------------------- | :--------------------------------------------------- |
-| hideknife / showknife / knife | hide, show knife |
-| surrender / sur | vote to surrender |
-| score / s | score |
-| pick | pick menu |
-| back / spec | jump or go back for observers |
-| np / noplay | not playing |
-| ip / play | play | play |
-| checkpoint / cp | checkpoint | checkpoint |
-| teleport / tp | teleport to a checkpoint |
-| checkpoint | gocheck / gc | checkpoint |
-| showdmg / showdamade | Damage |
-| noclip / clip | noclip | noclip |
-| respawn / resp | respawn | sleep |
-| top / tops | top players per match |
-| map / maps | show map list |
-| rank / me | Show your pts stats |
-| pts / ptstop | Show top players by pts |
-| hud / hudinfo | disable/enable hud |
-| rnw / rocknewwatcher | vote for new watcher |
-| wt / watcher | transfer/assign a new watcher |
-| speclist / showspec | Enable/Disable speclist |
-| spechide / hidespec | Enable/Disable spechide |
-
-## Acknowledgments / Authors of other plugins
 [Garey](https://github.com/Garey27)
 
 [Medusa](https://github.com/medusath)
+
+[juice](https://github.com/etojuice)

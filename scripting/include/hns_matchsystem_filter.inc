@@ -3,7 +3,12 @@
 #endif
 #define _hns_matchsystem_filter_included
 
-
+/**
+* Optional native filter for match-system addon modules.
+*
+* Returns PLUGIN_HANDLED for known optional natives so the core can run
+* without hard dependency on every addon plugin.
+*/
 public match_system_additons(const szNativeName[], iNativeID, iTrapMode) {
 	if (equal(szNativeName, "hns_mysql_stats_init") || equal(szNativeName, "hns_mysql_stats_data") || equal(szNativeName, "hns_mysql_stats_get_ownage") || equal(szNativeName, "hns_mysql_stats_set_ownage")) { 
 		return PLUGIN_HANDLED
