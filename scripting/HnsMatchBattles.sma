@@ -133,6 +133,7 @@ public bool:native_battle_menu(amxx, params) {
 
 public plugin_init() {
 	register_plugin("Match: Battles (cfg)", "dev", "OpenHNS");
+	register_dictionary("match_additons.txt");
 
 	get_mapname(g_szMap, charsmax(g_szMap));
 
@@ -188,11 +189,11 @@ public CmdStartRace(id) {
 	}
 
 	if (!g_bArenasLoaded || !GetArenaCount()) {
-		client_print_color(id, print_team_red, "%s На этой карте нет сконфигурированных арен.", g_sPrefix);
+		client_print_color(id, print_team_red, "%s %L", g_sPrefix, id, "BATTLE_NO_ARENAS");
 		return PLUGIN_HANDLED;
 	}
 
-	new hMenu = menu_create("\rSelect arena for battle", "RaceHandler");
+	new hMenu = menu_create(fmt("%L", id, "BATTLE_MENU_RACE_TITLE"), "RaceHandler");
 
 	new iCount = GetArenaCount(), name[48];
 	for (new i = 0; i < iCount; i++) {
@@ -201,7 +202,10 @@ public CmdStartRace(id) {
 	}
 
 	// элемент-переключатель шанса
-	menu_additem(hMenu, fmt("Chance for players: %s", g_bChanceForPlayers[id] ? "\ryes" : "\dno"));
+	new szChanceState[16], szChanceItem[64];
+	formatex(szChanceState, charsmax(szChanceState), "%L", id, g_bChanceForPlayers[id] ? "BATTLE_MENU_YES" : "BATTLE_MENU_NO");
+	formatex(szChanceItem, charsmax(szChanceItem), "%L", id, "BATTLE_MENU_CHANCE", szChanceState);
+	menu_additem(hMenu, szChanceItem);
 
 	menu_display(id, hMenu, 0);
 
@@ -277,13 +281,13 @@ public CmdArenas(id) {
 	}
 
 	if (!g_bArenasLoaded || !GetArenaCount()) {
-		client_print_color(id, print_team_red, "%s На этой карте нет телепортов из конфига.", g_sPrefix);
+		client_print_color(id, print_team_red, "%s %L", g_sPrefix, id, "BATTLE_NO_TELEPORTS");
 		return PLUGIN_HANDLED;
 	}
 
-	new hMenu = menu_create("\rTeleports:", "ArenasHandler");
+	new hMenu = menu_create(fmt("%L", id, "BATTLE_MENU_TELEPORTS_TITLE"), "ArenasHandler");
 
-	menu_additem(hMenu, "knife");
+	menu_additem(hMenu, fmt("%L", id, "BATTLE_MENU_TELEPORT_KNIFE"));
 
 	new iCount = GetArenaCount(), szName[48];
 	for (new i = 0; i < iCount; i++) {
@@ -341,7 +345,7 @@ public ArenasHandler(id, menu, item) {
 
 	new iEnt = GetArenaEnt(iArenaID);
 	if (!iEnt) {
-		client_print_color(id, print_team_red, "%s Телепорт не найден (проверь targetname в ini).", g_sPrefix);
+		client_print_color(id, print_team_red, "%s %L", g_sPrefix, id, "BATTLE_TELEPORT_NOT_FOUND");
 		menu_destroy(menu);
 		return PLUGIN_HANDLED;
 	}
@@ -388,7 +392,7 @@ public StartBattle(iArenaID) {
 	GetArenaName(iArenaID, szName, charsmax(szName));
 
 	if (g_eBattleData[BATTLE_INITIATOR]) {
-		client_print_color(0, print_team_blue, "%s ^3%n^1 started battle! (^3%s^1)", g_sPrefix, g_eBattleData[BATTLE_INITIATOR], szName);
+		client_print_color(0, print_team_blue, "%s %L", g_sPrefix, LANG_SERVER, "BATTLE_STARTED", g_eBattleData[BATTLE_INITIATOR], szName);
 	}
 
 	if (bRaceMode) {
@@ -473,12 +477,22 @@ public task_StartBattle() {
 	}
 
 	if (g_eBattleData[BATTLE_PREPARE]) {
-		new szBuff[16];
+		new szBuff[16], szCounter[16], szChance[32];
 		formatex(szBuff, charsmax(szBuff), "%d", g_eBattleData[BATTLE_PREPARE]);
+		szChance[0] = 0;
+
+		if (g_eBattleData[BATTLE_PREPARE] == 4) {
+			formatex(szCounter, charsmax(szCounter), "%L", LANG_SERVER, "BATTLE_HUD_FIGHT");
+		} else {
+			copy(szCounter, charsmax(szCounter), szBuff);
+		}
+
+		if (g_eBattleData[BATTLE_CHANCE]) {
+			formatex(szChance, charsmax(szChance), "%L", LANG_SERVER, "BATTLE_HUD_CHANCE");
+		}
+
 		set_dhudmessage(100, 100, 100, -1.0, 0.75, .holdtime = 1.0);
-		show_dhudmessage(0, "Батл^nНе нажимайте на клавиши заранее!^n%s^n%s",
-			g_eBattleData[BATTLE_PREPARE] == 4 ? "В БОЙ!" : szBuff,
-			g_eBattleData[BATTLE_CHANCE] ? "CHANCE FOR PLAYERS" : "");
+		show_dhudmessage(0, "%L", LANG_SERVER, "BATTLE_HUD_TEXT", szCounter, szChance);
 	}
 
 	rg_send_audio(0, g_szSounds[g_eBattleData[BATTLE_PREPARE]])
@@ -757,7 +771,7 @@ CheckStatus(id, bool:is_finish) {
 		new iPlayers[MAX_PLAYERS], iNum;
 		get_players(iPlayers, iNum, "ache", TeamName:get_member(id, m_iTeam) == TEAM_TERRORIST ? "CT" : "TERRORIST");
 
-		client_print_color(0, print_team_blue, "%s %n win battle!", g_sPrefix, id);
+		client_print_color(0, print_team_blue, "%s %L", g_sPrefix, LANG_SERVER, "BATTLE_WIN_PLAYER", id);
 		EndBattle(false);
 
 		for (new i; i < iNum; i++) {
@@ -794,7 +808,9 @@ ResetColideData(id, bool:kill) {
 			get_players(iPlayers, iNum, "ache", TeamName:get_member(id, m_iTeam) == TEAM_TERRORIST ? "TERRORIST" : "CT");
 
 			if (!(iNum - 1)) {
-				client_print_color(0, print_team_blue, "%s Team ^3%s^1 win battle!", g_sPrefix, TeamName:get_member(id, m_iTeam) == TEAM_TERRORIST ? "CTS" : "TERRORISTS");
+				new szWinnerTeam[16];
+				formatex(szWinnerTeam, charsmax(szWinnerTeam), "%L", LANG_SERVER, TeamName:get_member(id, m_iTeam) == TEAM_TERRORIST ? "BATTLE_TEAM_CTS" : "BATTLE_TEAM_TERRORISTS");
+				client_print_color(0, print_team_blue, "%s %L", g_sPrefix, LANG_SERVER, "BATTLE_WIN_TEAM", szWinnerTeam);
 				EndBattle(false);
 			}
 			user_kill(id);

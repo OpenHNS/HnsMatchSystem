@@ -150,6 +150,24 @@ MAPS_ACTION_CHANGE = Change map
 MAPS_NOM = %s ^3%n^1 nominated map: ^3%s^1.
 MAPS_CHAGE = %s ^3%n^1 change map: ^3%s^1.
 
+BATTLE_NO_ARENAS = No configured battle arenas on this map.
+BATTLE_MENU_RACE_TITLE = \rSelect arena for battle
+BATTLE_MENU_CHANCE = Chance for players: %s
+BATTLE_MENU_YES = \ryes
+BATTLE_MENU_NO = \dno
+BATTLE_NO_TELEPORTS = No configured teleports on this map.
+BATTLE_MENU_TELEPORTS_TITLE = \rTeleports:
+BATTLE_MENU_TELEPORT_KNIFE = knife
+BATTLE_TELEPORT_NOT_FOUND = Teleport not found (check targetname in ini).
+BATTLE_STARTED = ^3%n^1 started battle! (^3%s^1)
+BATTLE_HUD_TEXT = Battle^nDo not press keys early!^n%s^n%s
+BATTLE_HUD_FIGHT = FIGHT!
+BATTLE_HUD_CHANCE = CHANCE FOR PLAYERS
+BATTLE_WIN_PLAYER = %n win battle!
+BATTLE_WIN_TEAM = Team ^3%s^1 win battle!
+BATTLE_TEAM_CTS = CTS
+BATTLE_TEAM_TERRORISTS = TERRORISTS
+
 CUP_NOT = This functionality is not available while Tournament Mode is enabled.
 
 [ru]
@@ -307,5 +325,23 @@ MAPS_ACTION_NOM = Номинировать карту
 MAPS_ACTION_CHANGE = Сменить карту
 MAPS_NOM = %s ^3%n^1 номинировал карту: ^3%s^1.
 MAPS_CHAGE = %s ^3%n^1 сменил карту: ^3%s^1.
+
+BATTLE_NO_ARENAS = На этой карте нет сконфигурированных арен.
+BATTLE_MENU_RACE_TITLE = \rВыберите арену для батла
+BATTLE_MENU_CHANCE = Шанс для игроков: %s
+BATTLE_MENU_YES = \rда
+BATTLE_MENU_NO = \dнет
+BATTLE_NO_TELEPORTS = На этой карте нет телепортов из конфига.
+BATTLE_MENU_TELEPORTS_TITLE = \rТелепорты:
+BATTLE_MENU_TELEPORT_KNIFE = ножевой
+BATTLE_TELEPORT_NOT_FOUND = Телепорт не найден (проверь targetname в ini).
+BATTLE_STARTED = ^3%n^1 запустил батл! (^3%s^1)
+BATTLE_HUD_TEXT = Батл^nНе нажимайте на клавиши заранее!^n%s^n%s
+BATTLE_HUD_FIGHT = В БОЙ!
+BATTLE_HUD_CHANCE = ШАНС ДЛЯ ИГРОКОВ
+BATTLE_WIN_PLAYER = %n победил в батле!
+BATTLE_WIN_TEAM = Команда ^3%s^1 победила в батле!
+BATTLE_TEAM_CTS = КТ
+BATTLE_TEAM_TERRORISTS = ТЕРРОРИСТЫ
 
 CUP_NOT = %s Данный функционал недоступен при включённом турнирном режиме.
