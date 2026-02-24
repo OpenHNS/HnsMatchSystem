@@ -87,9 +87,10 @@ public hns_setrole(id)
 		}
 	}
 
-	if (g_iSettings[ONEHPMODE] == 1)
-	{
+	if (g_iSettings[ONEHPMODE] == 1) {
 		set_entvar(id, var_health, 1.0);
+	} else if (g_iCurrentMode == MODE_MIX && g_iCurrentRules == RULES_DUEL) {
+		set_entvar(id, var_health, 60.0);
 	}
 }
 
