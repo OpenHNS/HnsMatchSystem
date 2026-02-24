@@ -21,6 +21,10 @@ public kniferound_stop() {
 	if(task_exists(HUD_PAUSE)) {
 		remove_task(HUD_PAUSE);
 	}
+
+	if (hns_battle_init()) {
+		hns_battle_end(false);
+	}
 	
 	g_iMatchStatus = MATCH_NONE;
 	training_start();
@@ -52,23 +56,35 @@ public kniferound_unpause() {
  
 public kniferound_roundstart() {
 	switch (g_iMatchStatus) {
-		case MATCH_CAPTAINKNIFE: {
-			setTaskHud(0, 2.0, 1, 255, 255, 255, 3.0, "%L", LANG_PLAYER, "HUD_START_CAPKF");
-			
-			chat_print(0, "%L", LANG_PLAYER, "START_KNIFE");
+		case MATCH_CAPTAINKNIFE, MATCH_CAPTAINBATTLE: {
+			if (g_iMatchStatus == MATCH_CAPTAINBATTLE) {
+				setTaskHud(0, 2.0, 1, 255, 255, 255, 3.0, "%L", LANG_PLAYER, "HUD_START_CAPBT");
+				chat_print(0, "%L", LANG_PLAYER, "START_CAPBATTLE");
+			} else {
+				setTaskHud(0, 2.0, 1, 255, 255, 255, 3.0, "%L", LANG_PLAYER, "HUD_START_CAPKF");
+				chat_print(0, "%L", LANG_PLAYER, "START_KNIFE");
+			}
 
 			g_eMatchState = STATE_ENABLED;
 
-			ChangeGameplay(GAMEPLAY_KNIFE);
+			if (g_iMatchStatus == MATCH_CAPTAINBATTLE) {
+				ChangeGameplay(GAMEPLAY_BATTLERACE);
+			} else {
+				ChangeGameplay(GAMEPLAY_KNIFE);
+			}
 		}
-		case MATCH_TEAMKNIFE: {
+		case MATCH_TEAMKNIFE, MATCH_TEAMBATTLE, MATCH_BATTLERACE: {
 			setTaskHud(0, 2.0, 1, 255, 255, 255, 3.0, "%L", LANG_PLAYER, "HUD_STARTKNIFE");
 			
 			chat_print(0, "%L", LANG_PLAYER, "START_KNIFE");
 
 			g_eMatchState = STATE_ENABLED;
 
-			ChangeGameplay(GAMEPLAY_KNIFE);
+			if (g_iMatchStatus == MATCH_BATTLERACE) {
+				ChangeGameplay(GAMEPLAY_BATTLERACE);
+			} else {
+				ChangeGameplay(GAMEPLAY_KNIFE);
+			}
 
 			if (g_bHnsBannedInit) {
 				if (checkUserBan()) {
@@ -101,7 +117,7 @@ public kniferound_roundstart() {
 
 public kniferound_roundend(bool:win_ct) {
 	switch(g_iMatchStatus) {
-		case MATCH_CAPTAINKNIFE: {
+		case MATCH_CAPTAINKNIFE, MATCH_CAPTAINBATTLE: {
 			g_iCaptainPick = win_ct ? hns_get_captain_role(ROLE_CAP_B) : hns_get_captain_role(ROLE_CAP_A);
 			get_user_authid(g_iCaptainPick, g_iCaptainPickSteam, charsmax(g_iCaptainPickSteam))
 
@@ -121,7 +137,7 @@ public kniferound_roundend(bool:win_ct) {
 				set_task(1.0, "WaitPick");
 			}
 		}
-		case MATCH_TEAMKNIFE: {
+		case MATCH_TEAMKNIFE, MATCH_TEAMBATTLE: {
 			if (win_ct) {
 				setTaskHud(0, 2.0, 1, 255, 255, 255, 3.0, "%L", LANG_SERVER, "HUD_KF_WIN_CT");
 			} else {
@@ -139,6 +155,11 @@ public kniferound_roundend(bool:win_ct) {
 			if (!hns_cup_enabled()) {
 				StartVoteRules();
 			}
+		}
+		case MATCH_BATTLERACE: {
+			training_start();
+			g_iMatchStatus = MATCH_NONE;
+			g_eMatchState = STATE_DISABLED;
 		}
 		case MATCH_CUPKNIFE: {
 			training_start();
@@ -159,7 +180,7 @@ public kniferound_roundend(bool:win_ct) {
 
 public kniferound_player_leave(id) {
 	switch (g_iMatchStatus) {
-		case MATCH_CAPTAINKNIFE: {
+		case MATCH_CAPTAINKNIFE, MATCH_CAPTAINBATTLE: {
 			if (hns_is_user_role(id, ROLE_CAP_A) || hns_is_user_role(id, ROLE_CAP_B)) {
 				LogSendMessage("[MATCH] Player captain (%n) leave! (MATCH_CAPTAINKNIFE)", id);
 				chat_print(0, "Captain ^3%n^1 leave, stop captain knife mode.", id);

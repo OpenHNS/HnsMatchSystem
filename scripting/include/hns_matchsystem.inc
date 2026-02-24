@@ -38,12 +38,15 @@ native hns_set_mode(HNS_MODES:iMode);
 */
 enum MATCH_STATUS {
 	MATCH_NONE,
+	MATCH_BATTLERACE,
 	MATCH_CAPTAINPICK,
 	MATCH_CAPTAINKNIFE,
+	MATCH_CAPTAINBATTLE,
 	MATCH_TEAMPICK,
 	MATCH_CUPKNIFE,
 	MATCH_CUPPICK,
 	MATCH_TEAMKNIFE,
+	MATCH_TEAMBATTLE,
 	MATCH_MAPPICK,
 	MATCH_WAITCONNECT,
 	MATCH_STARTED
@@ -55,6 +58,15 @@ enum MATCH_STATUS {
 * @return		Match status (MATCH_STATUS)
 */
 native MATCH_STATUS:hns_get_status();
+
+/**
+* Sets current match status.
+*
+* @param iStatus	Match status (MATCH_STATUS)
+*
+* @noreturn
+*/
+native hns_set_status(MATCH_STATUS:iStatus);
 
 
 enum MODE_STATES {

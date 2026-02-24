@@ -446,7 +446,7 @@ public cmdKnifeRound(id) {
 		return PLUGIN_HANDLED;
 	}
 
-	if (g_iMatchStatus == MATCH_CAPTAINKNIFE || g_iMatchStatus == MATCH_TEAMKNIFE || g_iMatchStatus == MATCH_CUPKNIFE) {
+	if (g_iMatchStatus == MATCH_CAPTAINKNIFE || g_iMatchStatus == MATCH_CAPTAINBATTLE || g_iMatchStatus == MATCH_TEAMKNIFE || g_iMatchStatus == MATCH_TEAMBATTLE || g_iMatchStatus == MATCH_BATTLERACE || g_iMatchStatus == MATCH_CUPKNIFE) {
 		chat_print(id, "%L", id, "KNIFE_ALREADY");
 		return PLUGIN_HANDLED;
 	}
@@ -469,7 +469,7 @@ public cmdKnifePickBan(id) {
 		return PLUGIN_HANDLED;
 	}
 
-	if (g_iMatchStatus == MATCH_CAPTAINKNIFE || g_iMatchStatus == MATCH_TEAMKNIFE || g_iMatchStatus == MATCH_CUPKNIFE) {
+	if (g_iMatchStatus == MATCH_CAPTAINKNIFE || g_iMatchStatus == MATCH_CAPTAINBATTLE || g_iMatchStatus == MATCH_TEAMKNIFE || g_iMatchStatus == MATCH_TEAMBATTLE || g_iMatchStatus == MATCH_BATTLERACE || g_iMatchStatus == MATCH_CUPKNIFE) {
 		chat_print(id, "Ножевой раунд Pick/Ban уже запущен.");
 		return PLUGIN_HANDLED;
 	}
@@ -482,9 +482,13 @@ public cmdKnifePickBan(id) {
 	return PLUGIN_HANDLED;
 }
 
-
 public cmdCaptain(id) {
 	if (!isUserWatcher(id)) {
+		return PLUGIN_HANDLED;
+	}
+
+	if (g_iCurrentMode == MODE_TRAINING && g_iMatchStatus == MATCH_BATTLERACE) {
+		chat_print(id, "%L", id, "RACE_ACTIVE_STOP");
 		return PLUGIN_HANDLED;
 	}
 
@@ -548,7 +552,7 @@ public cmdStop(id) {
 			chat_print(0, "%l", "STOP_MIX", id);
 		}
 		case MODE_KNIFE: {
-			if (g_iMatchStatus == MATCH_CAPTAINKNIFE) {
+			if (g_iMatchStatus == MATCH_CAPTAINKNIFE || g_iMatchStatus == MATCH_CAPTAINBATTLE) {
 				resetCaptainData();
 				chat_print(0, "%l", "STOP_CAP", id);
 			} else if (g_iMatchStatus == MATCH_CUPKNIFE) {
@@ -565,6 +569,11 @@ public cmdStop(id) {
 				g_iMatchStatus = MATCH_NONE;
 				training_start();
 				chat_print(0, "%l", "STOP_CAP", id);
+			} else if (g_iMatchStatus == MATCH_BATTLERACE) {
+				if (hns_battle_init()) {
+					hns_battle_end(true);
+				}
+				g_iMatchStatus = MATCH_NONE;
 			} else if (g_iMatchStatus == MATCH_CUPPICK) {
 				// TODO: Стоп cup pick ban
 				hns_cup_stop_veto();
@@ -672,6 +681,10 @@ public cmdSwapTeams(id) {
 
 public cmdStartPause(id) {
 	if (!isUserWatcher(id)) {
+		return PLUGIN_HANDLED;
+	}
+
+	if (g_iCurrentMode == MODE_KNIFE && g_iMatchStatus == MATCH_BATTLERACE) {
 		return PLUGIN_HANDLED;
 	}
 

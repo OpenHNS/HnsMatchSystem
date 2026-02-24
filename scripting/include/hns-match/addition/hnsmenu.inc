@@ -19,9 +19,9 @@ public mainMatchMenu(id) {
 		if (!hns_cup_enabled()) {
 			if (g_iCurrentMode == MODE_TRAINING && g_iMatchStatus == MATCH_NONE)
 				formatex(szMsg, charsmax(szMsg), "%L", id, "MENU_MAIN_CAP");
-			else if (g_iCurrentMode == MODE_KNIFE && g_iMatchStatus == MATCH_TEAMKNIFE && g_eMatchState == STATE_PAUSED)
+			else if (g_iCurrentMode == MODE_KNIFE && (g_iMatchStatus == MATCH_TEAMKNIFE || g_iMatchStatus == MATCH_TEAMBATTLE) && g_eMatchState == STATE_PAUSED)
 				formatex(szMsg, charsmax(szMsg), "%L", id, "MENU_MAIN_UNPAUSEKF");
-			else if (g_iMatchStatus == MATCH_CAPTAINPICK || g_iMatchStatus == MATCH_CAPTAINKNIFE || g_iMatchStatus == MATCH_TEAMPICK)
+			else if (g_iMatchStatus == MATCH_CAPTAINPICK || g_iMatchStatus == MATCH_CAPTAINKNIFE || g_iMatchStatus == MATCH_CAPTAINBATTLE || g_iMatchStatus == MATCH_TEAMPICK)
 				formatex(szMsg, charsmax(szMsg), "%L", id, "MENU_MAIN_STOPCAP");
 			else
 				formatex(szMsg, charsmax(szMsg), "%L", id, "MENU_MAIN_NOTCAP");
@@ -49,8 +49,10 @@ public mainMatchMenu(id) {
 
 
 	if (hns_is_knife_map()) {
-		if (g_iMatchStatus == MATCH_CAPTAINPICK || g_iMatchStatus == MATCH_CAPTAINKNIFE || g_iMatchStatus == MATCH_TEAMPICK)
+		if (g_iMatchStatus == MATCH_CAPTAINPICK || g_iMatchStatus == MATCH_CAPTAINKNIFE || g_iMatchStatus == MATCH_CAPTAINBATTLE || g_iMatchStatus == MATCH_TEAMPICK)
 			formatex(szMsg, charsmax(szMsg), "%L", id, "MENU_MAIN_NOTSTARTKF");
+		else if (g_iCurrentMode == MODE_TRAINING && g_iMatchStatus == MATCH_BATTLERACE)
+			formatex(szMsg, charsmax(szMsg), "%L", id, "MENU_MAIN_STOPRACE");
 		else if (g_iCurrentMode == MODE_KNIFE)
 			formatex(szMsg, charsmax(szMsg), "%L", id, "MENU_MAIN_STOPKF");
 		else
@@ -113,9 +115,9 @@ public mainMatchMenuHandler(id, hMenu, item) {
 				if (!hns_cup_enabled()) {
 					if (g_iCurrentMode == MODE_TRAINING && g_iMatchStatus == MATCH_NONE)
 						cmdCaptain(id);
-					else if (g_iCurrentMode == MODE_KNIFE && g_iMatchStatus == MATCH_TEAMKNIFE && g_eMatchState == STATE_PAUSED)
+					else if (g_iCurrentMode == MODE_KNIFE && (g_iMatchStatus == MATCH_TEAMKNIFE || g_iMatchStatus == MATCH_TEAMBATTLE) && g_eMatchState == STATE_PAUSED)
 						cmdStopPause(id);
-					else if (g_iMatchStatus == MATCH_CAPTAINPICK || g_iMatchStatus == MATCH_CAPTAINKNIFE || g_iMatchStatus == MATCH_TEAMPICK)
+					else if (g_iMatchStatus == MATCH_CAPTAINPICK || g_iMatchStatus == MATCH_CAPTAINKNIFE || g_iMatchStatus == MATCH_CAPTAINBATTLE || g_iMatchStatus == MATCH_TEAMPICK)
 						cmdStop(id);
 					else
 						mainMatchMenu(id);
@@ -142,8 +144,10 @@ public mainMatchMenuHandler(id, hMenu, item) {
 		}
 		case 2: {
 			if (hns_is_knife_map()) {
-				if (g_iMatchStatus == MATCH_CAPTAINPICK || g_iMatchStatus == MATCH_CAPTAINKNIFE || g_iMatchStatus == MATCH_TEAMPICK)
+				if (g_iMatchStatus == MATCH_CAPTAINPICK || g_iMatchStatus == MATCH_CAPTAINKNIFE || g_iMatchStatus == MATCH_CAPTAINBATTLE || g_iMatchStatus == MATCH_TEAMPICK)
 					mainMatchMenu(id);
+				else if (g_iCurrentMode == MODE_TRAINING && g_iMatchStatus == MATCH_BATTLERACE)
+					cmdStop(id);
 				else if (g_iCurrentMode == MODE_KNIFE)
 					cmdStop(id);
 				else

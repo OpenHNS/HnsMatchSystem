@@ -72,12 +72,14 @@ NOT_START_MIX   = Please, disable other mode to start mix game.
 NOT_START_KNIFE = Please, disable other mode to start knife round.
 
 KNIFE_ALREADY   = Knife round has already started.
+RACE_ACTIVE_STOP = Race battle is active. Stop it first with ^3/stop^1.
 
 NOT_CAPTAIN     = Only available on the knife map.
 
 START_MIX       = ^3%n^1 has started ^3mix^1.
 START_KNIFE     = Started ^3knife^1 round!
 START_KNIFE_1   = ^3%n^1 has started ^3knife^1 round!
+START_CAPBATTLE = Started ^3captain battle^1 round!
 
 STOP_MIX        = ^3%n^1 stopped ^3mix^1.
 STOP_KNIFE      = ^3%n^1 stopped ^3knife^1 round^1.
@@ -126,6 +128,7 @@ HUD_STARTKNIFE  = Team knife round started.
 HUD_UNPAUSE     = Game Unpaused^nLive! Live! Live!
 HUD_PAUSE       = GAME PAUSED
 HUD_START_CAPKF = Captain knife round started.
+HUD_START_CAPBT = Captain battle round started.
 HUD_WAITPICK    = %n selects a player, %.f seconds left.
 
 MENU_MIX_TITLE       = \rHide'n'Seek match system
@@ -137,6 +140,7 @@ MENU_MAIN_MIX        = Start mix match
 MENU_MAIN_STOPMIX    = \rStop mix match
 MENU_MAIN_NOSTOPMIX  = \dStop mix match
 MENU_MAIN_STOPKF     = \rStop knife round^n
+MENU_MAIN_STOPRACE   = \rStop race battle^n
 MENU_MAIN_NOTSTARTKF = \dStart knife round^n
 MENU_MAIN_STARTKF    = Start knife round^n
 MENU_MAIN_UNPAUSEKF  = Unpause knife round
@@ -263,12 +267,14 @@ NOT_START_MIX   = Пожалуйста, отключите другой режи
 NOT_START_KNIFE = Пожалуйста, отключите другой режим перед запуском ножевого раунда.
 
 KNIFE_ALREADY   = Ножевой раунд уже запущен.
+RACE_ACTIVE_STOP = Идет race битва. Сначала остановите ее через ^3/stop^1.
 
 NOT_CAPTAIN     = Доступно только на ножевой карте.
 
 START_MIX       = ^3%n^1 запустил ^3микс^1!
 START_KNIFE     = Запущен ^3ножевой^1 раунд!
 START_KNIFE_1   = ^3%n^1 запустил ^3ножевой^1 раунд!
+START_CAPBATTLE = Запущен ^3батл раунд капитанов^1!
 
 STOP_MIX        = ^3%n^1 остановил ^3микс^1.
 STOP_KNIFE      = ^3%n^1 остановил ^3ножевой раунд^1.
@@ -317,6 +323,7 @@ HUD_STARTKNIFE  = Начался ножевой раунд за выбор ко�
 HUD_UNPAUSE     = Игра возоблена^nНачало игры!
 HUD_PAUSE       = ИГРА ПРИОСТАНОВЛЕНА
 HUD_START_CAPKF = Начался ножевой раунд за выбор игроков!
+HUD_START_CAPBT = Начался батл раунд за выбор игроков!
 HUD_WAITPICK    = %n выбирает игрока, осталось %.f сек.
 
 
@@ -328,6 +335,7 @@ MENU_MAIN_STOPCUSTOM = \rОстановить пользовательский �
 MENU_MAIN_MIX        = Запустить микс
 MENU_MAIN_STOPMIX    = \rЗавершить микс
 MENU_MAIN_STOPKF     = \rОстановить ножевой раунд^n
+MENU_MAIN_STOPRACE   = \rОстановить race битву^n
 MENU_MAIN_NOTSTARTKF = \dЗапустить ножевой раунд^n
 MENU_MAIN_STARTKF    = Запустить ножевой раунд^n
 MENU_MAIN_CUSTOM     = Запустить пользовательский мод^n

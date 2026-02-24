@@ -194,11 +194,11 @@ public chooseCapsHandler(id, hMenu, item) {
 			rg_set_user_team(iCaptainA, TEAM_TERRORIST);
 			rg_set_user_team(iCaptainB, TEAM_CT);
 
-			g_iMatchStatus = MATCH_CAPTAINKNIFE;
-
-			LogSendMessage("[MATCH] Captains (%n) (%n) OK! Start captain knife", iCaptainA, iCaptainB);
-
-			kniferound_start();
+			if (hns_battle_init() && hns_battle_arenas_init()) {
+				captainDecideMethodMenu(id);
+			} else {
+				start_captain_decide();
+			}
 		} else {
 			chat_print(0, "%L", LANG_PLAYER, "CAP_HAS_LEFT");
 			
@@ -207,6 +207,46 @@ public chooseCapsHandler(id, hMenu, item) {
 			resetCaptainData();
 		}
 	}
+	return PLUGIN_HANDLED;
+}
+
+stock captainDecideMethodMenu(id) {
+	if (!is_user_connected(id) || g_iMatchStatus != MATCH_CAPTAINPICK) {
+		return;
+	}
+
+	new hMenu = menu_create("\rCaptain decide method", "captainDecideMethodHandler");
+	menu_additem(hMenu, "Knife round");
+	menu_additem(hMenu, "Battle race");
+	menu_additem(hMenu, "Battle race (chance)");
+	menu_setprop(hMenu, MPROP_EXITNAME, "Knife");
+	menu_setprop(hMenu, MPROP_SHOWPAGE, 0);
+	menu_display(id, hMenu, 0);
+}
+
+public captainDecideMethodHandler(id, hMenu, item) {
+	menu_destroy(hMenu);
+
+	if (g_iMatchStatus != MATCH_CAPTAINPICK) {
+		return PLUGIN_HANDLED;
+	}
+
+	if (item == MENU_EXIT || item == 0) {
+		start_captain_decide();
+		return PLUGIN_HANDLED;
+	}
+
+	if (item == 1) {
+		start_captain_battle_decide(false);
+		return PLUGIN_HANDLED;
+	}
+
+	if (item == 2) {
+		start_captain_battle_decide(true);
+		return PLUGIN_HANDLED;
+	}
+
+	start_captain_decide();
 	return PLUGIN_HANDLED;
 }
 
@@ -508,9 +548,41 @@ public checkFullTeams() {
 	if (iPlayersMatch == 10 || !iPlayersNotMatch || (iPlayersMatch % 2 == 0) && (iPlayersNotMatch <= 1)) {
 		resetCaptainData();
 		chat_print(0, "%L", LANG_PLAYER, "TEAM_FULL"); // TODO: Чат: Ножевой раунд начнется через 5 сек
-		g_iMatchStatus = MATCH_TEAMKNIFE;
-		kniferound_start(); // TODO: Добавить в худ таймер: Ножевой раунд начнется через %d сек
+		start_team_decide(); // TODO: Добавить в худ таймер: Ножевой раунд/батл начнется через %d сек
 	}
+}
+
+stock start_captain_decide() {
+	new iCaptainA = hns_get_captain_role(ROLE_CAP_A);
+	new iCaptainB = hns_get_captain_role(ROLE_CAP_B);
+
+	g_iMatchStatus = MATCH_CAPTAINKNIFE;
+	LogSendMessage("[MATCH] Captains (%n) (%n) OK! Start captain knife", iCaptainA, iCaptainB);
+	kniferound_start();
+}
+
+stock start_captain_battle_decide(bool:bChance = false) {
+	new iCaptainA = hns_get_captain_role(ROLE_CAP_A);
+	new iCaptainB = hns_get_captain_role(ROLE_CAP_B);
+
+	if (hns_battle_init() && hns_battle_arenas_init()) {
+		g_iMatchStatus = MATCH_CAPTAINBATTLE;
+
+		if (hns_battle_start(0, bChance)) {
+			LogSendMessage("[MATCH] Captains (%n) (%n) OK! Start captain battle (chance: %d)", iCaptainA, iCaptainB, bChance);
+			return;
+		}
+	}
+
+	chat_print(0, "Battle start failed. Fallback to knife decide.");
+	LogSendMessage("[MATCH] Captains (%n) (%n) battle start failed, fallback to knife", iCaptainA, iCaptainB);
+	start_captain_decide();
+}
+
+stock start_team_decide() {
+	g_iMatchStatus = MATCH_TEAMKNIFE;
+	LogSendMessage("[MATCH] Team decide: start knife");
+	kniferound_start();
 }
 
 public WaitLeaveCap() {

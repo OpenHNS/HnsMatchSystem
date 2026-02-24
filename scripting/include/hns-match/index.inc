@@ -18,6 +18,7 @@
 #include <hns_matchsystem_api.inc>
 #include <hns_matchsystem_bans.inc>
 #include <hns_matchsystem_maps.inc>
+#include <hns_matchsystem_battles.inc>
 #include <hns_matchsystem_cup.inc>
 
 #include <hns-match/globals>
@@ -34,6 +35,7 @@
 #include <hns-match/gameplay/gameplay_hns.inc>
 #include <hns-match/gameplay/gameplay_knife.inc>
 #include <hns-match/gameplay/gameplay_training.inc>
+#include <hns-match/gameplay/gameplay_battle.inc>
 
 #include <hns-match/modes/mode_training.inl>
 #include <hns-match/modes/mode_pub.inl>

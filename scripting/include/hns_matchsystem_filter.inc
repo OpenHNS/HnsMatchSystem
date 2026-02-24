@@ -46,5 +46,9 @@ public match_system_additons(const szNativeName[], iNativeID, iTrapMode) {
 		return PLUGIN_HANDLED
 	}
 
+	if (equal(szNativeName, "hns_battle_init") || equal(szNativeName, "hns_battle_arenas_init") || equal(szNativeName, "hns_battle_start") || equal(szNativeName, "hns_battle_end") || equal(szNativeName, "hns_battle_menu")) { 
+		return PLUGIN_HANDLED
+	}
+
 	return PLUGIN_CONTINUE;
 }

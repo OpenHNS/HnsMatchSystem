@@ -1,7 +1,8 @@
 enum _: GAMEPLAYS {
 	GAMEPLAY_HNS,
 	GAMEPLAY_KNIFE,
-	GAMEPLAY_TRAINING
+	GAMEPLAY_TRAINING,
+	GAMEPLAY_BATTLERACE
 }
 
 new g_iCurrentGameplay;
@@ -21,6 +22,7 @@ public init_gameplay() {
 	hns_init();
 	knife_init();
 	training_init();
+	battle_init();
 }
 
 
@@ -30,6 +32,8 @@ public ChangeGameplay(iMode) {
 			hns_disable_rules();
 		case GAMEPLAY_TRAINING:
 			training_disable_rules();
+		case GAMEPLAY_BATTLERACE:
+			battle_disable_rules();
 	}
 
 	switch (iMode) {
@@ -41,6 +45,9 @@ public ChangeGameplay(iMode) {
 		}
 		case GAMEPLAY_KNIFE: {
 			knife_enable_rules();
+		}
+		case GAMEPLAY_BATTLERACE: {
+			battle_enable_rules();
 		}
 	}
 

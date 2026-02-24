@@ -14,6 +14,7 @@ public plugin_natives() {
 	register_native("hns_set_mode", "native_set_mode");
 
 	register_native("hns_get_status", "native_get_status");
+	register_native("hns_set_status", "native_set_status");
 	register_native("hns_get_state", "native_get_state");
 
 	register_native("hns_get_rules", "native_get_rules");
@@ -76,6 +77,18 @@ public native_set_mode(amxx, params) {
 			mix_start()
 		}
 	}
+}
+
+public native_set_status(amxx, params) {
+	enum { iStatus = 1 };
+	new MATCH_STATUS:iNewStatus = MATCH_STATUS:get_param(iStatus);
+
+	if (iNewStatus < MATCH_NONE || iNewStatus > MATCH_STARTED) {
+		return 0;
+	}
+
+	g_iMatchStatus = iNewStatus;
+	return 1;
 }
 
 public Float:native_get_score_a() {
