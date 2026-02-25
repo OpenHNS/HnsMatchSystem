@@ -354,6 +354,8 @@ public ArenasHandler(id, menu, item) {
 	set_entvar(id, var_angles, flAngles);
 	set_entvar(id, var_v_angle, flAngles);
 	set_entvar(id, var_fixangle, true);
+	set_entvar(id, var_velocity, { 0.0, 0.0, 0.0 });
+	set_entvar(id, var_basevelocity, { 0.0, 0.0, 0.0 });
 
 	CmdArenas(id);
 	menu_destroy(menu);
