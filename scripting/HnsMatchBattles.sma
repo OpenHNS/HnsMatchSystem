@@ -885,6 +885,10 @@ PreparePlayer(id, bool:freeze) {
 	flOrigin[2] += 20.0;
 
 	if (freeze) {
+		if (is_battle_race_context()) {
+			PrepareRaceLoadout(id);
+		}
+
 		set_entvar(id, var_velocity, { 0.0, 0.0, 0.0 });
 		set_entvar(id, var_origin, flOrigin);
 		set_entvar(id, var_angles, flAngles);
@@ -896,6 +900,12 @@ PreparePlayer(id, bool:freeze) {
 		set_entvar(id, var_angles, flAngles);
 		RequestFrame("SetVelocity", id);
 	}
+}
+
+stock PrepareRaceLoadout(id) {
+	rg_remove_all_items(id);
+	rg_give_item(id, "weapon_knife");
+	rg_give_item(id, "weapon_usp");
 }
 
 public SetVelocity(id) {
