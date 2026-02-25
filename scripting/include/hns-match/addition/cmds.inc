@@ -574,6 +574,7 @@ public cmdStop(id) {
 					hns_battle_end(true);
 				}
 				g_iMatchStatus = MATCH_NONE;
+				chat_print(0, "%l", "STOP_RACE", id);
 			} else if (g_iMatchStatus == MATCH_CUPPICK) {
 				// TODO: Стоп cup pick ban
 				hns_cup_stop_veto();

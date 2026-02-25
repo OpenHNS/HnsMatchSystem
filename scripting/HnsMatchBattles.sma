@@ -426,7 +426,9 @@ public EndBattle(bool:set_training) {
 
 	if (bRaceMode) {
 		hns_set_status(MATCH_NONE);
-		hns_set_gameplay(GAMEPLAY_TRAINING);
+		// For standalone race always return via training mode start
+		// so round restart is executed by training_start().
+		hns_set_mode(MODE_TRAINING);
 	}
 
 	new iPlayers[MAX_PLAYERS], iNum;
@@ -437,7 +439,7 @@ public EndBattle(bool:set_training) {
 		ResetColideData(id, false);
 	}
 
-	if (set_training) {
+	if (!bRaceMode && set_training) {
 		hns_set_mode(MODE_TRAINING);
 	}
 

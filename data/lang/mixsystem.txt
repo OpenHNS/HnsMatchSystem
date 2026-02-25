@@ -87,6 +87,7 @@ STOP_PUB        = ^3%n^1 stopped ^3public^1 mode^1.
 STOP_CAP        = ^3%n^1 stopped ^3captain^1 mode^1.
 STOP_DM         = ^3%n^1 stopped ^3deathmatch^1 mode^1.
 STOP_ZM         = ^3%n^1 stopped ^3zombie^1 mode^1.
+STOP_RACE       = ^3%n^1 stopped ^3race battle^1.
 
 SCORE_TIME      = TT [^3%s^1] %d vs %d [^3%s^1] CT (^3%d^1/^3%d^1 rounds) (^3%s^1 diff)
 SCORE_TIME_WT   = TT [^3%s^1] vs [^3%s^1] CT (^3%s^1 diff)
@@ -282,6 +283,7 @@ STOP_PUB        = ^3%n^1 остановил ^3паблик^1 режим.
 STOP_CAP        = ^3%n^1 остановил режим ^3капитанов^1.
 STOP_DM         = ^3%n^1 остановил ^3ДМ^1 режим.
 STOP_ZM         = ^3%n^1 остановил ^3зомби^1 режим^1.
+STOP_RACE       = ^3%n^1 остановил ^3race битву^1.
 
 SCORE_TIME     = TT [^3%s^1] %d vs %d [^3%s^1] CT (^3%d^1/^3%d^1 раундов) (^3%s^1 разрыв)
 SCORE_TIME_WT  = TT [^3%s^1] vs [^3%s^1] CT (^3%s^1 разрыв)

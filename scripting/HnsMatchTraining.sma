@@ -69,8 +69,20 @@ public plugin_cfg() {
 	hns_get_prefix(g_szPrefix, charsmax(g_szPrefix));
 }
 
-public CmdClipMode(id) {
+stock bool:is_training_commands_allowed() {
 	if (hns_get_mode() != MODE_TRAINING && hns_get_state() != STATE_PAUSED) {
+		return false;
+	}
+
+	if (hns_get_status() == MATCH_BATTLERACE) {
+		return false;
+	}
+
+	return true;
+}
+
+public CmdClipMode(id) {
+	if (!is_training_commands_allowed()) {
 		return PLUGIN_HANDLED;
 	}
 
@@ -94,7 +106,7 @@ public CmdClipMode(id) {
 
 
 public CmdCheckpoint(id) {
-	if (hns_get_mode() != MODE_TRAINING && hns_get_state() != STATE_PAUSED) {
+	if (!is_training_commands_allowed()) {
 		return PLUGIN_HANDLED;
 	}
 
@@ -114,7 +126,7 @@ public CmdCheckpoint(id) {
 }
 
 public CmdRespawn(id) {
-	if (hns_get_mode() != MODE_TRAINING && hns_get_state() != STATE_PAUSED) {
+	if (!is_training_commands_allowed()) {
 		return PLUGIN_HANDLED;
 	}
 
@@ -126,7 +138,7 @@ public CmdRespawn(id) {
 }
 
 public CmdGoCheck(id) {
-	if (hns_get_mode() != MODE_TRAINING && hns_get_state() != STATE_PAUSED) {
+	if (!is_training_commands_allowed()) {
 		return PLUGIN_HANDLED;
 	}
 
@@ -157,7 +169,7 @@ public CmdGoCheck(id) {
 }
 
 public CmdStuck(id) {
-	if (hns_get_mode() != MODE_TRAINING && hns_get_state() != STATE_PAUSED) {
+	if (!is_training_commands_allowed()) {
 		return PLUGIN_HANDLED;
 	}
 
@@ -186,7 +198,7 @@ public CmdStuck(id) {
 }
 
 public CmdShowDamage(id) {
-	if (hns_get_mode() != MODE_TRAINING && hns_get_state() != STATE_PAUSED) {
+	if (!is_training_commands_allowed()) {
 		return PLUGIN_HANDLED
 	}
 
@@ -202,7 +214,7 @@ public CmdShowDamage(id) {
 }
 
 public CmdSaveAngles(id) {
-	if (hns_get_mode() != MODE_TRAINING && hns_get_state() != STATE_PAUSED) {
+	if (!is_training_commands_allowed()) {
 		return PLUGIN_HANDLED
 	}
 
@@ -234,7 +246,7 @@ public CmdSaveAngles(id) {
 // }
 
 public cmdWeapons(id) {
-	if (hns_get_mode() != MODE_TRAINING && hns_get_state() != STATE_PAUSED) {
+	if (!is_training_commands_allowed()) {
 		return PLUGIN_HANDLED
 	}
 
@@ -252,7 +264,7 @@ public cmdWeapons(id) {
 }
 
 public cmdScout(id) {
-	if (hns_get_mode() != MODE_TRAINING && hns_get_state() != STATE_PAUSED) {
+	if (!is_training_commands_allowed()) {
 		return PLUGIN_HANDLED
 	}
 
@@ -261,7 +273,7 @@ public cmdScout(id) {
 }
 
 public cmdUsp(id) {
-	if (hns_get_mode() != MODE_TRAINING && hns_get_state() != STATE_PAUSED) {
+	if (!is_training_commands_allowed()) {
 		return PLUGIN_HANDLED
 	}
 
@@ -270,7 +282,7 @@ public cmdUsp(id) {
 }
 
 public cmdFlash(id) {
-	if (hns_get_mode() != MODE_TRAINING && hns_get_state() != STATE_PAUSED) {
+	if (!is_training_commands_allowed()) {
 		return PLUGIN_HANDLED;
 	}
 	
@@ -284,7 +296,7 @@ public cmdFlash(id) {
 }
 
 public cmdAWP(id) {
-	if (hns_get_mode() != MODE_TRAINING && hns_get_state() != STATE_PAUSED) {
+	if (!is_training_commands_allowed()) {
 		return PLUGIN_HANDLED
 	}
 
@@ -293,7 +305,7 @@ public cmdAWP(id) {
 }
 
 public cmdM4A1(id) {
-	if (hns_get_mode() != MODE_TRAINING && hns_get_state() != STATE_PAUSED) {
+	if (!is_training_commands_allowed()) {
 		return PLUGIN_HANDLED
 	}
 
@@ -303,7 +315,7 @@ public cmdM4A1(id) {
 
 
 public hns_training_menu(id) {
-	if ((hns_get_mode() != MODE_TRAINING && hns_get_state() != STATE_PAUSED) || !is_user_connected(id))
+	if (!is_training_commands_allowed() || !is_user_connected(id))
 		return PLUGIN_HANDLED;
 
 	new szMsg[64];
@@ -352,6 +364,11 @@ public hns_training_menu(id) {
 }
 
 public hns_training_menu_code(id, hMenu, item) {
+	if (!is_training_commands_allowed()) {
+		menu_destroy(hMenu);
+		return PLUGIN_HANDLED;
+	}
+
 	if (item == MENU_EXIT) {
 		menu_destroy(hMenu);
 		return PLUGIN_HANDLED;
