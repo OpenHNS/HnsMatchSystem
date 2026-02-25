@@ -49,6 +49,9 @@ PUB_CANC        = Please, disable other mode to enable public mode.
 DM_ACTIVATED    = ^3%n^1 has activated ^3deatchmatch^1 mode.
 DM_ALREADY      = Deatchmatch mode is already running.
 DM_CANC         = Please, disable other mode to enable deathmatch mode.
+DM_1TT_ACTIVATED = ^3%n^1 has activated ^3deathmatch 1TT^1 mode.
+DM_1TT_ALREADY   = Deathmatch 1TT mode is already running.
+DM_1TT_CANC      = Please, disable other mode to enable deathmatch 1TT mode.
 
 ZM_ACTIVATED    = ^3%n^1 has activated ^3zombie^1 mode.
 ZM_ALREADY      = Zombie mode is already running.
@@ -86,6 +89,7 @@ STOP_KNIFE      = ^3%n^1 stopped ^3knife^1 round^1.
 STOP_PUB        = ^3%n^1 stopped ^3public^1 mode^1.
 STOP_CAP        = ^3%n^1 stopped ^3captain^1 mode^1.
 STOP_DM         = ^3%n^1 stopped ^3deathmatch^1 mode^1.
+STOP_DM_1TT     = ^3%n^1 stopped ^3deathmatch 1TT^1 mode^1.
 STOP_ZM         = ^3%n^1 stopped ^3zombie^1 mode^1.
 STOP_RACE       = ^3%n^1 stopped ^3race battle^1.
 
@@ -157,6 +161,7 @@ MENU_MAIN_ADMMENU    = Admin menu
 
 MENU_CUSTOM_PUB     = Public
 MENU_CUSTOM_DM      = DeathMatch
+MENU_CUSTOM_DM_1TT  = DeathMatch 1TT
 MENU_CUSTOM_ZM      = Zombie
 
 MENU_STNGS_ROUNDTIME_TRNG   = Roundtime: \d[Training]
@@ -245,6 +250,9 @@ PUB_CANC        = Пожалуйста, отключите другой режи
 DM_ACTIVATED    = ^3%n^1 активировал ^3ДМ^1 режим.
 DM_ALREADY      = ДМ режим уже запущен.
 DM_CANC         = Пожалуйста, отключите другой режим чтобы запустить ДМ.
+DM_1TT_ACTIVATED = ^3%n^1 активировал ^3ДМ 1TT^1 режим.
+DM_1TT_ALREADY   = ДМ 1TT режим уже запущен.
+DM_1TT_CANC      = Пожалуйста, отключите другой режим чтобы запустить ДМ 1TT.
 
 ZM_ACTIVATED    = ^3%n^1 активировал ^3зомби^1 режим.
 ZM_ALREADY      = Зомби режим уже запущен.
@@ -282,6 +290,7 @@ STOP_KNIFE      = ^3%n^1 остановил ^3ножевой раунд^1.
 STOP_PUB        = ^3%n^1 остановил ^3паблик^1 режим.
 STOP_CAP        = ^3%n^1 остановил режим ^3капитанов^1.
 STOP_DM         = ^3%n^1 остановил ^3ДМ^1 режим.
+STOP_DM_1TT     = ^3%n^1 остановил ^3ДМ 1TT^1 режим.
 STOP_ZM         = ^3%n^1 остановил ^3зомби^1 режим^1.
 STOP_RACE       = ^3%n^1 остановил ^3race битву^1.
 
@@ -352,6 +361,7 @@ MENU_MAIN_ADMMENU    = Админ меню
 
 MENU_CUSTOM_PUB     = Паблик
 MENU_CUSTOM_DM      = ДМ
+MENU_CUSTOM_DM_1TT  = ДМ 1TT
 MENU_CUSTOM_ZM      = Зомби
 
 MENU_STNGS_ROUNDTIME_TRNG   = Roundtime: \d[Training]

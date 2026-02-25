@@ -159,7 +159,7 @@ public fwdEmitSoundPre(id, iChannel, szSample[], Float:volume, Float:attenuation
 }
 
 public fwdClientKill(id) {
-	if (g_iCurrentMode == MODE_DM) {
+	if (g_iCurrentMode == MODE_DM || g_iCurrentMode == MODE_DM_1TT) {
 		chat_print(id, "%L", id, "KILL_NOT");
 		return FMRES_SUPERCEDE;
 	} else if (g_iCurrentMode == MODE_MIX && g_iCurrentRules == RULES_MR && g_flRoundTime < 90.0) {

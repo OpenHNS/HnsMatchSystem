@@ -101,7 +101,7 @@ public hns_killed(victim, attacker)
 		return;
 	}
 	
-	if (g_iCurrentMode == MODE_DM || !g_iSettings[LASTGRENADE])
+	if (g_iCurrentMode == MODE_DM || g_iCurrentMode == MODE_DM_1TT || !g_iSettings[LASTGRENADE])
 	{
 		return;
 	}
@@ -224,4 +224,3 @@ public fwd_Knife_Deploy_Post(ent)
 	set_member(ent, m_Weapon_flNextSecondaryAttack, 99999.0);
 	return HAM_IGNORED;
 }
-

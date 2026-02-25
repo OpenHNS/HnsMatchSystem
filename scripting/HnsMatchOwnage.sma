@@ -54,7 +54,7 @@ public touchPlayer(iToucher, iTouched) {
 				rg_send_audio(0, g_szSound[random(sizeof(g_szSound))]);
 				hns_mysql_stats_set_ownage(iToucher);
 				bOwnageHandled = true;
-			} else if (hns_get_mode() == MODE_PUB || hns_get_mode() == MODE_DM || hns_get_mode() == MODE_ZM) {
+			} else if (hns_get_mode() == MODE_PUB || hns_get_mode() == MODE_DM || hns_get_mode() == MODE_DM_1TT || hns_get_mode() == MODE_ZM) {
 				g_flLastHeadTouch[iToucher] = flGametime;
 				rg_send_audio(0, g_szSound[random(sizeof(g_szSound))]);
 				show_dhudmessage(0, "%L", LANG_PLAYER, "HNS_OWNAGE", iToucher, iTouched);

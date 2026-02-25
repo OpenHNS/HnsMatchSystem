@@ -72,6 +72,9 @@ public native_set_mode(amxx, params) {
 		case MODE_DM: {
 			dm_start()
 		}
+		case MODE_DM_1TT: {
+			dm_1tt_start()
+		}
 		case MODE_ZM: {
 			zm_start()
 		}

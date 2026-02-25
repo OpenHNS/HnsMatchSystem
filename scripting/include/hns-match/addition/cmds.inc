@@ -23,6 +23,7 @@ stock cmds_init() {
 	RegisterSayCmd("duel", 		"versus", 		"cmdDuelMode",		iWatcherAccess, "Choose 1x1 mode");
 	RegisterSayCmd("pub", 		"public", 		"cmdPubMode", 		iWatcherAccess, "Public mode");
 	RegisterSayCmd("dm", 		"deathmatch", 	"cmdDMMode", 		iWatcherAccess, "DeathMatch mode");
+	RegisterSayCmd("dm1tt", 	"dm1", 			"cmdDM1TTMode", 	iWatcherAccess, "DeathMatch 1TT mode");
 	RegisterSayCmd("zm", 		"zombie", 		"cmdZMMode", 		iWatcherAccess, "Zombie mode");
 	RegisterSayCmd("bld", 		"blend", 		"cmdBlend", 		iWatcherAccess, "Blend teams");
 	RegisterSayCmd("specall", 	"specall", 		"cmdTransferSpec", 	iWatcherAccess, "Spec Transfer");
@@ -287,6 +288,28 @@ public cmdDMMode(id) {
 	return PLUGIN_HANDLED;
 }
 
+public cmdDM1TTMode(id) {
+	if (!isUserWatcher(id)) {
+		return PLUGIN_HANDLED;
+	}
+
+	if (g_iCurrentMode == MODE_DM_1TT) {
+		chat_print(id, "%L", id, "DM_1TT_ALREADY");
+		return PLUGIN_HANDLED;
+	}
+
+	if (g_iCurrentMode != MODE_TRAINING || g_iMatchStatus != MATCH_NONE) {
+		chat_print(id, "%L", id, "DM_1TT_CANC");
+		return PLUGIN_HANDLED;
+	}
+
+	chat_print(0, "%l", "DM_1TT_ACTIVATED", id);
+
+	dm_1tt_start();
+
+	return PLUGIN_HANDLED;
+}
+
 public cmdZMMode(id) {
 	if (!isUserWatcher(id)) {
 		return PLUGIN_HANDLED;
@@ -318,6 +341,13 @@ public cmdBlend(id) {
 		chat_print(0, "%l", "BLEND_TEAMS", id);
 		blendZM();
 		return PLUGIN_HANDLED; 
+	}
+
+	if (g_iCurrentMode == MODE_DM_1TT) {
+		chat_print(0, "%l", "BLEND_TEAMS", id);
+		dm_1tt_set_teams();
+		hns_restart_round();
+		return PLUGIN_HANDLED;
 	}
 
 	if (g_iCurrentMode != MODE_PUB && g_iCurrentMode != MODE_DM) {
@@ -592,6 +622,10 @@ public cmdStop(id) {
 			training_start();
 			chat_print(0, "%l", "STOP_DM", id);
 		}
+		case MODE_DM_1TT: {
+			training_start();
+			chat_print(0, "%l", "STOP_DM_1TT", id);
+		}
 		case MODE_ZM: {
 			training_start();
 			chat_print(0, "%l", "STOP_ZM", id);
@@ -828,7 +862,7 @@ public cmdShowTimers(id) {
 }
 
 public cmdTeamSpec(id) {
-	if (g_iCurrentMode == MODE_PUB || g_iCurrentMode == MODE_DM || (g_iCurrentMode == MODE_TRAINING && g_iMatchStatus == MATCH_NONE)) { // Переделать
+	if (g_iCurrentMode == MODE_PUB || g_iCurrentMode == MODE_DM || g_iCurrentMode == MODE_DM_1TT || (g_iCurrentMode == MODE_TRAINING && g_iMatchStatus == MATCH_NONE)) { // Переделать
 		if (getUserTeam(id) == TEAM_SPECTATOR) {
 			new iNumTT = get_playersnum_ex(GetPlayers_MatchTeam, "TERRORIST");
 			new iNumCT = get_playersnum_ex(GetPlayers_MatchTeam, "CT");
