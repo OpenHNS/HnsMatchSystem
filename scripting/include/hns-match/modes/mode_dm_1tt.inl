@@ -1,6 +1,7 @@
 public dm_1tt_init() {
 	g_ModFuncs[MODE_DM_1TT][MODEFUNC_KILL] = CreateOneForward(g_PluginId, "dm_1tt_killed", FP_CELL, FP_CELL);
 	g_ModFuncs[MODE_DM_1TT][MODEFUNC_FALLDAMAGE] = CreateOneForward(g_PluginId, "dm_1tt_falldamage", FP_CELL, FP_FLOAT);
+	g_ModFuncs[MODE_DM_1TT][MODEFUNC_PLAYER_JOIN] = CreateOneForward(g_PluginId, "dm_1tt_player_join", FP_CELL);
 	g_ModFuncs[MODE_DM_1TT][MODEFUNC_PLAYER_LEAVE] = CreateOneForward(g_PluginId, "dm_1tt_player_leave", FP_CELL);
 }
 
@@ -45,6 +46,20 @@ public dm_1tt_falldamage(id, Float:flDmg) {
 
 	if (getUserTeam(id) == TEAM_TERRORIST) {
 		dm_1tt_transfer_tt(id);
+	}
+}
+
+public dm_1tt_player_join(id) {
+	if (!is_user_connected(id)) {
+		return;
+	}
+
+	if (getUserTeam(id) != TEAM_CT) {
+		rg_set_user_team(id, TEAM_CT);
+	}
+
+	if (!is_user_alive(id)) {
+		rg_round_respawn(id);
 	}
 }
 
