@@ -12,6 +12,8 @@ public plugin_natives() {
 
 	register_native("hns_get_mode", "native_get_mode");
 	register_native("hns_set_mode", "native_set_mode");
+	register_native("hns_get_gameplay", "native_get_gameplay");
+	register_native("hns_set_gameplay", "native_set_gameplay");
 
 	register_native("hns_get_status", "native_get_status");
 	register_native("hns_set_status", "native_set_status");
@@ -77,6 +79,27 @@ public native_set_mode(amxx, params) {
 			mix_start()
 		}
 	}
+}
+
+public native_get_gameplay(amxx, params) {
+	return g_iCurrentGameplay;
+}
+
+public native_set_gameplay(amxx, params) {
+	enum { iSetGameplay = 1 };
+
+	new iGameplay = get_param(iSetGameplay);
+
+	if (iGameplay < GAMEPLAY_HNS || iGameplay > GAMEPLAY_BATTLERACE) {
+		return 0;
+	}
+
+	if (iGameplay == g_iCurrentGameplay) {
+		return 1;
+	}
+
+	ChangeGameplay(iGameplay);
+	return 1;
 }
 
 public native_set_status(amxx, params) {

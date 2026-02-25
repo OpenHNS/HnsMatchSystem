@@ -18,6 +18,22 @@ enum HNS_MODES {
 };
 
 /**
+* Gameplay layers.
+*/
+enum HNS_GAMEPLAYS {
+	GAMEPLAY_HNS,
+	GAMEPLAY_KNIFE,
+	GAMEPLAY_TRAINING,
+	GAMEPLAY_BATTLERACE
+};
+
+// Backward-compatible aliases for older API naming.
+#define HNS_GAMEPLAY_HNS GAMEPLAY_HNS
+#define HNS_GAMEPLAY_KNIFE GAMEPLAY_KNIFE
+#define HNS_GAMEPLAY_TRAINING GAMEPLAY_TRAINING
+#define HNS_GAMEPLAY_BATTLERACE GAMEPLAY_BATTLERACE
+
+/**
 * Returns current game mode.
 *
 * @return		Game mode (HNS_MODES)
@@ -32,6 +48,22 @@ native HNS_MODES:hns_get_mode();
 * @noreturn
 */
 native hns_set_mode(HNS_MODES:iMode);
+
+/**
+* Returns current gameplay layer.
+*
+* @return		Gameplay (HNS_GAMEPLAYS)
+*/
+native HNS_GAMEPLAYS:hns_get_gameplay();
+
+/**
+* Sets current gameplay layer.
+*
+* @param iGameplay	Gameplay (HNS_GAMEPLAYS)
+*
+* @return		1 on success, 0 on invalid value
+*/
+native hns_set_gameplay(HNS_GAMEPLAYS:iGameplay);
 
 /**
 * Match statuses.

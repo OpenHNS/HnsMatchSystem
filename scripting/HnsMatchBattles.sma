@@ -382,6 +382,7 @@ public StartBattle(iArenaID) {
 
 	if (bRaceMode) {
 		hns_set_status(MATCH_BATTLERACE);
+		hns_set_gameplay(GAMEPLAY_BATTLERACE);
 	} else {
 		hns_set_mode(MODE_KNIFE);
 	}
@@ -417,12 +418,15 @@ public EndBattle(bool:set_training) {
 		return PLUGIN_HANDLED;
 	}
 
+	new bool:bRaceMode = hns_get_status() == MATCH_BATTLERACE;
+
 	g_eBattleData[BATTLE_ENABLED] = false;
 	remove_task(TASK_START_BATTLE);
 	arrayset(g_eBattleData, 0, BattleData_s);
 
-	if (hns_get_status() == MATCH_BATTLERACE) {
+	if (bRaceMode) {
 		hns_set_status(MATCH_NONE);
+		hns_set_gameplay(GAMEPLAY_TRAINING);
 	}
 
 	new iPlayers[MAX_PLAYERS], iNum;

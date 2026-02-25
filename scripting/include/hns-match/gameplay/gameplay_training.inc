@@ -66,6 +66,10 @@ public training_setrole(id) {
 
 
 public hook_old_on(id) {
+	if (g_iMatchStatus == MATCH_BATTLERACE) {
+		return PLUGIN_HANDLED;
+	}
+
 	if(!is_user_alive(id)) {
 		return PLUGIN_HANDLED;
 	}
