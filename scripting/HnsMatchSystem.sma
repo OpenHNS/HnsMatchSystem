@@ -1,5 +1,7 @@
 #include <hns-match/index>
 
+new g_iTeamJoinMethod;
+
 public plugin_precache() {
 	engfunc(EngFunc_CreateNamedEntity, engfunc(EngFunc_AllocString, "func_buyzone"));
 	g_iRegisterSpawn = register_forward(FM_Spawn, "fwdSpawn", 1);
@@ -23,6 +25,10 @@ public plugin_init() {
 	rh_get_mapname(g_szMapName, charsmax(g_szMapName));
 
 	cvars_init();
+
+	new pTeamJoinMethod = create_cvar("new_teamjoin_metod", "0", FCVAR_NONE, "Team join method (0 - ShowMenu/VGUIMenu, 1 - ReAPI HandleMenu_ChooseTeam)", true, 0.0, true, 1.0);
+	bind_pcvar_num(pTeamJoinMethod, g_iTeamJoinMethod);
+
 	init_gameplay();
 	InitGameModes();
 
@@ -41,6 +47,7 @@ public plugin_init() {
 	RegisterHookChain(RG_CBasePlayer_Killed, "rgPlayerKilled", true);
 	RegisterHookChain(RG_PlayerBlind, "rgPlayerBlind", false);
 	RegisterHookChain(RG_CBasePlayer_MakeBomber, "rgPlayerMakeBomber", false);
+	RegisterHookChain(RG_HandleMenu_ChooseTeam, "rgHandleMenuChooseTeam", false);
 
 	RegisterHam(Ham_Weapon_PrimaryAttack, "weapon_knife", "Knife_PrimaryAttack", false);
 
@@ -334,6 +341,10 @@ public msgHostagePos(msgid, dest, id) {
 }
 
 public msgShowMenu(msgid, dest, id) {
+	if (g_iTeamJoinMethod == 1) {
+		return PLUGIN_CONTINUE;
+	}
+
 	if (!shouldAutoJoin(id))
 		return PLUGIN_CONTINUE;
 
@@ -353,6 +364,10 @@ public msgShowMenu(msgid, dest, id) {
 }
 
 public msgVguiMenu(msgid, dest, id) {
+	if (g_iTeamJoinMethod == 1) {
+		return PLUGIN_CONTINUE;
+	}
+
 	if (get_msg_arg_int(1) != 2 || !shouldAutoJoin(id))
 		return (PLUGIN_CONTINUE);
 	
@@ -363,6 +378,29 @@ public msgVguiMenu(msgid, dest, id) {
 	setForceTeamJoinTask(id, msgid);
 
 	return PLUGIN_HANDLED;
+}
+
+public rgHandleMenuChooseTeam(const id, const MenuChooseTeam:slot) {
+	if (g_iTeamJoinMethod != 1) {
+		return HC_CONTINUE;
+	}
+
+	if (!shouldAutoJoin(id)) {
+		return HC_CONTINUE;
+	}
+
+	if (hns_is_knife_map() && hns_cup_enabled()) {
+		return HC_CONTINUE;
+	}
+
+	// Force direct join to SPEC first, then apply mode-specific join logic.
+	if (slot != MenuChoose_Spec) {
+		SetHookChainArg(2, ATYPE_INTEGER, MenuChoose_Spec);
+	}
+
+	set_task(0.2, "taskSetPlayerTeam", id);
+
+	return HC_CONTINUE;
 }
 
 public msgHideWeapon(msgid, dest, id) {
