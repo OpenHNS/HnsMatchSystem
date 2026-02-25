@@ -40,7 +40,9 @@ native bool:hns_battle_end(bool:bSetTraining = true);
 * Opens battles race menu for player.
 *
 * @param id		Player index
+* @param bCaptainMenu	Open menu in captain decide context
+* @param bInitialChance	Initial chance toggle state in menu
 *
 * @return		true if menu call was accepted, otherwise false
 */
-native bool:hns_battle_menu(id);
+native bool:hns_battle_menu(id, bool:bCaptainMenu = false, bool:bInitialChance = false);

@@ -37,6 +37,7 @@ enum _: ArenaInfo_s {
 
 new g_sPrefix[24], g_szMap[32];
 new g_eBattleData[BattleData_s], bool:g_bChanceForPlayers[MAX_PLAYERS + 1];
+new bool:g_bBattleMenuCaptain[MAX_PLAYERS + 1];
 new Array:g_aColide[MAX_PLAYERS + 1], Float:g_flTouchDelay[MAX_PLAYERS + 1];
 
 new Array:g_aArenas;
@@ -123,12 +124,14 @@ public bool:native_battle_menu(amxx, params) {
 	}
 
 	new id = get_param(1);
-	if (!is_user_connected(id) || !isUserWatcher(id) || !can_start_race_now()) {
+	new bool:bCaptainMenu = (params >= 2) ? bool:get_param(2) : false;
+	new bool:bInitialChance = (params >= 3) ? bool:get_param(3) : g_bChanceForPlayers[id];
+
+	if (!is_user_connected(id) || !isUserWatcher(id)) {
 		return false;
 	}
 
-	CmdStartRace(id);
-	return true;
+	return OpenBattleMenu(id, bCaptainMenu, bInitialChance);
 }
 
 public plugin_init() {
@@ -171,44 +174,13 @@ public plugin_cfg() {
 
 public client_putinserver(id) {
 	g_bChanceForPlayers[id] = false;
+	g_bBattleMenuCaptain[id] = false;
 	g_flTouchDelay[id] = 0.0;
 	ResetColideData(id, false);
 }
 
 public CmdStartRace(id) {
-	if (!is_user_connected(id)) {
-		return PLUGIN_HANDLED;
-	}
-	
-	if (!isUserWatcher(id)) {
-		return PLUGIN_HANDLED;
-	}
-
-	if (!can_start_race_now()) {
-		return PLUGIN_HANDLED;
-	}
-
-	if (!g_bArenasLoaded || !GetArenaCount()) {
-		client_print_color(id, print_team_red, "%s %L", g_sPrefix, id, "BATTLE_NO_ARENAS");
-		return PLUGIN_HANDLED;
-	}
-
-	new hMenu = menu_create(fmt("%L", id, "BATTLE_MENU_RACE_TITLE"), "RaceHandler");
-
-	new iCount = GetArenaCount(), name[48];
-	for (new i = 0; i < iCount; i++) {
-		GetArenaName(i, name, charsmax(name));
-		menu_additem(hMenu, fmt("%s%s", name, i == iCount - 1 ? "^n" : ""));
-	}
-
-	// элемент-переключатель шанса
-	new szChanceState[16], szChanceItem[64];
-	formatex(szChanceState, charsmax(szChanceState), "%L", id, g_bChanceForPlayers[id] ? "BATTLE_MENU_YES" : "BATTLE_MENU_NO");
-	formatex(szChanceItem, charsmax(szChanceItem), "%L", id, "BATTLE_MENU_CHANCE", szChanceState);
-	menu_additem(hMenu, szChanceItem);
-
-	menu_display(id, hMenu, 0);
-
+	OpenBattleMenu(id, false, g_bChanceForPlayers[id]);
 	return PLUGIN_HANDLED;
 }
 
@@ -219,6 +191,13 @@ public RaceHandler(id, hMenu, item) {
 	}
 
 	if (item == MENU_EXIT) { 
+		if (g_bBattleMenuCaptain[id] && hns_get_mode() == MODE_TRAINING && hns_get_status() == MATCH_CAPTAINPICK) {
+			chat_print(0, "Battle menu canceled. Fallback to knife decide.");
+			hns_set_status(MATCH_CAPTAINKNIFE);
+			hns_set_mode(MODE_KNIFE);
+		}
+
+		g_bBattleMenuCaptain[id] = false;
 		menu_destroy(hMenu); 
 		return PLUGIN_HANDLED; 
 	}
@@ -228,7 +207,7 @@ public RaceHandler(id, hMenu, item) {
 		return PLUGIN_HANDLED; 
 	}
 
-	if (!can_start_race_now()) {
+	if (!can_open_battle_menu_now(g_bBattleMenuCaptain[id])) {
 		menu_destroy(hMenu); 
 		return PLUGIN_HANDLED;
 	}
@@ -243,7 +222,7 @@ public RaceHandler(id, hMenu, item) {
 
 	if (item == iCount) {
 		g_bChanceForPlayers[id] = !g_bChanceForPlayers[id];
-		CmdStartRace(id);
+		OpenBattleMenu(id, g_bBattleMenuCaptain[id], g_bChanceForPlayers[id]);
 		menu_destroy(hMenu);
 		return PLUGIN_HANDLED;
 	}
@@ -256,7 +235,16 @@ public RaceHandler(id, hMenu, item) {
 
 	g_eBattleData[BATTLE_INITIATOR] = id;
 	g_eBattleData[BATTLE_CHANCE] = g_bChanceForPlayers[id];
+
+	if (g_bBattleMenuCaptain[id]) {
+		hns_set_status(MATCH_CAPTAINBATTLE);
+	}
+
 	StartBattle(iArenaID);
+	if (g_bBattleMenuCaptain[id] && !g_eBattleData[BATTLE_ENABLED] && hns_get_mode() == MODE_TRAINING) {
+		hns_set_status(MATCH_CAPTAINPICK);
+	}
+	g_bBattleMenuCaptain[id] = false;
 
 	menu_destroy(hMenu);
 	return PLUGIN_HANDLED;
@@ -542,8 +530,60 @@ stock bool:is_knife_map_safe() {
 	return szKnifeMap[0] && equali(szCurrentMap, szKnifeMap);
 }
 
-stock bool:can_start_race_now() {
-	return is_knife_map_safe() && hns_get_mode() == MODE_TRAINING && hns_get_status() == MATCH_NONE;
+stock bool:can_open_battle_menu_now(bool:bCaptainMenu) {
+	if (!is_knife_map_safe()) {
+		return false;
+	}
+
+	if (hns_get_mode() != MODE_TRAINING) {
+		return false;
+	}
+
+	new MATCH_STATUS:iStatus = hns_get_status();
+
+	if (bCaptainMenu) {
+		return iStatus == MATCH_CAPTAINPICK;
+	}
+
+	return iStatus == MATCH_NONE;
+}
+
+stock bool:OpenBattleMenu(id, bool:bCaptainMenu = false, bool:bInitialChance = false) {
+	if (!is_user_connected(id)) {
+		return false;
+	}
+
+	if (!isUserWatcher(id)) {
+		return false;
+	}
+
+	if (!can_open_battle_menu_now(bCaptainMenu)) {
+		return false;
+	}
+
+	if (!g_bArenasLoaded || !GetArenaCount()) {
+		client_print_color(id, print_team_red, "%s %L", g_sPrefix, id, "BATTLE_NO_ARENAS");
+		return false;
+	}
+
+	g_bBattleMenuCaptain[id] = bCaptainMenu;
+	g_bChanceForPlayers[id] = bInitialChance;
+
+	new hMenu = menu_create(fmt("%L", id, "BATTLE_MENU_RACE_TITLE"), "RaceHandler");
+
+	new iCount = GetArenaCount(), name[48];
+	for (new i = 0; i < iCount; i++) {
+		GetArenaName(i, name, charsmax(name));
+		menu_additem(hMenu, fmt("%s%s", name, i == iCount - 1 ? "^n" : ""));
+	}
+
+	new szChanceState[16], szChanceItem[64];
+	formatex(szChanceState, charsmax(szChanceState), "%L", id, g_bChanceForPlayers[id] ? "BATTLE_MENU_YES" : "BATTLE_MENU_NO");
+	formatex(szChanceItem, charsmax(szChanceItem), "%L", id, "BATTLE_MENU_CHANCE", szChanceState);
+	menu_additem(hMenu, szChanceItem);
+
+	menu_display(id, hMenu, 0);
+	return true;
 }
 
 stock bool:can_start_battle_now() {

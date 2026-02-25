@@ -237,12 +237,12 @@ public captainDecideMethodHandler(id, hMenu, item) {
 	}
 
 	if (item == 1) {
-		start_captain_battle_decide(false);
+		start_captain_battle_decide(id, false);
 		return PLUGIN_HANDLED;
 	}
 
 	if (item == 2) {
-		start_captain_battle_decide(true);
+		start_captain_battle_decide(id, true);
 		return PLUGIN_HANDLED;
 	}
 
@@ -561,21 +561,19 @@ stock start_captain_decide() {
 	kniferound_start();
 }
 
-stock start_captain_battle_decide(bool:bChance = false) {
+stock start_captain_battle_decide(id, bool:bChance = false) {
 	new iCaptainA = hns_get_captain_role(ROLE_CAP_A);
 	new iCaptainB = hns_get_captain_role(ROLE_CAP_B);
 
 	if (hns_battle_init() && hns_battle_arenas_init()) {
-		g_iMatchStatus = MATCH_CAPTAINBATTLE;
-
-		if (hns_battle_start(0, bChance)) {
-			LogSendMessage("[MATCH] Captains (%n) (%n) OK! Start captain battle (chance: %d)", iCaptainA, iCaptainB, bChance);
+		if (hns_battle_menu(id, true, bChance)) {
+			LogSendMessage("[MATCH] Captains (%n) (%n) OK! Open captain battle menu (chance: %d)", iCaptainA, iCaptainB, bChance);
 			return;
 		}
 	}
 
-	chat_print(0, "Battle start failed. Fallback to knife decide.");
-	LogSendMessage("[MATCH] Captains (%n) (%n) battle start failed, fallback to knife", iCaptainA, iCaptainB);
+	chat_print(0, "Battle menu unavailable. Fallback to knife decide.");
+	LogSendMessage("[MATCH] Captains (%n) (%n) battle menu unavailable, fallback to knife", iCaptainA, iCaptainB);
 	start_captain_decide();
 }
 
