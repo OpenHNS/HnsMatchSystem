@@ -124,8 +124,16 @@ public bool:native_battle_menu(amxx, params) {
 	}
 
 	new id = get_param(1);
-	new bool:bCaptainMenu = (params >= 2) ? bool:get_param(2) : false;
-	new bool:bInitialChance = (params >= 3) ? bool:get_param(3) : g_bChanceForPlayers[id];
+	new bool:bCaptainMenu = false;
+	new bool:bInitialChance = g_bChanceForPlayers[id];
+
+	if (params >= 2) {
+		bCaptainMenu = get_param(2) != 0;
+	}
+
+	if (params >= 3) {
+		bInitialChance = get_param(3) != 0;
+	}
 
 	if (!is_user_connected(id) || !isUserWatcher(id)) {
 		return false;
@@ -192,7 +200,7 @@ public RaceHandler(id, hMenu, item) {
 
 	if (item == MENU_EXIT) { 
 		if (g_bBattleMenuCaptain[id] && hns_get_mode() == MODE_TRAINING && hns_get_status() == MATCH_CAPTAINPICK) {
-			chat_print(0, "Battle menu canceled. Fallback to knife decide.");
+			client_print_color(0, print_team_blue, "%s Battle menu canceled. Fallback to knife decide.", g_sPrefix);
 			hns_set_status(MATCH_CAPTAINKNIFE);
 			hns_set_mode(MODE_KNIFE);
 		}
