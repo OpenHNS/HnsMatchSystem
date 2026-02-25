@@ -101,7 +101,10 @@ public hns_killed(victim, attacker)
 		return;
 	}
 	
-	if (g_iCurrentMode == MODE_DM || g_iCurrentMode == MODE_DM_1TT || !g_iSettings[LASTGRENADE])
+	if (g_iCurrentMode == MODE_DM
+		|| g_iCurrentMode == MODE_DM_1TT
+		|| (g_iCurrentMode == MODE_MIX && g_iCurrentRules == RULES_DUEL)
+		|| !g_iSettings[LASTGRENADE])
 	{
 		return;
 	}
