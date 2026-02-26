@@ -19,6 +19,7 @@ Counter-Strike Hide'n'Seek Match System plugins.
 
 - Public / DeathMatch / Zombie warmup modes.
 - Knife / Captain team setup modes.
+- Battle race / Arenas (knife-context alternative and standalone race runs).
 - MR / Wintime / 1x1 match modes.
 - Watcher (admin) menu (`N`).
 - Admin-driven match flow.
@@ -96,6 +97,7 @@ Counter-Strike Hide'n'Seek Match System plugins.
 - HnsMatchMaps.sma - Map list and map settings (`/maps`)
 - HnsMatchMapRules.sma - Rules for specific maps
 - HnsMatchTraining.sma - Training mode (cp/tp/respawn/noclip)
+- HnsMatchBattles.sma - Battle race / Arenas (`/race`, `/arenas`, captain battle decide)
 - HnsMatchRecontrol.sma - Player replace/control transfer plugin
 - HnsMatchWatcher.sma - Watcher system and watcher voting
 - HnsMatchBans.amxx - Match bans plugin (binary module in release build)

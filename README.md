@@ -20,6 +20,7 @@ Counter-Strike Hide'n'Seek Match System plugins.
 
 - Public / DeathMatch / Zombie - Моды для разминок.
 - Knife / Captain - Режимы распределений команд.
+- Battle race / Arenas - Альтернатива ножевому в knife-контексте и отдельные race-запуски.
 - MR / Wintime / 1x1 - Режимы матчей
 - Watcher (admin) menu (N)
 - Система зависит от администратора.
@@ -94,6 +95,7 @@ Counter-Strike Hide'n'Seek Match System plugins.
 - HnsMatchMaps.sma - Список карт и карта-настройки (`/maps`)
 - HnsMatchMapRules.sma - Правила для отдельных карт
 - HnsMatchTraining.sma - Тренировочный режим (cp/tp/respawn/noclip)
+- HnsMatchBattles.sma - Battle race / Arenas (`/race`, `/arenas`, captain battle decide)
 - HnsMatchRecontrol.sma - Замена/передача контроля игрока
 - HnsMatchWatcher.sma - Система watcher и голосование за watcher
 - HnsMatchBans.amxx - Плагин банов матч-системы (бинарный модуль в сборке)

@@ -155,7 +155,7 @@ public plugin_init() {
 	g_aArenas = ArrayCreate(ArenaInfo_s);
 
 	RegisterSayCmd("race", "racemenu",		"CmdStartRace", hns_get_flag_watcher(), "Battles race menu");
-	RegisterSayCmd("arenas", "arenasmenu",	"CmdArenas", hns_get_flag_watcher(), "Battles arenas menu");
+	RegisterSayCmd("arenas", "arenasmenu",	"CmdArenas", 0, "Battles arenas menu");
 
 	// На не-ножевой карте батлы отключены: не читаем arenas config.
 	if (is_knife_map_safe()) {
