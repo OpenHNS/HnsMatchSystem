@@ -6,7 +6,7 @@
 #include <hns_matchsystem_maps>
 
 const TASK_START_BATTLE = 78291;
-const TASK_PLAYER_CHANCE = 13901;
+const TASK_PLAYER_RETURN = 13901;
 
 new const g_szSounds[][] = {
 	"openhns/battle/prepare.wav",
@@ -20,8 +20,7 @@ enum _: BattleData_s {
 	bool:BATTLE_ENABLED,
 	BATTLE_ARENA,
 	BATTLE_INITIATOR,
-	BATTLE_PREPARE,
-	bool:BATTLE_CHANCE
+	BATTLE_PREPARE
 };
 
 enum _: CollideData_s {
@@ -32,12 +31,18 @@ enum _: CollideData_s {
 enum _: ArenaInfo_s {
 	a_name[32],
 	a_target[32],
+	a_type,
 	a_entid
 };
 
+const ARENA_TYPE_RACE = (1 << 0);
+const ARENA_TYPE_TELEPORT = (1 << 1);
+const ARENA_TYPE_ALL = ARENA_TYPE_RACE | ARENA_TYPE_TELEPORT;
+
 new g_sPrefix[24], g_szMap[32];
-new g_eBattleData[BattleData_s], bool:g_bChanceForPlayers[MAX_PLAYERS + 1];
+new g_eBattleData[BattleData_s];
 new bool:g_bBattleMenuCaptain[MAX_PLAYERS + 1];
+new bool:g_bRaceLoadoutGiven[MAX_PLAYERS + 1];
 new Array:g_aColide[MAX_PLAYERS + 1], Float:g_flTouchDelay[MAX_PLAYERS + 1];
 
 new Array:g_aArenas;
@@ -63,12 +68,17 @@ public native_battle_init(amxx, params) {
 }
 
 public native_battle_arenas_init(amxx, params) {
+	if (!is_knife_map_safe()) {
+		g_bArenasLoaded = false;
+		return 0;
+	}
+
 	if (!g_aArenas) {
 		g_aArenas = ArrayCreate(ArenaInfo_s);
 		get_mapname(g_szMap, charsmax(g_szMap));
 	}
 
-	if (!g_bArenasLoaded || !GetArenaCount()) {
+	if (!g_bArenasLoaded || !GetArenaCountByType(ARENA_TYPE_RACE)) {
 		LoadArenasFromIni();
 	}
 
@@ -76,19 +86,14 @@ public native_battle_arenas_init(amxx, params) {
 		FindArenas();
 	}
 
-	return g_bArenasLoaded && GetArenaCount() > 0;
+	return g_bArenasLoaded && GetArenaCountByType(ARENA_TYPE_RACE) > 0;
 }
 
 public bool:native_battle_start(amxx, params) {
 	new iArena = 0;
-	new bool:bChance = false;
 
 	if (params >= 1) {
 		iArena = get_param(1);
-	}
-
-	if (params >= 2) {
-		bChance = bool:get_param(2);
 	}
 
 	if (hns_get_mode() == MODE_KNIFE && g_eBattleData[BATTLE_ENABLED]) {
@@ -100,7 +105,6 @@ public bool:native_battle_start(amxx, params) {
 	}
 
 	g_eBattleData[BATTLE_INITIATOR] = 0;
-	g_eBattleData[BATTLE_CHANCE] = bChance;
 	StartBattle(iArena);
 
 	return g_eBattleData[BATTLE_ENABLED];
@@ -125,21 +129,16 @@ public bool:native_battle_menu(amxx, params) {
 
 	new id = get_param(1);
 	new bool:bCaptainMenu = false;
-	new bool:bInitialChance = g_bChanceForPlayers[id];
 
 	if (params >= 2) {
 		bCaptainMenu = get_param(2) != 0;
-	}
-
-	if (params >= 3) {
-		bInitialChance = get_param(3) != 0;
 	}
 
 	if (!is_user_connected(id) || !isUserWatcher(id)) {
 		return false;
 	}
 
-	return OpenBattleMenu(id, bCaptainMenu, bInitialChance);
+	return OpenBattleMenu(id, bCaptainMenu);
 }
 
 public plugin_init() {
@@ -158,9 +157,14 @@ public plugin_init() {
 	RegisterSayCmd("race", "racemenu",		"CmdStartRace", hns_get_flag_watcher(), "Battles race menu");
 	RegisterSayCmd("arenas", "arenasmenu",	"CmdArenas", hns_get_flag_watcher(), "Battles arenas menu");
 
-	// грузим только текущую карту
-	LoadArenasFromIni();
-	FindArenas();
+	// На не-ножевой карте батлы отключены: не читаем arenas config.
+	if (is_knife_map_safe()) {
+		LoadArenasFromIni();
+		FindArenas();
+	} else {
+		g_bArenasLoaded = false;
+		log_amx("[HNS] Battles disabled on non-knife map '%s'.", g_szMap);
+	}
 
 	RegisterHookChain(RG_CSGameRules_RestartRound, "CSGameRules_RestartRound_Post", true);
 	RegisterHookChain(RG_CBasePlayer_Spawn, "CBasePlayer_Spawn_Post", true);
@@ -181,14 +185,15 @@ public plugin_cfg() {
 }
 
 public client_putinserver(id) {
-	g_bChanceForPlayers[id] = false;
 	g_bBattleMenuCaptain[id] = false;
+	g_bRaceLoadoutGiven[id] = false;
 	g_flTouchDelay[id] = 0.0;
+	remove_task(id + TASK_PLAYER_RETURN);
 	ResetColideData(id, false);
 }
 
 public CmdStartRace(id) {
-	OpenBattleMenu(id, false, g_bChanceForPlayers[id]);
+	OpenBattleMenu(id, false);
 	return PLUGIN_HANDLED;
 }
 
@@ -221,28 +226,20 @@ public RaceHandler(id, hMenu, item) {
 	}
 
 
-	new iCount = GetArenaCount();
+	new iCount = GetArenaCountByType(ARENA_TYPE_RACE);
 
 	if (!iCount) { 
 		menu_destroy(hMenu); 
 		return PLUGIN_HANDLED; 
 	}
 
-	if (item == iCount) {
-		g_bChanceForPlayers[id] = !g_bChanceForPlayers[id];
-		OpenBattleMenu(id, g_bBattleMenuCaptain[id], g_bChanceForPlayers[id]);
-		menu_destroy(hMenu);
-		return PLUGIN_HANDLED;
-	}
-
 	new iArenaID;
-	if (!GetArenaByItemIndex(item, iArenaID)) {
+	if (!GetArenaByItemIndex(item, ARENA_TYPE_RACE, iArenaID)) {
 		menu_destroy(hMenu);
 		return PLUGIN_HANDLED;
 	}
 
 	g_eBattleData[BATTLE_INITIATOR] = id;
-	g_eBattleData[BATTLE_CHANCE] = g_bChanceForPlayers[id];
 
 	if (g_bBattleMenuCaptain[id]) {
 		hns_set_status(MATCH_CAPTAINBATTLE);
@@ -276,7 +273,7 @@ public CmdArenas(id) {
 		return PLUGIN_HANDLED;
 	}
 
-	if (!g_bArenasLoaded || !GetArenaCount()) {
+	if (!g_bArenasLoaded || !GetArenaCountByType(ARENA_TYPE_ALL)) {
 		client_print_color(id, print_team_red, "%s %L", g_sPrefix, id, "BATTLE_NO_TELEPORTS");
 		return PLUGIN_HANDLED;
 	}
@@ -285,9 +282,14 @@ public CmdArenas(id) {
 
 	menu_additem(hMenu, fmt("%L", id, "BATTLE_MENU_TELEPORT_KNIFE"));
 
-	new iCount = GetArenaCount(), szName[48];
+	new iCount = GetArenaCountByType(ARENA_TYPE_ALL), szName[48];
 	for (new i = 0; i < iCount; i++) {
-		GetArenaName(i, szName, charsmax(szName));
+		new iArenaID;
+		if (!GetArenaByItemIndex(i, ARENA_TYPE_ALL, iArenaID)) {
+			continue;
+		}
+
+		GetArenaName(iArenaID, szName, charsmax(szName));
 		menu_additem(hMenu, szName);
 	}
 
@@ -349,6 +351,7 @@ public ArenasHandler(id, menu, item) {
 	new Float:flOrigin[3], Float:flAngles[3];
 	get_entvar(iEnt, var_origin, flOrigin);
 	get_entvar(iEnt, var_angles, flAngles);
+	flOrigin[2] += 20.0;
 
 	set_entvar(id, var_origin, flOrigin);
 	set_entvar(id, var_angles, flAngles);
@@ -381,9 +384,17 @@ public StartBattle(iArenaID) {
 	if (bRaceMode) {
 		hns_set_status(MATCH_BATTLERACE);
 		hns_set_gameplay(GAMEPLAY_BATTLERACE);
+
+		for (new id = 1; id <= MaxClients; id++) {
+			g_bRaceLoadoutGiven[id] = false;
+			remove_task(id + TASK_PLAYER_RETURN);
+		}
 	} else {
 		hns_set_mode(MODE_KNIFE);
 	}
+
+	// Battle must always run in no-block style.
+	SetBattleSemiclip(true);
 
 	g_eBattleData[BATTLE_ARENA] = iArenaID;
 
@@ -394,19 +405,17 @@ public StartBattle(iArenaID) {
 		client_print_color(0, print_team_blue, "%s %L", g_sPrefix, LANG_SERVER, "BATTLE_STARTED", g_eBattleData[BATTLE_INITIATOR], szName);
 	}
 
-	if (bRaceMode) {
-		new iPlayers[MAX_PLAYERS], iNum;
-		get_players(iPlayers, iNum, "ch");
+	new iPlayers[MAX_PLAYERS], iNum;
+	get_players(iPlayers, iNum, "ch");
 
-		for (new i; i < iNum; i++) {
-			new id = iPlayers[i];
-			PreparePlayer(id, true);
-		}
-
-		g_eBattleData[BATTLE_PREPARE] = 0;
-		remove_task(TASK_START_BATTLE);
-		set_task(1.0, "task_StartBattle", .id = TASK_START_BATTLE);
+	for (new i; i < iNum; i++) {
+		new id = iPlayers[i];
+		PreparePlayer(id, true);
 	}
+
+	g_eBattleData[BATTLE_PREPARE] = 0;
+	remove_task(TASK_START_BATTLE);
+	set_task(1.0, "task_StartBattle", .id = TASK_START_BATTLE);
 
 	return PLUGIN_HANDLED;
 }
@@ -421,6 +430,7 @@ public EndBattle(bool:set_training) {
 	g_eBattleData[BATTLE_ENABLED] = false;
 	remove_task(TASK_START_BATTLE);
 	arrayset(g_eBattleData, 0, BattleData_s);
+	SetBattleSemiclip(false);
 
 	if (bRaceMode) {
 		hns_set_status(MATCH_NONE);
@@ -434,6 +444,8 @@ public EndBattle(bool:set_training) {
 
 	for (new i; i < iNum; i++) {
 		new id = iPlayers[i];
+		remove_task(id + TASK_PLAYER_RETURN);
+		g_bRaceLoadoutGiven[id] = false;
 		ResetColideData(id, false);
 	}
 
@@ -444,13 +456,32 @@ public EndBattle(bool:set_training) {
 	return PLUGIN_HANDLED;
 }
 
+stock SetBattleSemiclip(bool:bEnable) {
+	server_cmd("semiclip_option semiclip %d", bEnable ? 1 : 0);
+	server_cmd("semiclip_option team %d", bEnable ? 3 : 0);
+	server_cmd("semiclip_option time 0");
+	server_exec();
+}
+
 public CSGameRules_RestartRound_Post() {
-	if (!is_battle_knife_context()) {
+	if (!is_battle_context()) {
 		return;
 	}
 
 	if (!g_eBattleData[BATTLE_ENABLED]) {
 		return
+	}
+
+	// Safety: knife mode/gameplay can toggle settings during round restart.
+	// Re-apply no-block for active battle context.
+	SetBattleSemiclip(true);
+
+	new iPlayers[MAX_PLAYERS], iNum;
+	get_players(iPlayers, iNum, "ch");
+
+	for (new i; i < iNum; i++) {
+		new id = iPlayers[i];
+		PreparePlayer(id, true);
 	}
 
 	g_eBattleData[BATTLE_PREPARE] = 0;
@@ -465,6 +496,10 @@ public task_StartBattle() {
 		remove_task(TASK_START_BATTLE);
 		return HC_CONTINUE;
 	}
+
+	// Keep battle no-block forced during whole countdown/restart cycle.
+	// Some mode/config hooks can override semiclip options between ticks.
+	SetBattleSemiclip(true);
 
 	if (g_eBattleData[BATTLE_PREPARE] >= sizeof(g_szSounds)) {
 		new iPlayers[MAX_PLAYERS], iNum;
@@ -481,25 +516,24 @@ public task_StartBattle() {
 	}
 
 	if (g_eBattleData[BATTLE_PREPARE]) {
-		new szBuff[16], szCounter[16], szChance[32];
-		formatex(szBuff, charsmax(szBuff), "%d", g_eBattleData[BATTLE_PREPARE]);
-		szChance[0] = 0;
+		new szCounter[16];
 
 		if (g_eBattleData[BATTLE_PREPARE] == 4) {
 			formatex(szCounter, charsmax(szCounter), "%L", LANG_SERVER, "BATTLE_HUD_FIGHT");
 		} else {
-			copy(szCounter, charsmax(szCounter), szBuff);
-		}
-
-		if (g_eBattleData[BATTLE_CHANCE]) {
-			formatex(szChance, charsmax(szChance), "%L", LANG_SERVER, "BATTLE_HUD_CHANCE");
+			formatex(szCounter, charsmax(szCounter), "%d", 4 - g_eBattleData[BATTLE_PREPARE]);
 		}
 
 		set_dhudmessage(100, 100, 100, -1.0, 0.75, .holdtime = 1.0);
-		show_dhudmessage(0, "%L", LANG_SERVER, "BATTLE_HUD_TEXT", szCounter, szChance);
+		show_dhudmessage(0, "%L", LANG_SERVER, "BATTLE_HUD_TEXT", szCounter, "");
 	}
 
-	rg_send_audio(0, g_szSounds[g_eBattleData[BATTLE_PREPARE]])
+	new iSoundIndex = g_eBattleData[BATTLE_PREPARE];
+	if (g_eBattleData[BATTLE_PREPARE] >= 1 && g_eBattleData[BATTLE_PREPARE] <= 3) {
+		iSoundIndex = 4 - g_eBattleData[BATTLE_PREPARE];
+	}
+
+	rg_send_audio(0, g_szSounds[iSoundIndex])
 	g_eBattleData[BATTLE_PREPARE]++;
 
 	if (g_eBattleData[BATTLE_PREPARE] == 1)
@@ -523,7 +557,9 @@ public CBasePlayer_Spawn_Post(id) {
 		return HC_CONTINUE;
 	}
 
-	PreparePlayer(id, true);
+	new bool:bFreeze = g_eBattleData[BATTLE_PREPARE] < sizeof(g_szSounds);
+
+	PreparePlayer(id, bFreeze);
 
 	return HC_CONTINUE;
 }
@@ -558,7 +594,7 @@ stock bool:can_open_battle_menu_now(bool:bCaptainMenu) {
 	return iStatus == MATCH_NONE;
 }
 
-stock bool:OpenBattleMenu(id, bool:bCaptainMenu = false, bool:bInitialChance = false) {
+stock bool:OpenBattleMenu(id, bool:bCaptainMenu = false) {
 	if (!is_user_connected(id)) {
 		return false;
 	}
@@ -571,26 +607,25 @@ stock bool:OpenBattleMenu(id, bool:bCaptainMenu = false, bool:bInitialChance = f
 		return false;
 	}
 
-	if (!g_bArenasLoaded || !GetArenaCount()) {
+	if (!g_bArenasLoaded || !GetArenaCountByType(ARENA_TYPE_RACE)) {
 		client_print_color(id, print_team_red, "%s %L", g_sPrefix, id, "BATTLE_NO_ARENAS");
 		return false;
 	}
 
 	g_bBattleMenuCaptain[id] = bCaptainMenu;
-	g_bChanceForPlayers[id] = bInitialChance;
 
 	new hMenu = menu_create(fmt("%L", id, "BATTLE_MENU_RACE_TITLE"), "RaceHandler");
 
-	new iCount = GetArenaCount(), name[48];
+	new iCount = GetArenaCountByType(ARENA_TYPE_RACE), name[48];
 	for (new i = 0; i < iCount; i++) {
-		GetArenaName(i, name, charsmax(name));
+		new iArenaID;
+		if (!GetArenaByItemIndex(i, ARENA_TYPE_RACE, iArenaID)) {
+			continue;
+		}
+
+		GetArenaName(iArenaID, name, charsmax(name));
 		menu_additem(hMenu, fmt("%s%s", name, i == iCount - 1 ? "^n" : ""));
 	}
-
-	new szChanceState[16], szChanceItem[64];
-	formatex(szChanceState, charsmax(szChanceState), "%L", id, g_bChanceForPlayers[id] ? "BATTLE_MENU_YES" : "BATTLE_MENU_NO");
-	formatex(szChanceItem, charsmax(szChanceItem), "%L", id, "BATTLE_MENU_CHANCE", szChanceState);
-	menu_additem(hMenu, szChanceItem);
 
 	menu_display(id, hMenu, 0);
 	return true;
@@ -638,6 +673,14 @@ stock bool:is_battle_context() {
 // ======== Конфиг: загрузка секции текущей карты ========
 stock LoadArenasFromIni()
 {
+	if (!is_knife_map_safe()) {
+		if (g_aArenas) {
+			ArrayClear(g_aArenas);
+		}
+		g_bArenasLoaded = false;
+		return;
+	}
+
 	ArrayClear(g_aArenas);
 	g_bArenasLoaded = false;
 
@@ -651,7 +694,7 @@ stock LoadArenasFromIni()
 		return;
 	}
 
-	new line[192], curSection[64], bool:sectionMatched;
+	new line[192], curSection[64], bool:sectionMatched, iSectionTypeMask;
 	while (!feof(file)) {
 		fgets(file, line, charsmax(line));
 		trim(line);
@@ -660,11 +703,17 @@ stock LoadArenasFromIni()
 
 		if (line[0] == '[') {
 			new close = contain(line, "]");
-			if (close == -1) { sectionMatched = false; continue; }
+			if (close == -1) {
+				sectionMatched = false;
+				iSectionTypeMask = 0;
+				continue;
+			}
 
 			copyc(curSection, charsmax(curSection), line[1], ']');
 			trim(curSection);
-			sectionMatched = bool:equali(curSection, g_szMap);
+			
+			iSectionTypeMask = GetArenaSectionType(curSection);
+			sectionMatched = iSectionTypeMask != 0;
 			continue;
 		}
 
@@ -686,6 +735,7 @@ stock LoadArenasFromIni()
 		new info[ArenaInfo_s];
 		copy(info[a_name], charsmax(info[a_name]), left);
 		copy(info[a_target], charsmax(info[a_target]), right);
+		info[a_type] = iSectionTypeMask;
 		info[a_entid] = 0;
 
 		ArrayPushArray(g_aArenas, info);
@@ -713,25 +763,62 @@ stock FindArenas() {
 		ArrayGetArray(g_aArenas, i, info);
 		info[a_entid] = 0;
 
-		new ent = -1, tn[32];
-		while ((ent = rg_find_ent_by_class(ent, "info_teleport_destination"))) {
-			get_entvar(ent, var_targetname, tn, charsmax(tn));
-			if (equali(tn, info[a_target])) {
-				info[a_entid] = ent;
-				break;
-			}
-		}
+		info[a_entid] = FindArenaEntByType(info[a_type], info[a_target]);
 		ArraySetArray(g_aArenas, i, info);
 
 		if (!info[a_entid]) {
-			log_amx("[HNS] target '%s' not found on map '%s' (arena '%s')",
-				info[a_target], g_szMap, info[a_name]);
+			log_amx("[HNS] target '%s' not found for type %d on map '%s' (arena '%s')",
+				info[a_target], info[a_type], g_szMap, info[a_name]);
 		}
 	}
 }
 
+stock FindArenaEntByType(iArenaType, const szTargetName[]) {
+	// :teleports -> info_target
+	if (iArenaType == ARENA_TYPE_TELEPORT) {
+		return FindEntByTargetName("info_target", szTargetName);
+	}
+
+	// :races -> info_teleport_destination
+	if (iArenaType == ARENA_TYPE_RACE) {
+		return FindEntByTargetName("info_teleport_destination", szTargetName);
+	}
+
+	return 0;
+}
+
+stock FindEntByTargetName(const szClassName[], const szTargetName[]) {
+	new ent = -1, tn[32];
+
+	while ((ent = rg_find_ent_by_class(ent, szClassName))) {
+		get_entvar(ent, var_targetname, tn, charsmax(tn));
+		if (equali(tn, szTargetName)) {
+			return ent;
+		}
+	}
+
+	return 0;
+}
+
 stock GetArenaCount() {
 	return g_aArenas ? ArraySize(g_aArenas) : 0;
+}
+
+stock GetArenaCountByType(iTypeMask) {
+	if (!g_aArenas) {
+		return 0;
+	}
+
+	new info[ArenaInfo_s], iCount;
+	new iTotal = ArraySize(g_aArenas);
+	for (new i; i < iTotal; i++) {
+		ArrayGetArray(g_aArenas, i, info);
+		if (info[a_type] & iTypeMask) {
+			iCount++;
+		}
+	}
+
+	return iCount;
 }
 
 stock GetArenaName(index, out[], len) {
@@ -753,26 +840,70 @@ stock GetArenaEnt(index) {
 	return info[a_entid];
 }
 
-// для меню /race: пункты = [0..count-1], дальше — "Chance for players"
-stock GetArenaByItemIndex(menu_item, &iArenaID) {
+// Фильтрованный индекс для меню арен.
+stock GetArenaByItemIndex(menu_item, iTypeMask, &iArenaID) {
 	iArenaID = -1;
-	new cnt = GetArenaCount();
-	if (menu_item < 0) return 0;
-	if (menu_item < cnt) {
-		iArenaID = menu_item;
-		return 1;
+
+	if (menu_item < 0 || !g_aArenas) {
+		return 0;
 	}
+
+	new info[ArenaInfo_s], iFilteredIndex;
+	new iTotal = ArraySize(g_aArenas);
+	for (new i; i < iTotal; i++) {
+		ArrayGetArray(g_aArenas, i, info);
+		if (!(info[a_type] & iTypeMask)) {
+			continue;
+		}
+
+		if (iFilteredIndex == menu_item) {
+			iArenaID = i;
+			return 1;
+		}
+
+		iFilteredIndex++;
+	}
+
 	return 0;
 }
 
 // для меню /arenas: item 0 — "knife", дальше 1..count
 stock GetTeleportByItemIndex(menu_item, &iArenaID) {
 	iArenaID = -1;
-	if (menu_item <= 0) return 0;
-	new idx = menu_item - 1;
-	if (idx < 0 || idx >= GetArenaCount()) return 0;
-	iArenaID = idx;
-	return 1;
+	if (menu_item <= 0) {
+		return 0;
+	}
+
+	return GetArenaByItemIndex(menu_item - 1, ARENA_TYPE_ALL, iArenaID);
+}
+
+stock GetArenaSectionType(const szSection[]) {
+	new szMapSection[64], szCategory[32];
+	copy(szMapSection, charsmax(szMapSection), szSection);
+
+	new iColonPos = contain(szMapSection, ":");
+	if (iColonPos < 0) {
+		return 0;
+	}
+
+	copy(szCategory, charsmax(szCategory), szMapSection[iColonPos + 1]);
+	szMapSection[iColonPos] = 0;
+	trim(szMapSection);
+	trim(szCategory);
+
+	if (!equali(szMapSection, g_szMap)) {
+		return 0;
+	}
+
+	if (equali(szCategory, "races")) {
+		return ARENA_TYPE_RACE;
+	}
+
+	if (equali(szCategory, "teleports")) {
+		return ARENA_TYPE_TELEPORT;
+	}
+
+	return 0;
 }
 
 // ======== Оригинальная логика (с заменой на конфиговые арены) ========
@@ -790,6 +921,11 @@ public touch_PlayerCollide(iTouched, iToucher) {
 
 	if (!g_eBattleData[BATTLE_ENABLED])
 		return;
+
+	// Ignore finish/fail triggers while countdown is active.
+	if (g_eBattleData[BATTLE_PREPARE] < sizeof(g_szSounds)) {
+		return;
+	}
 
 	new szClassName[32];
 	get_entvar(iBlock, var_classname, szClassName, charsmax(szClassName));
@@ -824,15 +960,20 @@ public touch_PlayerCollide(iTouched, iToucher) {
 
 CheckStatus(id, bool:is_finish) {
 	if (is_finish) {
-		new iPlayers[MAX_PLAYERS], iNum;
-		get_players(iPlayers, iNum, "ache", TeamName:get_member(id, m_iTeam) == TEAM_TERRORIST ? "CT" : "TERRORIST");
+		new MATCH_STATUS:iStatus = hns_get_status();
+		new TeamName:iWinnerTeam = TeamName:get_member(id, m_iTeam);
 
 		client_print_color(0, print_team_blue, "%s %L", g_sPrefix, LANG_SERVER, "BATTLE_WIN_PLAYER", id);
 		EndBattle(false);
 
-		for (new i; i < iNum; i++) {
-			new iPlayer = iPlayers[i];
-			user_kill(iPlayer, true);
+		// For captain/team battle in knife context finish round with winner team,
+		// so knife flow continues without manual user_kill().
+		if (iStatus == MATCH_CAPTAINBATTLE || iStatus == MATCH_TEAMBATTLE) {
+			if (iWinnerTeam == TEAM_CT) {
+				rg_round_end(0.1, WINSTATUS_CTS, ROUND_CTS_WIN);
+			} else {
+				rg_round_end(0.1, WINSTATUS_TERRORISTS, ROUND_TERRORISTS_WIN);
+			}
 		}
 	} else {
 		ResetColideData(id, true);
@@ -854,42 +995,38 @@ CheckColide(id, block) {
 	}
 }
 
-ResetColideData(id, bool:kill) {
+ResetColideData(id, bool:return_to_start) {
 	ArrayClear(g_aColide[id]);
-	if (kill) {
-		if (g_eBattleData[BATTLE_CHANCE]) {
-			PlayerChance(id);
-		} else {
-			new iPlayers[MAX_PLAYERS], iNum;
-			get_players(iPlayers, iNum, "ache", TeamName:get_member(id, m_iTeam) == TEAM_TERRORIST ? "TERRORIST" : "CT");
 
-			if (!(iNum - 1)) {
-				new szWinnerTeam[16];
-				formatex(szWinnerTeam, charsmax(szWinnerTeam), "%L", LANG_SERVER, TeamName:get_member(id, m_iTeam) == TEAM_TERRORIST ? "BATTLE_TEAM_CTS" : "BATTLE_TEAM_TERRORISTS");
-				client_print_color(0, print_team_blue, "%s %L", g_sPrefix, LANG_SERVER, "BATTLE_WIN_TEAM", szWinnerTeam);
-				EndBattle(false);
-			}
-			user_kill(id);
-		}
+	if (return_to_start) {
+		ReturnPlayerToStart(id);
 	}
 }
 
-PlayerChance(id) {
+ReturnPlayerToStart(id) {
+	if (!g_eBattleData[BATTLE_ENABLED]) {
+		return;
+	}
+
+	if (!is_user_connected(id) || !is_user_alive(id)) {
+		return;
+	}
+
+	remove_task(id + TASK_PLAYER_RETURN);
 	PreparePlayer(id, true);
-	set_task(1.0, "task_PlayerChance", .id = id + TASK_PLAYER_CHANCE);
+	set_task(1.0, "task_PlayerReturn", .id = id + TASK_PLAYER_RETURN);
 }
 
-public task_PlayerChance(id) {
-	id -= TASK_PLAYER_CHANCE;
+public task_PlayerReturn(id) {
+	id -= TASK_PLAYER_RETURN;
 
 	if (!g_eBattleData[BATTLE_ENABLED])
 		return;
 
-	if (!is_user_connected(id))
+	if (!is_user_connected(id) || !is_user_alive(id))
 		return;
 
 	PreparePlayer(id, false);
-	rg_send_audio(id, g_szSounds[charsmax(g_szSounds)]);
 }
 
 public AddToFullPack_Post(es, e, iEnt, id, hostflags, player, pSet) {
@@ -917,7 +1054,8 @@ public AddToFullPack_Post(es, e, iEnt, id, hostflags, player, pSet) {
 
 PreparePlayer(id, bool:freeze) {
 	if (!is_battle_context()) return;
-	if (TeamName:get_member(id, m_iTeam) == TEAM_SPECTATOR || !is_user_alive(id)) return;
+	new TeamName:iTeam = TeamName:get_member(id, m_iTeam);
+	if (iTeam == TEAM_SPECTATOR || !is_user_alive(id)) return;
 
 	new arena_id = g_eBattleData[BATTLE_ARENA];
 	if (arena_id < 0 || arena_id >= GetArenaCount()) return;
@@ -931,14 +1069,13 @@ PreparePlayer(id, bool:freeze) {
 	new Float:flOrigin[3], Float:flAngles[3];
 	get_entvar(ent, var_origin, flOrigin);
 	get_entvar(ent, var_angles, flAngles);
-
 	flOrigin[2] += 20.0;
 
-	if (freeze) {
-		if (is_battle_race_context()) {
-			PrepareRaceLoadout(id);
-		}
+	if (is_battle_race_context()) {
+		PrepareRaceLoadout(id);
+	}
 
+	if (freeze) {
 		set_entvar(id, var_velocity, { 0.0, 0.0, 0.0 });
 		set_entvar(id, var_origin, flOrigin);
 		set_entvar(id, var_angles, flAngles);
@@ -953,9 +1090,14 @@ PreparePlayer(id, bool:freeze) {
 }
 
 stock PrepareRaceLoadout(id) {
+	if (g_bRaceLoadoutGiven[id]) {
+		return;
+	}
+
 	rg_remove_all_items(id);
 	rg_give_item(id, "weapon_knife");
 	rg_give_item(id, "weapon_usp");
+	g_bRaceLoadoutGiven[id] = true;
 }
 
 public SetVelocity(id) {

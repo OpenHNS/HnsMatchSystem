@@ -5,7 +5,7 @@ public battle_init() {
 }
 
 public battle_enable_rules() {
-	set_semiclip(SEMICLIP_OFF);
+	set_semiclip(SEMICLIP_ON, true);
 	g_iCurrentGameplay = GAMEPLAY_BATTLERACE;
 
 	// Battle gameplay intentionally has no +hook logic.

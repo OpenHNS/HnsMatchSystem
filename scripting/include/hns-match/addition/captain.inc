@@ -218,8 +218,7 @@ stock captainDecideMethodMenu(id) {
 	new hMenu = menu_create("\rCaptain decide method", "captainDecideMethodHandler");
 	menu_additem(hMenu, "Knife round");
 	menu_additem(hMenu, "Battle race");
-	menu_additem(hMenu, "Battle race (chance)");
-	menu_setprop(hMenu, MPROP_EXITNAME, "Knife");
+	menu_setprop(hMenu, MPROP_EXITNAME, "Exit");
 	menu_setprop(hMenu, MPROP_SHOWPAGE, 0);
 	menu_display(id, hMenu, 0);
 }
@@ -231,18 +230,21 @@ public captainDecideMethodHandler(id, hMenu, item) {
 		return PLUGIN_HANDLED;
 	}
 
-	if (item == MENU_EXIT || item == 0) {
+	if (item == MENU_EXIT) {
+		captain_stop();
+		training_start();
+		chat_print(0, "Captain mode canceled.");
+		LogSendMessage("[MATCH] Captain decide menu exited. Captain mode canceled.");
+		return PLUGIN_HANDLED;
+	}
+
+	if (item == 0) {
 		start_captain_decide();
 		return PLUGIN_HANDLED;
 	}
 
 	if (item == 1) {
-		start_captain_battle_decide(id, false);
-		return PLUGIN_HANDLED;
-	}
-
-	if (item == 2) {
-		start_captain_battle_decide(id, true);
+		start_captain_battle_decide(id);
 		return PLUGIN_HANDLED;
 	}
 
@@ -561,13 +563,13 @@ stock start_captain_decide() {
 	kniferound_start();
 }
 
-stock start_captain_battle_decide(id, bool:bChance = false) {
+stock start_captain_battle_decide(id) {
 	new iCaptainA = hns_get_captain_role(ROLE_CAP_A);
 	new iCaptainB = hns_get_captain_role(ROLE_CAP_B);
 
 	if (hns_battle_init() && hns_battle_arenas_init()) {
-		if (hns_battle_menu(id, true, bChance)) {
-			LogSendMessage("[MATCH] Captains (%n) (%n) OK! Open captain battle menu (chance: %d)", iCaptainA, iCaptainB, bChance);
+		if (hns_battle_menu(id, true)) {
+			LogSendMessage("[MATCH] Captains (%n) (%n) OK! Open captain battle menu", iCaptainA, iCaptainB);
 			return;
 		}
 	}
