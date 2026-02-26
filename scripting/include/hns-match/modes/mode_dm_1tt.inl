@@ -131,7 +131,7 @@ stock dm_1tt_transfer_tt(iPrevTT) {
 
 stock dm_1tt_get_random_ct() {
 	static iPlayers[MAX_PLAYERS], iNum;
-	get_players(iPlayers, iNum, "he", "CT");
+	get_players(iPlayers, iNum, "ahe", "CT");
 
 	if (!iNum) {
 		return 0;

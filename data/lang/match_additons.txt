@@ -84,6 +84,7 @@ SPECHIDE_ON = %s Spechide is now ^3enabled^1.
 SPECHIDE_OFF = %s Spechide is now ^3disabled^1.
 
 DMG_SPAM = %s Please wait ^3%.1f^1 seconds between commands!
+DMG_ONLY_SKILL = %s /dmg available only in ^3skill^1 mode.
 DMG_ERR = %s There is no OR multiple players with matching pattern -> ^3%s^1.
 DMG_SHOW_ROUND = %s ^3%n^1's fall damage ^3%.0f^1 HP - before ^3%.0f^1 HP - ^3This round^1, ^3%.1f^1 seconds ago.
 DMG_SHOW = %s ^3%n^1's fall damage ^3%.0f^1 HP - before ^3%.0f^1 HP - ^3Not this round^1, ^3%.1f^1 seconds ago.
@@ -261,6 +262,7 @@ SPECHIDE_ON = %s Спрятаться в списке наблюдателей: 
 SPECHIDE_OFF = %s Спрятаться в списке наблюдателей: ^3выключено^1.
 
 DMG_SPAM = %s Пожалуйста, подождите ^3%.1f^1 секунды между командами!
+DMG_ONLY_SKILL = %s /dmg доступен только в режиме ^3skill^1.
 DMG_ERR = %s Не существует ИЛИ нескольких игроков с совпадающим шаблоном -> ^3%s^1.
 DMG_SHOW_ROUND = %s ^3%n^1 потерял ^3%.0f^1 HP - до ^3%.0f^1 HP - ^3В этом раунде^1, ^3%.1f^1 секунд назад.
 DMG_SHOW = %s ^3%n^1 потерял ^3%.0f^1 HP - до ^3%.0f^1 HP - ^3Не в этом раунде^1, ^3%.1f^1 секунд назад.

@@ -294,7 +294,7 @@ public sayHandle(id) {
 	trim(pattern);
 
 	if (g_iShowDmgMode == 1 && hns_isboost()) {
-		client_print_color(id, print_team_blue, "[^3%s^1] /dmg available only in ^3skill^1 mode.", g_szPrefix);
+		client_print_color(id, print_team_blue, "%L", id, "DMG_ONLY_SKILL", g_szPrefix);
 		return PLUGIN_CONTINUE;
 	}
 
