@@ -11,6 +11,13 @@ new const g_szFileName[] = "watcher.ini";
 
 new g_sPrefix[24];
 
+enum _:CVARS {
+	MIN_RNW_PLAYERS
+}
+
+new pCvar[CVARS];
+new g_iMinRnwPlayers;
+
 enum _:WATCHER {
 	w_iId,
 	w_szSteamId[64]
@@ -32,7 +39,10 @@ public plugin_natives() {
 }
 
 public plugin_init() {
-	register_plugin("Match: Watcher", "1.2", "OpenHNS"); // Garey
+	register_plugin("Match: Watcher", "1.3", "OpenHNS"); // Garey
+
+	pCvar[MIN_RNW_PLAYERS] = create_cvar("hns_watcher_min_rnw", "0", FCVAR_NONE, "Minimum players required for /rnw", true, 0.0, true, 32.0);
+	bind_pcvar_num(pCvar[MIN_RNW_PLAYERS], g_iMinRnwPlayers);
 
 	RegisterSayCmd("rnw", "rocknewwatcher", "cmdRnw", 0, "Rock new watchers");
 	RegisterSayCmd("unrnw", "nornw", "cmdUnRnw", 0, "Cancel vote new watchers");
@@ -305,12 +315,11 @@ public cmdRnw(id) {
 	}
 
 	new iPlayers = get_playersnum();
-	
-	// if(iPlayers <= 1) {
-	// 	client_print_color(id, print_team_blue, "%L", id, "WTR_NOT_NEED", g_sPrefix);
-		
-	// 	return PLUGIN_CONTINUE;
-	// }
+
+	if(iPlayers < g_iMinRnwPlayers) {
+		client_print_color(id, print_team_blue, "%L", id, "WTR_NOT_NEED", g_sPrefix);
+		return PLUGIN_CONTINUE;
+	}
 
 	new iNeedVote;
 

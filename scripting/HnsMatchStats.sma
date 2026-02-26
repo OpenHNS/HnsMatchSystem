@@ -65,8 +65,6 @@ new g_hSaveLeaveForward;
 public plugin_init() {
 	register_plugin("Match: Stats", "1.2", "OpenHNS"); // Garey
 
-	RegisterSayCmd("tes", "aas", "cmdTest", 0, "Test");
-
 	RegisterHookChain(RG_CBasePlayer_Killed, "rgPlayerKilled", false);
 	RegisterHookChain(RG_CBasePlayer_Killed, "rgPlayerKilledPost", true);
 	RegisterHookChain(RG_CBasePlayer_TakeDamage, "rgPlayerTakeDamage", false);
@@ -85,10 +83,6 @@ public plugin_init() {
 
 public plugin_cfg() {
 	hns_get_prefix(g_szPrefix, charsmax(g_szPrefix));
-}
-
-public cmdTest(id) {
-	rgPlayerKilled(0, id);
 }
 
 public plugin_natives() {

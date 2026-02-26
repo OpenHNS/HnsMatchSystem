@@ -35,6 +35,19 @@ new Float:g_flShowRoundStats = 0.0;
 
 new g_szMess[1024];
 
+enum _:CVARS {
+	HUDPLAYER_PLAYER,
+	HUDPLAYER_ROUND,
+	HUDPLAYER_SPEC,
+	SHOWDMG_MODE
+}
+
+new pCvar[CVARS];
+new g_iHudPlayerPlayer;
+new g_iHudPlayerRound;
+new g_iHudPlayerSpec;
+new g_iShowDmgMode;
+
 enum _: SHOW_STATS {
 	PLR_STATS_STABS,
 	PLR_STATS_DMG_CT,
@@ -128,7 +141,16 @@ public native_set_player_hud_specinfo(amxx, params) {
 }
 
 public plugin_init() {
-	register_plugin("Match: Player info", "1.2", "OpenHNS");
+	register_plugin("Match: Player info", "1.3", "OpenHNS");
+
+	pCvar[HUDPLAYER_PLAYER] = create_cvar("hns_hudplayer_player", "1", FCVAR_NONE, "0: disable player hud, 1: enable player hud", true, 0.0, true, 1.0);
+	bind_pcvar_num(pCvar[HUDPLAYER_PLAYER], g_iHudPlayerPlayer);
+	pCvar[HUDPLAYER_ROUND] = create_cvar("hns_hudplayer_round", "1", FCVAR_NONE, "0: disable round hud, 1: enable round hud", true, 0.0, true, 1.0);
+	bind_pcvar_num(pCvar[HUDPLAYER_ROUND], g_iHudPlayerRound);
+	pCvar[HUDPLAYER_SPEC] = create_cvar("hns_hudplayer_spec", "1", FCVAR_NONE, "0: no watchers, 1: count, 2: count and list", true, 0.0, true, 2.0);
+	bind_pcvar_num(pCvar[HUDPLAYER_SPEC], g_iHudPlayerSpec);
+	pCvar[SHOWDMG_MODE] = create_cvar("hns_showdmg_mode", "0", FCVAR_NONE, "0: /dmg always, 1: only in skill mode", true, 0.0, true, 1.0);
+	bind_pcvar_num(pCvar[SHOWDMG_MODE], g_iShowDmgMode);
 
 	register_clcmd("say", "sayHandle");
 
@@ -270,6 +292,11 @@ public sayHandle(id) {
 	}
 
 	trim(pattern);
+
+	if (g_iShowDmgMode == 1 && hns_isboost()) {
+		client_print_color(id, print_team_blue, "[^3%s^1] /dmg available only in ^3skill^1 mode.", g_szPrefix);
+		return PLUGIN_CONTINUE;
+	}
 
 	new Float:flGameTime = get_gametime();
 
@@ -415,7 +442,7 @@ public taskShowBestRound() {
 	for (new i = 0; i < iNum; i++) {
 		new id = iPlayers[i];
 	
-		if (!is_user_connected(id) || !g_HudRoundOnOff[id]) {
+		if (!is_user_connected(id) || !g_iHudPlayerRound || !g_HudRoundOnOff[id]) {
 			continue;
 		}
 
@@ -624,13 +651,13 @@ public task_ShowPlayerInfo() {
 			}
 
 			//if(is_user_connected(hnsteamname[HNS_TEAM_A]) && is_user_connected(hnsteamname[HNS_TEAM_B])) {
-				iLen += format(szHudMess[iLen], sizeof szHudMess - iLen, "\
-				%0.1f : %n ^n\
-				%0.1f : %n ^n\
-				^nDistance %d ^n",
-				flScoreA, hnsteamname[HNS_TEAM_A],
-				flScoreB, hnsteamname[HNS_TEAM_B],
-				hns_get_players_distance());
+			iLen += format(szHudMess[iLen], sizeof szHudMess - iLen, "\
+			%0.1f : %n ^n\
+			%0.1f : %n ^n\
+			^nDistance %d ^n",
+			flScoreA, hnsteamname[HNS_TEAM_A],
+			flScoreB, hnsteamname[HNS_TEAM_B],
+			hns_get_players_distance());
 			//}
 
 			new iDistance = hns_get_point_distance();
@@ -651,42 +678,12 @@ public task_ShowPlayerInfo() {
 			szDistance[iPos] = EOS;
 			iLen += format(szHudMess[iLen], sizeof szHudMess - iLen, "%s^n", szDistance);
 
-			new szSpecMess[512], iSpecLen;
-			new iSpecNum;
-			for (new j = 1; j <= MaxClients; j++) {
-				if (!g_eSpecPlayers[id][SHOW_SPEC]) {
-					break;
-				}
-
-				if (!g_eSpecPlayers[j][IS_SPEC]) {
-					continue;
-				}
-
-				if (g_eSpecPlayers[j][SPEC_HIDE]) {
-					continue;
-				}
-
-				if (!is_user_connected(j)) {
-					continue;
-				}
-
-				if (g_eSpecPlayers[j][SPEC_TARGET] == show_id) {
-					iSpecNum++;
-					iSpecLen += format(szSpecMess[iSpecLen], sizeof szSpecMess - iSpecLen, "%n%s^n", j, g_eSpecPlayers[j][IS_POV] ? "" : " [3rd Person]");
-				}
-			}
-
-			// if (iSpecNum) {
-			// 	iLen += format(szHudMess[iLen], sizeof szHudMess - iLen, "^nWatching [%d]^n%s", iSpecNum, szSpecMess);
-			// }
-			if (iSpecNum) {
-				iLen += format(szHudMess[iLen], sizeof szHudMess - iLen, "^nWatching [%d]", iSpecNum);
-			}
+			iLen = AddWatchersInfoToHud(id, show_id, szHudMess, iLen, sizeof szHudMess);
 
 			ShowSyncHudMsg(id, g_MsgSync, "%s", szHudMess);
 		}
 
-		if (g_HudOnOff[id] && hns_get_rules() != RULES_DUEL) {
+			if (g_iHudPlayerPlayer && g_HudOnOff[id] && hns_get_rules() != RULES_DUEL) {
 			set_hudmessage(.red = 100, .green = 100, .blue = 100, .x = 0.01, .y = 0.25, .holdtime = 1.0);
 			new szHudMess[1024], iLen;
 			if (show_id != id) {
@@ -732,41 +729,54 @@ public task_ShowPlayerInfo() {
 			// 	iLen += format(szHudMess[iLen], sizeof szHudMess - iLen, "%s", get_matchstats_str(hns_get_status()));
 			// }
 
-			new szSpecMess[512], iSpecLen;
-			new iSpecNum;
-			for (new j = 1; j <= MaxClients; j++) {
-				if (!g_eSpecPlayers[id][SHOW_SPEC]) {
-					break;
-				}
-
-				if (!g_eSpecPlayers[j][IS_SPEC]) {
-					continue;
-				}
-
-				if (g_eSpecPlayers[j][SPEC_HIDE]) {
-					continue;
-				}
-
-				if (!is_user_connected(j)) {
-					continue;
-				}
-
-				if (g_eSpecPlayers[j][SPEC_TARGET] == show_id) {
-					iSpecNum++;
-					iSpecLen += format(szSpecMess[iSpecLen], sizeof szSpecMess - iSpecLen, "%n%s^n", j, g_eSpecPlayers[j][IS_POV] ? "" : " [3rd Person]");
-				}
-			}
-
-			// if (iSpecNum) {
-			// 	iLen += format(szHudMess[iLen], sizeof szHudMess - iLen, "^nWatching [%d]^n%s", iSpecNum, szSpecMess);
-			// }
-			if (iSpecNum) {
-				iLen += format(szHudMess[iLen], sizeof szHudMess - iLen, "^nWatching [%d]", iSpecNum);
-			}
+			iLen = AddWatchersInfoToHud(id, show_id, szHudMess, iLen, sizeof szHudMess);
 
 			ShowSyncHudMsg(id, g_MsgSync, "%s", szHudMess);
 		}
 	}
+}
+
+stock AddWatchersInfoToHud(id, show_id, szHudMess[], iLen, iHudLen) {
+	if (!g_eSpecPlayers[id][SHOW_SPEC] || g_iHudPlayerSpec <= 0) {
+		return iLen;
+	}
+
+	new iSpecNum;
+	new szSpecMess[512], iSpecLen;
+
+	for (new j = 1; j <= MaxClients; j++) {
+		if (!g_eSpecPlayers[j][IS_SPEC]) {
+			continue;
+		}
+
+		if (g_eSpecPlayers[j][SPEC_HIDE]) {
+			continue;
+		}
+
+		if (!is_user_connected(j)) {
+			continue;
+		}
+
+		if (g_eSpecPlayers[j][SPEC_TARGET] == show_id) {
+			iSpecNum++;
+
+			if (g_iHudPlayerSpec >= 2) {
+				iSpecLen += format(szSpecMess[iSpecLen], sizeof szSpecMess - iSpecLen, "%n%s^n", j, g_eSpecPlayers[j][IS_POV] ? "" : " [3rd Person]");
+			}
+		}
+	}
+
+	if (!iSpecNum) {
+		return iLen;
+	}
+
+	if (g_iHudPlayerSpec >= 2) {
+		iLen += format(szHudMess[iLen], iHudLen - iLen, "^nWatching [%d]^n%s", iSpecNum, szSpecMess);
+	} else {
+		iLen += format(szHudMess[iLen], iHudLen - iLen, "^nWatching [%d]", iSpecNum);
+	}
+
+	return iLen;
 }
 
 public get_matchstats_str(MATCH_STATUS:iStatus) {
