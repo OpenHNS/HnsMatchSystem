@@ -3,10 +3,9 @@
 #include <hns_matchsystem>
 #include <hns_matchsystem_filter>
 #include <hns_matchsystem_bans>
-#include <hns_matchsystem_api>
 #include <hns_matchsystem_cup>
 
-#define rg_get_user_team(%0) get_member(%0, m_iTeam)
+#define TASK_RESPONSE 13370
 
 new g_szPrefix[24];
 
@@ -33,6 +32,12 @@ enum ControlType
 	TYPE_REPLACE,
 	TYPE_CONTROL
 }
+
+enum _:CVARS
+{
+	ENABLE_REPLACE,
+	ENABLE_CONTROL
+}
 /*
 [33] == [request]
 */
@@ -49,6 +54,8 @@ new TransferType:g_eTransferType[MAX_PLAYERS + 1], g_iTransferPlayer[MAX_PLAYERS
 new g_saveData[MAX_PLAYERS + 1][Data];
 
 new g_hReplaceForward;
+new pCvar[CVARS];
+new g_iEnableReplace, g_iEnableControl;
 
 public plugin_natives() {
 	set_native_filter("match_system_additons");
@@ -56,17 +63,19 @@ public plugin_natives() {
 
 public plugin_init()
 {
-	register_plugin("Match: ReControl", "1.4", "OpenHNS"); // Thanks Conor, Denzer, Garey
+	register_plugin("Match: ReControl", "1.5", "OpenHNS"); // Thanks Conor, Denzer, Garey
 
-	// TODO: Сделать кваром
-	if (!hns_api_stats_init()) {
-		register_clcmd("drop", "Control");
-		RegisterSayCmd("co", "co", "Control");
-		RegisterSayCmd("control", "con", "Control");
-	
-		RegisterSayCmd("re", "re", "Replace");
-		RegisterSayCmd("replace", "rep", "Replace");
-	}
+	pCvar[ENABLE_REPLACE] = create_cvar("hns_enable_replace", "1", FCVAR_NONE, "Enable replace commands", true, 0.0, true, 1.0);
+	bind_pcvar_num(pCvar[ENABLE_REPLACE], g_iEnableReplace);
+	pCvar[ENABLE_CONTROL] = create_cvar("hns_enable_control", "1", FCVAR_NONE, "Enable control commands", true, 0.0, true, 1.0);
+	bind_pcvar_num(pCvar[ENABLE_CONTROL], g_iEnableControl);
+
+	register_clcmd("drop", "Control");
+	RegisterSayCmd("co", "co", "Control");
+	RegisterSayCmd("control", "con", "Control");
+
+	RegisterSayCmd("re", "re", "Replace");
+	RegisterSayCmd("replace", "rep", "Replace");
 
 	register_clcmd("hns_transfer", "ReplaceAdmin");
 	RegisterSayCmd("rea", "rea", "ReplaceAdmin");
@@ -85,6 +94,7 @@ public plugin_cfg() {
 public client_putinserver(id)
 {
 	ResetTransfer(id);
+	remove_task(id + TASK_RESPONSE);
 
 	arrayset(g_saveData[id], 0, Data);
 	g_bGiveWeapons[id] = false;
@@ -94,8 +104,7 @@ public client_putinserver(id)
 
 public client_disconnected(id)
 {
-	if (task_exists(1337))
-		remove_task(1337);
+	remove_task(id + TASK_RESPONSE);
 	
 	g_bInvited[id] = false;
 }
@@ -108,6 +117,10 @@ public client_disconnected(id)
 }
 
 public Control(id) {
+	if (!g_iEnableControl) {
+		return PLUGIN_HANDLED;
+	}
+
 	if (hns_cup_enabled()) {
 		client_print_color(id, print_team_blue, "%L", LANG_PLAYER, "CUP_NOT", g_szPrefix);
 		return PLUGIN_HANDLED;
@@ -120,6 +133,10 @@ public Control(id) {
 }
 
 public Replace(id) {
+	if (!g_iEnableReplace) {
+		return PLUGIN_HANDLED;
+	}
+
 	if (hns_cup_enabled()) {
 		client_print_color(id, print_team_blue, "%L", LANG_PLAYER, "CUP_NOT", g_szPrefix);
 		return PLUGIN_HANDLED;
@@ -221,19 +238,19 @@ public MenuHandler(id, m_Menu, szKeys)
 		if(szTime < g_flDelay[id])
 			client_print_color(id, print_team_blue, "%L", LANG_PLAYER, "RECON_DELAY", g_szPrefix, g_flDelay[id] - szTime);
 		else
-		{
-			g_bInvited[invited_id] = true;
-			g_flDelay[id] = get_gametime() + 10.0;
-			
-			Confirmation(invited_id);
-			
-			new Parms[2];
-			Parms[0] = id;
-			Parms[1] = invited_id;
-			
-			set_task(10.0, "task_Response", 1337, Parms, 2);
+			{
+				g_bInvited[invited_id] = true;
+				g_flDelay[id] = get_gametime() + 10.0;
+				
+				Confirmation(invited_id);
+
+				new Parms[1];
+				Parms[0] = id;
+
+				remove_task(invited_id + TASK_RESPONSE);
+				set_task(10.0, "task_Response", invited_id + TASK_RESPONSE, Parms, sizeof(Parms));
+			}
 		}
-	}
 	
 	if (g_bInvited[invited_id])
 	{
@@ -431,9 +448,10 @@ public ConfirmationHandler(id, m_Confirmation, szKeys)
 	}
 
 	new requested_id = g_ReplaceRequests[id];
-	
+		
 	g_bInvited[id] = false;
-	
+	remove_task(id + TASK_RESPONSE);
+		
 	switch (szKeys)
 	{
 		case 0:
@@ -520,6 +538,7 @@ public ReControl(id)
 		g_saveData[id][iFlash] = rg_get_user_bpammo(requested_id, WEAPON_FLASHBANG);
 		g_saveData[id][iSmoke] = rg_get_user_bpammo(requested_id, WEAPON_SMOKEGRENADE);
 		g_saveData[id][flHealth] = get_entvar(requested_id, var_health);
+		StripInventoryBeforeReplace(requested_id);
 		
 		if (g_ControlType[requested_id] == TYPE_REPLACE)
 		{
@@ -561,7 +580,11 @@ public ReControl(id)
 public task_Response(Parms[], task_id)
 {
 	new requested_id = Parms[0];
-	new id = Parms[1];
+	new id = task_id - TASK_RESPONSE;
+
+	if (id < 1 || id > MaxClients) {
+		return;
+	}
 	
 	if (g_bInvited[id])
 	{
@@ -592,6 +615,7 @@ ReplacePlayers(replacement_player, substitutive_player, admin_replaced = 0) {
 		g_saveData[substitutive_player][iFlash]   = rg_get_user_bpammo(replacement_player, WEAPON_FLASHBANG);
 		g_saveData[substitutive_player][iHe]   = rg_get_user_bpammo(replacement_player, WEAPON_HEGRENADE);
 		g_saveData[substitutive_player][flHealth]  = get_entvar(replacement_player, var_health);
+		StripInventoryBeforeReplace(replacement_player);
 
 		rg_set_user_team(substitutive_player, g_saveData[substitutive_player][iTeam]);
 		rg_set_user_team(replacement_player, TEAM_SPECTATOR);
@@ -609,4 +633,17 @@ ReplacePlayers(replacement_player, substitutive_player, admin_replaced = 0) {
 	ExecuteForward(g_hReplaceForward, _, replacement_player, substitutive_player);
 
 	client_print_color(0, print_team_blue, "%L", LANG_PLAYER, "RECON_ADM_REPLACE", g_szPrefix, admin_replaced, replacement_player, substitutive_player);
+}
+
+stock StripInventoryBeforeReplace(id) {
+	if (!is_user_alive(id)) {
+		return;
+	}
+
+	rg_remove_all_items(id);
+	rg_give_item(id, "weapon_knife");
+
+	rg_set_user_bpammo(id, WEAPON_HEGRENADE, 0);
+	rg_set_user_bpammo(id, WEAPON_FLASHBANG, 0);
+	rg_set_user_bpammo(id, WEAPON_SMOKEGRENADE, 0);
 }
