@@ -64,7 +64,11 @@ public dm_1tt_player_join(id) {
 }
 
 public dm_1tt_player_leave(id) {
-	if (getUserTeam(id) != TEAM_TERRORIST && get_playersnum_ex(GetPlayers_MatchTeam, "TERRORIST") > 0) {
+	if (id < 1 || id > MaxClients) {
+		return;
+	}
+
+	if (get_playersnum_ex(GetPlayers_MatchTeam, "TERRORIST") > 0) {
 		return;
 	}
 
