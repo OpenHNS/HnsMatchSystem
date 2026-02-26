@@ -683,7 +683,7 @@ public task_ShowPlayerInfo() {
 			ShowSyncHudMsg(id, g_MsgSync, "%s", szHudMess);
 		}
 
-			if (g_iHudPlayerPlayer && g_HudOnOff[id] && hns_get_rules() != RULES_DUEL) {
+		if (g_iHudPlayerPlayer && g_HudOnOff[id] && hns_get_rules() != RULES_DUEL) {
 			set_hudmessage(.red = 100, .green = 100, .blue = 100, .x = 0.01, .y = 0.25, .holdtime = 1.0);
 			new szHudMess[1024], iLen;
 			if (show_id != id) {
