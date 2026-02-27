@@ -351,7 +351,7 @@ public ArenasHandler(id, menu, item) {
 	new Float:flOrigin[3], Float:flAngles[3];
 	get_entvar(iEnt, var_origin, flOrigin);
 	get_entvar(iEnt, var_angles, flAngles);
-	flOrigin[2] += 20.0;
+	flOrigin[2] += 60.0;
 
 	set_entvar(id, var_origin, flOrigin);
 	set_entvar(id, var_angles, flAngles);
@@ -458,7 +458,8 @@ public EndBattle(bool:set_training) {
 
 stock SetBattleSemiclip(bool:bEnable) {
 	server_cmd("semiclip_option semiclip %d", bEnable ? 1 : 0);
-	server_cmd("semiclip_option team %d", bEnable ? 3 : 0);
+	// ReSemiclip: team 0 -> semiclip for all players (including enemies).
+	server_cmd("semiclip_option team 0");
 	server_cmd("semiclip_option time 0");
 	server_exec();
 }

@@ -5,7 +5,8 @@ public battle_init() {
 }
 
 public battle_enable_rules() {
-	set_semiclip(SEMICLIP_ON, true);
+	// ReSemiclip: team 0 -> semiclip for all players (including enemies).
+	set_semiclip(SEMICLIP_ON);
 	g_iCurrentGameplay = GAMEPLAY_BATTLERACE;
 
 	// Battle gameplay intentionally has no +hook logic.

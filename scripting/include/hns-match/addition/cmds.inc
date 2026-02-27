@@ -642,6 +642,10 @@ public cmdSkillMode(id) {
 		return PLUGIN_HANDLED;
 	}
 
+	if (g_iMatchStatus == MATCH_BATTLERACE || g_iMatchStatus == MATCH_CAPTAINBATTLE || g_iMatchStatus == MATCH_TEAMBATTLE) {
+		return PLUGIN_HANDLED;
+	}
+
 	chat_print(0, "%l", "TYPE_SKILL", id);
 
 	if (g_iCurrentMode == MODE_MIX) {
@@ -662,6 +666,10 @@ public cmdSkillMode(id) {
 
 public cmdBoostMode(id) {
 	if (!isUserWatcher(id)) {
+		return PLUGIN_HANDLED;
+	}
+
+	if (g_iMatchStatus == MATCH_BATTLERACE || g_iMatchStatus == MATCH_CAPTAINBATTLE || g_iMatchStatus == MATCH_TEAMBATTLE) {
 		return PLUGIN_HANDLED;
 	}
 
