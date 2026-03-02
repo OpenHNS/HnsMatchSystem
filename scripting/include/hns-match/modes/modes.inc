@@ -50,7 +50,7 @@ public set_cvars_mode(iMode) {
 		case MODE_KNIFE: server_cmd("exec %s/knife.cfg", szPath);
 		case MODE_PUB: server_cmd("exec %s/public.cfg", szPath);
 		case MODE_DM: server_cmd("exec %s/deathmatch.cfg", szPath);
-		case MODE_DM_1TT: server_cmd("exec %s/deathmatch.cfg", szPath);
+		case MODE_DM_1TT: server_cmd("exec %s/deathmatch1tt.cfg", szPath);
 		case MODE_MIX: server_cmd("exec %s/match.cfg", szPath);
 		case MODE_ZM: server_cmd("exec %s/zombie.cfg", szPath);
 	}
