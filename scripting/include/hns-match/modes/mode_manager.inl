@@ -12,7 +12,9 @@ public delayed_mode() {
 	PDS_GetCell("match_status", g_iMatchStatus);
 	PDS_GetCell("match_rules", g_iCurrentRules);
 
-	if (hns_is_knife_map()) {
+	if (g_iCurrentGameplay == GAMEPLAY_BATTLERACE && g_iCurrentMode == MODE_BATTLES && g_iMatchStatus == MATCH_BATTLERACE) {
+		battlesmode_start();
+	} else if (hns_is_knife_map()) {
 		g_iMatchStatus = MATCH_NONE;
 		training_start();
 	} else if (g_iMatchStatus == MATCH_MAPPICK || g_iMatchStatus == MATCH_WAITCONNECT) {
@@ -108,7 +110,7 @@ public wait_players_cup() {
 }
 
 public Task_CheckTime() {
-	if(g_iCurrentMode == MODE_MIX) {
+	if(g_iCurrentMode == MODE_MIX || g_iCurrentMode == MODE_BATTLES) {
 		return PLUGIN_HANDLED;
 	}
 

@@ -38,6 +38,7 @@
 #include <hns-match/gameplay/gameplay_battle.inc>
 
 #include <hns-match/modes/mode_training.inl>
+#include <hns-match/modes/mode_battles.inl>
 #include <hns-match/modes/mode_pub.inl>
 #include <hns-match/modes/mode_dm.inl>
 #include <hns-match/modes/mode_dm_1tt.inl>

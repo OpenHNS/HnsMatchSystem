@@ -517,7 +517,7 @@ public cmdCaptain(id) {
 		return PLUGIN_HANDLED;
 	}
 
-	if (g_iCurrentMode == MODE_TRAINING && g_iMatchStatus == MATCH_BATTLERACE) {
+	if (g_iCurrentMode == MODE_BATTLES && g_iMatchStatus == MATCH_BATTLERACE) {
 		chat_print(id, "%L", id, "RACE_ACTIVE_STOP");
 		return PLUGIN_HANDLED;
 	}
@@ -582,12 +582,11 @@ public cmdStop(id) {
 			chat_print(0, "%l", "STOP_MIX", id);
 		}
 		case MODE_KNIFE: {
-			if (g_iMatchStatus == MATCH_CAPTAINKNIFE || g_iMatchStatus == MATCH_CAPTAINBATTLE) {
+			if (g_iMatchStatus == MATCH_CAPTAINKNIFE) {
 				resetCaptainData();
 				chat_print(0, "%l", "STOP_CAP", id);
 			} else if (g_iMatchStatus == MATCH_CUPKNIFE) {
 				// TODO: Стоп cup knife
-			
 			} else {
 				chat_print(0, "%l", "STOP_KNIFE", id);
 			}
@@ -613,6 +612,23 @@ public cmdStop(id) {
 			} else if (g_iMatchStatus) {
 				g_iMatchStatus = MATCH_NONE;
 			}
+		}
+		case MODE_BATTLES: {
+			new MATCH_STATUS:iPrevStatus = g_iMatchStatus;
+
+			if (hns_battle_init()) {
+				hns_battle_end(false);
+			}
+
+			if (iPrevStatus == MATCH_CAPTAINBATTLE) {
+				resetCaptainData();
+				chat_print(0, "%l", "STOP_CAP", id);
+			} else {
+				chat_print(0, "%l", "STOP_RACE", id);
+			}
+
+			g_iMatchStatus = MATCH_NONE;
+			training_start();
 		}
 		case MODE_PUB: {
 			training_start();
@@ -724,10 +740,6 @@ public cmdSwapTeams(id) {
 
 public cmdStartPause(id) {
 	if (!isUserWatcher(id)) {
-		return PLUGIN_HANDLED;
-	}
-
-	if (g_iCurrentMode == MODE_KNIFE && g_iMatchStatus == MATCH_BATTLERACE) {
 		return PLUGIN_HANDLED;
 	}
 

@@ -5,11 +5,9 @@ public battle_init() {
 }
 
 public battle_enable_rules() {
-	// ReSemiclip: team 0 -> semiclip for all players (including enemies).
 	set_semiclip(SEMICLIP_ON);
 	g_iCurrentGameplay = GAMEPLAY_BATTLERACE;
 
-	// Battle gameplay intentionally has no +hook logic.
 	for (new id = 1; id <= MaxClients; id++) {
 		if (is_user_connected(id)) {
 			remove_hook(id);

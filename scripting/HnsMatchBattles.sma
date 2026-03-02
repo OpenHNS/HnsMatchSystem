@@ -44,6 +44,8 @@ new g_eBattleData[BattleData_s];
 new bool:g_bBattleMenuCaptain[MAX_PLAYERS + 1];
 new bool:g_bRaceLoadoutGiven[MAX_PLAYERS + 1];
 new Array:g_aColide[MAX_PLAYERS + 1], Float:g_flTouchDelay[MAX_PLAYERS + 1];
+new g_hForwardBattleStarted;
+new g_hForwardBattleFinished;
 
 new Array:g_aArenas;
 new bool:g_bArenasLoaded;
@@ -96,7 +98,7 @@ public bool:native_battle_start(amxx, params) {
 		iArena = get_param(1);
 	}
 
-	if (hns_get_mode() == MODE_KNIFE && g_eBattleData[BATTLE_ENABLED]) {
+	if (hns_get_mode() == MODE_BATTLES && g_eBattleData[BATTLE_ENABLED]) {
 		return true;
 	}
 
@@ -144,6 +146,8 @@ public bool:native_battle_menu(amxx, params) {
 public plugin_init() {
 	register_plugin("Match: Battles (cfg)", "dev", "OpenHNS");
 	register_dictionary("match_additons.txt");
+	g_hForwardBattleStarted = CreateMultiForward("hns_battles_started", ET_CONTINUE, FP_CELL, FP_CELL);
+	g_hForwardBattleFinished = CreateMultiForward("hns_battles_finished", ET_CONTINUE, FP_CELL, FP_CELL);
 
 	get_mapname(g_szMap, charsmax(g_szMap));
 
@@ -178,6 +182,8 @@ public plugin_end() {
 		ArrayDestroy(g_aColide[i]);
 
 	if (g_aArenas) ArrayDestroy(g_aArenas);
+	if (g_hForwardBattleStarted) DestroyForward(g_hForwardBattleStarted);
+	if (g_hForwardBattleFinished) DestroyForward(g_hForwardBattleFinished);
 }
 
 public plugin_cfg() {
@@ -383,18 +389,22 @@ public StartBattle(iArenaID) {
 
 	if (bRaceMode) {
 		hns_set_status(MATCH_BATTLERACE);
-		hns_set_gameplay(GAMEPLAY_BATTLERACE);
 
 		for (new id = 1; id <= MaxClients; id++) {
 			g_bRaceLoadoutGiven[id] = false;
 			remove_task(id + TASK_PLAYER_RETURN);
 		}
-	} else {
-		hns_set_mode(MODE_KNIFE);
 	}
 
-	// Battle must always run in no-block style.
-	SetBattleSemiclip(true);
+	if (g_hForwardBattleStarted) {
+		new iRet;
+		ExecuteForward(g_hForwardBattleStarted, iRet, iArenaID, bRaceMode);
+	}
+
+	// Safety fallback if core listener is missing.
+	if (hns_get_mode() != MODE_BATTLES) {
+		hns_set_mode(MODE_BATTLES);
+	}
 
 	g_eBattleData[BATTLE_ARENA] = iArenaID;
 
@@ -430,7 +440,6 @@ public EndBattle(bool:set_training) {
 	g_eBattleData[BATTLE_ENABLED] = false;
 	remove_task(TASK_START_BATTLE);
 	arrayset(g_eBattleData, 0, BattleData_s);
-	SetBattleSemiclip(false);
 
 	if (bRaceMode) {
 		hns_set_status(MATCH_NONE);
@@ -456,14 +465,6 @@ public EndBattle(bool:set_training) {
 	return PLUGIN_HANDLED;
 }
 
-stock SetBattleSemiclip(bool:bEnable) {
-	server_cmd("semiclip_option semiclip %d", bEnable ? 1 : 0);
-	// ReSemiclip: team 0 -> semiclip for all players (including enemies).
-	server_cmd("semiclip_option team 0");
-	server_cmd("semiclip_option time 0");
-	server_exec();
-}
-
 public CSGameRules_RestartRound_Post() {
 	if (!is_battle_context()) {
 		return;
@@ -472,10 +473,6 @@ public CSGameRules_RestartRound_Post() {
 	if (!g_eBattleData[BATTLE_ENABLED]) {
 		return
 	}
-
-	// Safety: knife mode/gameplay can toggle settings during round restart.
-	// Re-apply no-block for active battle context.
-	SetBattleSemiclip(true);
 
 	new iPlayers[MAX_PLAYERS], iNum;
 	get_players(iPlayers, iNum, "ch");
@@ -497,10 +494,6 @@ public task_StartBattle() {
 		remove_task(TASK_START_BATTLE);
 		return HC_CONTINUE;
 	}
-
-	// Keep battle no-block forced during whole countdown/restart cycle.
-	// Some mode/config hooks can override semiclip options between ticks.
-	SetBattleSemiclip(true);
 
 	if (g_eBattleData[BATTLE_PREPARE] >= sizeof(g_szSounds)) {
 		new iPlayers[MAX_PLAYERS], iNum;
@@ -655,7 +648,7 @@ stock bool:can_open_arenas_now() {
 }
 
 stock bool:is_battle_knife_context() {
-	if (hns_get_mode() != MODE_KNIFE) {
+	if (hns_get_mode() != MODE_BATTLES) {
 		return false;
 	}
 
@@ -664,7 +657,7 @@ stock bool:is_battle_knife_context() {
 }
 
 stock bool:is_battle_race_context() {
-	return hns_get_mode() == MODE_TRAINING && hns_get_status() == MATCH_BATTLERACE;
+	return hns_get_mode() == MODE_BATTLES && hns_get_status() == MATCH_BATTLERACE;
 }
 
 stock bool:is_battle_context() {
@@ -963,18 +956,14 @@ CheckStatus(id, bool:is_finish) {
 	if (is_finish) {
 		new MATCH_STATUS:iStatus = hns_get_status();
 		new TeamName:iWinnerTeam = TeamName:get_member(id, m_iTeam);
+		new bool:bRaceMode = (iStatus == MATCH_BATTLERACE);
 
 		client_print_color(0, print_team_blue, "%s %L", g_sPrefix, LANG_SERVER, "BATTLE_WIN_PLAYER", id);
 		EndBattle(false);
 
-		// For captain/team battle in knife context finish round with winner team,
-		// so knife flow continues without manual user_kill().
-		if (iStatus == MATCH_CAPTAINBATTLE || iStatus == MATCH_TEAMBATTLE) {
-			if (iWinnerTeam == TEAM_CT) {
-				rg_round_end(0.1, WINSTATUS_CTS, ROUND_CTS_WIN);
-			} else {
-				rg_round_end(0.1, WINSTATUS_TERRORISTS, ROUND_TERRORISTS_WIN);
-			}
+		if (g_hForwardBattleFinished) {
+			new iRet;
+			ExecuteForward(g_hForwardBattleFinished, iRet, _:iWinnerTeam, bRaceMode);
 		}
 	} else {
 		ResetColideData(id, true);

@@ -15,7 +15,8 @@ enum HNS_MODES {
 	MODE_DM,
 	MODE_ZM,
 	MODE_MIX,
-	MODE_DM_1TT
+	MODE_DM_1TT,
+	MODE_BATTLES
 };
 
 /**
