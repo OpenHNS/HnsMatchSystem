@@ -886,7 +886,14 @@ public cmdTeamSpec(id) {
 		if (getUserTeam(id) == TEAM_SPECTATOR) {
 			new iNumTT = get_playersnum_ex(GetPlayers_MatchTeam, "TERRORIST");
 			new iNumCT = get_playersnum_ex(GetPlayers_MatchTeam, "CT");
-			if (iNumTT == iNumCT && g_eSpecBack[id] != TEAM_UNASSIGNED) {
+
+			if (g_iCurrentMode == MODE_DM_1TT) {
+				if (iNumTT == 0) {
+					rg_set_user_team(id, TEAM_TERRORIST);
+				} else {
+					rg_set_user_team(id, TEAM_CT);
+				}
+			} else if (iNumTT == iNumCT && g_eSpecBack[id] != TEAM_UNASSIGNED) {
 				rg_set_user_team(id, g_eSpecBack[id]);
 			} else if (iNumTT < iNumCT) {
 				rg_set_user_team(id, TEAM_TERRORIST);

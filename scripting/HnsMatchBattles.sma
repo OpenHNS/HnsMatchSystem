@@ -479,6 +479,7 @@ public CSGameRules_RestartRound_Post() {
 
 	for (new i; i < iNum; i++) {
 		new id = iPlayers[i];
+		remove_task(id + TASK_PLAYER_RETURN);
 		PreparePlayer(id, true);
 	}
 
@@ -959,6 +960,9 @@ CheckStatus(id, bool:is_finish) {
 		new bool:bRaceMode = (iStatus == MATCH_BATTLERACE);
 
 		client_print_color(0, print_team_blue, "%s %L", g_sPrefix, LANG_SERVER, "BATTLE_WIN_PLAYER", id);
+		if (bRaceMode) {
+			PrintRacePlaces(id);
+		}
 		EndBattle(false);
 
 		if (g_hForwardBattleFinished) {
@@ -967,6 +971,73 @@ CheckStatus(id, bool:is_finish) {
 		}
 	} else {
 		ResetColideData(id, true);
+	}
+}
+
+stock PrintRacePlaces(iFinishPlayer) {
+	if (!is_user_connected(iFinishPlayer)) {
+		return;
+	}
+
+	new iFinishOrigin[3];
+	get_user_origin(iFinishPlayer, iFinishOrigin);
+
+	new iPlayers[MAX_PLAYERS], iNum;
+	get_players(iPlayers, iNum, "ch");
+
+	new iRankIds[MAX_PLAYERS], iRankDist[MAX_PLAYERS], iRankNum;
+	for (new i; i < iNum; i++) {
+		new id = iPlayers[i];
+		if (!is_user_connected(id)) {
+			continue;
+		}
+
+		if (TeamName:get_member(id, m_iTeam) == TEAM_SPECTATOR) {
+			continue;
+		}
+
+		if (!is_user_alive(id) && id != iFinishPlayer) {
+			continue;
+		}
+
+		iRankIds[iRankNum] = id;
+		if (id == iFinishPlayer) {
+			iRankDist[iRankNum] = 0;
+		} else {
+			new iOrigin[3];
+			get_user_origin(id, iOrigin);
+			iRankDist[iRankNum] = get_distance(iFinishOrigin, iOrigin);
+		}
+		iRankNum++;
+	}
+
+	if (!iRankNum) {
+		return;
+	}
+
+	for (new i; i < iRankNum - 1; i++) {
+		new iMin = i;
+		for (new j = i + 1; j < iRankNum; j++) {
+			if (iRankDist[j] < iRankDist[iMin]) {
+				iMin = j;
+			}
+		}
+
+		if (iMin != i) {
+			new iTmpId = iRankIds[i];
+			iRankIds[i] = iRankIds[iMin];
+			iRankIds[iMin] = iTmpId;
+
+			new iTmpDist = iRankDist[i];
+			iRankDist[i] = iRankDist[iMin];
+			iRankDist[iMin] = iTmpDist;
+		}
+	}
+
+	new iTop = (iRankNum > 3) ? 3 : iRankNum;
+	client_print_color(0, print_team_blue, "%s Race top by distance to finish:", g_sPrefix);
+	for (new i; i < iTop; i++) {
+		client_print_color(0, print_team_blue, "%s #%d %n (%d units)", g_sPrefix, i + 1, iRankIds[i], iRankDist[i]);
 	}
 }
 
@@ -1015,6 +1086,11 @@ public task_PlayerReturn(id) {
 
 	if (!is_user_connected(id) || !is_user_alive(id))
 		return;
+
+	if (g_eBattleData[BATTLE_PREPARE] < sizeof(g_szSounds)) {
+		PreparePlayer(id, true);
+		return;
+	}
 
 	PreparePlayer(id, false);
 }
@@ -1091,6 +1167,26 @@ stock PrepareRaceLoadout(id) {
 }
 
 public SetVelocity(id) {
+	if (!g_eBattleData[BATTLE_ENABLED]) {
+		return;
+	}
+
+	if (!is_battle_context()) {
+		return;
+	}
+
+	if (g_eBattleData[BATTLE_PREPARE] < sizeof(g_szSounds)) {
+		return;
+	}
+
+	if (!is_user_connected(id) || !is_user_alive(id)) {
+		return;
+	}
+
+	if (TeamName:get_member(id, m_iTeam) == TEAM_SPECTATOR) {
+		return;
+	}
+
 	new Float:flVelocity[3];
 	velocity_by_aim(id, 300, flVelocity);
 	flVelocity[2] = 250.0;
