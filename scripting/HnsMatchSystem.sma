@@ -42,12 +42,12 @@ public plugin_init() {
 	RegisterHookChain(RG_CBasePlayer_Killed, "rgPlayerKilled", true);
 	RegisterHookChain(RG_PlayerBlind, "rgPlayerBlind", false);
 	RegisterHookChain(RG_CBasePlayer_MakeBomber, "rgPlayerMakeBomber", false);
+	RegisterHookChain(RG_ShowMenu, "rgShowMenu", false);
+	RegisterHookChain(RG_ShowVGUIMenu, "rgShowVGUIMenu", false);
 
 	RegisterHam(Ham_Weapon_PrimaryAttack, "weapon_knife", "Knife_PrimaryAttack", false);
 
 	register_message(get_user_msgid("HostagePos"), "msgHostagePos");
-	register_message(get_user_msgid("ShowMenu"), "msgShowMenu");
-	register_message(get_user_msgid("VGUIMenu"), "msgVguiMenu");
 	register_message(get_user_msgid("HideWeapon"), "msgHideWeapon");
 
 	unregister_forward(FM_Spawn, g_iRegisterSpawn, 1);
@@ -334,36 +334,33 @@ public msgHostagePos(msgid, dest, id) {
 	return PLUGIN_HANDLED;
 }
 
-public msgShowMenu(msgid, dest, id) {
-	if (!shouldAutoJoin(id))
-		return PLUGIN_CONTINUE;
+public rgShowMenu(const index, const bitsSlots, const iDisplayTime, const iNeedMore, const szText[]) {
+	if (!shouldAutoJoin(index))
+		return HC_CONTINUE;
 
-	if (hns_is_knife_map() && hns_cup_enabled()) {
-		return PLUGIN_CONTINUE;
+	if (hns_is_knife_map() && hns_cup_enabled() && !first_join_need_control()) {
+		return HC_CONTINUE;
 	}
 
-	static team_select[] = "#Team_Select";
-	static menu_text_code[sizeof team_select];
-	get_msg_arg_string(4, menu_text_code, sizeof menu_text_code - 1);
-	if (!equal(menu_text_code, team_select))
-		return (PLUGIN_CONTINUE);
+	if (!equal(szText, "#Team_Select"))
+		return HC_CONTINUE;
 
-	setForceTeamJoinTask(id, msgid);
+	setForceTeamJoinTask(index, get_user_msgid("ShowMenu"));
 
-	return PLUGIN_HANDLED;
+	return HC_SUPERCEDE;
 }
 
-public msgVguiMenu(msgid, dest, id) {
-	if (get_msg_arg_int(1) != 2 || !shouldAutoJoin(id))
-		return (PLUGIN_CONTINUE);
+public rgShowVGUIMenu(const index, VGUIMenu:menuType, const bitsSlots, const szOldMenu[]) {
+	if (menuType != VGUI_Menu_Team || !shouldAutoJoin(index))
+		return HC_CONTINUE;
 	
-	if (hns_is_knife_map() && hns_cup_enabled()) {
-		return PLUGIN_CONTINUE;
+	if (hns_is_knife_map() && hns_cup_enabled() && !first_join_need_control()) {
+		return HC_CONTINUE;
 	}
 
-	setForceTeamJoinTask(id, msgid);
+	setForceTeamJoinTask(index, get_user_msgid("VGUIMenu"));
 
-	return PLUGIN_HANDLED;
+	return HC_SUPERCEDE;
 }
 
 public msgHideWeapon(msgid, dest, id) {
@@ -388,7 +385,69 @@ public taskForceTeamJoin(menu_msgid[], id) {
 	if (get_user_team(id))
 		return;
 
+	if (first_join_control(id, menu_msgid[0])) {
+		return;
+	}
+
+	if (g_iCurrentMode == MODE_DM_1TT) {
+		forceTeamJoin(id, menu_msgid[0], "2", "5");
+		return;
+	}
+
 	forceTeamJoin(id, menu_msgid[0], "5", "5");
+}
+
+stock bool:first_join_control(id, menu_msgid) {
+	switch (g_iMatchStatus) {
+		case MATCH_CAPTAINKNIFE, MATCH_CAPTAINBATTLE, MATCH_CUPKNIFE, MATCH_CUPPICK, MATCH_TEAMKNIFE, MATCH_TEAMBATTLE: {
+			forceTeamJoin(id, menu_msgid, "6");
+			return true;
+		}
+		case MATCH_CAPTAINPICK, MATCH_TEAMPICK, MATCH_MAPPICK: {
+			if (!first_join_is_match_player(id)) {
+				forceTeamJoin(id, menu_msgid, "6");
+				return true;
+			}
+		}
+		case MATCH_STARTED: {
+			if (g_iCurrentMode == MODE_MIX && !first_join_is_match_player(id)) {
+				forceTeamJoin(id, menu_msgid, "6");
+				return true;
+			}
+		}
+	}
+
+	return false;
+}
+
+stock bool:first_join_need_control() {
+	if (g_iCurrentMode == MODE_MIX && g_iMatchStatus == MATCH_STARTED) {
+		return true;
+	}
+
+	switch (g_iMatchStatus) {
+		case MATCH_CAPTAINPICK, MATCH_CAPTAINKNIFE, MATCH_CAPTAINBATTLE, MATCH_TEAMPICK, MATCH_CUPKNIFE, MATCH_CUPPICK, MATCH_TEAMKNIFE, MATCH_TEAMBATTLE, MATCH_MAPPICK: {
+			return true;
+		}
+	}
+
+	return false;
+}
+
+stock bool:first_join_is_match_player(id) {
+	if (g_eMatchInfo[e_tLeaveData] == Invalid_Trie) {
+		return false;
+	}
+
+	new eLeaveData[PLAYER_INFO];
+	new szAuth[MAX_AUTHID_LENGTH];
+	get_user_authid(id, szAuth, charsmax(szAuth));
+
+	if (!TrieGetArray(g_eMatchInfo[e_tLeaveData], szAuth, eLeaveData, PLAYER_INFO)) {
+		return false;
+	}
+
+	return eLeaveData[PLAYER_MATCH];
 }
 
 
