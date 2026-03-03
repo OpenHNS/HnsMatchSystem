@@ -235,7 +235,7 @@ public cmdMapsMenu(id) {
 
 	if (!bHasItems) {
 		menu_destroy(hMenu);
-		client_print_color(id, print_team_red, "%s Нет доступных карт.", g_szPrefix);
+		client_print_color(id, print_team_red, "%L", id, "MAPS_MENU_NO_MAPS", g_szPrefix);
 		return PLUGIN_CONTINUE;
 	}
 

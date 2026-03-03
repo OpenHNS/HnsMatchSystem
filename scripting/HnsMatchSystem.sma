@@ -154,13 +154,13 @@ public fwdEmitSoundPre(id, iChannel, szSample[], Float:volume, Float:attenuation
 
 public fwdClientKill(id) {
 	if (g_iCurrentMode == MODE_DM || g_iCurrentMode == MODE_DM_1TT) {
-		chat_print(id, "%L", id, "KILL_NOT");
+		client_print_color(id, print_team_blue, "%L", id, "KILL_NOT", g_iSettings[PREFIX]);
 		return FMRES_SUPERCEDE;
 	} else if (g_iCurrentMode == MODE_MIX && g_iCurrentRules == RULES_MR && g_flRoundTime < 90.0) {
-		chat_print(id, "%L", id, "KILL_NOT_MIX");
+		client_print_color(id, print_team_blue, "%L", id, "KILL_NOT_MIX", g_iSettings[PREFIX]);
 		return FMRES_SUPERCEDE;
 	} else {
-		chat_print(0, "%l", "KILL_HIMSELF", id);
+		client_print_color(0, print_team_blue, "%L", LANG_PLAYER, "KILL_HIMSELF", g_iSettings[PREFIX], id);
 	}
 	return FMRES_IGNORED;
 }

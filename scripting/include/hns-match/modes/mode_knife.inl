@@ -53,16 +53,16 @@ public kniferound_unpause() {
 public kniferound_roundstart() {
 	switch (g_iMatchStatus) {
 		case MATCH_CAPTAINKNIFE: {
-			setTaskHud(0, 2.0, 1, 255, 255, 255, 3.0, "%L", LANG_PLAYER, "HUD_START_CAPKF");
-			chat_print(0, "%L", LANG_PLAYER, "START_KNIFE");
+			setTaskHud(0, 2.0, 1, 255, 255, 255, 3.0, "%L", LANG_SERVER, "HUD_START_CAPKF");
+			client_print_color(0, print_team_blue, "%L", LANG_PLAYER, "START_KNIFE", g_iSettings[PREFIX]);
 
 			g_eMatchState = STATE_ENABLED;
 			ChangeGameplay(GAMEPLAY_KNIFE);
 		}
 		case MATCH_TEAMKNIFE: {
-			setTaskHud(0, 2.0, 1, 255, 255, 255, 3.0, "%L", LANG_PLAYER, "HUD_STARTKNIFE");
+			setTaskHud(0, 2.0, 1, 255, 255, 255, 3.0, "%L", LANG_SERVER, "HUD_STARTKNIFE");
 			
-			chat_print(0, "%L", LANG_PLAYER, "START_KNIFE");
+			client_print_color(0, print_team_blue, "%L", LANG_PLAYER, "START_KNIFE", g_iSettings[PREFIX]);
 
 			g_eMatchState = STATE_ENABLED;
 
@@ -81,7 +81,7 @@ public kniferound_roundstart() {
 		case MATCH_CUPKNIFE: {
 			setTaskHud(0, 2.0, 1, 255, 255, 255, 3.0, "Pick/Ban knife started!");
 			
-			chat_print(0, "Started ^3knife Pick/Ban^1 round!");
+			client_print_color(0, print_team_blue, "%L", LANG_PLAYER, "KNIFEPB_ROUND_STARTED", g_iSettings[PREFIX]);
 
 			g_eMatchState = STATE_ENABLED;
 
@@ -158,12 +158,12 @@ public kniferound_roundend(bool:win_ct) {
 public kniferound_player_leave(id) {
 	switch (g_iMatchStatus) {
 		case MATCH_CAPTAINKNIFE: {
-			if (hns_is_user_role(id, ROLE_CAP_A) || hns_is_user_role(id, ROLE_CAP_B)) {
-				LogSendMessage("[MATCH] Player captain (%n) leave! (MATCH_CAPTAINKNIFE)", id);
-				chat_print(0, "Captain ^3%n^1 leave, stop captain knife mode.", id);
-				captain_stop();
-				training_start();
-			}
+				if (hns_is_user_role(id, ROLE_CAP_A) || hns_is_user_role(id, ROLE_CAP_B)) {
+					LogSendMessage("[MATCH] Player captain (%n) leave! (MATCH_CAPTAINKNIFE)", id);
+					client_print_color(0, print_team_blue, "%L", LANG_PLAYER, "CAP_LEAVE_STOP_KNIFE", g_iSettings[PREFIX], id);
+					captain_stop();
+					training_start();
+				}
 		}
 	}
 }

@@ -207,7 +207,7 @@ public taskCheckLeave() {
 	if (iNum < g_eMatchInfo[e_mTeamSize]) {
 		// Pause Need Players
 		g_eMatchInfo[e_mLeaved] = true;
-		chat_print(0, "%L", LANG_PLAYER, "NEED_PAUSE", g_eMatchInfo[e_mTeamSize] - iNum)
+		client_print_color(0, print_team_blue, "%L", LANG_PLAYER, "NEED_PAUSE", g_iSettings[PREFIX], g_eMatchInfo[e_mTeamSize] - iNum);
 	} else {
 		iNum = iNum - g_eMatchInfo[e_mTeamSize];
 		if (iNum >= 2) {
@@ -232,7 +232,7 @@ public MixFinishedMR(iWinTeam) {
 	new Float:TimeDiff = floatabs(g_eMatchInfo[e_flSidesTime][g_isTeamTT] - g_eMatchInfo[e_flSidesTime][HNS_TEAM:!g_isTeamTT]);
 	new szTime[24];
 	fnConvertTime(TimeDiff, szTime, charsmax(szTime));
-	chat_print(0, "%L", LANG_PLAYER, "MR_WIN", iWinTeam == 1 ? "TT" : "CT", szTime);
+	client_print_color(0, print_team_blue, "%L", LANG_PLAYER, "MR_WIN", g_iSettings[PREFIX], iWinTeam == 1 ? "TT" : "CT", szTime);
 	
 	setTaskHud(0, 1.0, 1, 255, 255, 255, 4.0, "%L", LANG_SERVER, "HUD_GAMEOVER");
 	
@@ -251,7 +251,7 @@ public MixFinishedWT() {
 	new szTime[24];
 	fnConvertTime(TimeDiff, szTime, charsmax(szTime), false);
 	
-	chat_print(0, "%L", LANG_PLAYER, "TT_WIN", szTime);
+	client_print_color(0, print_team_blue, "%L", LANG_PLAYER, "TT_WIN", g_iSettings[PREFIX], szTime);
 	
 	setTaskHud(0, 1.0, 1, 255, 255, 255, 4.0, "%L", LANG_SERVER, "HUD_GAMEOVER");
 
@@ -301,7 +301,7 @@ public mix_roundend(bool:win_ct) {
 					MixFinishedMR(win_team == g_isTeamTT ? 1 : 2);
 				else {
 					hns_swap_teams();
-					chat_print(0, "%L", LANG_PLAYER, "SAME_TIMER");
+					client_print_color(0, print_team_blue, "%L", LANG_PLAYER, "SAME_TIMER", g_iSettings[PREFIX]);
 					g_iSettings[MAXROUNDS] += 2;
 				}
 			} else {

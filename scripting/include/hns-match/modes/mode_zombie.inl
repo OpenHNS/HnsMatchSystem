@@ -119,7 +119,7 @@ public checkZombie() {
 public set_zombie() {
 	new iZombie = GetRandomAlive();
 	rg_set_user_team(iZombie, TEAM_CT);
-	chat_print(0, "%l", "SET_ZOMBIE", iZombie);
+	client_print_color(0, print_team_blue, "%L", LANG_PLAYER, "SET_ZOMBIE", g_iSettings[PREFIX], iZombie);
 	iLastZombie = iZombie;
 	hns_setrole(iZombie);
 }

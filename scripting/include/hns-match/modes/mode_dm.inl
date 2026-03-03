@@ -64,7 +64,7 @@ public LuckyTransferToTT(id) {
 	new lucky = GetRandomCT();
 	if (lucky) {
 		rg_set_user_team(lucky, TEAM_TERRORIST);
-		chat_print(0, "%L", LANG_PLAYER, "DM_TRANSF", lucky)
+		client_print_color(0, print_team_blue, "%L", LANG_PLAYER, "DM_TRANSF", g_iSettings[PREFIX], lucky)
 		rg_set_user_team(id, TEAM_CT);
 
 		if (!g_iSettings[ONEHPMODE])

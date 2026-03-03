@@ -122,7 +122,7 @@ public Control(id) {
 	}
 
 	if (hns_cup_enabled()) {
-		client_print_color(id, print_team_blue, "%L", LANG_PLAYER, "CUP_NOT", g_szPrefix);
+		client_print_color(id, print_team_blue, "%L", id, "CUP_NOT", g_szPrefix);
 		return PLUGIN_HANDLED;
 	}
 
@@ -138,7 +138,7 @@ public Replace(id) {
 	}
 
 	if (hns_cup_enabled()) {
-		client_print_color(id, print_team_blue, "%L", LANG_PLAYER, "CUP_NOT", g_szPrefix);
+		client_print_color(id, print_team_blue, "%L", id, "CUP_NOT", g_szPrefix);
 		return PLUGIN_HANDLED;
 	}
 
@@ -234,9 +234,9 @@ public MenuHandler(id, m_Menu, szKeys)
 	if (!g_bInvited[invited_id])
 	{
 		new Float:szTime = get_gametime();
-		
+
 		if(szTime < g_flDelay[id])
-			client_print_color(id, print_team_blue, "%L", LANG_PLAYER, "RECON_DELAY", g_szPrefix, g_flDelay[id] - szTime);
+			client_print_color(id, print_team_blue, "%L", id, "RECON_DELAY", g_szPrefix, g_flDelay[id] - szTime);
 		else
 			{
 				g_bInvited[invited_id] = true;
@@ -274,7 +274,7 @@ public ReplaceAdmin(id)
 	}
 
 	if (hns_cup_enabled()) {
-		client_print_color(id, print_team_blue, "%L", LANG_PLAYER, "CUP_NOT", g_szPrefix);
+		client_print_color(id, print_team_blue, "%L", id, "CUP_NOT", g_szPrefix);
 		return;
 	}
 
@@ -463,12 +463,12 @@ public ConfirmationHandler(id, m_Confirmation, szKeys)
 		case 1:
 		{
 			if (g_ControlType[requested_id] == TYPE_CONTROL) {
-				client_print_color(requested_id, id, "%L", LANG_PLAYER, "RECON_REFUSED_CONTROL", g_szPrefix, id);
+				client_print_color(requested_id, id, "%L", requested_id, "RECON_REFUSED_CONTROL", g_szPrefix, id);
 			}
 			else {
-				client_print_color(requested_id, id, "%L", LANG_PLAYER, "RECON_REFUSED_REPLACE", g_szPrefix, id);
+				client_print_color(requested_id, id, "%L", requested_id, "RECON_REFUSED_REPLACE", g_szPrefix, id);
 			}
-			
+
 			Menu(requested_id);
 		}
 	}
@@ -591,10 +591,10 @@ public task_Response(Parms[], task_id)
 		g_bInvited[id] = false;
 		
 		Menu(requested_id);
-		client_print_color(requested_id, id, "%L", LANG_PLAYER, "RECON_DIDNT_CHOOSE", g_szPrefix, id);
+		client_print_color(requested_id, id, "%L", requested_id, "RECON_DIDNT_CHOOSE", g_szPrefix, id);
 		
 		show_menu(id, 0, "", 1);
-		client_print_color(id, print_team_blue, "%L", LANG_PLAYER, "RECON_EXPIRED", g_szPrefix);
+		client_print_color(id, print_team_blue, "%L", id, "RECON_EXPIRED", g_szPrefix);
 	}
 	
 	return;

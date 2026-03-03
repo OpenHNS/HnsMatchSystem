@@ -50,7 +50,7 @@ public taskSurrender() {
 	if (g_eSurrenderData[e_sFlTime] == g_iSettings[SUTVOTETIME]) {
 		for (new i; i < iNum; i++) {
 			new iPlayer = iPlayers[i];
-			chat_print(iPlayer, "%L", id, "SUR_NEED", g_eMatchInfo[e_mTeamSizeTT], g_eMatchInfo[e_mTeamSizeTT]);
+			client_print_color(iPlayer, print_team_blue, "%L", id, "SUR_NEED", g_iSettings[PREFIX], g_eMatchInfo[e_mTeamSizeTT], g_eMatchInfo[e_mTeamSizeTT]);
 		}
 		resetSurrenderData();
 		return PLUGIN_HANDLED;
@@ -136,7 +136,7 @@ resetSurrenderData() {
 }
 
 autoLose(TeamName:iTeam) {
-	chat_print(0, "%L", LANG_PLAYER, "SUR_END", iTeam == TEAM_TERRORIST ? "TERRORISTS" : "CTS");
+	client_print_color(0, print_team_blue, "%L", LANG_PLAYER, "SUR_END", g_iSettings[PREFIX], iTeam == TEAM_TERRORIST ? "TERRORISTS" : "CTS");
 
 	setTaskHud(0, 0.0, 1, 255, 255, 255, 4.0, "%L", LANG_SERVER, "HUD_GAMEOVER");
 	

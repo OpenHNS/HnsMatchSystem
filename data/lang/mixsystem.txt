@@ -1,121 +1,138 @@
 [en]
 
-STATUS_NOPLAY   = ^3%n^1 is ^3not available^1 for pick. [^3NOPLAY^1]
-STATUS_PLAY     = ^3%n^1 is now ^3available^1 for pick. [^3PLAY^1]
+STATUS_NOPLAY   = [^3%s^1] ^3%n^1 is ^3not available^1 for pick. [^3NOPLAY^1]
+STATUS_PLAY     = [^3%s^1] ^3%n^1 is now ^3available^1 for pick. [^3PLAY^1]
 
-SET_ROUNDTIME   = ^3%n^1 set ^3roundtime^1 to ^3%.2f^1 minutes.
-SET_MAXROUNDS   = ^3%n^1 set ^3maxrounds^1 to ^3%d^1 (^3%d^1 rounds).
-SET_WINTIME     = ^3%n^1 set ^3wintime^1 to ^3%d^1 minutes.
-SET_TT_TIME     = ^3%n^1 set ^3TT^1 time to ^3%s^1.
-SET_CT_TIME     = ^3%n^1 set ^3CT^1 time to ^3%s^1.
-TIME_SYNTAX     = Invalid syntax. Example: ^3/%s 15:43^1
+SET_ROUNDTIME   = [^3%s^1] ^3%n^1 set ^3roundtime^1 to ^3%.2f^1 minutes.
+SET_MAXROUNDS   = [^3%s^1] ^3%n^1 set ^3maxrounds^1 to ^3%d^1 (^3%d^1 rounds).
+SET_WINTIME     = [^3%s^1] ^3%n^1 set ^3wintime^1 to ^3%d^1 minutes.
+SET_TT_TIME     = [^3%s^1] ^3%n^1 set ^3TT^1 time to ^3%s^1.
+SET_CT_TIME     = [^3%s^1] ^3%n^1 set ^3CT^1 time to ^3%s^1.
+TIME_SYNTAX     = [^3%s^1] Invalid syntax. Example: ^3/%s 15:43^1
 
-KILL_HIMSELF    = ^3%n^1 killed himself.
-KILL_NOT        = Kill during deathmatch is not available.
-KILL_NOT_MIX    = You need to play ^31.5^1 minutes to use kill command.
+KILL_HIMSELF    = [^3%s^1] ^3%n^1 killed himself.
+KILL_NOT        = [^3%s^1] Kill during deathmatch is not available.
+KILL_NOT_MIX    = [^3%s^1] You need to play ^31.5^1 minutes to use kill command.
 KILL_WATER      = %s ^3%n^1 dropped in water.
 
-SUR_WAIT        = Wait ^3%s^1 for surrender!
-SUR_PLAYER      = Player ^3%n^1 (^3%s^1) started vote for surrender!
-SUR_NEED        = Need ^3%d/%d^1 votes for surrender!
-SUR_END         = Team ^3%s^1 surrendered!
+SUR_WAIT        = [^3%s^1] Wait ^3%s^1 for surrender!
+SUR_PLAYER      = [^3%s^1] Player ^3%n^1 (^3%s^1) started vote for surrender!
+SUR_NEED        = [^3%s^1] Need ^3%d/%d^1 votes for surrender!
+SUR_END         = [^3%s^1] Team ^3%s^1 surrendered!
 
-AFK_PAUSE       = ^3%d^1 players AFK, pausing the game.
-AFK_UNPAUSE     = LIVE! All players are here! Unpausing match.
+AFK_PAUSE       = [^3%s^1] ^3%d^1 players AFK, pausing the game.
+AFK_UNPAUSE     = [^3%s^1] LIVE! All players are here! Unpausing match.
 
-BAN_PAUSE       = ^3%n^1 banned from matches.
+BAN_PAUSE       = [^3%s^1] ^3%n^1 banned from matches.
 
-NEED_PAUSE      = Match paused, need ^3%d^1 players.
+NEED_PAUSE      = [^3%s^1] Match paused, need ^3%d^1 players.
 
-DM_TRANSF       = ^3%n^1 transfered to ^3Terrorist^1.
+DM_TRANSF       = [^3%s^1] ^3%n^1 transfered to ^3Terrorist^1.
 
-MODE_ALREADY    = This mode already started!
-MODE_NOT_MIX    = This command is not available during the match!
-MODE_NOT_SET_DUEL = You need 1 player per team to start a duel.
-MODE_SET_MR     = ^3%n^1 changed mode to ^3MR^1!
-MODE_SET_WT     = ^3%n^1 changed mode to ^3Wintime^1!
-MODE_SET_DUEL   = ^3%n^1 changed mode to ^3Duel^1!
+MODE_ALREADY    = [^3%s^1] This mode already started!
+MODE_NOT_MIX    = [^3%s^1] This command is not available during the match!
+MODE_NOT_SET_DUEL = [^3%s^1] You need 1 player per team to start a duel.
+MODE_SET_MR     = [^3%s^1] ^3%n^1 changed mode to ^3MR^1!
+MODE_SET_WT     = [^3%s^1] ^3%n^1 changed mode to ^3Wintime^1!
+MODE_SET_DUEL   = [^3%s^1] ^3%n^1 changed mode to ^3Duel^1!
 
 GAME_NOTSTARTED = Game not started or already paused (use /unpause)
-GAME_PAUSED     = ^3%n^1 paused the game!
-GAME_UNPAUSED   = ^3%n^1 unpaused the game!
-GAME_SWAP       = ^3%n^1 swapped teams!
-GAME_RESTART    = ^3%n^1 did restart!
+GAME_PAUSED     = [^3%s^1] ^3%n^1 paused the game!
+GAME_UNPAUSED   = [^3%s^1] ^3%n^1 unpaused the game!
+GAME_SWAP       = [^3%s^1] ^3%n^1 swapped teams!
+GAME_RESTART    = [^3%s^1] ^3%n^1 did restart!
 
-PUB_ACTIVATED   = ^3%n^1 has activated ^3public^1 mode.
-PUB_ALREADY     = Public mode is already running.
-PUB_CANC        = Please, disable other mode to enable public mode.
+PUB_ACTIVATED   = [^3%s^1] ^3%n^1 has activated ^3public^1 mode.
+PUB_ALREADY     = [^3%s^1] Public mode is already running.
+PUB_CANC        = [^3%s^1] Please, disable other mode to enable public mode.
 
-DM_ACTIVATED    = ^3%n^1 has activated ^3deatchmatch^1 mode.
-DM_ALREADY      = Deatchmatch mode is already running.
-DM_CANC         = Please, disable other mode to enable deathmatch mode.
-DM_1TT_ACTIVATED = ^3%n^1 has activated ^3deathmatch 1TT^1 mode.
-DM_1TT_ALREADY   = Deathmatch 1TT mode is already running.
-DM_1TT_CANC      = Please, disable other mode to enable deathmatch 1TT mode.
+DM_ACTIVATED    = [^3%s^1] ^3%n^1 has activated ^3deatchmatch^1 mode.
+DM_ALREADY      = [^3%s^1] Deatchmatch mode is already running.
+DM_CANC         = [^3%s^1] Please, disable other mode to enable deathmatch mode.
+DM_1TT_ACTIVATED = [^3%s^1] ^3%n^1 has activated ^3deathmatch 1TT^1 mode.
+DM_1TT_ALREADY   = [^3%s^1] Deathmatch 1TT mode is already running.
+DM_1TT_CANC      = [^3%s^1] Please, disable other mode to enable deathmatch 1TT mode.
 
-ZM_ACTIVATED    = ^3%n^1 has activated ^3zombie^1 mode.
-ZM_ALREADY      = Zombie mode is already running.
-ZM_CANC         = Please, disable other mode to enable zombie mode.
+ZM_ACTIVATED    = [^3%s^1] ^3%n^1 has activated ^3zombie^1 mode.
+ZM_ALREADY      = [^3%s^1] Zombie mode is already running.
+ZM_CANC         = [^3%s^1] Please, disable other mode to enable zombie mode.
 
-SET_ZOMBIE      = ^3%n^1 is a zombie!
+SET_ZOMBIE      = [^3%s^1] ^3%n^1 is a zombie!
 
-BLEND_TEAMS     = ^3%n^1 blended the teams.
+BLEND_TEAMS     = [^3%s^1] ^3%n^1 blended the teams.
 
-TRANSF_SPEC     = ^3%n^1 transfered all players to ^3spectators^1!
-TRANSF_TT       = ^3%n^1 transfered all players to ^3terrorist's^1!
-TRANSF_CT       = ^3%n^1 transfered all players to ^3counter-terrorist's^1!
+TRANSF_SPEC     = [^3%s^1] ^3%n^1 transfered all players to ^3spectators^1!
+TRANSF_TT       = [^3%s^1] ^3%n^1 transfered all players to ^3terrorist's^1!
+TRANSF_CT       = [^3%s^1] ^3%n^1 transfered all players to ^3counter-terrorist's^1!
 
-TYPE_SKILL      = ^3%n^1 has activated ^3skill^1 mode.
-TYPE_BOOST      = ^3%n^1 has activated ^3boost^1 mode.
+TYPE_SKILL      = [^3%s^1] ^3%n^1 has activated ^3skill^1 mode.
+TYPE_BOOST      = [^3%s^1] ^3%n^1 has activated ^3boost^1 mode.
 
 AA_10           = ^3%n^1 changed ^3airaccelerate^1 to ^310^1.
 AA_100          = ^3%n^1 changed ^3airaccelerate^1 to ^3100^1.
 
-NOT_START_MIX   = Please, disable other mode to start mix game.
-NOT_START_KNIFE = Please, disable other mode to start knife round.
+NOT_START_MIX   = [^3%s^1] Please, disable other mode to start mix game.
+NOT_START_KNIFE = [^3%s^1] Please, disable other mode to start knife round.
 
-KNIFE_ALREADY   = Knife round has already started.
-RACE_ACTIVE_STOP = Race battle is active. Stop it first with ^3/stop^1.
+KNIFE_ALREADY   = [^3%s^1] Knife round has already started.
+KNIFEPB_NOTRAIN = [^3%s^1] Please, disable other mode before starting knife Pick/Ban.
+KNIFEPB_ALREADY = [^3%s^1] Knife Pick/Ban round has already started.
+KNIFEPB_STARTED_BY = [^3%s^1] ^3%n^1 started ^3knife Pick/Ban^1 round!
+KNIFEPB_ROUND_STARTED = [^3%s^1] Started ^3knife Pick/Ban^1 round!
+RACE_ACTIVE_STOP = [^3%s^1] Race battle is active. Stop it first with ^3/stop^1.
 
-NOT_CAPTAIN     = Only available on the knife map.
+NOT_CAPTAIN     = [^3%s^1] Only available on the knife map.
 
-START_MIX       = ^3%n^1 has started ^3mix^1.
-START_KNIFE     = Started ^3knife^1 round!
-START_KNIFE_1   = ^3%n^1 has started ^3knife^1 round!
+START_MIX       = [^3%s^1] ^3%n^1 has started ^3mix^1.
+START_KNIFE     = [^3%s^1] Started ^3knife^1 round!
+START_KNIFE_1   = [^3%s^1] ^3%n^1 has started ^3knife^1 round!
 START_CAPBATTLE = Started ^3captain battle^1 round!
 
-STOP_MIX        = ^3%n^1 stopped ^3mix^1.
-STOP_KNIFE      = ^3%n^1 stopped ^3knife^1 round^1.
-STOP_PUB        = ^3%n^1 stopped ^3public^1 mode^1.
-STOP_CAP        = ^3%n^1 stopped ^3captain^1 mode^1.
-STOP_DM         = ^3%n^1 stopped ^3deathmatch^1 mode^1.
-STOP_DM_1TT     = ^3%n^1 stopped ^3deathmatch 1TT^1 mode^1.
-STOP_ZM         = ^3%n^1 stopped ^3zombie^1 mode^1.
-STOP_RACE       = ^3%n^1 stopped ^3race battle^1.
+STOP_MIX        = [^3%s^1] ^3%n^1 stopped ^3mix^1.
+STOP_KNIFE      = [^3%s^1] ^3%n^1 stopped ^3knife^1 round^1.
+STOP_PUB        = [^3%s^1] ^3%n^1 stopped ^3public^1 mode^1.
+STOP_CAP        = [^3%s^1] ^3%n^1 stopped ^3captain^1 mode^1.
+STOP_DM         = [^3%s^1] ^3%n^1 stopped ^3deathmatch^1 mode^1.
+STOP_DM_1TT     = [^3%s^1] ^3%n^1 stopped ^3deathmatch 1TT^1 mode^1.
+STOP_ZM         = [^3%s^1] ^3%n^1 stopped ^3zombie^1 mode^1.
+STOP_RACE       = [^3%s^1] ^3%n^1 stopped ^3race battle^1.
 
-SCORE_TIME      = TT [^3%s^1] %d vs %d [^3%s^1] CT (^3%d^1/^3%d^1 rounds) (^3%s^1 diff)
-SCORE_TIME_WT   = TT [^3%s^1] vs [^3%s^1] CT (^3%s^1 diff)
+SCORE_TIME      = [^3%s^1] TT [^3%s^1] %d vs %d [^3%s^1] CT (^3%d^1/^3%d^1 rounds) (^3%s^1 diff)
+SCORE_TIME_WT   = [^3%s^1] TT [^3%s^1] vs [^3%s^1] CT (^3%s^1 diff)
 SCORE_DUEL      = Score: ^3%n^1 - ^3%d^1 vs ^3%d^1 - ^3%n^1
 SCORE_DUEL_DEF  = Score: TT - ^3%d^1 vs ^3%d^1 - CT
 SCORE_NOT       = Sorry, but the game is not live.
 
-SAME_TIMER      = Same Timers! OVERTIME! Playing +2 Rounds.
+SAME_TIMER      = [^3%s^1] Same Timers! OVERTIME! Playing +2 Rounds.
 
-TT_WIN          = TT win the match! (^3%s^1 difference)
-MR_WIN          = %s win the match! (^3%s^1 difference)
+TT_WIN          = [^3%s^1] TT win the match! (^3%s^1 difference)
+MR_WIN          = [^3%s^1] %s win the match! (^3%s^1 difference)
 DUEL_WIN        = Player ^3%n^1 (^3TT^1) win duel!
+DUEL_POINTS_WINNER = [^3%s^1] Points: ^3%n^1 ^4%.1f^1 vs ^4%.1f^1 ^3%n^1 | Winner: ^3%n^1 ^3%.1f^1
+DUEL_POINTS_TIME = [^3%s^1] Points: ^3%n^1 ^4%.1f^1 vs ^4%.1f^1 ^3%n^1 | Time: ^3%s
 
-CAP_CHOOSE      = ^3%n^1 choosing captains...
-CAP_FIRST       = First captain: ^3%n^1.
-CAP_SECOND      = Second captain: ^3%n^1.
-CAP_FIRST_PTS   = First captain: ^3%n^1 (^3%d^1 [^3%s^1]).
-CAP_SECOND_PTS  = Second captain: ^3%n^1 (^3%d^1 [^3%s^1]).
-CAP_HAS_LEFT    = One of the captains has left, the captain's mode is disabled!
-TEAM_FULL       = The teams are full!
+CAP_CHOOSE      = [^3%s^1] ^3%n^1 choosing captains...
+CAP_FIRST       = [^3%s^1] First captain: ^3%n^1.
+CAP_SECOND      = [^3%s^1] Second captain: ^3%n^1.
+CAP_FIRST_PTS   = [^3%s^1] First captain: ^3%n^1 (^3%d^1 [^3%s^1]).
+CAP_SECOND_PTS  = [^3%s^1] Second captain: ^3%n^1 (^3%d^1 [^3%s^1]).
+CAP_HAS_LEFT    = [^3%s^1] One of the captains has left, the captain's mode is disabled!
+TEAM_FULL       = [^3%s^1] The teams are full!
+CAP_MODE_CANCELED = [^3%s^1] Captain mode canceled.
+CAP_WAITPLAYERS_NOT_FOUND = [^3%s^1] Players not found.
+CAP_TEAM_TT_LEAVE_WAIT = [^3%s^1] TT captain left. Waiting 10 sec for reconnect.
+CAP_TEAM_CT_LEAVE_WAIT = [^3%s^1] CT captain left. Waiting 10 sec for reconnect.
+CAP_BATTLE_MENU_FALLBACK = [^3%s^1] Battle menu unavailable. Fallback to knife decide.
+CAP_PLAYERS_NOT_FOUND_STOP = [^3%s^1] Players not found. Stopping team pick mode.
+CAP_NEW_TT = [^3%s^1] New TT captain: ^3%n^1
+CAP_NEW_CT = [^3%s^1] New CT captain: ^3%n^1
+CAP_LEAVE_STOP = [^3%s^1] Captain ^3%n^1 left, stop captain mode.
+CAP_LEAVE_STOP_KNIFE = [^3%s^1] Captain ^3%n^1 left, stop captain knife mode.
+CAP_LEAVE_STOP_BATTLE = [^3%s^1] Captain ^3%n^1 left, stop captain battle mode.
 
-PLAYER_CHOOSE       = Captain ^3%n^1 chose ^3%n^1.
-PLAYER_CHOOSE_PTS   = Captain ^3%n^1 chose ^3%n^1 (^3%d^1 [^3%s^1]).
-PLAYER_CHOOSE_RANDOM = Captain ^3%n^1 has been chosen ^3%n^1 at random!
+PLAYER_CHOOSE       = [^3%s^1] Captain ^3%n^1 chose ^3%n^1.
+PLAYER_CHOOSE_PTS   = [^3%s^1] Captain ^3%n^1 chose ^3%n^1 (^3%d^1 [^3%s^1]).
+PLAYER_CHOOSE_RANDOM = [^3%s^1] Captain ^3%n^1 has been chosen ^3%n^1 at random!
 
 
 HUD_TIMETOWIN   = Last Round!^n TT Need %s Time to Win!
@@ -135,6 +152,8 @@ HUD_PAUSE       = GAME PAUSED
 HUD_START_CAPKF = Captain knife round started.
 HUD_START_CAPBT = Captain battle round started.
 HUD_WAITPICK    = %n selects a player, %.f seconds left.
+HUD_CAPTAIN_LEAVE_WAIT = Captain left! Wait %.f sec.
+HUD_KNIFEPB_STARTED = Pick/Ban knife started.
 
 MENU_MIX_TITLE       = \rHide'n'Seek match system
 MENU_MAIN_CAP        = Start captain mode
@@ -181,9 +200,9 @@ MENU_MODE_MR        = MR System
 MENU_MODE_WINTIME   = Wintime
 MENU_MODE_DUEL      = Duel
 
-VOTE_MR     = ^3%n^1 voted for ^3MR^1!
-VOTE_WT     = ^3%n^1 voted for ^3Wintime^1!
-VOTE_WIN    = ^3%s^1 mode won the vote!
+VOTE_MR     = [^3%s^1] ^3%n^1 voted for ^3MR^1!
+VOTE_WT     = [^3%s^1] ^3%n^1 voted for ^3Wintime^1!
+VOTE_WIN    = [^3%s^1] ^3%s^1 mode won the vote!
 
 MENU_VERIF_TITLE = \rVerification menu^n^n\dAre you sure you want to stop this mod:
 
@@ -201,122 +220,139 @@ MENU_NADES_TITLE = Do you need some nades?
 
 [ru]
 
-STATUS_NOPLAY   = ^3%n^1 выставил статус ^1не играю^1. [^3NOPLAY^1]
-STATUS_PLAY     = ^3%n^1 выставил статус ^1играю^1. [^3PLAY^1]
+STATUS_NOPLAY   = [^3%s^1] ^3%n^1 выставил статус ^1не играю^1. [^3NOPLAY^1]
+STATUS_PLAY     = [^3%s^1] ^3%n^1 выставил статус ^1играю^1. [^3PLAY^1]
 
-SET_ROUNDTIME   = ^3%n^1 установил ^3roundtime^1 на ^3%.2f^1 минут.
-SET_MAXROUNDS   = ^3%n^1 установил ^3maxrounds^1 на ^3%d^1 (^3%d^1 раундов).
-SET_WINTIME     = ^3%n^1 установил ^3wintime^1 на ^3%d^1 минут.
-SET_TT_TIME     = ^3%n^1 установил время ^3TT^1 на ^3%s^1.
-SET_CT_TIME     = ^3%n^1 установил время ^3CT^1 на ^3%s^1.
-TIME_SYNTAX     = Неверный синтаксис. Пример: ^3/%s 15:43^1
+SET_ROUNDTIME   = [^3%s^1] ^3%n^1 установил ^3roundtime^1 на ^3%.2f^1 минут.
+SET_MAXROUNDS   = [^3%s^1] ^3%n^1 установил ^3maxrounds^1 на ^3%d^1 (^3%d^1 раундов).
+SET_WINTIME     = [^3%s^1] ^3%n^1 установил ^3wintime^1 на ^3%d^1 минут.
+SET_TT_TIME     = [^3%s^1] ^3%n^1 установил время ^3TT^1 на ^3%s^1.
+SET_CT_TIME     = [^3%s^1] ^3%n^1 установил время ^3CT^1 на ^3%s^1.
+TIME_SYNTAX     = [^3%s^1] Неверный синтаксис. Пример: ^3/%s 15:43^1
 
-KILL_HIMSELF    = ^3%n^1 убил сам себя.
-KILL_NOT        = Не доступно для режима ДМ.
-KILL_NOT_MIX    = Вам необходимо отыграть ^31.5^1 минуты, чтобы убить самого себя.
+KILL_HIMSELF    = [^3%s^1] ^3%n^1 убил сам себя.
+KILL_NOT        = [^3%s^1] Не доступно для режима ДМ.
+KILL_NOT_MIX    = [^3%s^1] Вам необходимо отыграть ^31.5^1 минуты, чтобы убить самого себя.
 KILL_WATER      = %s ^3%n^1 упал в воду.
 
-SUR_WAIT        = Подождите ^3%s^1 чтобы сдаться!
-SUR_PLAYER      = Игрок ^3%n^1 (^3%s^1) захотел сдаться!
-SUR_NEED        = Нужно ^3%d/%d^1 голосов чтобы сдаться!
-SUR_END         = Команда ^3%s^1 сдалась!
+SUR_WAIT        = [^3%s^1] Подождите ^3%s^1 чтобы сдаться!
+SUR_PLAYER      = [^3%s^1] Игрок ^3%n^1 (^3%s^1) захотел сдаться!
+SUR_NEED        = [^3%s^1] Нужно ^3%d/%d^1 голосов чтобы сдаться!
+SUR_END         = [^3%s^1] Команда ^3%s^1 сдалась!
 
-AFK_PAUSE       = ^3%d^1 игроков АФК, игра приостановлена.
-AFK_UNPAUSE     = Старт! Все игроки на месте! Игра возоблена.
+AFK_PAUSE       = [^3%s^1] ^3%d^1 игроков АФК, игра приостановлена.
+AFK_UNPAUSE     = [^3%s^1] Старт! Все игроки на месте! Игра возоблена.
 
-BAN_PAUSE       = ^3%n^1 забанен на матчах.
+BAN_PAUSE       = [^3%s^1] ^3%n^1 забанен на матчах.
 
-NEED_PAUSE      = Матч приостановлен, требуется ^3%d^1 игроков.
+NEED_PAUSE      = [^3%s^1] Матч приостановлен, требуется ^3%d^1 игроков.
 
-DM_TRANSF       = %n перенесли за ^3Террористов^1.
+DM_TRANSF       = [^3%s^1] %n перенесли за ^3Террористов^1.
 
-MODE_ALREADY    = Этот режим уже запущен!
-MODE_NOT_MIX    = Эта команда недоступна во время матча!
-MODE_NOT_SET_DUEL = Чтобы начать дуэль, в каждой команде должно быть по 1 игроку.
-MODE_SET_MR     = ^3%n^1 изменил режим на ^3MR^1!
-MODE_SET_WT     = ^3%n^1 изменил режим на ^3Wintime^1!
-MODE_SET_DUEL   = ^3%n^1 изменил режим на ^3Duel^1!
+MODE_ALREADY    = [^3%s^1] Этот режим уже запущен!
+MODE_NOT_MIX    = [^3%s^1] Эта команда недоступна во время матча!
+MODE_NOT_SET_DUEL = [^3%s^1] Чтобы начать дуэль, в каждой команде должно быть по 1 игроку.
+MODE_SET_MR     = [^3%s^1] ^3%n^1 изменил режим на ^3MR^1!
+MODE_SET_WT     = [^3%s^1] ^3%n^1 изменил режим на ^3Wintime^1!
+MODE_SET_DUEL   = [^3%s^1] ^3%n^1 изменил режим на ^3Duel^1!
 
 GAME_NOTSTARTED = Игра приостановлена, используйте (^1say /unpause^1).
-GAME_PAUSED     = ^3%n^1 приостановил игру!
-GAME_UNPAUSED   = ^3%n^1 возобновил игру!
-GAME_SWAP       = ^3%n^1 поменял команды местами!
-GAME_RESTART    = ^3%n^1 перезапустил раунд!
+GAME_PAUSED     = [^3%s^1] ^3%n^1 приостановил игру!
+GAME_UNPAUSED   = [^3%s^1] ^3%n^1 возобновил игру!
+GAME_SWAP       = [^3%s^1] ^3%n^1 поменял команды местами!
+GAME_RESTART    = [^3%s^1] ^3%n^1 перезапустил раунд!
 
-PUB_ACTIVATED   = ^3%n^1 активировал ^3паблик^1 режим.
-PUB_ALREADY     = Паблик режим уже запущен.
-PUB_CANC        = Пожалуйста, отключите другой режим чтобы запустить паблик.
+PUB_ACTIVATED   = [^3%s^1] ^3%n^1 активировал ^3паблик^1 режим.
+PUB_ALREADY     = [^3%s^1] Паблик режим уже запущен.
+PUB_CANC        = [^3%s^1] Пожалуйста, отключите другой режим чтобы запустить паблик.
 
-DM_ACTIVATED    = ^3%n^1 активировал ^3ДМ^1 режим.
-DM_ALREADY      = ДМ режим уже запущен.
-DM_CANC         = Пожалуйста, отключите другой режим чтобы запустить ДМ.
-DM_1TT_ACTIVATED = ^3%n^1 активировал ^3ДМ 1TT^1 режим.
-DM_1TT_ALREADY   = ДМ 1TT режим уже запущен.
-DM_1TT_CANC      = Пожалуйста, отключите другой режим чтобы запустить ДМ 1TT.
+DM_ACTIVATED    = [^3%s^1] ^3%n^1 активировал ^3ДМ^1 режим.
+DM_ALREADY      = [^3%s^1] ДМ режим уже запущен.
+DM_CANC         = [^3%s^1] Пожалуйста, отключите другой режим чтобы запустить ДМ.
+DM_1TT_ACTIVATED = [^3%s^1] ^3%n^1 активировал ^3ДМ 1TT^1 режим.
+DM_1TT_ALREADY   = [^3%s^1] ДМ 1TT режим уже запущен.
+DM_1TT_CANC      = [^3%s^1] Пожалуйста, отключите другой режим чтобы запустить ДМ 1TT.
 
-ZM_ACTIVATED    = ^3%n^1 активировал ^3зомби^1 режим.
-ZM_ALREADY      = Зомби режим уже запущен.
-ZM_CANC         = Пожалуйста, отключите другой режим чтобы запустить Зомби.
+ZM_ACTIVATED    = [^3%s^1] ^3%n^1 активировал ^3зомби^1 режим.
+ZM_ALREADY      = [^3%s^1] Зомби режим уже запущен.
+ZM_CANC         = [^3%s^1] Пожалуйста, отключите другой режим чтобы запустить Зомби.
 
-SET_ZOMBIE      = ^3%n^1 зомби!
+SET_ZOMBIE      = [^3%s^1] ^3%n^1 зомби!
 
-BLEND_TEAMS     = ^3%n^1 смешал команды.
+BLEND_TEAMS     = [^3%s^1] ^3%n^1 смешал команды.
 
-TRANSF_SPEC     = ^3%n^1 перевел всех игроков за ^3наблюдателей^1!
-TRANSF_TT       = ^3%n^1 перевел всех игроков за ^3террористов^1!
-TRANSF_CT       = ^3%n^1 перевел всех игроков за ^3контр-3террористов^1!
+TRANSF_SPEC     = [^3%s^1] ^3%n^1 перевел всех игроков за ^3наблюдателей^1!
+TRANSF_TT       = [^3%s^1] ^3%n^1 перевел всех игроков за ^3террористов^1!
+TRANSF_CT       = [^3%s^1] ^3%n^1 перевел всех игроков за ^3контр-3террористов^1!
 
-TYPE_SKILL      = ^3%n^1 активировал ^3скилл^1 режим.
-TYPE_BOOST      = ^3%n^1 активировал ^3буст^1 режим.
+TYPE_SKILL      = [^3%s^1] ^3%n^1 активировал ^3скилл^1 режим.
+TYPE_BOOST      = [^3%s^1] ^3%n^1 активировал ^3буст^1 режим.
 
 AA_10           = ^3%n^1 установил ^3airaccelerate^1 на ^310^1.
 AA_100          = ^3%n^1 установил ^3airaccelerate^1 на ^3100^1.
 
-NOT_START_MIX   = Пожалуйста, отключите другой режим перед запуском матча.
-NOT_START_KNIFE = Пожалуйста, отключите другой режим перед запуском ножевого раунда.
+NOT_START_MIX   = [^3%s^1] Пожалуйста, отключите другой режим перед запуском матча.
+NOT_START_KNIFE = [^3%s^1] Пожалуйста, отключите другой режим перед запуском ножевого раунда.
 
-KNIFE_ALREADY   = Ножевой раунд уже запущен.
-RACE_ACTIVE_STOP = Идет race битва. Сначала остановите ее через ^3/stop^1.
+KNIFE_ALREADY   = [^3%s^1] Ножевой раунд уже запущен.
+KNIFEPB_NOTRAIN = [^3%s^1] Пожалуйста, отключите другой режим перед запуском ножевого Pick/Ban.
+KNIFEPB_ALREADY = [^3%s^1] Ножевой Pick/Ban раунд уже запущен.
+KNIFEPB_STARTED_BY = [^3%s^1] ^3%n^1 запустил ^3ножевой Pick/Ban^1 раунд!
+KNIFEPB_ROUND_STARTED = [^3%s^1] Запущен ^3ножевой Pick/Ban^1 раунд!
+RACE_ACTIVE_STOP = [^3%s^1] Идет race битва. Сначала остановите ее через ^3/stop^1.
 
-NOT_CAPTAIN     = Доступно только на ножевой карте.
+NOT_CAPTAIN     = [^3%s^1] Доступно только на ножевой карте.
 
-START_MIX       = ^3%n^1 запустил ^3микс^1!
-START_KNIFE     = Запущен ^3ножевой^1 раунд!
-START_KNIFE_1   = ^3%n^1 запустил ^3ножевой^1 раунд!
+START_MIX       = [^3%s^1] ^3%n^1 запустил ^3микс^1!
+START_KNIFE     = [^3%s^1] Запущен ^3ножевой^1 раунд!
+START_KNIFE_1   = [^3%s^1] ^3%n^1 запустил ^3ножевой^1 раунд!
 START_CAPBATTLE = Запущен ^3батл раунд капитанов^1!
 
-STOP_MIX        = ^3%n^1 остановил ^3микс^1.
-STOP_KNIFE      = ^3%n^1 остановил ^3ножевой раунд^1.
-STOP_PUB        = ^3%n^1 остановил ^3паблик^1 режим.
-STOP_CAP        = ^3%n^1 остановил режим ^3капитанов^1.
-STOP_DM         = ^3%n^1 остановил ^3ДМ^1 режим.
-STOP_DM_1TT     = ^3%n^1 остановил ^3ДМ 1TT^1 режим.
-STOP_ZM         = ^3%n^1 остановил ^3зомби^1 режим^1.
-STOP_RACE       = ^3%n^1 остановил ^3race битву^1.
+STOP_MIX        = [^3%s^1] ^3%n^1 остановил ^3микс^1.
+STOP_KNIFE      = [^3%s^1] ^3%n^1 остановил ^3ножевой раунд^1.
+STOP_PUB        = [^3%s^1] ^3%n^1 остановил ^3паблик^1 режим.
+STOP_CAP        = [^3%s^1] ^3%n^1 остановил режим ^3капитанов^1.
+STOP_DM         = [^3%s^1] ^3%n^1 остановил ^3ДМ^1 режим.
+STOP_DM_1TT     = [^3%s^1] ^3%n^1 остановил ^3ДМ 1TT^1 режим.
+STOP_ZM         = [^3%s^1] ^3%n^1 остановил ^3зомби^1 режим^1.
+STOP_RACE       = [^3%s^1] ^3%n^1 остановил ^3race битву^1.
 
-SCORE_TIME     = TT [^3%s^1] %d vs %d [^3%s^1] CT (^3%d^1/^3%d^1 раундов) (^3%s^1 разрыв)
-SCORE_TIME_WT  = TT [^3%s^1] vs [^3%s^1] CT (^3%s^1 разрыв)
+SCORE_TIME     = [^3%s^1] TT [^3%s^1] %d vs %d [^3%s^1] CT (^3%d^1/^3%d^1 раундов) (^3%s^1 разрыв)
+SCORE_TIME_WT  = [^3%s^1] TT [^3%s^1] vs [^3%s^1] CT (^3%s^1 разрыв)
 SCORE_DUEL     = Счет: ^3%n^1 - ^3%d^1 vs ^3%d^1 - ^3%n^1
 SCORE_DUEL_DEF = Счет: TT - ^3%d^1 vs ^3%d^1 - CT
 SCORE_NOT      = Извините, но игра не запущена.
 
-SAME_TIMER     = Время равное! ОВЕРТАЙМ! Начало доп. игры (+2 раунда).
+SAME_TIMER     = [^3%s^1] Время равное! ОВЕРТАЙМ! Начало доп. игры (+2 раунда).
 
-TT_WIN          = ТТ Выиграли игру! (^3%s^1 разрыв)
-MR_WIN          = %s Выиграли игру! (^3%s^1 разрыв)
+TT_WIN          = [^3%s^1] ТТ Выиграли игру! (^3%s^1 разрыв)
+MR_WIN          = [^3%s^1] %s Выиграли игру! (^3%s^1 разрыв)
 DUEL_WIN        = Игрок ^3%n^1 (^3TT^1) выиграл дуэль!
+DUEL_POINTS_WINNER = [^3%s^1] Очки: ^3%n^1 ^4%.1f^1 vs ^4%.1f^1 ^3%n^1 | Победитель: ^3%n^1 ^3%.1f^1
+DUEL_POINTS_TIME = [^3%s^1] Очки: ^3%n^1 ^4%.1f^1 vs ^4%.1f^1 ^3%n^1 | Время: ^3%s
 
-CAP_CHOOSE      = ^3%n^1 выбирает капитанов...
-CAP_FIRST       = Первый капитан: ^3%n^1.
-CAP_SECOND      = Второй капитан: ^3%n^1.
-CAP_FIRST_PTS   = Первый капитан: ^3%n^1 (^3%d^1 [^3%s^1]).
-CAP_SECOND_PTS  = Второй капитан: ^3%n^1 (^3%d^1 [^3%s^1]).
-CAP_HAS_LEFT    = Один из капитанов ушел, режим капитана отключен!
-TEAM_FULL       = Команды полны!
+CAP_CHOOSE      = [^3%s^1] ^3%n^1 выбирает капитанов...
+CAP_FIRST       = [^3%s^1] Первый капитан: ^3%n^1.
+CAP_SECOND      = [^3%s^1] Второй капитан: ^3%n^1.
+CAP_FIRST_PTS   = [^3%s^1] Первый капитан: ^3%n^1 (^3%d^1 [^3%s^1]).
+CAP_SECOND_PTS  = [^3%s^1] Второй капитан: ^3%n^1 (^3%d^1 [^3%s^1]).
+CAP_HAS_LEFT    = [^3%s^1] Один из капитанов ушел, режим капитана отключен!
+TEAM_FULL       = [^3%s^1] Команды полны!
+CAP_MODE_CANCELED = [^3%s^1] Режим капитанов отменен.
+CAP_WAITPLAYERS_NOT_FOUND = [^3%s^1] Игроки не найдены.
+CAP_TEAM_TT_LEAVE_WAIT = [^3%s^1] Капитан TT вышел. Ждем возврат 10 сек.
+CAP_TEAM_CT_LEAVE_WAIT = [^3%s^1] Капитан CT вышел. Ждем возврат 10 сек.
+CAP_BATTLE_MENU_FALLBACK = [^3%s^1] Battle меню недоступно. Переход к ножевому выбору.
+CAP_PLAYERS_NOT_FOUND_STOP = [^3%s^1] Игроки не найдены. Режим выбора команд остановлен.
+CAP_NEW_TT = [^3%s^1] Новый капитан TT: ^3%n^1
+CAP_NEW_CT = [^3%s^1] Новый капитан CT: ^3%n^1
+CAP_LEAVE_STOP = [^3%s^1] Капитан ^3%n^1 вышел, режим капитанов остановлен.
+CAP_LEAVE_STOP_KNIFE = [^3%s^1] Капитан ^3%n^1 вышел, captain knife остановлен.
+CAP_LEAVE_STOP_BATTLE = [^3%s^1] Капитан ^3%n^1 вышел, captain battle остановлен.
 
-PLAYER_CHOOSE       = Капитан ^3%n^1 выбрал ^3%n^1.
-PLAYER_CHOOSE_PTS   = Капитан ^3%n^1 выбрал ^3%n^1 (^3%d^1 [^3%s^1]).
-PLAYER_CHOOSE_RANDOM = Капитан ^3%n^1 выбрал ^3%n^1 случайно!
+PLAYER_CHOOSE       = [^3%s^1] Капитан ^3%n^1 выбрал ^3%n^1.
+PLAYER_CHOOSE_PTS   = [^3%s^1] Капитан ^3%n^1 выбрал ^3%n^1 (^3%d^1 [^3%s^1]).
+PLAYER_CHOOSE_RANDOM = [^3%s^1] Капитан ^3%n^1 выбрал ^3%n^1 случайно!
 
 
 HUD_TIMETOWIN   = Последний раунд!^n ТТ Нужно %s чтобы победить!
@@ -336,6 +372,8 @@ HUD_PAUSE       = ИГРА ПРИОСТАНОВЛЕНА
 HUD_START_CAPKF = Начался ножевой раунд за выбор игроков!
 HUD_START_CAPBT = Начался батл раунд за выбор игроков!
 HUD_WAITPICK    = %n выбирает игрока, осталось %.f сек.
+HUD_CAPTAIN_LEAVE_WAIT = Капитан вышел! Ожидание %.f сек.
+HUD_KNIFEPB_STARTED = Ножевой Pick/Ban запущен.
 
 
 MENU_MIX_TITLE       = \rHide'n'Seek match system
@@ -345,10 +383,12 @@ MENU_MAIN_STOPCAP    = \rОстановить капитан мод
 MENU_MAIN_STOPCUSTOM = \rОстановить пользовательский мод
 MENU_MAIN_MIX        = Запустить микс
 MENU_MAIN_STOPMIX    = \rЗавершить микс
+MENU_MAIN_NOSTOPMIX  = \dЗавершить микс
 MENU_MAIN_STOPKF     = \rОстановить ножевой раунд^n
 MENU_MAIN_STOPRACE   = \rОстановить race битву^n
 MENU_MAIN_NOTSTARTKF = \dЗапустить ножевой раунд^n
 MENU_MAIN_STARTKF    = Запустить ножевой раунд^n
+MENU_MAIN_UNPAUSEKF  = Возобновить ножевой раунд
 MENU_MAIN_CUSTOM     = Запустить пользовательский мод^n
 MENU_MAIN_BLEND      = Смешать команды^n
 MENU_MAIN_PAUSE      = Приостановить микс^n
@@ -381,9 +421,9 @@ MENU_MODE_MR        = MR System
 MENU_MODE_WINTIME   = Wintime
 MENU_MODE_DUEL      = Duel
 
-VOTE_MR             = ^3%n^1 выбрал ^3MR^1!
-VOTE_WT             = ^3%n^1 выбрал ^3Wintime^1!
-VOTE_WIN            = Режим ^3%s^1 победил в голосовании!
+VOTE_MR             = [^3%s^1] ^3%n^1 выбрал ^3MR^1!
+VOTE_WT             = [^3%s^1] ^3%n^1 выбрал ^3Wintime^1!
+VOTE_WIN            = [^3%s^1] Режим ^3%s^1 победил в голосовании!
 
 MENU_VERIF_TITLE = \rМеню подтверждения^n^n\dВы уверены, что хотите остановить матч?
 

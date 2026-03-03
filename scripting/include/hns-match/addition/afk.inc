@@ -56,7 +56,7 @@ public taskCheckAfk() {
 			}
 		}
 		
-		chat_print(0, "%L", LANG_PLAYER, "AFK_PAUSE", iPlayersAfk);
+		client_print_color(0, print_team_blue, "%L", LANG_PLAYER, "AFK_PAUSE", g_iSettings[PREFIX], iPlayersAfk);
 		set_task(1.0, "taskAfk", .id = TASK_AFK, .flags = "b");
 	}
 }
@@ -100,7 +100,7 @@ public taskAfk() {
 		if (g_ModFuncs[g_iCurrentMode][MODEFUNC_UNPAUSE])
 			ExecuteForward(g_ModFuncs[g_iCurrentMode][MODEFUNC_UNPAUSE], _);
 			
-		chat_print(0, "%L", LANG_PLAYER, "AFK_UNPAUSE");
+		client_print_color(0, print_team_blue, "%L", LANG_PLAYER, "AFK_UNPAUSE", g_iSettings[PREFIX]);
 
 		if(task_exists(TASK_AFK))
 			remove_task(TASK_AFK);

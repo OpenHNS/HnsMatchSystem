@@ -101,7 +101,7 @@ public battlesmode_player_leave(id) {
 	if (g_iMatchStatus == MATCH_CAPTAINBATTLE) {
 		if (hns_is_user_role(id, ROLE_CAP_A) || hns_is_user_role(id, ROLE_CAP_B)) {
 			LogSendMessage("[MATCH] Player captain (%n) leave! (MATCH_CAPTAINBATTLE)", id);
-			chat_print(0, "Captain ^3%n^1 leave, stop captain battle mode.", id);
+			client_print_color(0, print_team_blue, "%L", LANG_PLAYER, "CAP_LEAVE_STOP_BATTLE", g_iSettings[PREFIX], id);
 			captain_stop();
 			training_start();
 		}

@@ -448,7 +448,7 @@ public menuSelectMode(id) {
 	}
 	
 	if (g_iCurrentMode == MODE_MIX) {
-		chat_print(id, "%L", id, "MODE_NOT_MIX");
+		client_print_color(id, print_team_blue, "%L", id, "MODE_NOT_MIX", g_iSettings[PREFIX]);
 		return PLUGIN_HANDLED;
 	}
 
@@ -550,10 +550,10 @@ public HandlerStartVoteRules(id, hMenu, item) {
 
 	if(index == 1) {
 		iVoteRules[RULES_MR]++;		
-		chat_print(0, "%l", "VOTE_MR", id);
+		client_print_color(0, print_team_blue, "%L", LANG_PLAYER, "VOTE_MR", g_iSettings[PREFIX], id);
 	} else {
 		iVoteRules[RULES_TIMER]++;
-		chat_print(0, "%l", "VOTE_WT", id);
+		client_print_color(0, print_team_blue, "%L", LANG_PLAYER, "VOTE_WT", g_iSettings[PREFIX], id);
 	}
 }
 
@@ -566,7 +566,7 @@ public VoteFinished() {
 		g_iCurrentRules = NATCH_RULES:random_num(0, 1);
 	}
 
-	chat_print(0, "%l", "VOTE_WIN", g_iCurrentRules == RULES_MR? "MR" : "Wintime");
+	client_print_color(0, print_team_blue, "%L", LANG_PLAYER, "VOTE_WIN", g_iSettings[PREFIX], g_iCurrentRules == RULES_MR? "MR" : "Wintime");
 	
 	iVoteRules[RULES_MR] = iVoteRules[RULES_TIMER] = 0;	
 }

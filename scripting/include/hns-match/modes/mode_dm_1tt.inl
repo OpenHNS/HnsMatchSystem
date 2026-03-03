@@ -118,7 +118,7 @@ stock dm_1tt_transfer_tt(iPrevTT) {
 
 	rg_set_user_team(iNextTT, TEAM_TERRORIST);
 	rg_set_user_team(iPrevTT, TEAM_CT);
-	chat_print(0, "%L", LANG_PLAYER, "DM_TRANSF", iNextTT);
+	client_print_color(0, print_team_blue, "%L", LANG_PLAYER, "DM_TRANSF", g_iSettings[PREFIX], iNextTT);
 
 	if (!g_iSettings[ONEHPMODE]) {
 		set_entvar(iNextTT, var_health, 100.0);

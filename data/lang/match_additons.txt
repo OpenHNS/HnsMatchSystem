@@ -68,6 +68,7 @@ TRNING_CLIP_OFF = %s No Clip ^3disabled^1!
 TRNING_INVIS_ON = %s Invis players ^3enabled^1!
 TRNING_INVIS_OFF = %s Invis players ^3disabled^1!
 TRNING_DMG = %s You have taken ^3%i^1 damage.
+TRNING_DMG_SPEC = %s ^3%n^1 have taken ^3%i^1 fall damage. HP left ^3%i^1.
 
 HNS_OWNAGE_MIX = %n owned %n's head! [#%d]
 HNS_OWNAGE = %n owned %n's head!
@@ -168,6 +169,10 @@ BATTLE_WIN_PLAYER = %n win battle!
 BATTLE_WIN_TEAM = Team ^3%s^1 win battle!
 BATTLE_TEAM_CTS = CTS
 BATTLE_TEAM_TERRORISTS = TERRORISTS
+BATTLE_MENU_FALLBACK = %s Battle menu canceled. Fallback to knife decide.
+BATTLE_RACE_TOP_1 = %s Race top: #1 ^3%n^1
+BATTLE_RACE_TOP_2 = %s Race top: #1 ^3%n^1, #2 ^3%n^1
+BATTLE_RACE_TOP_3 = %s Race top: #1 ^3%n^1, #2 ^3%n^1, #3 ^3%n^1
 
 CUP_NOT = This functionality is not available while Tournament Mode is enabled.
 
@@ -245,6 +250,7 @@ TRNING_CLIP_OFF = %s Ноклип ^3выключен^1!
 TRNING_INVIS_ON = %s Невидимые игроки ^3включено^1!
 TRNING_INVIS_OFF = %s Невидимые игроки ^3выключено^1!
 TRNING_DMG = %s Вы получили ^3%i^1 урона.
+TRNING_DMG_SPEC = %s ^3%n^1 получил ^3%i^1 урона от падения. Осталось HP: ^3%i^1.
 
 HNS_OWNAGE_MIX = %n запрыгнул на голову %n! [#%d]
 HNS_OWNAGE = %n запрыгнул на голову %n!
@@ -345,5 +351,9 @@ BATTLE_WIN_PLAYER = %n победил в батле!
 BATTLE_WIN_TEAM = Команда ^3%s^1 победила в батле!
 BATTLE_TEAM_CTS = КТ
 BATTLE_TEAM_TERRORISTS = ТЕРРОРИСТЫ
+BATTLE_MENU_FALLBACK = %s Меню батла закрыто. Возврат к ножевому выбору.
+BATTLE_RACE_TOP_1 = %s Топ race: #1 ^3%n^1
+BATTLE_RACE_TOP_2 = %s Топ race: #1 ^3%n^1, #2 ^3%n^1
+BATTLE_RACE_TOP_3 = %s Топ race: #1 ^3%n^1, #2 ^3%n^1, #3 ^3%n^1
 
 CUP_NOT = %s Данный функционал недоступен при включённом турнирном режиме.

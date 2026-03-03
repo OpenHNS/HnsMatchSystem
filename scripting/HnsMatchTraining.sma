@@ -435,7 +435,7 @@ public rgFlPlayerFallDamage(id) {
 		get_players(iPlayers, iNum, "ce", "SPECTATOR");
 		if (dmg >= 1.0) {
 			for (new i; i < iNum; i++) {
-				client_print_color(iPlayers[i], print_team_blue, "%s ^3%n^1 have taken ^3%i^1 fall damage. HP left ^3%i^1.", g_szPrefix, id, dmg, hpLeft);
+				client_print_color(iPlayers[i], print_team_blue, "%L", iPlayers[i], "TRNING_DMG_SPEC", g_szPrefix, id, dmg, hpLeft);
 			}
 		}
 	}

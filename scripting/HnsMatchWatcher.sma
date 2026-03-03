@@ -306,7 +306,7 @@ public ActivateWatcher(id) {
 
 public cmdRnw(id) {
 	if (hns_cup_enabled()) {
-		client_print_color(id, print_team_blue, "%L", LANG_PLAYER, "CUP_NOT", g_sPrefix);
+		client_print_color(id, print_team_blue, "%L", id, "CUP_NOT", g_sPrefix);
 		return PLUGIN_CONTINUE;
 	}
 
@@ -346,7 +346,7 @@ public cmdRnw(id) {
 
 public cmdUnRnw(id) {
 	if (hns_cup_enabled()) {
-		client_print_color(id, print_team_blue, "%L", LANG_PLAYER, "CUP_NOT", g_sPrefix);
+		client_print_color(id, print_team_blue, "%L", id, "CUP_NOT", g_sPrefix);
 		return PLUGIN_CONTINUE;
 	}
 

@@ -25,17 +25,6 @@ stock hns_swap_teams() {
 		ExecuteForward(g_ModFuncs[g_iCurrentMode][MODEFUNC_SWAP], _);
 }
 
-stock chat_print(const id, const message[], any:...) {
-	new msgFormated[191];
-
-	vformat(msgFormated, charsmax(msgFormated), message, 3);
-
-	if (!g_iSettings[PREFIX][0])
-		client_print_color(id, print_team_blue, "%s", msgFormated);
-	else
-		client_print_color(id, print_team_blue, "[^3%s^1] %s", g_iSettings[PREFIX], msgFormated);
-}
-
 stock set_semiclip(opt, bool:enemy = false) {
 	switch(opt) {
 		case SEMICLIP_ON: { 

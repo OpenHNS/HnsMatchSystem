@@ -206,7 +206,7 @@ stock MixFinishedPoints(HNS_TEAM:hns_team) {
 		iPlayerB = ttPlayers[0];
 	}
 
-	chat_print(0, "Points: ^3%n^1 ^4%.1f^1 vs ^4%.1f^1 ^3%n^1 | Winner: ^3%n^1 ^3%.1f^1", 
+	client_print_color(0, print_team_blue, "%L", LANG_PLAYER, "DUEL_POINTS_WINNER", g_iSettings[PREFIX],
 		iPlayerA, flScoreA, flScoreB, iPlayerB, 
 		hns_team == HNS_TEAM_A ? iPlayerA : iPlayerB,
 		hns_team == HNS_TEAM_A ? flScoreA : flScoreB);

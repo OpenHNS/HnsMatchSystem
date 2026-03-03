@@ -296,7 +296,7 @@ stock bool:checkUserBan() {
 
 		if (!e_bBanned[tempid]) continue;
 
-		chat_print(0, "%L", LANG_PLAYER, "BAN_PAUSE", tempid);
+		client_print_color(0, print_team_blue, "%L", LANG_PLAYER, "BAN_PAUSE", g_iSettings[PREFIX], tempid);
 		transferUserToSpec(tempid);
 		foundPlayerBanned = true;	
 	}

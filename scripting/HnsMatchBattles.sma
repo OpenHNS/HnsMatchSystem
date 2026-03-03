@@ -223,7 +223,7 @@ public RaceHandler(id, hMenu, item) {
 
 	if (item == MENU_EXIT) { 
 		if (g_bBattleMenuCaptain[id] && hns_get_mode() == MODE_TRAINING && hns_get_status() == MATCH_CAPTAINPICK) {
-			client_print_color(0, print_team_blue, "%s Battle menu canceled. Fallback to knife decide.", g_sPrefix);
+			client_print_color(0, print_team_blue, "%L", LANG_PLAYER, "BATTLE_MENU_FALLBACK", g_sPrefix);
 			hns_set_status(MATCH_CAPTAINKNIFE);
 			hns_set_mode(MODE_KNIFE);
 		}
@@ -424,7 +424,7 @@ public StartBattle(iArenaID) {
 	GetArenaName(iArenaID, szName, charsmax(szName));
 
 	if (g_eBattleData[BATTLE_INITIATOR]) {
-		client_print_color(0, print_team_blue, "%s %L", g_sPrefix, LANG_SERVER, "BATTLE_STARTED", g_eBattleData[BATTLE_INITIATOR], szName);
+		client_print_color(0, print_team_blue, "%s %L", g_sPrefix, LANG_PLAYER, "BATTLE_STARTED", g_eBattleData[BATTLE_INITIATOR], szName);
 	}
 
 	new iPlayers[MAX_PLAYERS], iNum;
@@ -525,14 +525,25 @@ public task_StartBattle() {
 	if (g_eBattleData[BATTLE_PREPARE]) {
 		new szCounter[16];
 
-		if (g_eBattleData[BATTLE_PREPARE] == 4) {
-			formatex(szCounter, charsmax(szCounter), "%L", LANG_SERVER, "BATTLE_HUD_FIGHT");
-		} else {
+		if (g_eBattleData[BATTLE_PREPARE] != 4) {
 			formatex(szCounter, charsmax(szCounter), "%d", 4 - g_eBattleData[BATTLE_PREPARE]);
 		}
 
 		set_dhudmessage(100, 100, 100, -1.0, 0.75, .holdtime = 1.0);
-		show_dhudmessage(0, "%L", LANG_SERVER, "BATTLE_HUD_TEXT", szCounter, "");
+
+		new iPlayers[MAX_PLAYERS], iNum;
+		get_players(iPlayers, iNum, "ch");
+		for (new i; i < iNum; i++) {
+			new id = iPlayers[i];
+			new szCounterPlayer[16];
+			if (g_eBattleData[BATTLE_PREPARE] == 4) {
+				formatex(szCounterPlayer, charsmax(szCounterPlayer), "%L", id, "BATTLE_HUD_FIGHT");
+			} else {
+				copy(szCounterPlayer, charsmax(szCounterPlayer), szCounter);
+			}
+
+			show_dhudmessage(id, "%L", id, "BATTLE_HUD_TEXT", szCounterPlayer, "");
+		}
 	}
 
 	new iSoundIndex = g_eBattleData[BATTLE_PREPARE];
@@ -1071,7 +1082,7 @@ CheckStatus(id, bool:is_finish) {
 		new TeamName:iWinnerTeam = TeamName:get_member(id, m_iTeam);
 		new bool:bRaceMode = (iStatus == MATCH_BATTLERACE);
 
-		client_print_color(0, print_team_blue, "%s %L", g_sPrefix, LANG_SERVER, "BATTLE_WIN_PLAYER", id);
+		client_print_color(0, print_team_blue, "%s %L", g_sPrefix, LANG_PLAYER, "BATTLE_WIN_PLAYER", id);
 		if (bRaceMode) {
 			PrintRacePlaces(id);
 		}
@@ -1148,11 +1159,11 @@ stock PrintRacePlaces(iFinishPlayer) {
 
 	new iTop = (iRankNum > 3) ? 3 : iRankNum;
 	if (iTop == 1) {
-		client_print_color(0, print_team_blue, "%s Race top: #1 ^3%n^1", g_sPrefix, iRankIds[0]);
+		client_print_color(0, print_team_blue, "%L", LANG_PLAYER, "BATTLE_RACE_TOP_1", g_sPrefix, iRankIds[0]);
 	} else if (iTop == 2) {
-		client_print_color(0, print_team_blue, "%s Race top: #1 ^3%n^1, #2 ^3%n^1", g_sPrefix, iRankIds[0], iRankIds[1]);
+		client_print_color(0, print_team_blue, "%L", LANG_PLAYER, "BATTLE_RACE_TOP_2", g_sPrefix, iRankIds[0], iRankIds[1]);
 	} else if (iTop == 3) {
-		client_print_color(0, print_team_blue, "%s Race top: #1 ^3%n^1, #2 ^3%n^1, #3 ^3%n^1", g_sPrefix, iRankIds[0], iRankIds[1], iRankIds[2]);
+		client_print_color(0, print_team_blue, "%L", LANG_PLAYER, "BATTLE_RACE_TOP_3", g_sPrefix, iRankIds[0], iRankIds[1], iRankIds[2]);
 	}
 }
 

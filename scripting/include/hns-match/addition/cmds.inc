@@ -74,9 +74,11 @@ public sayHandle(id) {
 		if (!isUserWatcher(id))
 			return PLUGIN_HANDLED;
 
-		if (is_str_num(szTarget)) {
+		replace(szTarget, charsmax(szTarget), ",", ".");
+
+		if (is_str_num(szTarget) || is_str_decimal(szTarget)) {
 			set_round_time(szTarget);
-			chat_print(0, "%l", "SET_ROUNDTIME", id, str_to_float(szTarget));
+			client_print_color(0, print_team_blue, "%L", LANG_PLAYER, "SET_ROUNDTIME", g_iSettings[PREFIX], id, str_to_float(szTarget));
 		}
 		return PLUGIN_CONTINUE;
 	}
@@ -92,7 +94,7 @@ public sayHandle(id) {
 
 		if (str_to_num(szTarget) > 0) {
 			g_iSettings[MAXROUNDS] = str_to_num(szTarget);
-			chat_print(0, "%l", "SET_MAXROUNDS", id, str_to_num(szTarget), str_to_num(szTarget) * 2);
+			client_print_color(0, print_team_blue, "%L", LANG_PLAYER, "SET_MAXROUNDS", g_iSettings[PREFIX], id, str_to_num(szTarget), str_to_num(szTarget) * 2);
 		}
 		return PLUGIN_CONTINUE;
 	}
@@ -110,7 +112,7 @@ public sayHandle(id) {
 			g_eMatchInfo[e_mWintime] = str_to_float(szTarget);
 			cvar_update_wintime(g_eMatchInfo[e_mWintime]);
 			
-			chat_print(0, "%l", "SET_WINTIME", id, str_to_num(szTarget));
+			client_print_color(0, print_team_blue, "%L", LANG_PLAYER, "SET_WINTIME", g_iSettings[PREFIX], id, str_to_num(szTarget));
 		}
 		return PLUGIN_CONTINUE;
 	}
@@ -130,12 +132,12 @@ public sayHandle(id) {
 		replace(szTarget, charsmax(szTarget), ".", " ");
 
 		if (parse(szTarget, szMinutes, charsmax(szMinutes), szSeconds, charsmax(szSeconds)) < 2) {
-			chat_print(id, "Неверный синтаксис. Пример: ^3/%s 15:43^1", bIsTT ? "tt" : "ct");
+			client_print_color(id, print_team_blue, "%L", id, "TIME_SYNTAX", g_iSettings[PREFIX], bIsTT ? "tt" : "ct");
 			return PLUGIN_HANDLED;
 		}
 
 		if (!szMinutes[0] || !szSeconds[0] || !is_str_num(szMinutes) || !is_str_num(szSeconds)) {
-			chat_print(id, "Неверный синтаксис. Пример: ^3/%s 15:43^1", bIsTT ? "tt" : "ct");
+			client_print_color(id, print_team_blue, "%L", id, "TIME_SYNTAX", g_iSettings[PREFIX], bIsTT ? "tt" : "ct");
 			return PLUGIN_HANDLED;
 		}
 
@@ -143,7 +145,7 @@ public sayHandle(id) {
 		new iSeconds = str_to_num(szSeconds);
 
 		if (iSeconds >= 60) {
-			chat_print(id, "Неверный синтаксис. Пример: ^3/%s 15:43^1", bIsTT ? "tt" : "ct");
+			client_print_color(id, print_team_blue, "%L", id, "TIME_SYNTAX", g_iSettings[PREFIX], bIsTT ? "tt" : "ct");
 			return PLUGIN_HANDLED;
 		}
 
@@ -159,9 +161,9 @@ public sayHandle(id) {
 		new szTime[8];
 		formatex(szTime, charsmax(szTime), "%02d:%02d", iMinutes, iSeconds);
 		if (bIsTT) {
-			chat_print(0, "^3%n^1 set ^3TT^1 time to ^3%s^1.", id, szTime)
+			client_print_color(0, print_team_blue, "%L", LANG_PLAYER, "SET_TT_TIME", g_iSettings[PREFIX], id, szTime);
 		} else {
-			chat_print(0, "^3%n^1 set ^3CT^1 time to ^3%s^1.", id, szTime);
+			client_print_color(0, print_team_blue, "%L", LANG_PLAYER, "SET_CT_TIME", g_iSettings[PREFIX], id, szTime);
 		}
 		return PLUGIN_CONTINUE;
 	}
@@ -182,16 +184,16 @@ public cmdMrMode(id) {
 	}
 
 	if (g_iCurrentRules == RULES_MR) {
-		chat_print(0, "%l", "MODE_ALREADY");
+		client_print_color(id, print_team_blue, "%L", id, "MODE_ALREADY", g_iSettings[PREFIX]);
 		return PLUGIN_HANDLED;
 	}
 
 	if (g_iCurrentMode == MODE_MIX) {
-		chat_print(0, "%l", "MODE_NOT_MIX");
+		client_print_color(id, print_team_blue, "%L", id, "MODE_NOT_MIX", g_iSettings[PREFIX]);
 		return PLUGIN_HANDLED;
 	}
 
-	chat_print(0, "%l", "MODE_SET_MR", id);
+	client_print_color(0, print_team_blue, "%L", LANG_PLAYER, "MODE_SET_MR", g_iSettings[PREFIX], id);
 	g_iCurrentRules = RULES_MR;
 
 	return PLUGIN_HANDLED;
@@ -203,16 +205,16 @@ public cmdWintimeMode(id) {
 	}
 
 	if (g_iCurrentRules == RULES_TIMER) {
-		chat_print(0, "%l", "MODE_ALREADY");
+		client_print_color(id, print_team_blue, "%L", id, "MODE_ALREADY", g_iSettings[PREFIX]);
 		return PLUGIN_HANDLED;
 	}
 
 	if (g_iCurrentMode == MODE_MIX) {
-		chat_print(0, "%l", "MODE_NOT_MIX");
+		client_print_color(id, print_team_blue, "%L", id, "MODE_NOT_MIX", g_iSettings[PREFIX]);
 		return PLUGIN_HANDLED;
 	}
 
-	chat_print(0, "%l", "MODE_SET_WT", id);
+	client_print_color(0, print_team_blue, "%L", LANG_PLAYER, "MODE_SET_WT", g_iSettings[PREFIX], id);
 	g_iCurrentRules = RULES_TIMER;
 
 	return PLUGIN_HANDLED;
@@ -224,21 +226,21 @@ public cmdDuelMode(id) {
 	}
 
 	if (g_iCurrentRules == RULES_DUEL) {
-		chat_print(0, "%l", "MODE_ALREADY");
+		client_print_color(id, print_team_blue, "%L", id, "MODE_ALREADY", g_iSettings[PREFIX]);
 		return PLUGIN_HANDLED;
 	}
 
 	if (g_iCurrentMode == MODE_MIX) {
-		chat_print(0, "%l", "MODE_NOT_MIX");
+		client_print_color(id, print_team_blue, "%L", id, "MODE_NOT_MIX", g_iSettings[PREFIX]);
 		return PLUGIN_HANDLED;
 	}
 
 	if (get_num_players_in_match() > 2) {
-		chat_print(0, "%l", "MODE_NOT_SET_DUEL");
+		client_print_color(id, print_team_blue, "%L", id, "MODE_NOT_SET_DUEL", g_iSettings[PREFIX]);
 		return PLUGIN_HANDLED;
 	}
 
-	chat_print(0, "%l", "MODE_SET_DUEL", id);
+	client_print_color(0, print_team_blue, "%L", LANG_PLAYER, "MODE_SET_DUEL", g_iSettings[PREFIX], id);
 	g_iCurrentRules = RULES_DUEL;
 
 	return PLUGIN_HANDLED;
@@ -250,16 +252,16 @@ public cmdPubMode(id) {
 	}
 
 	if (g_iCurrentMode == MODE_PUB) {
-		chat_print(id, "%L", id, "PUB_ALREADY");
+		client_print_color(id, print_team_blue, "%L", id, "PUB_ALREADY", g_iSettings[PREFIX]);
 		return PLUGIN_HANDLED;
 	}
 
 	if (g_iCurrentMode != MODE_TRAINING || g_iMatchStatus != MATCH_NONE) {
-		chat_print(id, "%L", id, "PUB_CANC");
+		client_print_color(id, print_team_blue, "%L", id, "PUB_CANC", g_iSettings[PREFIX]);
 		return PLUGIN_HANDLED;
 	}
 
-	chat_print(0, "%l", "PUB_ACTIVATED", id);
+	client_print_color(0, print_team_blue, "%L", LANG_PLAYER, "PUB_ACTIVATED", g_iSettings[PREFIX], id);
 
 	pub_start();
 
@@ -272,16 +274,16 @@ public cmdDMMode(id) {
 	}
 
 	if (g_iCurrentMode == MODE_DM) {
-		chat_print(id, "%L", id, "DM_ALREADY");
+		client_print_color(id, print_team_blue, "%L", id, "DM_ALREADY", g_iSettings[PREFIX]);
 		return PLUGIN_HANDLED;
 	}
 
 	if (g_iCurrentMode != MODE_TRAINING || g_iMatchStatus != MATCH_NONE) {
-		chat_print(id, "%L", id, "DM_CANC");
+		client_print_color(id, print_team_blue, "%L", id, "DM_CANC", g_iSettings[PREFIX]);
 		return PLUGIN_HANDLED;
 	}
 
-	chat_print(0, "%l", "DM_ACTIVATED", id);
+	client_print_color(0, print_team_blue, "%L", LANG_PLAYER, "DM_ACTIVATED", g_iSettings[PREFIX], id);
 
 	dm_start();
 
@@ -294,16 +296,16 @@ public cmdDM1TTMode(id) {
 	}
 
 	if (g_iCurrentMode == MODE_DM_1TT) {
-		chat_print(id, "%L", id, "DM_1TT_ALREADY");
+		client_print_color(id, print_team_blue, "%L", id, "DM_1TT_ALREADY", g_iSettings[PREFIX]);
 		return PLUGIN_HANDLED;
 	}
 
 	if (g_iCurrentMode != MODE_TRAINING || g_iMatchStatus != MATCH_NONE) {
-		chat_print(id, "%L", id, "DM_1TT_CANC");
+		client_print_color(id, print_team_blue, "%L", id, "DM_1TT_CANC", g_iSettings[PREFIX]);
 		return PLUGIN_HANDLED;
 	}
 
-	chat_print(0, "%l", "DM_1TT_ACTIVATED", id);
+	client_print_color(0, print_team_blue, "%L", LANG_PLAYER, "DM_1TT_ACTIVATED", g_iSettings[PREFIX], id);
 
 	dm_1tt_start();
 
@@ -316,16 +318,16 @@ public cmdZMMode(id) {
 	}
 
 	if (g_iCurrentMode == MODE_ZM) {
-		chat_print(id, "%L", id, "ZM_ALREADY");
+		client_print_color(id, print_team_blue, "%L", id, "ZM_ALREADY", g_iSettings[PREFIX]);
 		return PLUGIN_HANDLED;
 	}
 
 	if (g_iCurrentMode != MODE_TRAINING || g_iMatchStatus != MATCH_NONE) {
-		chat_print(id, "%L", id, "ZM_CANC");
+		client_print_color(id, print_team_blue, "%L", id, "ZM_CANC", g_iSettings[PREFIX]);
 		return PLUGIN_HANDLED;
 	}
 
-	chat_print(0, "%l", "ZM_ACTIVATED", id);
+	client_print_color(0, print_team_blue, "%L", LANG_PLAYER, "ZM_ACTIVATED", g_iSettings[PREFIX], id);
 
 	zm_start();
 
@@ -338,13 +340,13 @@ public cmdBlend(id) {
 	}
 
 	if (g_iCurrentMode == MODE_ZM) {
-		chat_print(0, "%l", "BLEND_TEAMS", id);
+		client_print_color(0, print_team_blue, "%L", LANG_PLAYER, "BLEND_TEAMS", g_iSettings[PREFIX], id);
 		blendZM();
 		return PLUGIN_HANDLED; 
 	}
 
 	if (g_iCurrentMode == MODE_DM_1TT) {
-		chat_print(0, "%l", "BLEND_TEAMS", id);
+		client_print_color(0, print_team_blue, "%L", LANG_PLAYER, "BLEND_TEAMS", g_iSettings[PREFIX], id);
 		dm_1tt_set_teams();
 		hns_restart_round();
 		return PLUGIN_HANDLED;
@@ -354,7 +356,7 @@ public cmdBlend(id) {
 		return PLUGIN_HANDLED;
 	}
 
-	chat_print(0, "%l", "BLEND_TEAMS", id);
+	client_print_color(0, print_team_blue, "%L", LANG_PLAYER, "BLEND_TEAMS", g_iSettings[PREFIX], id);
 
 	new Players[MAX_PLAYERS], Num;
 	get_players(Players, Num, "ch");
@@ -394,7 +396,7 @@ public cmdTransferSpec(id) {
 		return PLUGIN_HANDLED;
 	}
 
-	chat_print(0, "%l", "TRANSF_SPEC", id);
+	client_print_color(0, print_team_blue, "%L", LANG_PLAYER, "TRANSF_SPEC", g_iSettings[PREFIX], id);
 
 	transferUsers(TEAM_SPECTATOR);
 	
@@ -410,7 +412,7 @@ public cmdTransferTT(id) {
 		return PLUGIN_HANDLED;
 	}
 
-	chat_print(0, "%l", "TRANSF_TT", id);
+	client_print_color(0, print_team_blue, "%L", LANG_PLAYER, "TRANSF_TT", g_iSettings[PREFIX], id);
 
 	transferUsers(TEAM_TERRORIST);
 
@@ -426,7 +428,7 @@ public cmdTransferCT(id) {
 		return PLUGIN_HANDLED;
 	}
 
-	chat_print(0, "%l", "TRANSF_CT", id);
+	client_print_color(0, print_team_blue, "%L", LANG_PLAYER, "TRANSF_CT", g_iSettings[PREFIX], id);
 
 	transferUsers(TEAM_CT);
 
@@ -439,7 +441,7 @@ public cmdStartMatch(id) {
 	}
 
 	if (g_iCurrentMode != MODE_TRAINING) {
-		chat_print(id, "%L", id, "NOT_START_MIX");
+		client_print_color(id, print_team_blue, "%L", id, "NOT_START_MIX", g_iSettings[PREFIX]);
 		return PLUGIN_HANDLED;
 	} 
 	
@@ -459,7 +461,7 @@ public cmdStartMatch(id) {
 		remove_task(TASK_WAIT_CUP);
 	}
 
-	chat_print(0, "%l", "START_MIX", id);
+	client_print_color(0, print_team_blue, "%L", LANG_PLAYER, "START_MIX", g_iSettings[PREFIX], id);
 
 	mix_start();
 
@@ -472,16 +474,16 @@ public cmdKnifeRound(id) {
 	}
 
 	if (g_iCurrentMode != MODE_TRAINING) {
-		chat_print(id, "%L", id, "NOT_START_KNIFE");
+		client_print_color(id, print_team_blue, "%L", id, "NOT_START_KNIFE", g_iSettings[PREFIX]);
 		return PLUGIN_HANDLED;
 	}
 
 	if (g_iMatchStatus == MATCH_CAPTAINKNIFE || g_iMatchStatus == MATCH_CAPTAINBATTLE || g_iMatchStatus == MATCH_TEAMKNIFE || g_iMatchStatus == MATCH_TEAMBATTLE || g_iMatchStatus == MATCH_BATTLERACE || g_iMatchStatus == MATCH_CUPKNIFE) {
-		chat_print(id, "%L", id, "KNIFE_ALREADY");
+		client_print_color(id, print_team_blue, "%L", id, "KNIFE_ALREADY", g_iSettings[PREFIX]);
 		return PLUGIN_HANDLED;
 	}
 
-	chat_print(id, "%L", id, "START_KNIFE_1", id);
+	client_print_color(id, print_team_blue, "%L", id, "START_KNIFE_1", g_iSettings[PREFIX], id);
 
 	g_iMatchStatus = MATCH_TEAMKNIFE;
 	kniferound_start();
@@ -495,16 +497,16 @@ public cmdKnifePickBan(id) {
 	}
 
 	if (g_iCurrentMode != MODE_TRAINING) {
-		chat_print(id, "Пожалуйста, отключите другой режим перед запуском ножевого Pick/Ban.");
+		client_print_color(id, print_team_blue, "%L", id, "KNIFEPB_NOTRAIN", g_iSettings[PREFIX]);
 		return PLUGIN_HANDLED;
 	}
 
 	if (g_iMatchStatus == MATCH_CAPTAINKNIFE || g_iMatchStatus == MATCH_CAPTAINBATTLE || g_iMatchStatus == MATCH_TEAMKNIFE || g_iMatchStatus == MATCH_TEAMBATTLE || g_iMatchStatus == MATCH_BATTLERACE || g_iMatchStatus == MATCH_CUPKNIFE) {
-		chat_print(id, "Ножевой раунд Pick/Ban уже запущен.");
+		client_print_color(id, print_team_blue, "%L", id, "KNIFEPB_ALREADY", g_iSettings[PREFIX]);
 		return PLUGIN_HANDLED;
 	}
 
-	chat_print(id, "^3%n^1 запустил ^3ножевой Pick/Ban^1 раунд!", id);
+	client_print_color(id, print_team_blue, "%L", id, "KNIFEPB_STARTED_BY", g_iSettings[PREFIX], id);
 
 	g_iMatchStatus = MATCH_CUPKNIFE;
 	kniferound_start();
@@ -518,12 +520,12 @@ public cmdCaptain(id) {
 	}
 
 	if (g_iCurrentMode == MODE_BATTLES && g_iMatchStatus == MATCH_BATTLERACE) {
-		chat_print(id, "%L", id, "RACE_ACTIVE_STOP");
+		client_print_color(id, print_team_blue, "%L", id, "RACE_ACTIVE_STOP", g_iSettings[PREFIX]);
 		return PLUGIN_HANDLED;
 	}
 
 	if (!hns_is_knife_map()) {
-		chat_print(id, "%L", id, "NOT_CAPTAIN");
+		client_print_color(id, print_team_blue, "%L", id, "NOT_CAPTAIN", g_iSettings[PREFIX]);
 		return PLUGIN_HANDLED;
 	}
 
@@ -532,7 +534,7 @@ public cmdCaptain(id) {
 	}
 
 	// if (g_iCurrentMode != MODE_TRAINING) {
-	// 	chat_print(id, "Отключите другой режим.");
+	// 	client_print_color(id, print_team_blue, "[^3%s^1] Отключите другой режим.", g_iSettings[PREFIX]);
 	// }
 
 	captain_start(id);
@@ -579,16 +581,16 @@ public cmdStop(id) {
 	switch (g_iCurrentMode) {
 		case MODE_MIX: {
 			mix_stop();	
-			chat_print(0, "%l", "STOP_MIX", id);
+			client_print_color(0, print_team_blue, "%L", LANG_PLAYER, "STOP_MIX", g_iSettings[PREFIX], id);
 		}
 		case MODE_KNIFE: {
 			if (g_iMatchStatus == MATCH_CAPTAINKNIFE) {
 				resetCaptainData();
-				chat_print(0, "%l", "STOP_CAP", id);
+				client_print_color(0, print_team_blue, "%L", LANG_PLAYER, "STOP_CAP", g_iSettings[PREFIX], id);
 			} else if (g_iMatchStatus == MATCH_CUPKNIFE) {
 				// TODO: Стоп cup knife
 			} else {
-				chat_print(0, "%l", "STOP_KNIFE", id);
+				client_print_color(0, print_team_blue, "%L", LANG_PLAYER, "STOP_KNIFE", g_iSettings[PREFIX], id);
 			}
 			kniferound_stop();
 		}
@@ -597,13 +599,13 @@ public cmdStop(id) {
 				resetCaptainData();
 				g_iMatchStatus = MATCH_NONE;
 				training_start();
-				chat_print(0, "%l", "STOP_CAP", id);
+				client_print_color(0, print_team_blue, "%L", LANG_PLAYER, "STOP_CAP", g_iSettings[PREFIX], id);
 			} else if (g_iMatchStatus == MATCH_BATTLERACE) {
 				if (hns_battle_init()) {
 					hns_battle_end(true);
 				}
 				g_iMatchStatus = MATCH_NONE;
-				chat_print(0, "%l", "STOP_RACE", id);
+				client_print_color(0, print_team_blue, "%L", LANG_PLAYER, "STOP_RACE", g_iSettings[PREFIX], id);
 			} else if (g_iMatchStatus == MATCH_CUPPICK) {
 				// TODO: Стоп cup pick ban
 				hns_cup_stop_veto();
@@ -622,9 +624,9 @@ public cmdStop(id) {
 
 			if (iPrevStatus == MATCH_CAPTAINBATTLE) {
 				resetCaptainData();
-				chat_print(0, "%l", "STOP_CAP", id);
+				client_print_color(0, print_team_blue, "%L", LANG_PLAYER, "STOP_CAP", g_iSettings[PREFIX], id);
 			} else {
-				chat_print(0, "%l", "STOP_RACE", id);
+				client_print_color(0, print_team_blue, "%L", LANG_PLAYER, "STOP_RACE", g_iSettings[PREFIX], id);
 			}
 
 			g_iMatchStatus = MATCH_NONE;
@@ -632,19 +634,19 @@ public cmdStop(id) {
 		}
 		case MODE_PUB: {
 			training_start();
-			chat_print(0, "%l", "STOP_PUB", id);
+			client_print_color(0, print_team_blue, "%L", LANG_PLAYER, "STOP_PUB", g_iSettings[PREFIX], id);
 		}
 		case MODE_DM: {
 			training_start();
-			chat_print(0, "%l", "STOP_DM", id);
+			client_print_color(0, print_team_blue, "%L", LANG_PLAYER, "STOP_DM", g_iSettings[PREFIX], id);
 		}
 		case MODE_DM_1TT: {
 			training_start();
-			chat_print(0, "%l", "STOP_DM_1TT", id);
+			client_print_color(0, print_team_blue, "%L", LANG_PLAYER, "STOP_DM_1TT", g_iSettings[PREFIX], id);
 		}
 		case MODE_ZM: {
 			training_start();
-			chat_print(0, "%l", "STOP_ZM", id);
+			client_print_color(0, print_team_blue, "%L", LANG_PLAYER, "STOP_ZM", g_iSettings[PREFIX], id);
 		}
 	}
 
@@ -662,7 +664,7 @@ public cmdSkillMode(id) {
 		return PLUGIN_HANDLED;
 	}
 
-	chat_print(0, "%l", "TYPE_SKILL", id);
+	client_print_color(0, print_team_blue, "%L", LANG_PLAYER, "TYPE_SKILL", g_iSettings[PREFIX], id);
 
 	if (g_iCurrentMode == MODE_MIX) {
 		set_cvar_num("mp_freezetime", 5);
@@ -689,7 +691,7 @@ public cmdBoostMode(id) {
 		return PLUGIN_HANDLED;
 	}
 
-	chat_print(0, "%l", "TYPE_BOOST", id);
+	client_print_color(0, print_team_blue, "%L", LANG_PLAYER, "TYPE_BOOST", g_iSettings[PREFIX], id);
 
 	if (g_iCurrentMode == MODE_MIX) {
 		set_cvar_num("mp_freezetime", 15);
@@ -709,7 +711,7 @@ public cmdRestartRound(id) {
 		return PLUGIN_HANDLED;
 	}
 
-	chat_print(0, "%l", "GAME_RESTART", id);
+	client_print_color(0, print_team_blue, "%L", LANG_PLAYER, "GAME_RESTART", g_iSettings[PREFIX], id);
 
 	hns_restart_round();
 
@@ -725,7 +727,7 @@ public cmdSwapTeams(id) {
 		return PLUGIN_HANDLED;
 	}
 
-	chat_print(0, "%l", "GAME_SWAP", id);
+	client_print_color(0, print_team_blue, "%L", LANG_PLAYER, "GAME_SWAP", g_iSettings[PREFIX], id);
 
 	if (g_iCurrentMode == MODE_MIX) {
 		mix_reverttimer(); // TODO: Доработать
@@ -750,7 +752,7 @@ public cmdStartPause(id) {
 	if (g_ModFuncs[g_iCurrentMode][MODEFUNC_PAUSE])
 		ExecuteForward(g_ModFuncs[g_iCurrentMode][MODEFUNC_PAUSE], _);
 
-	chat_print(0, "%l", "GAME_PAUSED", id);
+	client_print_color(0, print_team_blue, "%L", LANG_PLAYER, "GAME_PAUSED", g_iSettings[PREFIX], id);
 
 	return PLUGIN_HANDLED;
 }
@@ -767,7 +769,7 @@ public cmdStopPause(id) {
 	if (g_ModFuncs[g_iCurrentMode][MODEFUNC_UNPAUSE])
 		ExecuteForward(g_ModFuncs[g_iCurrentMode][MODEFUNC_UNPAUSE], _);
 
-	chat_print(0, "%l", "GAME_UNPAUSED", id);
+	client_print_color(0, print_team_blue, "%L", LANG_PLAYER, "GAME_UNPAUSED", g_iSettings[PREFIX], id);
 
 	return PLUGIN_HANDLED;
 }
@@ -788,7 +790,7 @@ public cmdSurrender(id) {
 	if (g_eSurrenderData[e_sFlDelay] > get_gametime()) {
 		new szTime[24];
 		fnConvertTime(g_eSurrenderData[e_sFlDelay] - get_gametime(), szTime, 23, false);
-		chat_print(id, "%L", id, "SUR_WAIT", szTime);
+		client_print_color(id, print_team_blue, "%L", id, "SUR_WAIT", g_iSettings[PREFIX], szTime);
 		return PLUGIN_HANDLED;
 	}
 
@@ -801,7 +803,7 @@ public cmdSurrender(id) {
 	g_eSurrenderData[e_sStarted] = true;
 	g_eSurrenderData[e_sInitiator] = id;
 	g_eSurrenderData[e_sFlDelay] = get_gametime() + g_iSettings[SURTIMEDELAY];
-	chat_print(0, "%l", "SUR_PLAYER", id, getUserTeam(id) == TEAM_TERRORIST ? "TERRORISTS" : "CTS");
+	client_print_color(0, print_team_blue, "%L", LANG_PLAYER, "SUR_PLAYER", g_iSettings[PREFIX], id, getUserTeam(id) == TEAM_TERRORIST ? "TERRORISTS" : "CTS");
 
 	for (new i; i < iNum; i++) {
 		new iPlayer = iPlayers[i];
@@ -831,12 +833,12 @@ public cmdShowTimers(id) {
 			get_players(iPlayers, TTsize, "che", "TERRORIST");
 			get_players(iPlayers, CTSize, "che", "CT");
 			if (g_isTeamTT == HNS_TEAM_A) {
-				chat_print(id, "%L", id, "SCORE_TIME",
+				client_print_color(id, print_team_blue, "%L", id, "SCORE_TIME", g_iSettings[PREFIX],
 					szTimeToWin[HNS_TEAM_A], TTsize, CTSize, szTimeToWin[HNS_TEAM_B],
 					(g_eMatchInfo[e_iSidesRounds][HNS_TEAM_A] + g_eMatchInfo[e_iSidesRounds][HNS_TEAM_B]) + 1, g_iSettings[MAXROUNDS] * 2,
 					szTimeDiff);
 			} else {
-				chat_print(id, "%L", id, "SCORE_TIME",
+				client_print_color(id, print_team_blue, "%L", id, "SCORE_TIME", g_iSettings[PREFIX],
 					szTimeToWin[HNS_TEAM_B], TTsize, CTSize, szTimeToWin[HNS_TEAM_A],
 					(g_eMatchInfo[e_iSidesRounds][HNS_TEAM_B] + g_eMatchInfo[e_iSidesRounds][HNS_TEAM_A]) + 1, g_iSettings[MAXROUNDS] * 2,
 					szTimeDiff);
@@ -849,9 +851,9 @@ public cmdShowTimers(id) {
 			fnConvertTime(flTimeToWinA, szTimeToWin[HNS_TEAM_A], 23);
 			fnConvertTime(flTimeToWinB, szTimeToWin[HNS_TEAM_B], 23);
 			if (g_isTeamTT == HNS_TEAM_A) {
-				chat_print(id, "%L", id, "SCORE_TIME_WT", szTimeToWin[HNS_TEAM_A], szTimeToWin[HNS_TEAM_B], szTimeDiff);
+				client_print_color(id, print_team_blue, "%L", id, "SCORE_TIME_WT", g_iSettings[PREFIX], szTimeToWin[HNS_TEAM_A], szTimeToWin[HNS_TEAM_B], szTimeDiff);
 			} else {
-				chat_print(id, "%L", id, "SCORE_TIME_WT", szTimeToWin[HNS_TEAM_B], szTimeToWin[HNS_TEAM_A], szTimeDiff);
+				client_print_color(id, print_team_blue, "%L", id, "SCORE_TIME_WT", g_iSettings[PREFIX], szTimeToWin[HNS_TEAM_B], szTimeToWin[HNS_TEAM_A], szTimeDiff);
 			}
 		}
 		case RULES_DUEL: {
@@ -874,7 +876,7 @@ public cmdShowTimers(id) {
 			new szTime[24];
 			fnConvertTime(g_flPointsMatchTime, szTime, charsmax(szTime), false);
 			
-			chat_print(id, "Points: ^3%n^1 ^4%.1f^1 vs ^4%.1f^1 ^3%n^1 | Time: ^3%s", iPlayerA, flScoreA, flScoreB, iPlayerB, szTime);
+			client_print_color(id, print_team_blue, "%L", id, "DUEL_POINTS_TIME", g_iSettings[PREFIX], iPlayerA, flScoreA, flScoreB, iPlayerB, szTime);
 		}
 	}
 
@@ -917,14 +919,14 @@ public cmdTeamSpec(id) {
 public cmdNoplay(id) {
 	if (!g_bNoplay[id]) {
 		g_bNoplay[id] = true;
-		chat_print(0, "%l", "STATUS_NOPLAY", id);
+		client_print_color(0, print_team_blue, "%L", LANG_PLAYER, "STATUS_NOPLAY", g_iSettings[PREFIX], id);
 	}
 }
 
 public cmdPlay(id) {
 	if (g_bNoplay[id]) {
 		g_bNoplay[id] = false;
-		chat_print(0, "%l", "STATUS_PLAY", id);
+		client_print_color(0, print_team_blue, "%L", LANG_PLAYER, "STATUS_PLAY", g_iSettings[PREFIX], id);
 	}
 }
 
@@ -957,4 +959,28 @@ stock RegisterSayCmd(const szCmd[], const szShort[], const szFunc[], flags = -1,
 	register_clcmd(szTemp, szFunc, flags, szInfoLang);
 
 	return 1;
+}
+
+stock bool:is_str_decimal(const szValue[]) {
+	new iLen = strlen(szValue);
+	if (iLen < 3) {
+		return false;
+	}
+
+	new iDotPos = contain(szValue, ".");
+	if (iDotPos <= 0 || iDotPos >= iLen - 1) {
+		return false;
+	}
+
+	for (new i; i < iLen; i++) {
+		if (i == iDotPos) {
+			continue;
+		}
+
+		if (szValue[i] < '0' || szValue[i] > '9') {
+			return false;
+		}
+	}
+
+	return true;
 }
