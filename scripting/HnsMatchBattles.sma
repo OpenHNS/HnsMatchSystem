@@ -1035,9 +1035,12 @@ stock PrintRacePlaces(iFinishPlayer) {
 	}
 
 	new iTop = (iRankNum > 3) ? 3 : iRankNum;
-	client_print_color(0, print_team_blue, "%s Race top by distance to finish:", g_sPrefix);
-	for (new i; i < iTop; i++) {
-		client_print_color(0, print_team_blue, "%s #%d %n (%d units)", g_sPrefix, i + 1, iRankIds[i], iRankDist[i]);
+	if (iTop == 1) {
+		client_print_color(0, print_team_blue, "%s Race top: #1 ^3%n^1", g_sPrefix, iRankIds[0]);
+	} else if (iTop == 2) {
+		client_print_color(0, print_team_blue, "%s Race top: #1 ^3%n^1, #2 ^3%n^1", g_sPrefix, iRankIds[0], iRankIds[1]);
+	} else if (iTop == 3) {
+		client_print_color(0, print_team_blue, "%s Race top: #1 ^3%n^1, #2 ^3%n^1, #3 ^3%n^1", g_sPrefix, iRankIds[0], iRankIds[1], iRankIds[2]);
 	}
 }
 
