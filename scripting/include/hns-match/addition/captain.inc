@@ -283,7 +283,7 @@ public pickMenu(id, bool:bStartWait) {
 	new iPlayers[MAX_PLAYERS], iNum, szPlayer[10], iPlayer;
 	get_players(iPlayers, iNum, "che", "SPECTATOR");
 
-	new szBuffer[256];
+	new szBuffer[256], iAdded;
 	for (new i; i < iNum; i++) {
 		iPlayer = iPlayers[i];
 
@@ -322,7 +322,14 @@ public pickMenu(id, bool:bStartWait) {
 		}	
 
 		menu_additem(hMenu, szBuffer, szPlayer);
+		iAdded++;
 		szBuffer = "";
+	}
+
+	if (!iAdded) {
+		menu_destroy(hMenu);
+		checkFullTeams();
+		return PLUGIN_HANDLED;
 	}
 
 	menu_setprop(hMenu, MPROP_EXITNAME, "Refresh");
@@ -473,10 +480,6 @@ public wait_function(id) {
 			if (task_exists(TASK_WAITCAP)) {
 				remove_task(TASK_WAITCAP)
 			}
-
-			checkFullTeams();
-
-			pickMenu(g_iCaptainPick, true);
 
 			return;
 
