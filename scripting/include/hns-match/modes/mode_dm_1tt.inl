@@ -1,6 +1,7 @@
 public dm_1tt_init() {
 	g_ModFuncs[MODE_DM_1TT][MODEFUNC_KILL] = CreateOneForward(g_PluginId, "dm_1tt_killed", FP_CELL, FP_CELL);
 	g_ModFuncs[MODE_DM_1TT][MODEFUNC_FALLDAMAGE] = CreateOneForward(g_PluginId, "dm_1tt_falldamage", FP_CELL, FP_FLOAT);
+	g_ModFuncs[MODE_DM_1TT][MODEFUNC_ROUNDSTART] = CreateOneForward(g_PluginId, "dm_1tt_roundstart");
 	g_ModFuncs[MODE_DM_1TT][MODEFUNC_PLAYER_JOIN] = CreateOneForward(g_PluginId, "dm_1tt_player_join", FP_CELL);
 	g_ModFuncs[MODE_DM_1TT][MODEFUNC_PLAYER_LEAVE] = CreateOneForward(g_PluginId, "dm_1tt_player_leave", FP_CELL);
 }
@@ -15,6 +16,10 @@ public dm_1tt_start() {
 
 	dm_1tt_set_teams();
 	hns_restart_round(0.5);
+}
+
+public dm_1tt_roundstart() {
+	dm_1tt_set_teams();
 }
 
 public dm_1tt_killed(victim, killer) {
