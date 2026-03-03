@@ -38,6 +38,12 @@ enum _: ArenaInfo_s {
 const ARENA_TYPE_RACE = (1 << 0);
 const ARENA_TYPE_TELEPORT = (1 << 1);
 const ARENA_TYPE_ALL = ARENA_TYPE_RACE | ARENA_TYPE_TELEPORT;
+new const DEFAULT_RACE_ENT_CLASS[] = "info_teleport_destination";
+new const DEFAULT_TELEPORT_ENT_CLASS[] = "info_target";
+new const DEFAULT_FINISH_FAIL_ENT_CLASS[] = "trigger_multiple";
+new const DEFAULT_BLOCK_ENT_CLASS[] = "func_wall";
+new const DEFAULT_FINISH_PREFIX[] = "finish_";
+new const DEFAULT_FAIL_PREFIX[] = "fail_";
 
 new g_sPrefix[24], g_szMap[32];
 new g_eBattleData[BattleData_s];
@@ -49,6 +55,12 @@ new g_hForwardBattleFinished;
 
 new Array:g_aArenas;
 new bool:g_bArenasLoaded;
+new g_szRaceEntClass[32];
+new g_szTeleportEntClass[32];
+new g_szFinishFailEntClass[32];
+new g_szBlockEntClass[32];
+new g_szFinishPrefix[32];
+new g_szFailPrefix[32];
 
 public plugin_precache() {
 	for (new i; i < sizeof(g_szSounds); i++)
@@ -668,6 +680,8 @@ stock bool:is_battle_context() {
 // ======== Конфиг: загрузка секции текущей карты ========
 stock LoadArenasFromIni()
 {
+	ResetArenaEntityClasses();
+
 	if (!is_knife_map_safe()) {
 		if (g_aArenas) {
 			ArrayClear(g_aArenas);
@@ -689,7 +703,13 @@ stock LoadArenasFromIni()
 		return;
 	}
 
-	new line[192], curSection[64], bool:sectionMatched, iSectionTypeMask;
+	enum {
+		SECTION_NONE = 0,
+		SECTION_ARENAS,
+		SECTION_TRIGGERS
+	};
+
+	new line[192], curSection[64], iSectionKind, iSectionTypeMask;
 	while (!feof(file)) {
 		fgets(file, line, charsmax(line));
 		trim(line);
@@ -699,7 +719,7 @@ stock LoadArenasFromIni()
 		if (line[0] == '[') {
 			new close = contain(line, "]");
 			if (close == -1) {
-				sectionMatched = false;
+				iSectionKind = SECTION_NONE;
 				iSectionTypeMask = 0;
 				continue;
 			}
@@ -708,11 +728,23 @@ stock LoadArenasFromIni()
 			trim(curSection);
 			
 			iSectionTypeMask = GetArenaSectionType(curSection);
-			sectionMatched = iSectionTypeMask != 0;
+			if (iSectionTypeMask != 0) {
+				iSectionKind = SECTION_ARENAS;
+				continue;
+			}
+
+			if (IsTriggersSection(curSection)) {
+				iSectionKind = SECTION_TRIGGERS;
+				continue;
+			}
+
+			iSectionKind = SECTION_NONE;
 			continue;
 		}
 
-		if (!sectionMatched) continue;
+		if (iSectionKind == SECTION_NONE) {
+			continue;
+		}
 
 		new posEq = contain(line, "=");
 		if (posEq == -1) continue;
@@ -724,6 +756,13 @@ stock LoadArenasFromIni()
 		new right[64];
 		copy(right, charsmax(right), line[posEq + 1]);
 		trim(right);
+
+		if (iSectionKind == SECTION_TRIGGERS) {
+			if (left[0] && right[0]) {
+				ApplyTriggersConfig(left, right);
+			}
+			continue;
+		}
 
 		if (!left[0] || !right[0]) continue;
 
@@ -769,17 +808,26 @@ stock FindArenas() {
 }
 
 stock FindArenaEntByType(iArenaType, const szTargetName[]) {
-	// :teleports -> info_target
+	// :teleports -> info_target (or value from [map:triggers]).
 	if (iArenaType == ARENA_TYPE_TELEPORT) {
-		return FindEntByTargetName("info_target", szTargetName);
+		return FindEntByTargetName(g_szTeleportEntClass, szTargetName);
 	}
 
-	// :races -> info_teleport_destination
+	// :races -> info_teleport_destination (or value from [map:triggers]).
 	if (iArenaType == ARENA_TYPE_RACE) {
-		return FindEntByTargetName("info_teleport_destination", szTargetName);
+		return FindEntByTargetName(g_szRaceEntClass, szTargetName);
 	}
 
 	return 0;
+}
+
+stock ResetArenaEntityClasses() {
+	copy(g_szRaceEntClass, charsmax(g_szRaceEntClass), DEFAULT_RACE_ENT_CLASS);
+	copy(g_szTeleportEntClass, charsmax(g_szTeleportEntClass), DEFAULT_TELEPORT_ENT_CLASS);
+	copy(g_szFinishFailEntClass, charsmax(g_szFinishFailEntClass), DEFAULT_FINISH_FAIL_ENT_CLASS);
+	copy(g_szBlockEntClass, charsmax(g_szBlockEntClass), DEFAULT_BLOCK_ENT_CLASS);
+	copy(g_szFinishPrefix, charsmax(g_szFinishPrefix), DEFAULT_FINISH_PREFIX);
+	copy(g_szFailPrefix, charsmax(g_szFailPrefix), DEFAULT_FAIL_PREFIX);
 }
 
 stock FindEntByTargetName(const szClassName[], const szTargetName[]) {
@@ -901,6 +949,70 @@ stock GetArenaSectionType(const szSection[]) {
 	return 0;
 }
 
+stock bool:IsTriggersSection(const szSection[]) {
+	new szMapSection[64], szCategory[32];
+	copy(szMapSection, charsmax(szMapSection), szSection);
+
+	new iColonPos = contain(szMapSection, ":");
+	if (iColonPos < 0) {
+		return false;
+	}
+
+	copy(szCategory, charsmax(szCategory), szMapSection[iColonPos + 1]);
+	szMapSection[iColonPos] = 0;
+	trim(szMapSection);
+	trim(szCategory);
+
+	return equali(szMapSection, g_szMap) && equali(szCategory, "triggers");
+}
+
+stock ApplyTriggersConfig(const szKey[], const szValue[]) {
+	if (equali(szKey, "races") || equali(szKey, "race")) {
+		copy(g_szRaceEntClass, charsmax(g_szRaceEntClass), szValue);
+		log_amx("[HNS] Trigger class for races on '%s': %s", g_szMap, g_szRaceEntClass);
+		return;
+	}
+
+	if (equali(szKey, "teleports") || equali(szKey, "teleport")) {
+		copy(g_szTeleportEntClass, charsmax(g_szTeleportEntClass), szValue);
+		log_amx("[HNS] Trigger class for teleports on '%s': %s", g_szMap, g_szTeleportEntClass);
+		return;
+	}
+
+	if (equali(szKey, "finish_fail_class")
+	|| equali(szKey, "race_trigger_class")
+	|| equali(szKey, "trigger_multiple_class")) {
+		copy(g_szFinishFailEntClass, charsmax(g_szFinishFailEntClass), szValue);
+		log_amx("[HNS] Trigger class for finish/fail on '%s': %s", g_szMap, g_szFinishFailEntClass);
+		return;
+	}
+
+	if (equali(szKey, "block_class")
+	|| equali(szKey, "block_trigger_class")
+	|| equali(szKey, "func_wall_class")) {
+		copy(g_szBlockEntClass, charsmax(g_szBlockEntClass), szValue);
+		log_amx("[HNS] Trigger class for blocks on '%s': %s", g_szMap, g_szBlockEntClass);
+		return;
+	}
+
+	if (equali(szKey, "finish_prefix")) {
+		copy(g_szFinishPrefix, charsmax(g_szFinishPrefix), szValue);
+		log_amx("[HNS] Trigger finish prefix on '%s': %s", g_szMap, g_szFinishPrefix);
+		return;
+	}
+
+	if (equali(szKey, "fail_prefix")) {
+		copy(g_szFailPrefix, charsmax(g_szFailPrefix), szValue);
+		log_amx("[HNS] Trigger fail prefix on '%s': %s", g_szMap, g_szFailPrefix);
+		return;
+	}
+}
+
+stock bool:HasPrefixCI(const szText[], const szPrefix[]) {
+	new iPrefixLen = strlen(szPrefix);
+	return iPrefixLen > 0 && equali(szText, szPrefix, iPrefixLen);
+}
+
 // ======== Оригинальная логика (с заменой на конфиговые арены) ========
 
 public touch_PlayerCollide(iTouched, iToucher) {
@@ -924,12 +1036,12 @@ public touch_PlayerCollide(iTouched, iToucher) {
 
 	new szClassName[32];
 	get_entvar(iBlock, var_classname, szClassName, charsmax(szClassName));
-	if (equal(szClassName, "trigger_multiple")) {
+	if (equali(szClassName, g_szFinishFailEntClass)) {
 		new szTargetName[32];
 		get_entvar(iBlock, var_targetname, szTargetName, charsmax(szTargetName));
-		if (equali(szTargetName, "fail_", 5)) {
+		if (HasPrefixCI(szTargetName, g_szFailPrefix)) {
 			CheckStatus(iPlayer, false);
-		} else if (equali(szTargetName, "finish_", 5)) {
+		} else if (HasPrefixCI(szTargetName, g_szFinishPrefix)) {
 			CheckStatus(iPlayer, true);
 		}
 		return;
@@ -939,7 +1051,7 @@ public touch_PlayerCollide(iTouched, iToucher) {
 		if (g_flTouchDelay[iPlayer] > get_gametime())
 			return;
 
-		if (equal(szClassName, "func_wall")) {
+		if (equali(szClassName, g_szBlockEntClass)) {
 			new szTargetName[32];
 			get_entvar(iBlock, var_targetname, szTargetName, charsmax(szTargetName));
 			if (szTargetName[2] == '_') {
