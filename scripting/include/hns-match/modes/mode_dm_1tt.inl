@@ -1,7 +1,7 @@
 public dm_1tt_init() {
 	g_ModFuncs[MODE_DM_1TT][MODEFUNC_KILL] = CreateOneForward(g_PluginId, "dm_1tt_killed", FP_CELL, FP_CELL);
 	g_ModFuncs[MODE_DM_1TT][MODEFUNC_FALLDAMAGE] = CreateOneForward(g_PluginId, "dm_1tt_falldamage", FP_CELL, FP_FLOAT);
-	g_ModFuncs[MODE_DM_1TT][MODEFUNC_ROUNDSTART] = CreateOneForward(g_PluginId, "dm_1tt_roundstart");
+	g_ModFuncs[MODE_DM_1TT][MODEFUNC_RESTARTROUND] = CreateOneForward(g_PluginId, "dm_1tt_restartround");
 	g_ModFuncs[MODE_DM_1TT][MODEFUNC_PLAYER_JOIN] = CreateOneForward(g_PluginId, "dm_1tt_player_join", FP_CELL);
 	g_ModFuncs[MODE_DM_1TT][MODEFUNC_PLAYER_LEAVE] = CreateOneForward(g_PluginId, "dm_1tt_player_leave", FP_CELL);
 }
@@ -59,11 +59,14 @@ public dm_1tt_player_join(id) {
 		return;
 	}
 
+	new bool:bForceRespawn = false;
+
 	if (getUserTeam(id) != TEAM_CT) {
 		rg_set_user_team(id, TEAM_CT);
+		bForceRespawn = true;
 	}
 
-	if (!is_user_alive(id)) {
+	if (bForceRespawn || !is_user_alive(id)) {
 		rg_round_respawn(id);
 	}
 }
@@ -73,23 +76,11 @@ public dm_1tt_player_leave(id) {
 		return;
 	}
 
-	if (get_playersnum_ex(GetPlayers_MatchTeam, "TERRORIST") > 0) {
-		return;
-	}
+	dm_1tt_ensure_tt(true);
+}
 
-	new iNextTT = dm_1tt_get_random_ct();
-	if (!iNextTT) {
-		return;
-	}
-
-	rg_set_user_team(iNextTT, TEAM_TERRORIST);
-
-	if (!g_iSettings[ONEHPMODE]) {
-		set_entvar(iNextTT, var_health, 100.0);
-	}
-
-	hns_setrole(iNextTT);
-	rg_round_respawn(iNextTT);
+public dm_1tt_restartround() {
+	dm_1tt_ensure_tt();
 }
 
 public dm_1tt_set_teams() {
@@ -147,4 +138,31 @@ stock dm_1tt_get_random_ct() {
 	}
 
 	return iNum > 1 ? iPlayers[random(iNum)] : iPlayers[0];
+}
+
+stock dm_1tt_ensure_tt(bool:bRespawnNewTT = false) {
+	if (get_playersnum_ex(GetPlayers_MatchTeam, "TERRORIST") > 0) {
+		return 0;
+	}
+
+	new iNextTT = dm_1tt_get_random_ct();
+	if (!iNextTT) {
+		return 0;
+	}
+
+	rg_set_user_team(iNextTT, TEAM_TERRORIST);
+
+	if (!g_iSettings[ONEHPMODE]) {
+		set_entvar(iNextTT, var_health, 100.0);
+	}
+
+	if (is_user_alive(iNextTT)) {
+		hns_setrole(iNextTT);
+	}
+
+	if (bRespawnNewTT) {
+		rg_round_respawn(iNextTT);
+	}
+
+	return 1;
 }
