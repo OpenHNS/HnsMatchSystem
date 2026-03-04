@@ -458,24 +458,28 @@ public rgExplodeGrenade(const pGrenade, const tracehandle, const bitsDamageType)
 		return HC_CONTINUE;
 	}
 
-	g_iMsgHookTempEntity = register_message(SVC_TEMPENTITY, "Message_TempEntity");
+	if (!g_iMsgHookTempEntity) {
+		g_iMsgHookTempEntity = register_message(SVC_TEMPENTITY, "Message_TempEntity");
+	}
 
 	return HC_CONTINUE;
 }
 
 public rgExplodeGrenadePost(const pGrenade, const tracehandle, const bitsDamageType) {
-	if (hns_get_mode() != MODE_TRAINING && hns_get_state() != STATE_PAUSED) {
-		return HC_CONTINUE;
-	}
-	
 	if (g_iMsgHookTempEntity) {
 		unregister_message(SVC_TEMPENTITY, g_iMsgHookTempEntity);
 		g_iMsgHookTempEntity = 0;
 	}
-	
-	if (pGrenade > 0) {
+
+	if (hns_get_mode() != MODE_TRAINING && hns_get_state() != STATE_PAUSED) {
+		return HC_CONTINUE;
+	}
+
+	if (pGrenade > 0 && !is_nullent(pGrenade)) {
 		set_entvar(pGrenade, var_nextthink, 0.0);
 		set_entvar(pGrenade, var_flags, FL_KILLME);
+	} else {
+		return HC_CONTINUE;
 	}
 
 	new pSpark, Float:vecOriginGrenade[3], Float:vecOrigin[3];
@@ -516,6 +520,10 @@ public rgExplodeGrenadePost(const pGrenade, const tracehandle, const bitsDamageT
 // }
 
 public Message_TempEntity(const iMsgId, const iMsgType, const pEnt) {
+	if (hns_get_mode() != MODE_TRAINING && hns_get_state() != STATE_PAUSED) {
+		return PLUGIN_CONTINUE;
+	}
+
 	new iTempEntityId = get_msg_arg_int(1)
 
 	if (iTempEntityId == TE_DECAL || iTempEntityId == TE_WORLDDECAL) {
@@ -531,6 +539,11 @@ public Message_TempEntity(const iMsgId, const iMsgType, const pEnt) {
 
 
 public plugin_end() {
+	if (g_iMsgHookTempEntity) {
+		unregister_message(SVC_TEMPENTITY, g_iMsgHookTempEntity);
+		g_iMsgHookTempEntity = 0;
+	}
+
 	DestroyForward(g_hResetBugForward);
 }
 
