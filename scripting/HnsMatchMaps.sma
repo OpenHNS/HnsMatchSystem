@@ -246,13 +246,17 @@ public cmdMapsMenu(id) {
 }
 
 public cmdMapsRootHandler(id, hMenu, item) {
-	if (item == MENU_EXIT) {
+	if (item < 0) {
 		menu_destroy(hMenu);
 		return PLUGIN_HANDLED;
 	}
 
 	new szData[6], szName[64], iAccess, iCallback;
-	menu_item_getinfo(hMenu, item, iAccess, szData, charsmax(szData), szName, charsmax(szName), iCallback);
+	if (!menu_item_getinfo(hMenu, item, iAccess, szData, charsmax(szData), szName, charsmax(szName), iCallback)) {
+		menu_destroy(hMenu);
+		return PLUGIN_HANDLED;
+	}
+
 	new choice = str_to_num(szData);
 	menu_destroy(hMenu);
 
@@ -506,14 +510,16 @@ public cmdMapActionMenu(id, szMap[]) {
 }
 
 public cmdMapActionHandler(id, hMenu, item) {
-	if (item == MENU_EXIT) {
+	if (item < 0) {
 		menu_destroy(hMenu);
 		return PLUGIN_HANDLED;
 	}
 
 	new szData[6], szName[64], iAccess, iCallback;
-	menu_item_getinfo(hMenu, item, iAccess, szData, charsmax(szData), szName, charsmax(szName), iCallback);
-	menu_destroy(hMenu);
+	if (!menu_item_getinfo(hMenu, item, iAccess, szData, charsmax(szData), szName, charsmax(szName), iCallback)) {
+		menu_destroy(hMenu);
+		return PLUGIN_HANDLED;
+	}
 
 	new choice = str_to_num(szData);
 
