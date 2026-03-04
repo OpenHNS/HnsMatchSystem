@@ -45,7 +45,7 @@ public training_player_join(id) {
 
 			if (g_iMatchStatus == MATCH_TEAMPICK && (g_ePlayerInfo[id][PLAYER_ROLE] == ROLE_CAP_A || g_ePlayerInfo[id][PLAYER_ROLE] == ROLE_CAP_B)) {
 				if (g_iCaptainPick == -1) {
-					LogSendMessage("[MATCH] (g_iCaptainPick == -1) (%n)", id);
+					//LogSendMessage("[MATCH] (g_iCaptainPick == -1) (%n)", id);
 					if (g_ePlayerInfo[id][PLAYER_ROLE] == ROLE_CAP_A) {
 						g_iCaptainFirst = id;
 						g_iCaptainPick = g_iCaptainFirst;

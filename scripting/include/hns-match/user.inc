@@ -9,7 +9,7 @@ stock hns_set_user_role(id, PLAYER_ROLES:eRole) {
 	g_ePlayerInfo[id][PLAYER_ROLE] = eRole;
 	g_ePlayerInfo[id][PLAYER_MATCH] = true;
 
-	LogSendMessage("[MATCH] Player (%n) set role (%d)", id, g_ePlayerInfo[id][PLAYER_ROLE]);
+	//LogSendMessage("[MATCH] Player (%n) set role (%d)", id, g_ePlayerInfo[id][PLAYER_ROLE]);
 }
 
 // Если игрок имеет указаную роль
@@ -142,7 +142,7 @@ stock hns_reset_users_roles() {
 		g_ePlayerInfo[id][PLAYER_ROLE] = ROLE_SPEC;
 	}
 
-	LogSendMessage("[MATCH] Reset users roles");
+	//LogSendMessage("[MATCH] Reset users roles");
 }
 
 stock getUserKey(id) {

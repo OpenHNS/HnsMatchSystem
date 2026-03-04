@@ -111,7 +111,7 @@ public kniferound_roundend(bool:win_ct) {
 
 			g_eMatchState = STATE_DISABLED;
 
-			LogSendMessage("[MATCH] Captain (%n) win kf, choose player.", g_iCaptainPick);
+			//LogSendMessage("[MATCH] Captain (%n) win kf, choose player.", g_iCaptainPick);
 
 			pickMenu(g_iCaptainPick, true);
 
@@ -145,7 +145,7 @@ public kniferound_roundend(bool:win_ct) {
 
 			g_eMatchState = STATE_DISABLED;
 
-			LogSendMessage("[MATCH] hns_cup_set_veto %d", win_ct ? 2 : 1);
+			//LogSendMessage("[MATCH] hns_cup_set_veto %d", win_ct ? 2 : 1);
 
 			hns_cup_set_veto_turn_by_team(win_ct ? 2 : 1);
 		}
@@ -159,7 +159,7 @@ public kniferound_player_leave(id) {
 	switch (g_iMatchStatus) {
 		case MATCH_CAPTAINKNIFE: {
 				if (hns_is_user_role(id, ROLE_CAP_A) || hns_is_user_role(id, ROLE_CAP_B)) {
-					LogSendMessage("[MATCH] Player captain (%n) leave! (MATCH_CAPTAINKNIFE)", id);
+					//LogSendMessage("[MATCH] Player captain (%n) leave! (MATCH_CAPTAINKNIFE)", id);
 					client_print_color(0, print_team_blue, "%L", LANG_PLAYER, "CAP_LEAVE_STOP_KNIFE", g_iSettings[PREFIX], id);
 					captain_stop();
 					training_start();

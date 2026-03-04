@@ -49,7 +49,7 @@ public battlesmode_roundend(bool:win_ct) {
 			g_iMatchStatus = MATCH_TEAMPICK;
 			g_eMatchState = STATE_DISABLED;
 
-			LogSendMessage("[MATCH] Captain (%n) win battle, choose player.", g_iCaptainPick);
+			//LogSendMessage("[MATCH] Captain (%n) win battle, choose player.", g_iCaptainPick);
 
 			pickMenu(g_iCaptainPick, true);
 			if (g_iSettings[RANDOMPICK] == 1) {
@@ -100,7 +100,7 @@ public battlesmode_player_join(id) {
 public battlesmode_player_leave(id) {
 	if (g_iMatchStatus == MATCH_CAPTAINBATTLE) {
 		if (hns_is_user_role(id, ROLE_CAP_A) || hns_is_user_role(id, ROLE_CAP_B)) {
-			LogSendMessage("[MATCH] Player captain (%n) leave! (MATCH_CAPTAINBATTLE)", id);
+			//LogSendMessage("[MATCH] Player captain (%n) leave! (MATCH_CAPTAINBATTLE)", id);
 			client_print_color(0, print_team_blue, "%L", LANG_PLAYER, "CAP_LEAVE_STOP_BATTLE", g_iSettings[PREFIX], id);
 			captain_stop();
 			training_start();

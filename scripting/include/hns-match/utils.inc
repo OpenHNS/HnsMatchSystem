@@ -107,7 +107,7 @@ stock decodeText(const text, string[], const length) {
 
 stock loadMapCFG() {
 	if (hnsmatch_maps_load_settings()) {
-		LogSendMessage("HNS-MAIN | loadMapCFG() true - hnsmatch_maps_load_settings()");
+		//LogSendMessage("HNS-MAIN | loadMapCFG() true - hnsmatch_maps_load_settings()");
 	} else {
 		if (g_iSettings[HNSBOOST]) {
 			set_cvar_num("mp_freezetime", 15);
