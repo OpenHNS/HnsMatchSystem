@@ -85,41 +85,41 @@ public WatcherMenu(id) {
 
 	static szMsg[128];
 
-	formatex(szMsg, charsmax(szMsg), "%L", LANG_PLAYER, "WTR_MENU_MANAGMENT");
+	formatex(szMsg, charsmax(szMsg), "%L", id, "WTR_MENU_MANAGMENT");
 	new hMenu = menu_create(szMsg, "codeWatcherMenu");
 
-	formatex(szMsg, charsmax(szMsg), "%L", LANG_PLAYER, "WTR_MENU");
+	formatex(szMsg, charsmax(szMsg), "%L", id, "WTR_MENU");
 	menu_additem(hMenu, szMsg, "1");
 
-	formatex(szMsg, charsmax(szMsg), "%L", LANG_PLAYER, "WTR_MENU_TRANSFER");
+	formatex(szMsg, charsmax(szMsg), "%L", id, "WTR_MENU_TRANSFER");
 	menu_additem(hMenu, szMsg, "2");
 
-	formatex(szMsg, charsmax(szMsg), "%L", LANG_PLAYER, "WTR_MENU_CHANGEMAP");
+	formatex(szMsg, charsmax(szMsg), "%L", id, "WTR_MENU_CHANGEMAP");
 	menu_additem(hMenu, szMsg, "3");
 
-	formatex(szMsg, charsmax(szMsg), "%L", LANG_PLAYER, "WTR_MENU_KILLPLAYERS");
+	formatex(szMsg, charsmax(szMsg), "%L", id, "WTR_MENU_KILLPLAYERS");
 	menu_additem(hMenu, szMsg, "4");
 
 	if (isUserFullWatcher(id)) {
-		formatex(szMsg, charsmax(szMsg), "%L", LANG_PLAYER, "WTR_MENU_KICKMENU");
+		formatex(szMsg, charsmax(szMsg), "%L", id, "WTR_MENU_KICKMENU");
 	} else {
-		formatex(szMsg, charsmax(szMsg), "\d%L", LANG_PLAYER, "WTR_MENU_KICKMENU");
+		formatex(szMsg, charsmax(szMsg), "\d%L", id, "WTR_MENU_KICKMENU");
 	}
 
 	menu_additem(hMenu, szMsg, "5");
 
 	// if (isUserFullWatcher(id)) {
-	// 	formatex(szMsg, charsmax(szMsg), "%L", LANG_PLAYER, "WTR_MENU_MIXBANMENUS");
+	// 	formatex(szMsg, charsmax(szMsg), "%L", id, "WTR_MENU_MIXBANMENUS");
 	// } else {
-	// 	formatex(szMsg, charsmax(szMsg), "\d%L", LANG_PLAYER, "WTR_MENU_NOT_MIXBANMENUS");
+	// 	formatex(szMsg, charsmax(szMsg), "\d%L", id, "WTR_MENU_NOT_MIXBANMENUS");
 	// }
 
 	// menu_additem(hMenu, szMsg, "6");
 
 	// if (isUserFullWatcher(id)) {
-	// 	formatex(szMsg, charsmax(szMsg), "%L", LANG_PLAYER, "WTR_MENU_BLACKLIST");
+	// 	formatex(szMsg, charsmax(szMsg), "%L", id, "WTR_MENU_BLACKLIST");
 	// } else {
-	// 	formatex(szMsg, charsmax(szMsg), "%L", LANG_PLAYER, "WTR_MENU_NOT_BLACKLIST");
+	// 	formatex(szMsg, charsmax(szMsg), "%L", id, "WTR_MENU_NOT_BLACKLIST");
 	// }
 	// menu_additem(hMenu, szMsg, "5");
 
@@ -183,18 +183,18 @@ public ManagementWatcherMenu(id) {
 
 	static szMsg[128];
 
-	formatex(szMsg, charsmax(szMsg), "%L", LANG_PLAYER, "WTR_MENU_MANAGMENT");
+	formatex(szMsg, charsmax(szMsg), "%L", id, "WTR_MENU_MANAGMENT");
 	new hMenu = menu_create(szMsg, "codeManagementWatcherMenu");
 
 	if (isUserFullWatcher(id)) {
-		formatex(szMsg, charsmax(szMsg), "%L", LANG_PLAYER, "WTR_MENU_DEL");
+		formatex(szMsg, charsmax(szMsg), "%L", id, "WTR_MENU_DEL");
 	} else {
-		formatex(szMsg, charsmax(szMsg), "%L", LANG_PLAYER, "WTR_MENU_NOT_DEL");
+		formatex(szMsg, charsmax(szMsg), "%L", id, "WTR_MENU_NOT_DEL");
 	}
 
 	menu_additem(hMenu, szMsg, "1");
 
-	formatex(szMsg, charsmax(szMsg), "%L", LANG_PLAYER, "WTR_MENU_ADD");
+	formatex(szMsg, charsmax(szMsg), "%L", id, "WTR_MENU_ADD");
 	menu_additem(hMenu, szMsg, "2");
 
 	menu_display(id, hMenu, 0);
@@ -237,7 +237,7 @@ public codeManagementWatcherMenu(id, hMenu, item) {
 public ChooseNewWatcherMenu(id) {
 	static szMsg[128];
 
-	formatex(szMsg, charsmax(szMsg), "%L", LANG_PLAYER, "WTR_MENU_NEW");
+	formatex(szMsg, charsmax(szMsg), "%L", id, "WTR_MENU_NEW");
 	new hMenu = menu_create(szMsg, "codeChooseNewWatcherMenu");
 	
 	new iPlayers[MAX_PLAYERS], iNum, iTempID;
@@ -384,7 +384,7 @@ public StartVote() {
 public voteWatcherMenu(id) {
 	static szMsg[128];
 
-	formatex(szMsg, charsmax(szMsg), "%L", LANG_PLAYER, "WTR_MENU_CHOSE");
+	formatex(szMsg, charsmax(szMsg), "%L", id, "WTR_MENU_CHOSE");
 	new hMenu = menu_create(szMsg, "codeVoteWatcherMenu");
 	
 	new iPlayers[MAX_PLAYERS], iNum, iTempID;

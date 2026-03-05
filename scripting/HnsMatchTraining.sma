@@ -320,41 +320,41 @@ public hns_training_menu(id) {
 
 	new szMsg[64];
 
-	formatex(szMsg, charsmax(szMsg), "%L", LANG_PLAYER, "MENU_TRNING_TITLE");
+	formatex(szMsg, charsmax(szMsg), "%L", id, "MENU_TRNING_TITLE");
 	new hMenu = menu_create(szMsg, "hns_training_menu_code");
 
-	formatex(szMsg, charsmax(szMsg), "%L", LANG_PLAYER, "MENU_TRNING_CPNT");
+	formatex(szMsg, charsmax(szMsg), "%L", id, "MENU_TRNING_CPNT");
 	menu_additem(hMenu, szMsg, "1");
 
-	formatex(szMsg, charsmax(szMsg), "%L", LANG_PLAYER, "MENU_TRNING_TLPRT");
+	formatex(szMsg, charsmax(szMsg), "%L", id, "MENU_TRNING_TLPRT");
 	menu_additem(hMenu, szMsg, "2");
 
-	formatex(szMsg, charsmax(szMsg), "%L", LANG_PLAYER, "MENU_TRNING_NOCLIP");
+	formatex(szMsg, charsmax(szMsg), "%L", id, "MENU_TRNING_NOCLIP");
 	menu_additem(hMenu, szMsg, "3");
 
-	formatex(szMsg, charsmax(szMsg), "%L", LANG_PLAYER, "MENU_TRNING_RESPAWN");
+	formatex(szMsg, charsmax(szMsg), "%L", id, "MENU_TRNING_RESPAWN");
 	menu_additem(hMenu, szMsg, "4");
 
-	formatex(szMsg, charsmax(szMsg), "%L", LANG_PLAYER, "MENU_TRNING_DAMAGE");
+	formatex(szMsg, charsmax(szMsg), "%L", id, "MENU_TRNING_DAMAGE");
 	menu_additem(hMenu, szMsg, "5");
 
 	if (g_bSaveAngles[id]) {
-		formatex(szMsg, charsmax(szMsg), "%L", LANG_PLAYER, "MENU_TRNING_ANGL_ON");
+		formatex(szMsg, charsmax(szMsg), "%L", id, "MENU_TRNING_ANGL_ON");
 	} else {
-		formatex(szMsg, charsmax(szMsg), "%L", LANG_PLAYER, "MENU_TRNING_ANGL_OFF");
+		formatex(szMsg, charsmax(szMsg), "%L", id, "MENU_TRNING_ANGL_OFF");
 	}
 
 	menu_additem(hMenu, szMsg, "6");
 
 	// if (g_bInvisPlayers[id]) {
-	// 	formatex(szMsg, charsmax(szMsg), "%L", LANG_PLAYER, "MENU_TRNING_INVIS_ON");
+	// 	formatex(szMsg, charsmax(szMsg), "%L", id, "MENU_TRNING_INVIS_ON");
 	// } else {
-	// 	formatex(szMsg, charsmax(szMsg), "%L", LANG_PLAYER, "MENU_TRNING_INVIS_OFF");
+	// 	formatex(szMsg, charsmax(szMsg), "%L", id, "MENU_TRNING_INVIS_OFF");
 	// }
 
 	// menu_additem(hMenu, szMsg, "7");
 
-	formatex(szMsg, charsmax(szMsg), "%L", LANG_PLAYER, "MENU_TRNING_WEAPONS");
+	formatex(szMsg, charsmax(szMsg), "%L", id, "MENU_TRNING_WEAPONS");
 	menu_additem(hMenu, szMsg, "8");
 
 

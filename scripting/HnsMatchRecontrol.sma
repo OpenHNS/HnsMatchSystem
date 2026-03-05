@@ -155,7 +155,7 @@ public Menu(id)
 	new const bool:can_control = (!is_control) || (is_control && is_user_alive(id));
 	if (can_control && rg_get_user_team(id) != TEAM_SPECTATOR)
 	{
-		new m_Menu = menu_create(fmt("%L", LANG_PLAYER, is_control ? "RECON_TITLE_CONTROL" : "RECON_TITLE_REPLACE"), "MenuHandler");
+		new m_Menu = menu_create(fmt("%L", id, is_control ? "RECON_TITLE_CONTROL" : "RECON_TITLE_REPLACE"), "MenuHandler");
 
 		new Players[32], Count, szPlayer[10], Player, szName[MAX_NAME_LENGTH], szBuffer[64];
 
@@ -182,10 +182,10 @@ public Menu(id)
 			num_to_str(Player, szPlayer, charsmax(szPlayer));
 
 			if (g_bHnsBannedInit && e_bBanned[Player] && !is_control) {
-				formatex(szBuffer, charsmax(szBuffer), "%L", LANG_PLAYER, "RECON_BANNED", szName);
+				formatex(szBuffer, charsmax(szBuffer), "%L", id, "RECON_BANNED", szName);
 				menu_additem(m_Menu, szBuffer, szPlayer);
 			} else if (g_bInvited[Player]) {
-				formatex(szBuffer, charsmax(szBuffer), "%L", LANG_PLAYER, "RECON_INVITED", szName);
+				formatex(szBuffer, charsmax(szBuffer), "%L", id, "RECON_INVITED", szName);
 				menu_additem(m_Menu, szBuffer, szPlayer);
 			} else {
 				menu_additem(m_Menu, szName, szPlayer);
@@ -282,11 +282,11 @@ public ReplaceAdmin(id)
 
 	if (g_eTransferType[id] == TRANSFER_TO)
 	{
-		formatex(title, charsmax(title), "%L", LANG_PLAYER, "RECON_ADM_TRANSF_TO");
+		formatex(title, charsmax(title), "%L", id, "RECON_ADM_TRANSF_TO");
 	}
 	else if (g_eTransferType[id] == TRANSFER_IT)
 	{
-		formatex(title, charsmax(title), "%L", LANG_PLAYER, "RECON_ADM_TRANSF_IT");
+		formatex(title, charsmax(title), "%L", id, "RECON_ADM_TRANSF_IT");
 	}
 
 	new iPlayers[MAX_PLAYERS], iNum;
@@ -325,7 +325,7 @@ public ReplaceAdmin(id)
 		new szPlayer[10]; num_to_str(iPlayer, szPlayer, charsmax(szPlayer));
 
 		if ((g_bHnsBannedInit && e_bBanned[iPlayer] && (g_ControlType[iPlayer] == TYPE_REPLACE))) {
-			menu_additem(menu, fmt("%L", LANG_PLAYER, "RECON_BANNED", iPlayer), szPlayer);
+			menu_additem(menu, fmt("%L", id, "RECON_BANNED", iPlayer), szPlayer);
 		} else {
 			menu_additem(menu, fmt("%n", iPlayer), szPlayer);
 		}
@@ -424,9 +424,9 @@ public Confirmation(id)
 		new requested_id = g_ReplaceRequests[id];
 					
 		if (g_ControlType[requested_id] == TYPE_CONTROL)
-			m_Confirmation = menu_create(fmt("%L", LANG_PLAYER, "RECON_CONFIRM_CONTROL", requested_id), "ConfirmationHandler");
+			m_Confirmation = menu_create(fmt("%L", id, "RECON_CONFIRM_CONTROL", requested_id), "ConfirmationHandler");
 		else
-			m_Confirmation = menu_create(fmt("%L", LANG_PLAYER, "RECON_CONFIRM_REPLACE", requested_id), "ConfirmationHandler");
+			m_Confirmation = menu_create(fmt("%L", id, "RECON_CONFIRM_REPLACE", requested_id), "ConfirmationHandler");
 		
 		menu_additem(m_Confirmation, "Yes");
 		menu_additem(m_Confirmation, "No");
