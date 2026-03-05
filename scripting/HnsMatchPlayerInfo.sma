@@ -353,6 +353,10 @@ public cmdRoundInfo(id) {
 }
 
 public cmdShowSpec(id) {
+	if (g_iHudPlayerSpec <= 0) {
+		return PLUGIN_HANDLED_MAIN;
+	}
+
 	g_eSpecPlayers[id][SHOW_SPEC] = !g_eSpecPlayers[id][SHOW_SPEC];
 
 	if (g_eSpecPlayers[id][SHOW_SPEC]) {
@@ -365,6 +369,10 @@ public cmdShowSpec(id) {
 }
 
 public cmdSpecHide(id) {
+	if (g_iHudPlayerSpec <= 0) {
+		return PLUGIN_HANDLED_MAIN;
+	}
+
 	g_eSpecPlayers[id][SPEC_HIDE] = !g_eSpecPlayers[id][SPEC_HIDE];
 
 	if (g_eSpecPlayers[id][SPEC_HIDE]) {

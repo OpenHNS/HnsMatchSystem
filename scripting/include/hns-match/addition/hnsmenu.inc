@@ -197,21 +197,33 @@ public customMenu(id) {
 	if (!is_user_connected(id))
 		return PLUGIN_HANDLED;
 
-	new szMsg[64];
+	new szMsg[96];
 
 	formatex(szMsg, charsmax(szMsg), "%L", id, "MENU_MIX_TITLE");
 	new hMenu = menu_create(szMsg, "customMenuHandler");
 
 	formatex(szMsg, charsmax(szMsg), "%L", id, "MENU_CUSTOM_PUB");
+	if (g_iCurrentMode == MODE_PUB) {
+		format(szMsg, charsmax(szMsg), "%s \r[%L]", szMsg, id, "MENU_CUSTOM_ACTIVE");
+	}
 	menu_additem(hMenu, szMsg, "1");
 
 	formatex(szMsg, charsmax(szMsg), "%L", id, "MENU_CUSTOM_DM");
+	if (g_iCurrentMode == MODE_DM) {
+		format(szMsg, charsmax(szMsg), "%s \r[%L]", szMsg, id, "MENU_CUSTOM_ACTIVE");
+	}
 	menu_additem(hMenu, szMsg, "2");
 
 	formatex(szMsg, charsmax(szMsg), "%L", id, "MENU_CUSTOM_DM_1TT");
+	if (g_iCurrentMode == MODE_DM_1TT) {
+		format(szMsg, charsmax(szMsg), "%s \r[%L]", szMsg, id, "MENU_CUSTOM_ACTIVE");
+	}
 	menu_additem(hMenu, szMsg, "3");
 
 	formatex(szMsg, charsmax(szMsg), "%L", id, "MENU_CUSTOM_ZM");
+	if (g_iCurrentMode == MODE_ZM) {
+		format(szMsg, charsmax(szMsg), "%s \r[%L]", szMsg, id, "MENU_CUSTOM_ACTIVE");
+	}
 	menu_additem(hMenu, szMsg, "4");
 
 	menu_display(id, hMenu, 0);
@@ -305,6 +317,7 @@ public settingsMatchMenuHandler(id, hMenu, item) {
 	if (item == MENU_EXIT) {
 		menu_destroy(hMenu);
 		mainMatchMenu(id);
+		return PLUGIN_HANDLED;
 	}
 
 	new szData[6], szName[64], iAccess, iCallback;
@@ -452,18 +465,27 @@ public menuSelectMode(id) {
 		return PLUGIN_HANDLED;
 	}
 
-	new szMsg[64];
+	new szMsg[96];
 
 	formatex(szMsg, charsmax(szMsg), "%L", id, "MENU_MODE_TITLE");
 	new hMenu = menu_create(szMsg, "HandlerSelectMode");
 	
 	formatex(szMsg, charsmax(szMsg), "%L", id, "MENU_MODE_MR");
+	if (g_iCurrentRules == RULES_MR) {
+		format(szMsg, charsmax(szMsg), "%s \r[%L]", szMsg, id, "MENU_CUSTOM_ACTIVE");
+	}
 	menu_additem(hMenu, szMsg, "1");
 
 	formatex(szMsg, charsmax(szMsg), "%L", id, "MENU_MODE_WINTIME");
+	if (g_iCurrentRules == RULES_TIMER) {
+		format(szMsg, charsmax(szMsg), "%s \r[%L]", szMsg, id, "MENU_CUSTOM_ACTIVE");
+	}
 	menu_additem(hMenu, szMsg, "2");
 
 	formatex(szMsg, charsmax(szMsg), "%L", id, "MENU_MODE_DUEL");
+	if (g_iCurrentRules == RULES_DUEL) {
+		format(szMsg, charsmax(szMsg), "%s \r[%L]", szMsg, id, "MENU_CUSTOM_ACTIVE");
+	}
 	menu_additem(hMenu, szMsg, "3");
 		
 	menu_setprop(hMenu, MPROP_EXIT, MEXIT_ALL);

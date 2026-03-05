@@ -182,6 +182,7 @@ MENU_CUSTOM_PUB     = Public
 MENU_CUSTOM_DM      = DeathMatch
 MENU_CUSTOM_DM_1TT  = DeathMatch 1TT
 MENU_CUSTOM_ZM      = Zombie
+MENU_CUSTOM_ACTIVE  = Active
 
 MENU_STNGS_ROUNDTIME_TRNG   = Roundtime: \d[Training]
 MENU_STNGS_ROUNDTIME        = Roundtime: \y%.1f
@@ -403,6 +404,7 @@ MENU_CUSTOM_PUB     = Паблик
 MENU_CUSTOM_DM      = ДМ
 MENU_CUSTOM_DM_1TT  = ДМ 1TT
 MENU_CUSTOM_ZM      = Зомби
+MENU_CUSTOM_ACTIVE  = Активен
 
 MENU_STNGS_ROUNDTIME_TRNG   = Roundtime: \d[Training]
 MENU_STNGS_ROUNDTIME        = Roundtime: \y%.1f

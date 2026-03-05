@@ -335,8 +335,8 @@ public msgHostagePos(msgid, dest, id) {
 }
 
 public rgShowMenu(const index, const bitsSlots, const iDisplayTime, const iNeedMore, const szText[]) {
-	LogSendMessage("rgShowMenu: enter id=%d bits=%d display=%d needMore=%d text='%s' mode=%d status=%d team=%d task_exists=%d",
-		index, bitsSlots, iDisplayTime, iNeedMore, szText, g_iCurrentMode, g_iMatchStatus, get_user_team(index), task_exists(index));
+	//LogSendMessage("rgShowMenu: enter id=%d bits=%d display=%d needMore=%d text='%s' mode=%d status=%d team=%d task_exists=%d",
+	//	index, bitsSlots, iDisplayTime, iNeedMore, szText, g_iCurrentMode, g_iMatchStatus, get_user_team(index), task_exists(index));
 
 	if (!shouldAutoJoin(index)) {
 		return HC_CONTINUE;
@@ -352,22 +352,22 @@ public rgShowMenu(const index, const bitsSlots, const iDisplayTime, const iNeedM
 	}
 
 	if (!equal(szText, "#Team_Select")) {
-		LogSendMessage("rgShowMenu: id=%d -> HC_CONTINUE (text!='#Team_Select', text='%s')", index, szText);
+		//LogSendMessage("rgShowMenu: id=%d -> HC_CONTINUE (text!='#Team_Select', text='%s')", index, szText);
 		return HC_CONTINUE;
 	}
 
 	setForceTeamJoinTask(index, get_user_msgid("ShowMenu"));
-	LogSendMessage("rgShowMenu: id=%d -> HC_SUPERCEDE (scheduled force team join, msgid=%d)", index, get_user_msgid("ShowMenu"));
+	//LogSendMessage("rgShowMenu: id=%d -> HC_SUPERCEDE (scheduled force team join, msgid=%d)", index, get_user_msgid("ShowMenu"));
 
 	return HC_SUPERCEDE;
 }
 
 public rgShowVGUIMenu(const index, VGUIMenu:menuType, const bitsSlots, const szOldMenu[]) {
-	LogSendMessage("rgShowVGUIMenu: enter id=%d menuType=%d bits=%d oldMenu='%s' mode=%d status=%d team=%d task_exists=%d",
-		index, _:menuType, bitsSlots, szOldMenu, g_iCurrentMode, g_iMatchStatus, get_user_team(index), task_exists(index));
+	//LogSendMessage("rgShowVGUIMenu: enter id=%d menuType=%d bits=%d oldMenu='%s' mode=%d status=%d team=%d task_exists=%d",
+	//	index, _:menuType, bitsSlots, szOldMenu, g_iCurrentMode, g_iMatchStatus, get_user_team(index), task_exists(index));
 
 	if (menuType != VGUI_Menu_Team) {
-		LogSendMessage("rgShowVGUIMenu: id=%d -> HC_CONTINUE (menuType=%d != VGUI_Menu_Team)", index, _:menuType);
+		//LogSendMessage("rgShowVGUIMenu: id=%d -> HC_CONTINUE (menuType=%d != VGUI_Menu_Team)", index, _:menuType);
 		return HC_CONTINUE;
 	}
 
@@ -380,13 +380,13 @@ public rgShowVGUIMenu(const index, VGUIMenu:menuType, const bitsSlots, const szO
 	if (bKnifeMap && bCupEnabled) {
 		new bool:bNeedControl = first_join_need_control();
 		if (!bNeedControl) {
-			LogSendMessage("rgShowVGUIMenu: id=%d -> HC_CONTINUE (knife_map=1 cup_enabled=1 need_control=0)", index);
+			//LogSendMessage("rgShowVGUIMenu: id=%d -> HC_CONTINUE (knife_map=1 cup_enabled=1 need_control=0)", index);
 			return HC_CONTINUE;
 		}
 	}
 
 	setForceTeamJoinTask(index, get_user_msgid("VGUIMenu"));
-	LogSendMessage("rgShowVGUIMenu: id=%d -> HC_SUPERCEDE (scheduled force team join, msgid=%d)", index, get_user_msgid("VGUIMenu"));
+	//LogSendMessage("rgShowVGUIMenu: id=%d -> HC_SUPERCEDE (scheduled force team join, msgid=%d)", index, get_user_msgid("VGUIMenu"));
 
 	return HC_SUPERCEDE;
 }
@@ -402,57 +402,57 @@ bool:shouldAutoJoin(id) {
 	new iTeam = get_user_team(id);
 	new bool:bTaskExists = bool:task_exists(id);
 	new bool:bResult = (!iTeam && !bTaskExists);
-	LogSendMessage("shouldAutoJoin: id=%d team=%d task_exists=%d -> %d", id, iTeam, bTaskExists, bResult);
+	//LogSendMessage("shouldAutoJoin: id=%d team=%d task_exists=%d -> %d", id, iTeam, bTaskExists, bResult);
 	return bResult;
 }
 
 setForceTeamJoinTask(id, menu_msgid) {
 	static param_menu_msgid[2];
 	param_menu_msgid[0] = menu_msgid;
-	LogSendMessage("setForceTeamJoinTask: id=%d menu_msgid=%d delay=0.1", id, menu_msgid);
+	//LogSendMessage("setForceTeamJoinTask: id=%d menu_msgid=%d delay=0.1", id, menu_msgid);
 
 	set_task(0.1, "taskForceTeamJoin", id, param_menu_msgid, sizeof param_menu_msgid);
 }
 
 public taskForceTeamJoin(menu_msgid[], id) {
 	new iTeam = get_user_team(id);
-	LogSendMessage("taskForceTeamJoin: enter id=%d team=%d menu_msgid=%d mode=%d status=%d",
-		id, iTeam, menu_msgid[0], g_iCurrentMode, g_iMatchStatus);
+	//LogSendMessage("taskForceTeamJoin: enter id=%d team=%d menu_msgid=%d mode=%d status=%d",
+	//	id, iTeam, menu_msgid[0], g_iCurrentMode, g_iMatchStatus);
 
 	if (iTeam) {
-		LogSendMessage("taskForceTeamJoin: id=%d return (already has team=%d)", id, iTeam);
+		//LogSendMessage("taskForceTeamJoin: id=%d return (already has team=%d)", id, iTeam);
 		return;
 	}
 
 	if (first_join_control(id, menu_msgid[0])) {
-		LogSendMessage("taskForceTeamJoin: id=%d return (first_join_control handled)", id);
+		//LogSendMessage("taskForceTeamJoin: id=%d return (first_join_control handled)", id);
 		return;
 	}
 
 	if (g_iCurrentMode == MODE_DM_1TT) {
-		LogSendMessage("taskForceTeamJoin: id=%d MODE_DM_1TT -> forceTeamJoin(team='2', class='5')", id);
+		//LogSendMessage("taskForceTeamJoin: id=%d MODE_DM_1TT -> forceTeamJoin(team='2', class='5')", id);
 		forceTeamJoin(id, menu_msgid[0], "2", "5");
 		return;
 	}
 
-	LogSendMessage("taskForceTeamJoin: id=%d default -> forceTeamJoin(team='5', class='5')", id);
+	//LogSendMessage("taskForceTeamJoin: id=%d default -> forceTeamJoin(team='5', class='5')", id);
 	forceTeamJoin(id, menu_msgid[0], "5", "5");
 }
 
 stock bool:first_join_control(id, menu_msgid) {
-	LogSendMessage("first_join_control: enter id=%d mode=%d status=%d menu_msgid=%d", id, g_iCurrentMode, g_iMatchStatus, menu_msgid);
+	//LogSendMessage("first_join_control: enter id=%d mode=%d status=%d menu_msgid=%d", id, g_iCurrentMode, g_iMatchStatus, menu_msgid);
 
 	switch (g_iMatchStatus) {
 		case MATCH_CAPTAINKNIFE, MATCH_CAPTAINBATTLE, MATCH_CUPKNIFE, MATCH_CUPPICK, MATCH_TEAMKNIFE, MATCH_TEAMBATTLE: {
-			LogSendMessage("first_join_control: id=%d status=%d -> force spec/team choose ('6')", id, g_iMatchStatus);
+			//LogSendMessage("first_join_control: id=%d status=%d -> force spec/team choose ('6')", id, g_iMatchStatus);
 			forceTeamJoin(id, menu_msgid, "6");
 			return true;
 		}
 		case MATCH_CAPTAINPICK, MATCH_TEAMPICK, MATCH_MAPPICK: {
 			new bool:bMatchPlayer = first_join_is_match_player(id);
-			LogSendMessage("first_join_control: id=%d status=%d is_match_player=%d", id, g_iMatchStatus, bMatchPlayer);
+			//LogSendMessage("first_join_control: id=%d status=%d is_match_player=%d", id, g_iMatchStatus, bMatchPlayer);
 			if (!bMatchPlayer) {
-				LogSendMessage("first_join_control: id=%d -> force spec/team choose ('6')", id);
+				//LogSendMessage("first_join_control: id=%d -> force spec/team choose ('6')", id);
 				forceTeamJoin(id, menu_msgid, "6");
 				return true;
 			}
@@ -460,9 +460,9 @@ stock bool:first_join_control(id, menu_msgid) {
 		case MATCH_STARTED: {
 			if (g_iCurrentMode == MODE_MIX) {
 				new bool:bMatchPlayer = first_join_is_match_player(id);
-				LogSendMessage("first_join_control: id=%d MATCH_STARTED MODE_MIX is_match_player=%d", id, bMatchPlayer);
+				//LogSendMessage("first_join_control: id=%d MATCH_STARTED MODE_MIX is_match_player=%d", id, bMatchPlayer);
 				if (!bMatchPlayer) {
-					LogSendMessage("first_join_control: id=%d -> force spec/team choose ('6')", id);
+					//LogSendMessage("first_join_control: id=%d -> force spec/team choose ('6')", id);
 					forceTeamJoin(id, menu_msgid, "6");
 					return true;
 				}
@@ -470,7 +470,7 @@ stock bool:first_join_control(id, menu_msgid) {
 		}
 	}
 
-	LogSendMessage("first_join_control: id=%d -> false (no special handling)", id);
+	//LogSendMessage("first_join_control: id=%d -> false (no special handling)", id);
 	return false;
 }
 
@@ -506,33 +506,33 @@ stock bool:first_join_is_match_player(id) {
 
 
 stock forceTeamJoin(id, menu_msgid, team[] = "5", class[] = "0") {
-	LogSendMessage("forceTeamJoin: id=%d menu_msgid=%d team='%s' class='%s'", id, menu_msgid, team, class);
+	//LogSendMessage("forceTeamJoin: id=%d menu_msgid=%d team='%s' class='%s'", id, menu_msgid, team, class);
 
 	static jointeam[] = "jointeam";
 	if (class[0] == '0') {
-		LogSendMessage("forceTeamJoin: id=%d jointeam only", id);
+		//LogSendMessage("forceTeamJoin: id=%d jointeam only", id);
 		engclient_cmd(id, jointeam, team);
 		return;
 	}
 
 	static msg_block, joinclass[] = "joinclass";
 	msg_block = get_msg_block(menu_msgid);
-	LogSendMessage("forceTeamJoin: id=%d msg_block(old)=%d -> block menu message and send jointeam/joinclass", id, msg_block);
+	//LogSendMessage("forceTeamJoin: id=%d msg_block(old)=%d -> block menu message and send jointeam/joinclass", id, msg_block);
 	set_msg_block(menu_msgid, BLOCK_SET);
 	engclient_cmd(id, jointeam, team);
 	engclient_cmd(id, joinclass, class);
 	set_msg_block(menu_msgid, msg_block);
 
-	LogSendMessage("forceTeamJoin: id=%d scheduled taskSetPlayerTeam delay=0.2", id);
+	//LogSendMessage("forceTeamJoin: id=%d scheduled taskSetPlayerTeam delay=0.2", id);
 	set_task(0.2, "taskSetPlayerTeam", id);
 }
 
 public taskSetPlayerTeam(id) {
 	new bool:bConnected = bool:is_user_connected(id);
-	LogSendMessage("taskSetPlayerTeam: enter id=%d connected=%d mode=%d status=%d", id, bConnected, g_iCurrentMode, g_iMatchStatus);
+	//LogSendMessage("taskSetPlayerTeam: enter id=%d connected=%d mode=%d status=%d", id, bConnected, g_iCurrentMode, g_iMatchStatus);
 
 	if (!bConnected) {
-		LogSendMessage("taskSetPlayerTeam: id=%d return (not connected)", id);
+		//LogSendMessage("taskSetPlayerTeam: id=%d return (not connected)", id);
 		return;
 	}
 
@@ -540,7 +540,7 @@ public taskSetPlayerTeam(id) {
 	if (iJoinForward) {
 		ExecuteForward(g_ModFuncs[g_iCurrentMode][MODEFUNC_PLAYER_JOIN], _, id);
 	} else {
-		LogSendMessage("taskSetPlayerTeam: id=%d skip ExecuteForward (forward not set)", id);
+		//LogSendMessage("taskSetPlayerTeam: id=%d skip ExecuteForward (forward not set)", id);
 	}
 }
 

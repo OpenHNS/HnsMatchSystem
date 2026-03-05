@@ -556,8 +556,8 @@ public checkFullTeams() {
 }
 
 stock start_captain_decide() {
-	new iCaptainA = hns_get_captain_role(ROLE_CAP_A);
-	new iCaptainB = hns_get_captain_role(ROLE_CAP_B);
+	// new iCaptainA = hns_get_captain_role(ROLE_CAP_A);
+	// new iCaptainB = hns_get_captain_role(ROLE_CAP_B);
 
 	g_iMatchStatus = MATCH_CAPTAINKNIFE;
 	//LogSendMessage("[MATCH] Captains (%n) (%n) OK! Start captain knife", iCaptainA, iCaptainB);
@@ -565,8 +565,8 @@ stock start_captain_decide() {
 }
 
 stock start_captain_battle_decide(id) {
-	new iCaptainA = hns_get_captain_role(ROLE_CAP_A);
-	new iCaptainB = hns_get_captain_role(ROLE_CAP_B);
+	// new iCaptainA = hns_get_captain_role(ROLE_CAP_A);
+	// new iCaptainB = hns_get_captain_role(ROLE_CAP_B);
 
 	if (hns_battle_init() && hns_battle_arenas_init()) {
 		if (hns_battle_menu(id, true)) {

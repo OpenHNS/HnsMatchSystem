@@ -490,6 +490,7 @@ public GiveWeapons(id)
 		set_entvar(id, var_origin, g_saveData[id][Origin]);
 		set_entvar(id, var_velocity, g_saveData[id][Velocity]);
 		set_entvar(id, var_angles, g_saveData[id][Angles]);
+		set_entvar(id, var_v_angle, g_saveData[id][Angles]);
 		set_entvar(id, var_fixangle, 1);
 
 		switch (rg_get_user_team(id))
@@ -538,7 +539,6 @@ public ReControl(id)
 		g_saveData[id][iFlash] = rg_get_user_bpammo(requested_id, WEAPON_FLASHBANG);
 		g_saveData[id][iSmoke] = rg_get_user_bpammo(requested_id, WEAPON_SMOKEGRENADE);
 		g_saveData[id][flHealth] = get_entvar(requested_id, var_health);
-		StripInventoryBeforeReplace(requested_id);
 		
 		if (g_ControlType[requested_id] == TYPE_REPLACE)
 		{
@@ -547,6 +547,7 @@ public ReControl(id)
 
 			rg_set_user_team(id, g_saveData[id][iTeam]);
 			rg_set_user_team(requested_id, TEAM_SPECTATOR);
+			FinalizeTransferredPlayerState(id);
 
 			ExecuteForward(g_hReplaceForward, _, requested_id, id);
 		}
@@ -566,6 +567,7 @@ public ReControl(id)
 
 			rg_set_user_team(id, g_saveData[id][iTeam]);
 			rg_set_user_team(requested_id, TEAM_SPECTATOR);
+			FinalizeTransferredPlayerState(id);
 
 			ExecuteForward(g_hReplaceForward, _, requested_id, id);
 		}
@@ -600,6 +602,22 @@ public task_Response(Parms[], task_id)
 	return;
 }
 
+stock FinalizeTransferredPlayerState(id) {
+	if (!is_user_connected(id)) {
+		return;
+	}
+
+	set_member(id, m_iJoiningState, GETINTOGAME);
+	set_member(id, m_bJustConnected, false);
+	set_member(id, m_iMenu, Menu_OFF);
+	set_member(id, m_hObserverTarget, 0);
+	set_member(id, m_afPhysicsFlags, get_member(id, m_afPhysicsFlags) & ~PFLAG_OBSERVER);
+
+	set_entvar(id, var_iuser1, OBS_NONE);
+	set_entvar(id, var_iuser2, 0);
+	set_entvar(id, var_iuser3, 0);
+}
+
 ReplacePlayers(replacement_player, substitutive_player, admin_replaced = 0) {
 	g_saveData[substitutive_player][iTeam] = rg_get_user_team(replacement_player);
 
@@ -615,10 +633,10 @@ ReplacePlayers(replacement_player, substitutive_player, admin_replaced = 0) {
 		g_saveData[substitutive_player][iFlash]   = rg_get_user_bpammo(replacement_player, WEAPON_FLASHBANG);
 		g_saveData[substitutive_player][iHe]   = rg_get_user_bpammo(replacement_player, WEAPON_HEGRENADE);
 		g_saveData[substitutive_player][flHealth]  = get_entvar(replacement_player, var_health);
-		StripInventoryBeforeReplace(replacement_player);
 
 		rg_set_user_team(substitutive_player, g_saveData[substitutive_player][iTeam]);
 		rg_set_user_team(replacement_player, TEAM_SPECTATOR);
+		FinalizeTransferredPlayerState(substitutive_player);
 
 		g_bGiveWeapons[substitutive_player] = true;
 
@@ -628,22 +646,10 @@ ReplacePlayers(replacement_player, substitutive_player, admin_replaced = 0) {
 	else {
 		rg_set_user_team(substitutive_player, g_saveData[substitutive_player][iTeam]);
 		rg_set_user_team(replacement_player, TEAM_SPECTATOR);
+		FinalizeTransferredPlayerState(substitutive_player);
 	}
 
 	ExecuteForward(g_hReplaceForward, _, replacement_player, substitutive_player);
 
 	client_print_color(0, print_team_blue, "%L", LANG_PLAYER, "RECON_ADM_REPLACE", g_szPrefix, admin_replaced, replacement_player, substitutive_player);
-}
-
-stock StripInventoryBeforeReplace(id) {
-	if (!is_user_alive(id)) {
-		return;
-	}
-
-	rg_remove_all_items(id);
-	rg_give_item(id, "weapon_knife");
-
-	rg_set_user_bpammo(id, WEAPON_HEGRENADE, 0);
-	rg_set_user_bpammo(id, WEAPON_FLASHBANG, 0);
-	rg_set_user_bpammo(id, WEAPON_SMOKEGRENADE, 0);
 }
