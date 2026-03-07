@@ -663,7 +663,14 @@ stock bool:can_start_battle_now() {
 }
 
 stock bool:can_open_arenas_now() {
-	if (hns_get_mode() != MODE_TRAINING) {
+	new HNS_MODES:iMode = hns_get_mode();
+
+	// Allow /arenas while knife mode is paused.
+	if (iMode == MODE_KNIFE) {
+		return hns_get_state() == STATE_PAUSED;
+	}
+
+	if (iMode != MODE_TRAINING) {
 		return false;
 	}
 

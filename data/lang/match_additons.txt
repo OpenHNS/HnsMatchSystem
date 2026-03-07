@@ -1,7 +1,7 @@
 [en]
 
 PTS_RANK = %s Your rank is ^3%d^1 (Pts: ^3%d^1 | Wins: ^3%d^1 | Loss: ^3%d^1 | Skill: ^3%s^1)
-PTS_NOT_TIME = %s Pts not counted, playing time is less than 15 minutes.
+PTS_NOT_TIME = %s Pts not counted, playing time is less than %d minutes.
 PTS_NOT_PLR = %s Pts not counted, less than 6 players.
 PTS_SET_TT = %s Team ^3TT^1 set ^3+15^1 pts.
 PTS_SET_CT = %s Team ^3CT^1 set ^3+15^1 pts.
@@ -179,7 +179,7 @@ CUP_NOT = This functionality is not available while Tournament Mode is enabled.
 [ru]
 
 PTS_RANK = %s Ваш ранг: ^3%d^1 (Птс: ^3%d^1 | Побед: ^3%d^1 | Поражений: ^3%d^1 | Скилл: ^3%s^1)
-PTS_NOT_TIME = %s Птс не засчитан, время игры меньше 15 минут.
+PTS_NOT_TIME = %s Птс не засчитан, время игры меньше %d минут.
 PTS_NOT_PLR = %s Птс не засчитан, меньше 6-ти игроков.
 PTS_SET_TT = %s Команда ^3TT^1 получила ^3+15^1 птс.
 PTS_SET_CT = %s Команда ^3КT^1 получила ^3+15^1 птс.

@@ -122,6 +122,7 @@ new g_iOwnageData[MAX_PLAYERS + 1];
 new g_sPrefix[24];
 
 new Float:g_flMatchDelay;
+new g_iPtsMinMatchMinutes;
 
 public plugin_natives() {
 	register_native("hns_mysql_stats_init", "native_db_init");
@@ -200,6 +201,9 @@ public plugin_init() {
 
 	pCvar = create_cvar("hns_db", "hns", FCVAR_PROTECTED, "db");
 	bind_pcvar_string(pCvar, g_eCvars[DB], charsmax(g_eCvars[DB]));
+
+	pCvar = create_cvar("hns_pts_min_match_minutes", "15", FCVAR_NONE, "Minimum match duration in minutes to count PTS", true, 0.0, true, 180.0);
+	bind_pcvar_num(pCvar, g_iPtsMinMatchMinutes);
 
 	new szPath[PLATFORM_MAX_PATH]; 
 	get_localinfo("amxx_configsdir", szPath, charsmax(szPath));
@@ -771,7 +775,7 @@ public rgSetClientUserInfoName(id, infobuffer[], szNewName[]) {
 }
 
 public hns_match_started() {
-	g_flMatchDelay = get_gametime() + 600;
+	g_flMatchDelay = get_gametime() + (float(g_iPtsMinMatchMinutes) * 60.0);
 }
 
 public hns_match_canceled() {
@@ -780,7 +784,7 @@ public hns_match_canceled() {
 
 public hns_match_finished(iWinTeam) {
 	if (g_flMatchDelay > get_gametime()) {
-		client_print_color(0, print_team_blue, "%L", LANG_PLAYER, "PTS_NOT_TIME", g_sPrefix);
+		client_print_color(0, print_team_blue, "%L", LANG_PLAYER, "PTS_NOT_TIME", g_sPrefix, g_iPtsMinMatchMinutes);
 	} else {
 		if (get_num_players_in_match() < 5) {
 			client_print_color(0, print_team_blue, "%L", LANG_PLAYER, "PTS_NOT_PLR", g_sPrefix);

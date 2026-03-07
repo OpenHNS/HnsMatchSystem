@@ -98,6 +98,11 @@ public kniferound_roundstart() {
 }
 
 public kniferound_roundend(bool:win_ct) {
+	// Ignore round-end transitions while knife is paused (or not yet live).
+	if (g_eMatchState != STATE_ENABLED) {
+		return;
+	}
+
 	switch(g_iMatchStatus) {
 		case MATCH_CAPTAINKNIFE: {
 			g_iCaptainPick = win_ct ? hns_get_captain_role(ROLE_CAP_B) : hns_get_captain_role(ROLE_CAP_A);

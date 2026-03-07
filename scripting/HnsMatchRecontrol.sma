@@ -547,7 +547,6 @@ public ReControl(id)
 
 			rg_set_user_team(id, g_saveData[id][iTeam]);
 			rg_set_user_team(requested_id, TEAM_SPECTATOR);
-			FinalizeTransferredPlayerState(id);
 
 			ExecuteForward(g_hReplaceForward, _, requested_id, id);
 		}
@@ -567,7 +566,6 @@ public ReControl(id)
 
 			rg_set_user_team(id, g_saveData[id][iTeam]);
 			rg_set_user_team(requested_id, TEAM_SPECTATOR);
-			FinalizeTransferredPlayerState(id);
 
 			ExecuteForward(g_hReplaceForward, _, requested_id, id);
 		}
@@ -602,22 +600,6 @@ public task_Response(Parms[], task_id)
 	return;
 }
 
-stock FinalizeTransferredPlayerState(id) {
-	if (!is_user_connected(id)) {
-		return;
-	}
-
-	set_member(id, m_iJoiningState, GETINTOGAME);
-	set_member(id, m_bJustConnected, false);
-	set_member(id, m_iMenu, Menu_OFF);
-	set_member(id, m_hObserverTarget, 0);
-	set_member(id, m_afPhysicsFlags, get_member(id, m_afPhysicsFlags) & ~PFLAG_OBSERVER);
-
-	set_entvar(id, var_iuser1, OBS_NONE);
-	set_entvar(id, var_iuser2, 0);
-	set_entvar(id, var_iuser3, 0);
-}
-
 ReplacePlayers(replacement_player, substitutive_player, admin_replaced = 0) {
 	g_saveData[substitutive_player][iTeam] = rg_get_user_team(replacement_player);
 
@@ -636,7 +618,6 @@ ReplacePlayers(replacement_player, substitutive_player, admin_replaced = 0) {
 
 		rg_set_user_team(substitutive_player, g_saveData[substitutive_player][iTeam]);
 		rg_set_user_team(replacement_player, TEAM_SPECTATOR);
-		FinalizeTransferredPlayerState(substitutive_player);
 
 		g_bGiveWeapons[substitutive_player] = true;
 
@@ -646,7 +627,6 @@ ReplacePlayers(replacement_player, substitutive_player, admin_replaced = 0) {
 	else {
 		rg_set_user_team(substitutive_player, g_saveData[substitutive_player][iTeam]);
 		rg_set_user_team(replacement_player, TEAM_SPECTATOR);
-		FinalizeTransferredPlayerState(substitutive_player);
 	}
 
 	ExecuteForward(g_hReplaceForward, _, replacement_player, substitutive_player);
