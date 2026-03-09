@@ -339,9 +339,7 @@ public msgShowMenu(msgid, dest, id) {
 		return PLUGIN_CONTINUE;
 
 	if (hns_is_knife_map() && hns_cup_enabled()) {
-		if (!first_join_need_control()) {
-			return PLUGIN_CONTINUE;
-		}
+		return PLUGIN_CONTINUE;
 	}
 
 	static team_select[] = "#Team_Select";
@@ -360,9 +358,7 @@ public msgVguiMenu(msgid, dest, id) {
 		return PLUGIN_CONTINUE;
 	
 	if (hns_is_knife_map() && hns_cup_enabled()) {
-		if (!first_join_need_control()) {
-			return PLUGIN_CONTINUE;
-		}
+		return PLUGIN_CONTINUE;
 	}
 
 	setForceTeamJoinTask(id, msgid);
@@ -384,7 +380,6 @@ bool:shouldAutoJoin(id) {
 setForceTeamJoinTask(id, menu_msgid) {
 	static param_menu_msgid[2];
 	param_menu_msgid[0] = menu_msgid;
-	//LogSendMessage("setForceTeamJoinTask: id=%d menu_msgid=%d delay=0.1", id, menu_msgid);
 
 	set_task(0.1, "taskForceTeamJoin", id, param_menu_msgid, sizeof param_menu_msgid);
 }
@@ -392,70 +387,8 @@ setForceTeamJoinTask(id, menu_msgid) {
 public taskForceTeamJoin(menu_msgid[], id) {
 	if (get_user_team(id))
 		return;
-
-	if (first_join_control(id, menu_msgid[0])) {
-		return;
-	}
-
-	if (g_iCurrentMode == MODE_DM_1TT) {
-		forceTeamJoin(id, menu_msgid[0], "2", "5");
-		return;
-	}
 	
 	forceTeamJoin(id, menu_msgid[0], "5", "5");
-}
-
-stock bool:first_join_control(id, menu_msgid) {
-	switch (g_iMatchStatus) {
-		case MATCH_CAPTAINKNIFE, MATCH_CAPTAINBATTLE, MATCH_CUPKNIFE, MATCH_CUPPICK, MATCH_TEAMKNIFE, MATCH_TEAMBATTLE: {
-			forceTeamJoin(id, menu_msgid, "6");
-			return true;
-		}
-		case MATCH_CAPTAINPICK, MATCH_TEAMPICK, MATCH_MAPPICK: {
-			if (!first_join_is_match_player(id)) {
-				forceTeamJoin(id, menu_msgid, "6");
-				return true;
-			}
-		}
-		case MATCH_STARTED: {
-			if (g_iCurrentMode == MODE_MIX && !first_join_is_match_player(id)) {
-				forceTeamJoin(id, menu_msgid, "6");
-				return true;
-			}
-		}
-	}
-
-	return false;
-}
-
-stock bool:first_join_need_control() {
-	if (g_iCurrentMode == MODE_MIX && g_iMatchStatus == MATCH_STARTED) {
-		return true;
-	}
-
-	switch (g_iMatchStatus) {
-		case MATCH_CAPTAINPICK, MATCH_CAPTAINKNIFE, MATCH_CAPTAINBATTLE, MATCH_TEAMPICK, MATCH_CUPKNIFE, MATCH_CUPPICK, MATCH_TEAMKNIFE, MATCH_TEAMBATTLE, MATCH_MAPPICK: {
-			return true;
-		}
-	}
-
-	return false;
-}
-
-stock bool:first_join_is_match_player(id) {
-	if (g_eMatchInfo[e_tLeaveData] == Invalid_Trie) {
-		return false;
-	}
-
-	new eLeaveData[PLAYER_INFO];
-	new szAuth[MAX_AUTHID_LENGTH];
-	get_user_authid(id, szAuth, charsmax(szAuth));
-
-	if (!TrieGetArray(g_eMatchInfo[e_tLeaveData], szAuth, eLeaveData, PLAYER_INFO)) {
-		return false;
-	}
-
-	return eLeaveData[PLAYER_MATCH];
 }
 
 stock forceTeamJoin(id, menu_msgid, team[] = "5", class[] = "0") {
