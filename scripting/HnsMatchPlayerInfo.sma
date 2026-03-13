@@ -38,6 +38,7 @@ new g_iTopDmg[10];
 new Float:g_flTopRun[10];
 new Float:g_flTopFlash[10];
 new g_iTopStabs[10];
+new bool:g_bTopAvailable;
 
 new Float:g_flShowRoundStats = 0.0;
 
@@ -483,6 +484,7 @@ public hns_round_freezeend() {
 public hns_match_started() {
 	reset_best_players();
 	g_iTopCount = 0;
+	g_bTopAvailable = false;
 	for (new i; i < 10; i++) {
 		best_auth[i] = "";
 	}
@@ -493,6 +495,7 @@ public hns_match_stopped_post() {
 	if (!hns_api_stats_init()) {
 		g_iTopCount = 0;
 		ShowTop(0);
+		g_bTopAvailable = true;
 	}
 	reset_best_players();
 }
@@ -502,6 +505,7 @@ public hns_match_surrendered() {
 	if (!hns_api_stats_init()) {
 		g_iTopCount = 0;
 		ShowTop(0);
+		g_bTopAvailable = true;
 	}
 	reset_best_players();
 }
@@ -511,11 +515,16 @@ public hns_match_finished() {
 	if (!hns_api_stats_init()) {
 		g_iTopCount = 0;
 		ShowTop(0);
+		g_bTopAvailable = true;
 	}
 	reset_best_players();
 }
 
 public ShowTop(player) {
+	if (player && (hns_get_mode() == MODE_MIX || !g_bTopAvailable)) {
+		return;
+	}
+
 	if (!player || !g_iTopCount) {
 		buildTopSnapshot();
 	}
