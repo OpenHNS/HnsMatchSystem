@@ -491,6 +491,7 @@ public hns_match_started() {
 public hns_match_stopped_post() {
 	client_print_color(0, print_team_blue, "%L", LANG_PLAYER, "STATS_TOP", g_szPrefix);
 	if (!hns_api_stats_init()) {
+		g_iTopCount = 0;
 		ShowTop(0);
 	}
 	reset_best_players();
@@ -499,6 +500,7 @@ public hns_match_stopped_post() {
 public hns_match_surrendered() {
 	client_print_color(0, print_team_blue, "%L", LANG_PLAYER, "STATS_TOP", g_szPrefix);
 	if (!hns_api_stats_init()) {
+		g_iTopCount = 0;
 		ShowTop(0);
 	}
 	reset_best_players();
@@ -507,6 +509,7 @@ public hns_match_surrendered() {
 public hns_match_finished() {
 	client_print_color(0, print_team_blue, "%L", LANG_PLAYER, "STATS_TOP", g_szPrefix);
 	if (!hns_api_stats_init()) {
+		g_iTopCount = 0;
 		ShowTop(0);
 	}
 	reset_best_players();
