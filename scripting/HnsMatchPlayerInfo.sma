@@ -30,6 +30,14 @@ new g_MsgSync;
 new g_RoundSync;
 
 new best_auth[10][MAX_AUTHID_LENGTH];
+new g_iTopCount;
+new g_szTopName[10][32];
+new Float:g_flTopSDA[10];
+new Float:g_flTopSurv[10];
+new g_iTopDmg[10];
+new Float:g_flTopRun[10];
+new Float:g_flTopFlash[10];
+new g_iTopStabs[10];
 
 new Float:g_flShowRoundStats = 0.0;
 
@@ -474,6 +482,7 @@ public hns_round_freezeend() {
 
 public hns_match_started() {
 	reset_best_players();
+	g_iTopCount = 0;
 	for (new i; i < 10; i++) {
 		best_auth[i] = "";
 	}
@@ -504,39 +513,10 @@ public hns_match_finished() {
 }
 
 public ShowTop(player) {
-	if (!player) {
-		new Float:best_time[10];
-		new iPlayers[MAX_PLAYERS], iNum;
-		get_players(iPlayers, iNum, "ch");
-		new bid = 0;
-		for (new i; i < iNum; i++) {
-			new id = iPlayers[i];
-
-			if (rg_get_user_team(id) == TEAM_SPECTATOR)
-				continue;
-
-			if (bid >= 10)
-				break;
-
-			get_user_authid(id, best_auth[bid], charsmax(best_auth[]));
-			best_time[bid] = hns_get_stats_surv(STATS_ALL, id);
-			bid++;
-		}
-
-		for (new i = 0; i < 10; i++) {
-			for (new j = 0; j < 10; j++) {
-				if (best_time[j] < best_time[i]) {
-					new Float:tmp = best_time[i];
-					new tmpauth[MAX_AUTHID_LENGTH];
-					copy(tmpauth, charsmax(tmpauth), best_auth[i]);
-					best_time[i] = best_time[j];
-					best_time[j] = tmp;
-					copy(best_auth[i], charsmax(best_auth[]), best_auth[j]);
-					copy(best_auth[j], charsmax(best_auth[]), tmpauth);
-				}
-			}
-		}
+	if (!player || !g_iTopCount) {
+		buildTopSnapshot();
 	}
+
 	new szMotd[MAX_MOTD_LENGTH], iLen; // TODO: Добавить овнеджи, сделать столько стабы
 	iLen = formatex(szMotd, charsmax(szMotd), "<html><head><meta charset=UTF-8>\
 					<link rel=^"stylesheet^" href=^"https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css^">\
@@ -554,25 +534,14 @@ public ShowTop(player) {
 										<th>Flash time</th>\
 										<th>Stabs</th>\
 										</tr>\
-									</thead>\
-									<tbody>");
+										</thead>\
+										<tbody>");
 	new surv_time[24]; new flash_time[24];
-	for (new i = 0; i < 10; i++) {
-		new id = find_player_ex(FindPlayer_MatchAuthId, best_auth[i]);
-
-		if (!is_user_connected(id))
-			continue;
-
-		new Float:fS, Float:fD, Float:fA;
-		fS = float(hns_get_stats_stabs(STATS_ALL, id));
-		fD = float(hns_get_stats_deaths(STATS_ALL, id));
-		fA = float(hns_get_stats_assists(STATS_ALL, id));
-		new Float:fSDA = (fD > 0.0) ? floatdiv(floatadd(fS, fA), fD) : floatadd(fS, fA);
-
-		fnConvertTime(hns_get_stats_surv(STATS_ALL, id), surv_time, 23);
-		fnConvertTime(hns_get_stats_flashtime(STATS_ALL, id), flash_time, 23);
+	for (new i = 0; i < g_iTopCount; i++) {
+		fnConvertTime(g_flTopSurv[i], surv_time, charsmax(surv_time));
+		fnConvertTime(g_flTopFlash[i], flash_time, charsmax(flash_time));
 		iLen += formatex(szMotd[iLen], charsmax(szMotd) - iLen, "<tr> \
-		<td>%n</td> \
+		<td>%s</td> \
 		<td>%.1f</td> \
 		<td>%s</td> \
 		<td>%d</td> \
@@ -580,21 +549,86 @@ public ShowTop(player) {
 		<td>%s</td> \
 		<td>%d</td> \
 		</tr>",
-			id,
-			fSDA,
+			g_szTopName[i],
+			g_flTopSDA[i],
 			surv_time,
-			hns_get_stats_dmg_tt(STATS_ALL, id) + hns_get_stats_dmg_ct(STATS_ALL, id),
-			hns_get_stats_runned(STATS_ALL, id) / 1000.0,
+			g_iTopDmg[i],
+			g_flTopRun[i],
 			flash_time,
-			hns_get_stats_stabs(STATS_ALL, id));
+			g_iTopStabs[i]);
 	}
 	iLen += formatex(szMotd[iLen], charsmax(szMotd) - iLen, "</tbody>\
 								</table>\
 							</div>\
 						</body>\
-						</html>");
+							</html>");
 	show_motd(player, szMotd);
 	//log_to_file("motd.txt", szMotd);
+}
+
+stock buildTopSnapshot() {
+	new Float:best_time[10];
+	new iPlayers[MAX_PLAYERS], iNum;
+	get_players(iPlayers, iNum, "ch");
+
+	g_iTopCount = 0;
+
+	for (new i; i < 10; i++) {
+		best_auth[i][0] = EOS;
+		best_time[i] = 0.0;
+	}
+
+	new bid = 0;
+	for (new i; i < iNum; i++) {
+		new id = iPlayers[i];
+
+		if (rg_get_user_team(id) == TEAM_SPECTATOR)
+			continue;
+
+		if (bid >= 10)
+			break;
+
+		get_user_authid(id, best_auth[bid], charsmax(best_auth[]));
+		best_time[bid] = hns_get_stats_surv(STATS_ALL, id);
+		bid++;
+	}
+
+	for (new i = 0; i < 10; i++) {
+		for (new j = 0; j < 10; j++) {
+			if (best_time[j] < best_time[i]) {
+				new Float:tmp = best_time[i];
+				new tmpauth[MAX_AUTHID_LENGTH];
+				copy(tmpauth, charsmax(tmpauth), best_auth[i]);
+				best_time[i] = best_time[j];
+				best_time[j] = tmp;
+				copy(best_auth[i], charsmax(best_auth[]), best_auth[j]);
+				copy(best_auth[j], charsmax(best_auth[]), tmpauth);
+			}
+		}
+	}
+
+	for (new i = 0; i < 10; i++) {
+		if (!best_auth[i][0]) {
+			continue;
+		}
+
+		new id = find_player_ex(FindPlayer_MatchAuthId, best_auth[i]);
+		if (!is_user_connected(id)) {
+			continue;
+		}
+
+		new Float:fS = float(hns_get_stats_stabs(STATS_ALL, id));
+		new Float:fD = float(hns_get_stats_deaths(STATS_ALL, id));
+		new Float:fA = float(hns_get_stats_assists(STATS_ALL, id));
+		g_flTopSDA[g_iTopCount] = (fD > 0.0) ? floatdiv(floatadd(fS, fA), fD) : floatadd(fS, fA);
+		g_flTopSurv[g_iTopCount] = hns_get_stats_surv(STATS_ALL, id);
+		g_flTopFlash[g_iTopCount] = hns_get_stats_flashtime(STATS_ALL, id);
+		g_iTopDmg[g_iTopCount] = hns_get_stats_dmg_tt(STATS_ALL, id) + hns_get_stats_dmg_ct(STATS_ALL, id);
+		g_flTopRun[g_iTopCount] = hns_get_stats_runned(STATS_ALL, id) / 1000.0;
+		g_iTopStabs[g_iTopCount] = hns_get_stats_stabs(STATS_ALL, id);
+		get_user_name(id, g_szTopName[g_iTopCount], charsmax(g_szTopName[]));
+		g_iTopCount++;
+	}
 }
 
 public rgTakeDamage(victim, inflictor, attacker, Float:damage, damagebits) {
