@@ -214,6 +214,11 @@ public codeManagementWatcherMenu(id, hMenu, item) {
 
 	switch (iKey) {
 		case 1: {
+			if (!isUserFullWatcher(id)) {
+				ManagementWatcherMenu(id);
+				return PLUGIN_HANDLED;
+			}
+
 			if(is_user_connected(g_eWatcher[w_iId])) {
 				remove_user_flags(g_eWatcher[w_iId], hns_get_flag_watcher());
 				client_print_color(0, print_team_red, "%L", LANG_PLAYER, "WTR_DELETE", g_sPrefix, id, g_eWatcher[w_iId]);
@@ -286,9 +291,6 @@ public MakeWatcher(maker, id) {
 		return PLUGIN_HANDLED;
 	}
 	
-	if(is_user_connected(g_eWatcher[w_iId]))
-		remove_user_flags(g_eWatcher[w_iId], hns_get_flag_watcher());
-	
 	ActivateWatcher(id);
 	client_print_color(0, print_team_blue, "%L", LANG_PLAYER, "WTR_CHOOSE_NEW", g_sPrefix, maker, id);
 	
@@ -296,6 +298,10 @@ public MakeWatcher(maker, id) {
 }
 
 public ActivateWatcher(id) {
+	if (is_user_connected(g_eWatcher[w_iId]) && g_eWatcher[w_iId] != id) {
+		remove_user_flags(g_eWatcher[w_iId], hns_get_flag_watcher());
+	}
+
 	get_user_authid(id, g_eWatcher[w_szSteamId], charsmax(g_eWatcher[w_szSteamId]));
 	g_eWatcher[w_iId] = id;
 	
