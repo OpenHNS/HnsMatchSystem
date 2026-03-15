@@ -15,8 +15,19 @@ public training_init() {
 }
 
 public training_enable_rules() {
+	if (g_eMatchState == STATE_PAUSED) {
+		set_semiclip(SEMICLIP_ON, true);
+		goto hooks;
+	}
+
+	if (hns_is_knife_map()) {
+		set_semiclip(SEMICLIP_ON, true);
+		goto hooks;
+	}
+
 	set_semiclip(SEMICLIP_OFF);
 
+	hooks:
 	register_clcmd("+hook", "hook_old_on");
 	register_clcmd("-hook", "hook_old_off");
 
