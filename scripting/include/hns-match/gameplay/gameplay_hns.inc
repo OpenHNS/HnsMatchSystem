@@ -29,6 +29,10 @@ public hns_enable_rules()
 		set_semiclip(SEMICLIP_ON, true);
 	}
 
+	if (g_iCurrentMode == MODE_DM || g_iCurrentMode == MODE_DM_1TT) {
+		set_semiclip(SEMICLIP_ON, true);
+	}
+
 	if (!fwdDisableKnife)
 	{
 		fwdDisableKnife = RegisterHam(Ham_Item_Deploy, "weapon_knife", "fwd_Knife_Deploy_Post", true);

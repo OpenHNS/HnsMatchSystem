@@ -74,8 +74,10 @@ public wait_players() {
 			if(task_exists(TASK_WAIT)) {
 				remove_task(TASK_WAIT);
 			}
+			g_iMatchStatus = MATCH_NONE;
+			save_reset_data();
 		}
-	}
+		}
 
 	return PLUGIN_HANDLED;
 }

@@ -97,12 +97,12 @@ public training_player_join(id) {
 		return;
 	}
 
-	if (g_bPlayersListLoaded) {
-		if (!checkPlayer(id))
+	if (g_iMatchStatus == MATCH_WAITCONNECT && g_bPlayersListLoaded) {
+		if (!checkPlayer(id)) {
 			transferUserToSpec(id);
-		else
-			rg_round_respawn(id);
+			return;
+		}
 	}
-	else
-		rg_round_respawn(id);
+
+	rg_round_respawn(id);
 }

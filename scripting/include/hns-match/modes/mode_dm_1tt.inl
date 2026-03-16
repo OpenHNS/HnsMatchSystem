@@ -60,14 +60,32 @@ public dm_1tt_player_join(id) {
 	}
 
 	new bool:bForceRespawn = false;
+	new bool:bNeedTT = (get_playersnum_ex(GetPlayers_MatchTeam, "TERRORIST") <= 0);
 
-	if (getUserTeam(id) != TEAM_CT) {
-		rg_set_user_team(id, TEAM_CT);
-		bForceRespawn = true;
+	if (bNeedTT) {
+		if (getUserTeam(id) != TEAM_TERRORIST) {
+			rg_set_user_team(id, TEAM_TERRORIST);
+			bForceRespawn = true;
+		}
+	} else {
+		if (getUserTeam(id) != TEAM_CT) {
+			rg_set_user_team(id, TEAM_CT);
+			bForceRespawn = true;
+		}
 	}
 
 	if (bForceRespawn || !is_user_alive(id)) {
 		rg_round_respawn(id);
+	}
+
+	if (bNeedTT) {
+		if (!g_iSettings[ONEHPMODE]) {
+			set_entvar(id, var_health, 100.0);
+		}
+
+		if (is_user_alive(id)) {
+			hns_setrole(id);
+		}
 	}
 }
 

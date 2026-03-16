@@ -578,6 +578,10 @@ public cmdStop(id) {
 		remove_task(TASK_WAIT_CUP)
 	}
 
+	if (task_exists(TASK_STARTED)) {
+		remove_task(TASK_STARTED)
+	}
+
 	switch (g_iCurrentMode) {
 		case MODE_MIX: {
 			mix_stop();	
@@ -594,27 +598,31 @@ public cmdStop(id) {
 			}
 			kniferound_stop();
 		}
-		case MODE_TRAINING: {
-			if (g_iMatchStatus == MATCH_CAPTAINPICK || g_iMatchStatus == MATCH_TEAMPICK) {
-				resetCaptainData();
-				g_iMatchStatus = MATCH_NONE;
-				training_start();
-				client_print_color(0, print_team_blue, "%L", LANG_PLAYER, "STOP_CAP", g_iSettings[PREFIX], id);
-			} else if (g_iMatchStatus == MATCH_BATTLERACE) {
-				if (hns_battle_init()) {
-					hns_battle_end(true);
+			case MODE_TRAINING: {
+				if (g_iMatchStatus == MATCH_CAPTAINPICK || g_iMatchStatus == MATCH_TEAMPICK) {
+					resetCaptainData();
+					g_iMatchStatus = MATCH_NONE;
+					training_start();
+					client_print_color(0, print_team_blue, "%L", LANG_PLAYER, "STOP_CAP", g_iSettings[PREFIX], id);
+				} else if (g_iMatchStatus == MATCH_BATTLERACE) {
+					if (hns_battle_init()) {
+						hns_battle_end(true);
+					}
+					g_iMatchStatus = MATCH_NONE;
+					client_print_color(0, print_team_blue, "%L", LANG_PLAYER, "STOP_RACE", g_iSettings[PREFIX], id);
+				} else if (g_iMatchStatus == MATCH_CUPPICK) {
+					// TODO: Стоп cup pick ban
+					hns_cup_stop_veto();
+					g_iMatchStatus = MATCH_NONE;
+					save_reset_data();
+					training_start();
+				} else if (g_iMatchStatus) {
+					if (g_iMatchStatus == MATCH_WAITCONNECT || g_iMatchStatus == MATCH_MAPPICK) {
+						save_reset_data();
+					}
+					g_iMatchStatus = MATCH_NONE;
 				}
-				g_iMatchStatus = MATCH_NONE;
-				client_print_color(0, print_team_blue, "%L", LANG_PLAYER, "STOP_RACE", g_iSettings[PREFIX], id);
-			} else if (g_iMatchStatus == MATCH_CUPPICK) {
-				// TODO: Стоп cup pick ban
-				hns_cup_stop_veto();
-				g_iMatchStatus = MATCH_NONE;
-				training_start();
-			} else if (g_iMatchStatus) {
-				g_iMatchStatus = MATCH_NONE;
 			}
-		}
 		case MODE_BATTLES: {
 			new MATCH_STATUS:iPrevStatus = g_iMatchStatus;
 

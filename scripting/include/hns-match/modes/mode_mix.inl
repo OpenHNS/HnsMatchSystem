@@ -140,7 +140,7 @@ public mix_swap() {
 public mix_stop() {
 	ExecuteForward(g_hForwards[MATCH_CANCEL], _);
 
-	match_reset_data();
+	match_reset_data(true);
 
 	training_start();
 }
