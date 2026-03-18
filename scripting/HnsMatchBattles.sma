@@ -432,6 +432,9 @@ public StartBattle(iArenaID) {
 
 	for (new i; i < iNum; i++) {
 		new id = iPlayers[i];
+		if (rg_get_user_team(id) != TEAM_SPECTATOR && !is_user_alive(id)) {
+			rg_round_respawn(id);
+		}
 		PreparePlayer(id, true);
 	}
 
@@ -514,7 +517,7 @@ public task_StartBattle() {
 
 		for (new i; i < iNum; i++) {
 			new id = iPlayers[i];
-			if (TeamName:get_member(id, m_iTeam) == TEAM_SPECTATOR || !is_user_alive(id))
+			if (rg_get_user_team(id) == TEAM_SPECTATOR || !is_user_alive(id))
 				continue;
 			PreparePlayer(id, false);
 		}
@@ -1086,7 +1089,7 @@ public touch_PlayerCollide(iTouched, iToucher) {
 CheckStatus(id, bool:is_finish) {
 	if (is_finish) {
 		new MATCH_STATUS:iStatus = hns_get_status();
-		new TeamName:iWinnerTeam = TeamName:get_member(id, m_iTeam);
+		new TeamName:iWinnerTeam = rg_get_user_team(id);
 		new bool:bRaceMode = (iStatus == MATCH_BATTLERACE);
 
 		client_print_color(0, print_team_blue, "%s %L", g_sPrefix, LANG_PLAYER, "BATTLE_WIN_PLAYER", id);
@@ -1122,7 +1125,7 @@ stock PrintRacePlaces(iFinishPlayer) {
 			continue;
 		}
 
-		if (TeamName:get_member(id, m_iTeam) == TEAM_SPECTATOR) {
+		if (rg_get_user_team(id) == TEAM_SPECTATOR) {
 			continue;
 		}
 
@@ -1253,7 +1256,7 @@ public AddToFullPack_Post(es, e, iEnt, id, hostflags, player, pSet) {
 
 PreparePlayer(id, bool:freeze) {
 	if (!is_battle_context()) return;
-	new TeamName:iTeam = TeamName:get_member(id, m_iTeam);
+	new TeamName:iTeam = rg_get_user_team(id);
 	if (iTeam == TEAM_SPECTATOR || !is_user_alive(id)) return;
 
 	new arena_id = g_eBattleData[BATTLE_ARENA];
@@ -1316,7 +1319,7 @@ public SetVelocity(id) {
 		return;
 	}
 
-	if (TeamName:get_member(id, m_iTeam) == TEAM_SPECTATOR) {
+	if (rg_get_user_team(id) == TEAM_SPECTATOR) {
 		return;
 	}
 
