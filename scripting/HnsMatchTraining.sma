@@ -454,7 +454,7 @@ public rgFlPlayerFallDamage(id) {
 }
 
 public rgExplodeGrenade(const pGrenade, const tracehandle, const bitsDamageType) {
-	if (hns_get_mode() != MODE_TRAINING && hns_get_state() != STATE_PAUSED) {
+	if (!should_cleanup_flash_effects()) {
 		return HC_CONTINUE;
 	}
 
@@ -471,7 +471,7 @@ public rgExplodeGrenadePost(const pGrenade, const tracehandle, const bitsDamageT
 		g_iMsgHookTempEntity = 0;
 	}
 
-	if (hns_get_mode() != MODE_TRAINING && hns_get_state() != STATE_PAUSED) {
+	if (!should_cleanup_flash_effects()) {
 		return HC_CONTINUE;
 	}
 
@@ -495,6 +495,16 @@ public rgExplodeGrenadePost(const pGrenade, const tracehandle, const bitsDamageT
 	}
 
 	return HC_CONTINUE;
+}
+
+stock bool:should_cleanup_flash_effects() {
+	new HNS_MODES:iMode = hns_get_mode();
+
+	if (iMode == MODE_TRAINING || iMode == MODE_DM || iMode == MODE_DM_1TT) {
+		return true;
+	}
+
+	return hns_get_state() == STATE_PAUSED;
 }
 
 // public fmAddToFullPack(es, e, iEnt, id, hostflags, player, pSet) {
