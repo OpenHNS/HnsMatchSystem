@@ -7,6 +7,7 @@
 
 const TASK_START_BATTLE = 78291;
 const TASK_PLAYER_RETURN = 13901;
+const TASK_CHECK_BATTLE_TEAMS = 78292;
 
 new const g_szSounds[][] = {
 	"openhns/battle/prepare.wav",
@@ -441,6 +442,8 @@ public StartBattle(iArenaID) {
 	g_eBattleData[BATTLE_PREPARE] = 0;
 	remove_task(TASK_START_BATTLE);
 	set_task(1.0, "task_StartBattle", .id = TASK_START_BATTLE);
+	remove_task(TASK_CHECK_BATTLE_TEAMS);
+	set_task(1.0, "task_CheckBattleTeams", .id = TASK_CHECK_BATTLE_TEAMS, .flags = "b");
 
 	return PLUGIN_HANDLED;
 }
@@ -454,6 +457,7 @@ public EndBattle(bool:set_training) {
 
 	g_eBattleData[BATTLE_ENABLED] = false;
 	remove_task(TASK_START_BATTLE);
+	remove_task(TASK_CHECK_BATTLE_TEAMS);
 	arrayset(g_eBattleData, 0, BattleData_s);
 
 	if (bRaceMode) {
@@ -563,6 +567,10 @@ public task_StartBattle() {
 		set_task(1.0, "task_StartBattle", .id = TASK_START_BATTLE);
 
 	return HC_CONTINUE;
+}
+
+public task_CheckBattleTeams() {
+	CheckBattleTeamsAndStop();
 }
 
 public CBasePlayer_Spawn_Post(id) {
@@ -696,6 +704,33 @@ stock bool:is_battle_race_context() {
 
 stock bool:is_battle_context() {
 	return is_battle_knife_context() || is_battle_race_context();
+}
+
+stock bool:CheckBattleTeamsAndStop() {
+	if (!g_eBattleData[BATTLE_ENABLED] || !is_battle_context()) {
+		return false;
+	}
+
+	new iTT, iCT;
+
+	for (new id = 1; id <= MaxClients; id++) {
+		if (!is_user_connected(id) || is_user_hltv(id) || is_user_bot(id)) {
+			continue;
+		}
+
+		switch (rg_get_user_team(id)) {
+			case TEAM_TERRORIST: iTT++;
+			case TEAM_CT: iCT++;
+		}
+	}
+
+	if (iTT > 0 && iCT > 0) {
+		return false;
+	}
+
+	EndBattle(true);
+	hns_set_status(MATCH_NONE);
+	return true;
 }
 
 // ======== Конфиг: загрузка секции текущей карты ========
