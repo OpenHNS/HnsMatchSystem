@@ -181,7 +181,10 @@ public Menu(id)
 
 			num_to_str(Player, szPlayer, charsmax(szPlayer));
 
-			if (g_bHnsBannedInit && e_bBanned[Player] && !is_control) {
+			if (!is_control && hns_is_user_noplay(Player)) {
+				formatex(szBuffer, charsmax(szBuffer), "\d%s \r[noplay]", szName);
+				menu_additem(m_Menu, szBuffer, szPlayer);
+			} else if (g_bHnsBannedInit && e_bBanned[Player] && !is_control) {
 				formatex(szBuffer, charsmax(szBuffer), "%L", id, "RECON_BANNED", szName);
 				menu_additem(m_Menu, szBuffer, szPlayer);
 			} else if (g_bInvited[Player]) {
@@ -229,6 +232,11 @@ public MenuHandler(id, m_Menu, szKeys)
 			Menu(id);
 			return;
 		}
+	}
+
+	if (g_ControlType[id] == TYPE_REPLACE && hns_is_user_noplay(invited_id)) {
+		Menu(id);
+		return;
 	}
 	
 	if (!g_bInvited[invited_id])
@@ -324,7 +332,9 @@ public ReplaceAdmin(id)
 
 		new szPlayer[10]; num_to_str(iPlayer, szPlayer, charsmax(szPlayer));
 
-		if ((g_bHnsBannedInit && e_bBanned[iPlayer] && (g_ControlType[iPlayer] == TYPE_REPLACE))) {
+		if (hns_is_user_noplay(iPlayer)) {
+			menu_additem(menu, fmt("\d%n \r[noplay]", iPlayer), szPlayer);
+		} else if ((g_bHnsBannedInit && e_bBanned[iPlayer] && (g_ControlType[iPlayer] == TYPE_REPLACE))) {
 			menu_additem(menu, fmt("%L", id, "RECON_BANNED", iPlayer), szPlayer);
 		} else {
 			menu_additem(menu, fmt("%n", iPlayer), szPlayer);
@@ -374,6 +384,11 @@ public ReplaceAdmin_Handler(id, menu, item)
 			ReplaceAdmin(id);
 			return;
 		}
+	}
+
+	if (hns_is_user_noplay(iPlayer)) {
+		ReplaceAdmin(id);
+		return;
 	}
 
 	new TeamName:team = get_member(iPlayer, m_iTeam);

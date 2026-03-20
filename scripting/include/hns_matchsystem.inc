@@ -190,6 +190,15 @@ native hns_get_point_distance();
 native hns_get_players_distance();
 
 /**
+* Returns whether player has /noplay status enabled.
+*
+* @param id        Player index
+*
+* @return          1 if noplay, 0 otherwise
+*/
+native hns_is_user_noplay(id);
+
+/**
 * Returns watcher access flag bitmask.
 *
 * @return		Bitflag value

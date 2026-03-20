@@ -50,5 +50,9 @@ public match_system_additons(const szNativeName[], iNativeID, iTrapMode) {
 		return PLUGIN_HANDLED
 	}
 
+	if (equal(szNativeName, "hns_is_user_noplay")) {
+		return PLUGIN_HANDLED
+	}
+
 	return PLUGIN_CONTINUE;
 }

@@ -30,6 +30,7 @@ public plugin_natives() {
 
 	register_native("hns_get_point_distance", "native_get_point_distance");
 	register_native("hns_get_players_distance", "native_get_players_distance");
+	register_native("hns_is_user_noplay", "native_is_user_noplay");
 
 	set_native_filter("match_system_additons");
 }
@@ -138,6 +139,19 @@ public native_get_point_distance() {
 
 public native_get_players_distance() {
 	return g_iPlayerDistance;
+}
+
+public native_is_user_noplay(amxx, params) {
+	if (params < 1) {
+		return 0;
+	}
+
+	new id = get_param(1);
+	if (id < 1 || id > MaxClients) {
+		return 0;
+	}
+
+	return g_bNoplay[id];
 }
 
 public native_hns_isboost() {
