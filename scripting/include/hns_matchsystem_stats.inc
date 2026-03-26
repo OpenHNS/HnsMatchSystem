@@ -102,6 +102,16 @@ native hns_get_stats_flashcount(type, id);
 native hns_get_stats_flash(type, id);
 
 /**
+* Gets number of flashbang fails by TT (flash exploded without blinding any CT).
+*
+* @param type Stats type: TYPE_STATS
+* @param id Client index
+*
+* @return num
+*/
+native hns_get_stats_flashfail(type, id);
+
+/**
 * Gets total time (seconds) of CTs blinded by TT.
 *
 * @param type Stats type: TYPE_STATS
@@ -112,14 +122,84 @@ native hns_get_stats_flash(type, id);
 native Float:hns_get_stats_flashtime(type, id);
 
 /**
-* Gets players hide time.
+* Gets time (seconds) when player was the only alive TT.
 *
 * @param type Stats type: TYPE_STATS
 * @param id Client index
 *
 * @return float
 */
-native Float:hns_get_stats_hidetime(type, id);
+native Float:hns_get_stats_last_tt_time(type, id);
+
+/**
+* Gets first kills by CT (first CT kill in a round).
+*
+* @param type Stats type: TYPE_STATS
+* @param id Client index
+*
+* @return num
+*/
+native hns_get_stats_fk(type, id);
+
+/**
+* Gets first deaths of TT (first TT death in a round).
+*
+* @param type Stats type: TYPE_STATS
+* @param id Client index
+*
+* @return num
+*/
+native hns_get_stats_fd(type, id);
+
+/**
+* Gets number of CT rounds with 1 kill.
+*
+* @param type Stats type: TYPE_STATS
+* @param id Client index
+*
+* @return num
+*/
+native hns_get_stats_mk1(type, id);
+
+/**
+* Gets number of CT rounds with 2 kills.
+*
+* @param type Stats type: TYPE_STATS
+* @param id Client index
+*
+* @return num
+*/
+native hns_get_stats_mk2(type, id);
+
+/**
+* Gets number of CT rounds with 3 kills.
+*
+* @param type Stats type: TYPE_STATS
+* @param id Client index
+*
+* @return num
+*/
+native hns_get_stats_mk3(type, id);
+
+/**
+* Gets number of CT rounds with 4 kills.
+*
+* @param type Stats type: TYPE_STATS
+* @param id Client index
+*
+* @return num
+*/
+native hns_get_stats_mk4(type, id);
+
+/**
+* Gets number of CT rounds with 5+ kills.
+*
+* @param type Stats type: TYPE_STATS
+* @param id Client index
+*
+* @return num
+*/
+native hns_get_stats_mk5(type, id);
 
 
 /**
