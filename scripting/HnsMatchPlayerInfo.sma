@@ -407,8 +407,8 @@ public hns_apply_stats() {
 		new id = iPlayers[i];
 
 		g_eRoundBests[id][PLR_STATS_STABS] = hns_get_stats_stabs(STATS_ROUND, id);
-		g_eRoundBests[id][PLR_STATS_DMG_CT] = hns_get_stats_dmg_ct(STATS_ROUND, id);
-		g_eRoundBests[id][PLR_STATS_DMG_TT] =  hns_get_stats_dmg_tt(STATS_ROUND, id);
+		g_eRoundBests[id][PLR_STATS_DMG_CT] = hns_get_stats_falldmg_ct(STATS_ROUND, id);
+		g_eRoundBests[id][PLR_STATS_DMG_TT] =  hns_get_stats_falldmg_tt(STATS_ROUND, id);
 		g_eRoundBests[id][PLR_STATS_FLASHTIME] = hns_get_stats_flashtime(STATS_ROUND, id);
 		g_eRoundBests[id][PLR_STATS_OWNAGES] = hns_get_stats_ownages(STATS_ROUND, id);
 		g_eRoundBests[id][PLR_STATS_BHOP_COUNT] = hns_get_stats_bhop_count(STATS_ROUND, id);
@@ -635,7 +635,7 @@ stock buildTopSnapshot() {
 		g_flTopSDA[g_iTopCount] = (fD > 0.0) ? floatdiv(floatadd(fS, fA), fD) : floatadd(fS, fA);
 		g_flTopSurv[g_iTopCount] = hns_get_stats_surv(STATS_ALL, id);
 		g_flTopFlash[g_iTopCount] = hns_get_stats_flashtime(STATS_ALL, id);
-		g_iTopDmg[g_iTopCount] = hns_get_stats_dmg_tt(STATS_ALL, id) + hns_get_stats_dmg_ct(STATS_ALL, id);
+		g_iTopDmg[g_iTopCount] = hns_get_stats_falldmg_tt(STATS_ALL, id) + hns_get_stats_falldmg_ct(STATS_ALL, id);
 		g_flTopRun[g_iTopCount] = hns_get_stats_runned(STATS_ALL, id) / 1000.0;
 		g_iTopStabs[g_iTopCount] = hns_get_stats_stabs(STATS_ALL, id);
 		get_user_name(id, g_szTopName[g_iTopCount], charsmax(g_szTopName[]));

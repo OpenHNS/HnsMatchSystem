@@ -10,7 +10,7 @@ enum _:TYPE_STATS
 }
 
 /**
-* Gets players kills.
+* Gets players kills while playing CT.
 *
 * @param type Stats type: TYPE_STATS
 * @param id Client index
@@ -20,7 +20,7 @@ enum _:TYPE_STATS
 native hns_get_stats_kills(type, id);
 
 /**
-* Gets players deaths.
+* Gets players deaths while playing CT.
 *
 * @param type Stats type: TYPE_STATS
 * @param id Client index
@@ -30,7 +30,7 @@ native hns_get_stats_kills(type, id);
 native hns_get_stats_deaths(type, id);
 
 /**
-* Gets players assists.
+* Gets players assists while playing CT.
 *
 * @param type Stats type: TYPE_STATS
 * @param id Client index
@@ -40,7 +40,7 @@ native hns_get_stats_deaths(type, id);
 native hns_get_stats_assists(type, id);
 
 /**
-* Gets players stabs.
+* Gets players stabs while playing CT.
 *
 * @param type Stats type: TYPE_STATS
 * @param id Client index
@@ -50,58 +50,59 @@ native hns_get_stats_assists(type, id);
 native hns_get_stats_stabs(type, id);
 
 /**
-* Gets players damage CT.
+* Gets fall damage received while playing CT.
+* Damage per fall is capped at 100.
 *
 * @param type Stats type: TYPE_STATS
 * @param id Client index
 *
 * @return num
 */
-native hns_get_stats_dmg_ct(type, id);
+native hns_get_stats_falldmg_ct(type, id);
 
 /**
-* Gets players damage TT.
+* Gets fall damage received while playing TT.
+* Damage per fall is capped at 100.
 *
 * @param type Stats type: TYPE_STATS
 * @param id Client index
 *
 * @return damage TT num
 */
-native hns_get_stats_dmg_tt(type, id);
-
+native hns_get_stats_falldmg_tt(type, id);
 
 /**
-* Gets players runned distance.
+* Gets knife damage dealt by CT (damage per hit capped at 100).
 *
 * @param type Stats type: TYPE_STATS
 * @param id Client index
 *
-* @return float
+* @return num
 */
-native Float:hns_get_stats_runned(type, id);
+native hns_get_stats_damage(type, id);
 
 /**
-* Gets players runned time.
+* Gets number of CTs blinded by TT (per blind event).
 *
 * @param type Stats type: TYPE_STATS
 * @param id Client index
 *
-* @return float
+* @return num
 */
-native Float:hns_get_stats_runnedtime(type, id);
+native hns_get_stats_flashcount(type, id);
 
 /**
-* Gets players avg speed.
+* Gets number of flashbang throws by TT.
 *
 * @param type Stats type: TYPE_STATS
 * @param id Client index
 *
-* @return float
+* @return num
 */
-native Float:hns_get_stats_avg_speed(type, id);
+native hns_get_stats_flash(type, id);
 
 /**
-* Gets players flash time.
+* Gets total time (seconds) of CTs blinded by TT.
 *
 * @param type Stats type: TYPE_STATS
 * @param id Client index
@@ -130,6 +131,48 @@ native Float:hns_get_stats_hidetime(type, id);
 * @return float
 */
 native Float:hns_get_stats_playtime(type, id);
+
+/**
+* Gets number of rounds player was TT.
+*
+* @param type Stats type: TYPE_STATS
+* @param id Client index
+*
+* @return num
+*/
+native hns_get_stats_tt_rounds(type, id);
+
+/**
+* Gets number of rounds player was CT.
+*
+* @param type Stats type: TYPE_STATS
+* @param id Client index
+*
+* @return num
+*/
+native hns_get_stats_ct_rounds(type, id);
+
+/**
+* Gets number of confirmed spotted rounds.
+* A round is confirmed if TT had visible contact with CT for 3 continuous seconds
+* after 5 seconds from freeze end and within height delta limit.
+*
+* @param type Stats type: TYPE_STATS
+* @param id Client index
+*
+* @return num
+*/
+native hns_get_stats_spotted_rounds(type, id);
+
+/**
+* Gets total survive time (seconds) in rounds where spotted contact was confirmed.
+*
+* @param type Stats type: TYPE_STATS
+* @param id Client index
+*
+* @return float
+*/
+native Float:hns_get_stats_spotted_survived_time(type, id);
 
 /**
 * Gets players survive time.

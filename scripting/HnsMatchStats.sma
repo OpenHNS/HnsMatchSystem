@@ -13,6 +13,9 @@ forward ms_session_sgs(id, iCount, Float:flPercent, Float:flAVGSpeed);
 forward ms_session_ddrun(id, iCount, Float:flPercent, Float:flAVGSpeed);
 
 #define TASK_TIMER_STATS 61237
+#define SPOT_START_DELAY 5.0
+#define SPOT_CONFIRM_TIME 3.0
+#define SPOT_HEIGHT_LIMIT 100.0
 
 enum _:TYPE_STATS
 {
@@ -23,18 +26,23 @@ enum _:TYPE_STATS
 new g_szPrefix[24];
 
 enum _: PLAYER_STATS {
-	PLR_STATS_KILLS,
-	PLR_STATS_DEATHS,
-	PLR_STATS_ASSISTS,
-	PLR_STATS_STABS,
-	PLR_STATS_DMG_CT,
-	PLR_STATS_DMG_TT,
-	Float:PLR_STATS_RUNNED,
-	Float:PLR_STATS_RUNNEDTIME,
+	PLR_STATS_KILLS_CT,
+	PLR_STATS_DEATHS_CT,
+	PLR_STATS_ASSISTS_CT,
+	PLR_STATS_STABS_CT,
+	PLR_STATS_DAMAGE_CT,
+	PLR_STATS_FALLDMG_CT,
+	PLR_STATS_FALLDMG_TT,
+	PLR_STATS_FLASHCOUNT,
+	PLR_STATS_FLASH,
 	Float:PLR_STATS_FLASHTIME,
 	Float:PLR_STATS_SURVTIME,
 	Float:PLR_STATS_HIDETIME,
 	Float:PLR_STATS_PLAYTIME,
+	PLR_STATS_TT_ROUNDS,
+	PLR_STATS_CT_ROUNDS,
+	PLR_STATS_SPOTTED_ROUNDS,
+	Float:PLR_STATS_SPOTTED_SURV_TIME,
 	PLR_STATS_OWNAGES,
 	PLR_STATS_STOPS,
 	PLR_STATS_BHOP_COUNT,
@@ -55,6 +63,9 @@ new g_iGameStops;
 new g_iLastAttacker[MAX_PLAYERS + 1];
 
 new Float:g_flLastPosition[MAX_PLAYERS + 1][3];
+new Float:g_flSpottedVisibleTime[MAX_PLAYERS + 1];
+new bool:g_bSpottedConfirmed[MAX_PLAYERS + 1];
+new Float:g_flSpottedTrackStart;
 
 new Trie:g_tSaveData;
 new Trie:g_tSaveRoundData;
@@ -63,7 +74,7 @@ new g_hApplyStatsForward;
 new g_hSaveLeaveForward;
 
 public plugin_init() {
-	register_plugin("Match: Stats", "1.2", "OpenHNS"); // Garey
+	register_plugin("Match: Stats", "2.0", "OpenHNS"); // Garey
 
 	RegisterHookChain(RG_CBasePlayer_Killed, "rgPlayerKilled", false);
 	RegisterHookChain(RG_CBasePlayer_Killed, "rgPlayerKilledPost", true);
@@ -73,6 +84,7 @@ public plugin_init() {
 	RegisterHookChain(RG_CSGameRules_FlPlayerFallDamage, "rgPlayerFallDamage", true);
 	RegisterHookChain(RG_CSGameRules_OnRoundFreezeEnd, "rgRoundFreezeEnd", true);
 	RegisterHookChain(RG_PlayerBlind, "rgPlayerBlind");
+	RegisterHookChain(RG_ThrowFlashbang, "rgThrowFlashbang", true);
 
 	g_hApplyStatsForward = CreateMultiForward("hns_apply_stats", ET_CONTINUE, FP_CELL);
 	g_hSaveLeaveForward = CreateMultiForward("hns_save_leave_stats", ET_CONTINUE, FP_CELL, FP_CELL);
@@ -90,15 +102,21 @@ public plugin_natives() {
 	register_native("hns_get_stats_deaths", "native_get_stats_deaths");
 	register_native("hns_get_stats_assists", "native_get_stats_assists");
 	register_native("hns_get_stats_stabs", "native_get_stats_stabs");
-	register_native("hns_get_stats_dmg_ct", "native_get_stats_dmg_ct");
-	register_native("hns_get_stats_dmg_tt", "native_get_stats_dmg_tt");
-	register_native("hns_get_stats_runned", "native_get_stats_runned");
-	register_native("hns_get_stats_runnedtime", "native_get_stats_runnedtime");
-	register_native("hns_get_stats_avg_speed", "native_get_stats_avg_speed");
+	register_native("hns_get_stats_damage", "native_get_stats_damage");
+	
+	register_native("hns_get_stats_falldmg_ct", "native_get_stats_falldmg_ct");
+	register_native("hns_get_stats_falldmg_tt", "native_get_stats_falldmg_tt");
+	
+	register_native("hns_get_stats_flashcount", "native_get_stats_flashcount");
+	register_native("hns_get_stats_flash", "native_get_stats_flash");
 	register_native("hns_get_stats_flashtime", "native_get_stats_flashtime");
 	register_native("hns_get_stats_surv", "native_get_stats_surv");
 	register_native("hns_get_stats_hidetime", "native_get_hidetime");
 	register_native("hns_get_stats_playtime", "native_get_playtime");
+	register_native("hns_get_stats_tt_rounds", "native_get_tt_rounds");
+	register_native("hns_get_stats_ct_rounds", "native_get_ct_rounds");
+	register_native("hns_get_stats_spotted_rounds", "native_get_spotted_rounds");
+	register_native("hns_get_stats_spotted_survived_time", "native_get_spotted_survived_time");
 	register_native("hns_get_stats_ownages", "native_get_stats_ownages");
 	register_native("hns_get_stats_bhop_count", "native_get_stats_bhop_count");
 	register_native("hns_get_stats_bhop_percent", "native_get_stats_bhop_percent");
@@ -111,81 +129,73 @@ public plugin_natives() {
 public native_get_stats_kills(amxx, params) {
 	enum { type = 1, id = 2 };
 	if (get_param(type) == STATS_ROUND) {
-		return g_StatsRound[get_param(id)][PLR_STATS_KILLS];
+		return g_StatsRound[get_param(id)][PLR_STATS_KILLS_CT];
 	}
-	return iStats[get_param(id)][PLR_STATS_KILLS] + g_StatsRound[get_param(id)][PLR_STATS_KILLS];
+	return iStats[get_param(id)][PLR_STATS_KILLS_CT] + g_StatsRound[get_param(id)][PLR_STATS_KILLS_CT];
 }
 
 public native_get_stats_deaths(amxx, params) {
 	enum { type = 1, id = 2 };
 	if (get_param(type) == STATS_ROUND) {
-		return g_StatsRound[get_param(id)][PLR_STATS_DEATHS];
+		return g_StatsRound[get_param(id)][PLR_STATS_DEATHS_CT];
 	}
-	return iStats[get_param(id)][PLR_STATS_DEATHS] + g_StatsRound[get_param(id)][PLR_STATS_DEATHS];
+	return iStats[get_param(id)][PLR_STATS_DEATHS_CT] + g_StatsRound[get_param(id)][PLR_STATS_DEATHS_CT];
 }
 
 public native_get_stats_assists(amxx, params) {
 	enum { type = 1, id = 2 };
 	if (get_param(type) == STATS_ROUND) {
-		return g_StatsRound[get_param(id)][PLR_STATS_ASSISTS];
+		return g_StatsRound[get_param(id)][PLR_STATS_ASSISTS_CT];
 	}
-	return iStats[get_param(id)][PLR_STATS_ASSISTS] + g_StatsRound[get_param(id)][PLR_STATS_ASSISTS];
+	return iStats[get_param(id)][PLR_STATS_ASSISTS_CT] + g_StatsRound[get_param(id)][PLR_STATS_ASSISTS_CT];
 }
 
 public native_get_stats_stabs(amxx, params) {
 	enum { type = 1, id = 2 };
 	if (get_param(type) == STATS_ROUND) {
-		return g_StatsRound[get_param(id)][PLR_STATS_STABS];
+		return g_StatsRound[get_param(id)][PLR_STATS_STABS_CT];
 	}
-	return iStats[get_param(id)][PLR_STATS_STABS] + g_StatsRound[get_param(id)][PLR_STATS_STABS];
+	return iStats[get_param(id)][PLR_STATS_STABS_CT] + g_StatsRound[get_param(id)][PLR_STATS_STABS_CT];
 }
 
-public native_get_stats_dmg_ct(amxx, params) {
+public native_get_stats_damage(amxx, params) {
 	enum { type = 1, id = 2 };
 	if (get_param(type) == STATS_ROUND) {
-		return g_StatsRound[get_param(id)][PLR_STATS_DMG_CT];
+		return g_StatsRound[get_param(id)][PLR_STATS_DAMAGE_CT];
 	}
-	return iStats[get_param(id)][PLR_STATS_DMG_CT] + g_StatsRound[get_param(id)][PLR_STATS_DMG_CT];
+	return iStats[get_param(id)][PLR_STATS_DAMAGE_CT] + g_StatsRound[get_param(id)][PLR_STATS_DAMAGE_CT];
 }
 
-public native_get_stats_dmg_tt(amxx, params) {
+public native_get_stats_falldmg_ct(amxx, params) {
 	enum { type = 1, id = 2 };
 	if (get_param(type) == STATS_ROUND) {
-		return g_StatsRound[get_param(id)][PLR_STATS_DMG_TT];
+		return g_StatsRound[get_param(id)][PLR_STATS_FALLDMG_CT];
 	}
-	return iStats[get_param(id)][PLR_STATS_DMG_TT] + g_StatsRound[get_param(id)][PLR_STATS_DMG_TT];
+	return iStats[get_param(id)][PLR_STATS_FALLDMG_CT] + g_StatsRound[get_param(id)][PLR_STATS_FALLDMG_CT];
 }
 
-public Float:native_get_stats_runned(amxx, params) {
+public native_get_stats_falldmg_tt(amxx, params) {
 	enum { type = 1, id = 2 };
 	if (get_param(type) == STATS_ROUND) {
-		return g_StatsRound[get_param(id)][PLR_STATS_RUNNED];
+		return g_StatsRound[get_param(id)][PLR_STATS_FALLDMG_TT];
 	}
-	return iStats[get_param(id)][PLR_STATS_RUNNED] + g_StatsRound[get_param(id)][PLR_STATS_RUNNED];
+	return iStats[get_param(id)][PLR_STATS_FALLDMG_TT] + g_StatsRound[get_param(id)][PLR_STATS_FALLDMG_TT];
 }
 
-public Float:native_get_stats_runnedtime(amxx, params) {
+public native_get_stats_flashcount(amxx, params) {
 	enum { type = 1, id = 2 };
 	if (get_param(type) == STATS_ROUND) {
-		return g_StatsRound[get_param(id)][PLR_STATS_RUNNEDTIME];
+		return g_StatsRound[get_param(id)][PLR_STATS_FLASHCOUNT];
 	}
-	return iStats[get_param(id)][PLR_STATS_RUNNEDTIME] + g_StatsRound[get_param(id)][PLR_STATS_RUNNEDTIME];
+	return iStats[get_param(id)][PLR_STATS_FLASHCOUNT] + g_StatsRound[get_param(id)][PLR_STATS_FLASHCOUNT];
 }
 
-public Float:native_get_stats_avg_speed(amxx, params) {
+public native_get_stats_flash(amxx, params) {
 	enum { type = 1, id = 2 };
-	new Float:runned_time = g_StatsRound[get_param(id)][PLR_STATS_RUNNEDTIME];
-	new Float:run_distance = g_StatsRound[get_param(id)][PLR_STATS_RUNNED];
-
-	if (get_param(type) != STATS_ROUND) {
-		runned_time += iStats[get_param(id)][PLR_STATS_RUNNEDTIME];
-		run_distance += iStats[get_param(id)][PLR_STATS_RUNNED];
+	if (get_param(type) == STATS_ROUND) {
+		return g_StatsRound[get_param(id)][PLR_STATS_FLASH];
 	}
-
-	if (runned_time == 0.0) {
-		return 0.0; // Avoid division by zero
-	}
-	return floatdiv(run_distance, runned_time);
+	return iStats[get_param(id)][PLR_STATS_FLASH] + g_StatsRound[get_param(id)][PLR_STATS_FLASH];
 }
 
 public Float:native_get_stats_flashtime(amxx, params) {
@@ -210,6 +220,38 @@ public Float:native_get_playtime(amxx, params) {
 		return g_StatsRound[get_param(id)][PLR_STATS_PLAYTIME];
 	}
 	return iStats[get_param(id)][PLR_STATS_PLAYTIME] + g_StatsRound[get_param(id)][PLR_STATS_PLAYTIME];
+}
+
+public native_get_tt_rounds(amxx, params) {
+	enum { type = 1, id = 2 };
+	if (get_param(type) == STATS_ROUND) {
+		return g_StatsRound[get_param(id)][PLR_STATS_TT_ROUNDS];
+	}
+	return iStats[get_param(id)][PLR_STATS_TT_ROUNDS] + g_StatsRound[get_param(id)][PLR_STATS_TT_ROUNDS];
+}
+
+public native_get_ct_rounds(amxx, params) {
+	enum { type = 1, id = 2 };
+	if (get_param(type) == STATS_ROUND) {
+		return g_StatsRound[get_param(id)][PLR_STATS_CT_ROUNDS];
+	}
+	return iStats[get_param(id)][PLR_STATS_CT_ROUNDS] + g_StatsRound[get_param(id)][PLR_STATS_CT_ROUNDS];
+}
+
+public native_get_spotted_rounds(amxx, params) {
+	enum { type = 1, id = 2 };
+	if (get_param(type) == STATS_ROUND) {
+		return g_StatsRound[get_param(id)][PLR_STATS_SPOTTED_ROUNDS];
+	}
+	return iStats[get_param(id)][PLR_STATS_SPOTTED_ROUNDS] + g_StatsRound[get_param(id)][PLR_STATS_SPOTTED_ROUNDS];
+}
+
+public Float:native_get_spotted_survived_time(amxx, params) {
+	enum { type = 1, id = 2 };
+	if (get_param(type) == STATS_ROUND) {
+		return g_StatsRound[get_param(id)][PLR_STATS_SPOTTED_SURV_TIME];
+	}
+	return iStats[get_param(id)][PLR_STATS_SPOTTED_SURV_TIME] + g_StatsRound[get_param(id)][PLR_STATS_SPOTTED_SURV_TIME];
 }
 
 public Float:native_get_hidetime(amxx, params) {
@@ -239,9 +281,9 @@ public native_get_stats_bhop_count(amxx, params) {
 public Float:native_get_stats_bhop_percent(amxx, params) {
 	enum { type = 1, id = 2 };
 	if (get_param(type) == STATS_ROUND) {
-		return get_average_percent(g_StatsRound[get_param(id)][PLR_STATS_DDRUN_COUNT], g_StatsRound[get_param(id)][PLR_STATS_BHOP_PERCENT_SUM]);
+		return get_average_percent(g_StatsRound[get_param(id)][PLR_STATS_BHOP_COUNT], g_StatsRound[get_param(id)][PLR_STATS_BHOP_PERCENT_SUM]);
 	}
-	return get_average_percent(iStats[get_param(id)][PLR_STATS_DDRUN_COUNT] + g_StatsRound[get_param(id)][PLR_STATS_DDRUN_COUNT], iStats[get_param(id)][PLR_STATS_BHOP_PERCENT_SUM] + g_StatsRound[get_param(id)][PLR_STATS_BHOP_PERCENT_SUM]);
+	return get_average_percent(iStats[get_param(id)][PLR_STATS_BHOP_COUNT] + g_StatsRound[get_param(id)][PLR_STATS_BHOP_COUNT], iStats[get_param(id)][PLR_STATS_BHOP_PERCENT_SUM] + g_StatsRound[get_param(id)][PLR_STATS_BHOP_PERCENT_SUM]);
 }
 
 public native_get_stats_sgs_count(amxx, params) {
@@ -255,9 +297,9 @@ public native_get_stats_sgs_count(amxx, params) {
 public Float:native_get_stats_sgs_percent(amxx, params) {
 	enum { type = 1, id = 2 };
 	if (get_param(type) == STATS_ROUND) {
-		return get_average_percent(g_StatsRound[get_param(id)][PLR_STATS_DDRUN_COUNT], g_StatsRound[get_param(id)][PLR_STATS_SGS_PERCENT_SUM]);
+		return get_average_percent(g_StatsRound[get_param(id)][PLR_STATS_SGS_COUNT], g_StatsRound[get_param(id)][PLR_STATS_SGS_PERCENT_SUM]);
 	}
-	return get_average_percent(iStats[get_param(id)][PLR_STATS_DDRUN_COUNT] + g_StatsRound[get_param(id)][PLR_STATS_DDRUN_COUNT], iStats[get_param(id)][PLR_STATS_SGS_PERCENT_SUM] + g_StatsRound[get_param(id)][PLR_STATS_SGS_PERCENT_SUM]);
+	return get_average_percent(iStats[get_param(id)][PLR_STATS_SGS_COUNT] + g_StatsRound[get_param(id)][PLR_STATS_SGS_COUNT], iStats[get_param(id)][PLR_STATS_SGS_PERCENT_SUM] + g_StatsRound[get_param(id)][PLR_STATS_SGS_PERCENT_SUM]);
 }
 
 public native_get_stats_ddrun_count(amxx, params) {
@@ -278,7 +320,7 @@ public Float:native_get_stats_ddrun_percent(amxx, params) {
 
 public hns_players_replaced(requested_id, id) {	
 	for (new i = 0; i < PLAYER_STATS; i++) {
-		if (i == PLR_STATS_KILLS || i == PLR_MATCH || i == PLR_STATS_DEATHS) {
+		if (i == PLR_STATS_KILLS_CT || i == PLR_MATCH || i == PLR_STATS_DEATHS_CT) {
 			continue;
 		}
 		iStats[id][i] = iStats[requested_id][i];
@@ -314,6 +356,8 @@ public hns_player_leave_inmatch(id) {
 	arrayset(iStats[id], 0, PLAYER_STATS);
 	arrayset(g_StatsRound[id], 0, PLAYER_STATS);
 	arrayset(g_flLastPosition[id], 0, sizeof(g_flLastPosition[]));
+	g_flSpottedVisibleTime[id] = 0.0;
+	g_bSpottedConfirmed[id] = false;
 	g_iLastAttacker[id] = 0;
 }
 
@@ -330,6 +374,8 @@ public hns_match_reset_round() {
 		}
 
 		arrayset(g_StatsRound[iPlayer], 0, PLAYER_STATS);
+		g_flSpottedVisibleTime[iPlayer] = 0.0;
+		g_bSpottedConfirmed[iPlayer] = false;
 
 		SetScoreInfo(iPlayer, false);
 	}
@@ -343,6 +389,8 @@ public hns_match_started() {
 		new id = iPlayers[i];
 		arrayset(iStats[id], 0, PLAYER_STATS);
 		arrayset(g_StatsRound[id], 0, PLAYER_STATS);
+		g_flSpottedVisibleTime[id] = 0.0;
+		g_bSpottedConfirmed[id] = false;
 		SetScoreInfo(id, false);
 	}
 }
@@ -377,16 +425,16 @@ public rgPlayerKilled(victim, attacker) {
 		return;
 	}
 
-	if (is_user_connected(attacker) && victim != attacker) {
-		g_StatsRound[attacker][PLR_STATS_KILLS]++;
+	if (is_user_connected(attacker) && victim != attacker && rg_get_user_team(attacker) == TEAM_CT) {
+		g_StatsRound[attacker][PLR_STATS_KILLS_CT]++;
 	}
 
-	if (is_user_connected(victim)) {
-		g_StatsRound[victim][PLR_STATS_DEATHS]++;
+	if (is_user_connected(victim) && rg_get_user_team(victim) == TEAM_CT) {
+		g_StatsRound[victim][PLR_STATS_DEATHS_CT]++;
 	}
 
-	if (g_iLastAttacker[victim] && g_iLastAttacker[victim] != attacker) {
-		g_StatsRound[g_iLastAttacker[victim]][PLR_STATS_ASSISTS]++;
+	if (g_iLastAttacker[victim] && g_iLastAttacker[victim] != attacker && rg_get_user_team(g_iLastAttacker[victim]) == TEAM_CT) {
+		g_StatsRound[g_iLastAttacker[victim]][PLR_STATS_ASSISTS_CT]++;
 		g_iLastAttacker[victim] = 0;
 	}
 
@@ -411,13 +459,32 @@ public rgPlayerTakeDamage(iVictim, iWeapon, iAttacker, Float:fDamage) { // Пр�
 		return;
 	}
 
-	if (is_user_alive(iAttacker) && iVictim != iAttacker) {
-		new Float:fHealth; get_entvar(iVictim, var_health, fHealth);
-		if (fDamage < fHealth) {
-			g_iLastAttacker[iVictim] = iAttacker;
-		}
+	if (!is_user_alive(iAttacker) || iVictim == iAttacker || !is_user_alive(iVictim)) {
+		return;
+	}
 
-		g_StatsRound[iAttacker][PLR_STATS_STABS]++;
+	new TeamName:iAttackerTeam = rg_get_user_team(iAttacker);
+	new TeamName:iVictimTeam = rg_get_user_team(iVictim);
+	if (iAttackerTeam == iVictimTeam || iAttackerTeam == TEAM_SPECTATOR || iVictimTeam == TEAM_SPECTATOR) {
+		return;
+	}
+
+	new Float:fHealth; get_entvar(iVictim, var_health, fHealth);
+	if (fDamage < fHealth) {
+		g_iLastAttacker[iVictim] = iAttacker;
+	}
+
+	new iDamage = floatround(fDamage);
+	if (iDamage <= 0) {
+		return;
+	}
+	iDamage = min(iDamage, 100);
+
+	if (iAttackerTeam == TEAM_CT && iVictimTeam == TEAM_TERRORIST) {
+		if (is_attacker_knife(iAttacker)) {
+			g_StatsRound[iAttacker][PLR_STATS_DAMAGE_CT] += iDamage;
+		}
+		g_StatsRound[iAttacker][PLR_STATS_STABS_CT]++;
 	}
 }
 
@@ -427,15 +494,24 @@ public rgPlayerFallDamage(id) {
 	}
 
 	new dmg = floatround(Float:GetHookChainReturn(ATYPE_FLOAT));
+	if (dmg <= 0) {
+		return;
+	}
+	dmg = min(dmg, 100);
 
-	if (rg_get_user_team(id) == TEAM_TERRORIST) {
-		g_StatsRound[id][PLR_STATS_DMG_TT] += dmg;
-	} else {
-		g_StatsRound[id][PLR_STATS_DMG_CT] += dmg;
+	new TeamName:iTeam = rg_get_user_team(id);
+	if (iTeam == TEAM_TERRORIST) {
+		g_StatsRound[id][PLR_STATS_FALLDMG_TT] += dmg;
+	} else if (iTeam == TEAM_CT) {
+		g_StatsRound[id][PLR_STATS_FALLDMG_CT] += dmg;
 	}
 }
 
 public rgPlayerBlind(const index, const inflictor, const attacker, const Float:fadeTime, const Float:fadeHold, const alpha) {
+	if (hns_get_mode() != MODE_MIX || hns_get_state() != STATE_ENABLED) {
+		return HC_CONTINUE;
+	}
+
 	if(rg_get_user_team(index) != TEAM_CT || rg_get_user_team(attacker) != TEAM_TERRORIST || index == attacker)
 		return HC_CONTINUE;
 
@@ -443,6 +519,21 @@ public rgPlayerBlind(const index, const inflictor, const attacker, const Float:f
 		return HC_CONTINUE;
 
 	g_StatsRound[attacker][PLR_STATS_FLASHTIME] += fadeHold;
+	g_StatsRound[attacker][PLR_STATS_FLASHCOUNT]++;
+
+	return HC_CONTINUE;
+}
+
+public rgThrowFlashbang(const index, Float:vecStart[3], Float:vecVelocity[3], Float:time) {
+	if (hns_get_mode() != MODE_MIX || hns_get_state() != STATE_ENABLED) {
+		return HC_CONTINUE;
+	}
+
+	if (rg_get_user_team(index) != TEAM_TERRORIST) {
+		return HC_CONTINUE;
+	}
+
+	g_StatsRound[index][PLR_STATS_FLASH]++;
 
 	return HC_CONTINUE;
 }
@@ -463,14 +554,20 @@ public rgPlayerPreThink(id) {
 	if (hns_get_state() == STATE_ENABLED) {
 		if (is_user_alive(id)) {
 			if (rg_get_user_team(id) == TEAM_TERRORIST) {
-				if(is_player_running(id))
-				{
-					g_StatsRound[id][PLR_STATS_RUNNED] += vector_length(velocity) * frametime;
-					g_StatsRound[id][PLR_STATS_RUNNEDTIME] += frametime;
+				if (is_player_hidding(id)) {
+					g_StatsRound[id][PLR_STATS_HIDETIME] += frametime;
 				}
-				if(is_player_hidding(id))
-				{
-					g_StatsRound[id][PLR_STATS_HIDETIME] += frametime;					
+
+				if (get_gametime() >= g_flSpottedTrackStart && !g_bSpottedConfirmed[id]) {
+					if (is_player_spotted_by_ct(id)) {
+						g_flSpottedVisibleTime[id] += frametime;
+						if (g_flSpottedVisibleTime[id] >= SPOT_CONFIRM_TIME) {
+							g_bSpottedConfirmed[id] = true;
+							g_StatsRound[id][PLR_STATS_SPOTTED_ROUNDS] = 1;
+						}
+					} else {
+						g_flSpottedVisibleTime[id] = 0.0;
+					}
 				}
 			}
 		}
@@ -481,6 +578,7 @@ public rgPlayerPreThink(id) {
 }
 
 public rgRoundFreezeEnd() {
+	g_flSpottedTrackStart = get_gametime() + SPOT_START_DELAY;
 	set_task(0.25, "taskRoundEvent", .id = TASK_TIMER_STATS, .flags = "b");
 }
 
@@ -503,8 +601,13 @@ public taskRoundEvent() {
 		if(iTeam == TEAM_SPECTATOR)
 			continue;
 		
-		if (iTeam == TEAM_TERRORIST && is_user_alive(id))
-			g_StatsRound[id][PLR_STATS_SURVTIME] += 0.25;
+		if (iTeam == TEAM_TERRORIST) {
+			g_StatsRound[id][PLR_STATS_TT_ROUNDS] = 1;
+			if (is_user_alive(id))
+				g_StatsRound[id][PLR_STATS_SURVTIME] += 0.25;
+		} else if (iTeam == TEAM_CT) {
+			g_StatsRound[id][PLR_STATS_CT_ROUNDS] = 1;
+		}
 
 		g_StatsRound[id][PLR_STATS_PLAYTIME] += 0.25;
 	}
@@ -526,6 +629,8 @@ public hns_match_finished_post() {
 		new id = iPlayers[i];
 		arrayset(iStats[id], 0, PLAYER_STATS);
 		arrayset(g_StatsRound[id], 0, PLAYER_STATS);
+		g_flSpottedVisibleTime[id] = 0.0;
+		g_bSpottedConfirmed[id] = false;
 	}
 }
 
@@ -552,6 +657,8 @@ public rgRoundStart() {
 		new id = iPlayers[i];
 		arrayset(g_StatsRound[id], 0, PLAYER_STATS);
 		arrayset(g_flLastPosition[id], 0, sizeof(g_flLastPosition[]));
+		g_flSpottedVisibleTime[id] = 0.0;
+		g_bSpottedConfirmed[id] = false;
 	
 		g_iLastAttacker[id] = 0;
 	}
@@ -566,11 +673,11 @@ public rgRoundStart() {
 stock SetScoreInfo(id, bool:bRound = false) {
 	new Float:flKills, iDeaths;
 	if (bRound) {
-		flKills = float(iStats[id][PLR_STATS_KILLS] + g_StatsRound[id][PLR_STATS_KILLS]);
-		iDeaths = iStats[id][PLR_STATS_DEATHS] + g_StatsRound[id][PLR_STATS_DEATHS];
+		flKills = float(iStats[id][PLR_STATS_KILLS_CT] + g_StatsRound[id][PLR_STATS_KILLS_CT]);
+		iDeaths = iStats[id][PLR_STATS_DEATHS_CT] + g_StatsRound[id][PLR_STATS_DEATHS_CT];
 	} else {
-		flKills = float(iStats[id][PLR_STATS_KILLS]);
-		iDeaths = iStats[id][PLR_STATS_DEATHS];
+		flKills = float(iStats[id][PLR_STATS_KILLS_CT]);
+		iDeaths = iStats[id][PLR_STATS_DEATHS_CT];
 	}
 
 	set_entvar(id, var_frags, flKills);
@@ -641,6 +748,49 @@ stock is_player_hidding(id) {
 
 	return hided;
 }
+
+stock bool:is_attacker_knife(id) {
+	new iWeapon = get_member(id, m_pActiveItem);
+	if (iWeapon <= 0) {
+		return false;
+	}
+	static szClassname[32];
+	get_entvar(iWeapon, var_classname, szClassname, charsmax(szClassname));
+	return (equal(szClassname, "weapon_knife") != 0);
+}
+
+stock bool:is_player_spotted_by_ct(id) {
+	if (!is_user_alive(id) || rg_get_user_team(id) != TEAM_TERRORIST) {
+		return false;
+	}
+
+	new iPlayers[MAX_PLAYERS], iNum;
+	get_players(iPlayers, iNum, "ache", "CT");
+
+	new Float:ttEye[3], Float:ttViewOfs[3];
+	get_entvar(id, var_origin, ttEye);
+	get_entvar(id, var_view_ofs, ttViewOfs);
+	ttEye[2] += ttViewOfs[2];
+
+	new Float:ctEye[3], Float:ctViewOfs[3];
+	for (new i = 0; i < iNum; i++) {
+		new iCT = iPlayers[i];
+
+		get_entvar(iCT, var_origin, ctEye);
+		get_entvar(iCT, var_view_ofs, ctViewOfs);
+		ctEye[2] += ctViewOfs[2];
+
+		if (floatabs(ttEye[2] - ctEye[2]) > SPOT_HEIGHT_LIMIT) {
+			continue;
+		}
+
+		if (fm_is_in_viewcone(iCT, ttEye) && fm_is_ent_visible(iCT, id)) {
+			return true;
+		}
+	}
+
+	return false;
+}
 public Float:get_average_percent(iCount, Float:flPercentSum) {
     if (iCount == 0) {
         return 0.0;
@@ -656,6 +806,10 @@ collect_stats()
 	for (new i = 0; i < iNum; i++) {
 		new id = iPlayers[i];
 
+		if (g_StatsRound[id][PLR_STATS_SPOTTED_ROUNDS]) {
+			g_StatsRound[id][PLR_STATS_SPOTTED_SURV_TIME] += g_StatsRound[id][PLR_STATS_SURVTIME];
+		}
+
 		iStats[id][PLR_STATS_OWNAGES] += g_StatsRound[id][PLR_STATS_OWNAGES];
 		iStats[id][PLR_STATS_BHOP_COUNT] += g_StatsRound[id][PLR_STATS_BHOP_COUNT];
 		iStats[id][PLR_STATS_BHOP_PERCENT_SUM] = floatadd(iStats[id][PLR_STATS_BHOP_PERCENT_SUM], g_StatsRound[id][PLR_STATS_BHOP_PERCENT_SUM]);
@@ -663,15 +817,20 @@ collect_stats()
 		iStats[id][PLR_STATS_SGS_PERCENT_SUM] = floatadd(iStats[id][PLR_STATS_SGS_PERCENT_SUM], g_StatsRound[id][PLR_STATS_SGS_PERCENT_SUM]);
 		iStats[id][PLR_STATS_DDRUN_COUNT] += g_StatsRound[id][PLR_STATS_DDRUN_COUNT];
 		iStats[id][PLR_STATS_DDRUN_PERCENT_SUM] = floatadd(iStats[id][PLR_STATS_DDRUN_PERCENT_SUM], g_StatsRound[id][PLR_STATS_DDRUN_PERCENT_SUM]);
-		iStats[id][PLR_STATS_KILLS] += g_StatsRound[id][PLR_STATS_KILLS];
-		iStats[id][PLR_STATS_DEATHS] += g_StatsRound[id][PLR_STATS_DEATHS];
-		iStats[id][PLR_STATS_ASSISTS] += g_StatsRound[id][PLR_STATS_ASSISTS];
-		iStats[id][PLR_STATS_STABS] += g_StatsRound[id][PLR_STATS_STABS];
-		iStats[id][PLR_STATS_DMG_TT] += g_StatsRound[id][PLR_STATS_DMG_TT];
-		iStats[id][PLR_STATS_DMG_CT] += g_StatsRound[id][PLR_STATS_DMG_CT];
-		iStats[id][PLR_STATS_RUNNED] += g_StatsRound[id][PLR_STATS_RUNNED];
-		iStats[id][PLR_STATS_RUNNEDTIME] += g_StatsRound[id][PLR_STATS_RUNNEDTIME];
+		iStats[id][PLR_STATS_KILLS_CT] += g_StatsRound[id][PLR_STATS_KILLS_CT];
+		iStats[id][PLR_STATS_DEATHS_CT] += g_StatsRound[id][PLR_STATS_DEATHS_CT];
+		iStats[id][PLR_STATS_ASSISTS_CT] += g_StatsRound[id][PLR_STATS_ASSISTS_CT];
+		iStats[id][PLR_STATS_STABS_CT] += g_StatsRound[id][PLR_STATS_STABS_CT];
+		iStats[id][PLR_STATS_FALLDMG_TT] += g_StatsRound[id][PLR_STATS_FALLDMG_TT];
+		iStats[id][PLR_STATS_FALLDMG_CT] += g_StatsRound[id][PLR_STATS_FALLDMG_CT];
+		iStats[id][PLR_STATS_DAMAGE_CT] += g_StatsRound[id][PLR_STATS_DAMAGE_CT];
+		iStats[id][PLR_STATS_FLASHCOUNT] += g_StatsRound[id][PLR_STATS_FLASHCOUNT];
+		iStats[id][PLR_STATS_FLASH] += g_StatsRound[id][PLR_STATS_FLASH];
 		iStats[id][PLR_STATS_PLAYTIME] += g_StatsRound[id][PLR_STATS_PLAYTIME];
+		iStats[id][PLR_STATS_TT_ROUNDS] += g_StatsRound[id][PLR_STATS_TT_ROUNDS];
+		iStats[id][PLR_STATS_CT_ROUNDS] += g_StatsRound[id][PLR_STATS_CT_ROUNDS];
+		iStats[id][PLR_STATS_SPOTTED_ROUNDS] += g_StatsRound[id][PLR_STATS_SPOTTED_ROUNDS];
+		iStats[id][PLR_STATS_SPOTTED_SURV_TIME] = floatadd(iStats[id][PLR_STATS_SPOTTED_SURV_TIME], g_StatsRound[id][PLR_STATS_SPOTTED_SURV_TIME]);
 		iStats[id][PLR_STATS_HIDETIME] += g_StatsRound[id][PLR_STATS_HIDETIME];
 		iStats[id][PLR_STATS_FLASHTIME] += g_StatsRound[id][PLR_STATS_FLASHTIME];
 		iStats[id][PLR_STATS_SURVTIME] += g_StatsRound[id][PLR_STATS_SURVTIME];
