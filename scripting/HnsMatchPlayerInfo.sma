@@ -35,7 +35,6 @@ new g_szTopName[10][32];
 new Float:g_flTopSDA[10];
 new Float:g_flTopSurv[10];
 new g_iTopDmg[10];
-new Float:g_flTopRun[10];
 new Float:g_flTopFlash[10];
 new g_iTopStabs[10];
 new bool:g_bTopAvailable;
@@ -542,7 +541,6 @@ public ShowTop(player) {
 										<th>SDA</th>\
 										<th>Survive time</th>\
 										<th>DMG</th>\
-										<th>RUN</th>\
 										<th>Flash time</th>\
 										<th>Stabs</th>\
 										</tr>\
@@ -557,16 +555,14 @@ public ShowTop(player) {
 		<td>%.1f</td> \
 		<td>%s</td> \
 		<td>%d</td> \
-		<td>%.1fK</td> \
-		<td>%s</td> \
-		<td>%d</td> \
-		</tr>",
+			<td>%s</td> \
+			<td>%d</td> \
+			</tr>",
 			g_szTopName[i],
 			g_flTopSDA[i],
 			surv_time,
 			g_iTopDmg[i],
-			g_flTopRun[i],
-			flash_time,
+				flash_time,
 			g_iTopStabs[i]);
 	}
 	iLen += formatex(szMotd[iLen], charsmax(szMotd) - iLen, "</tbody>\
@@ -636,7 +632,6 @@ stock buildTopSnapshot() {
 		g_flTopSurv[g_iTopCount] = hns_get_stats_surv(STATS_ALL, id);
 		g_flTopFlash[g_iTopCount] = hns_get_stats_flashtime(STATS_ALL, id);
 		g_iTopDmg[g_iTopCount] = hns_get_stats_falldmg_tt(STATS_ALL, id) + hns_get_stats_falldmg_ct(STATS_ALL, id);
-		g_flTopRun[g_iTopCount] = hns_get_stats_runned(STATS_ALL, id) / 1000.0;
 		g_iTopStabs[g_iTopCount] = hns_get_stats_stabs(STATS_ALL, id);
 		get_user_name(id, g_szTopName[g_iTopCount], charsmax(g_szTopName[]));
 		g_iTopCount++;
