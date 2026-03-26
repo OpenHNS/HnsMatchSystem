@@ -526,7 +526,7 @@ public rgPlayerKilled(victim, attacker) {
 		g_bFirstKillCt = true;
 	}
 
-	if (is_user_connected(attacker) && victim != attacker && rg_get_user_team(attacker) == TEAM_CT) {
+	if (is_user_connected(attacker) && victim != attacker && rg_get_user_team(attacker) == TEAM_CT && rg_get_user_team(victim) == TEAM_TERRORIST) {
 		g_StatsRound[attacker][PLR_STATS_KILLS_CT]++;
 	}
 
@@ -689,7 +689,7 @@ public rgPlayerPreThink(id) {
 		frametime = 1.0;
 	}
 
-	if (hns_get_state() == STATE_ENABLED) {
+	if (hns_get_state() == STATE_ENABLED && hns_get_mode() == MODE_MIX) {
 		if (is_user_alive(id)) {
 			if (rg_get_user_team(id) == TEAM_TERRORIST) {
 				if (get_gametime() >= g_flSpottedTrackStart && !g_bSpottedConfirmed[id]) {
