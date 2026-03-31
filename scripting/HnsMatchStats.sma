@@ -1,5 +1,6 @@
 #include <amxmodx>
 #include <reapi>
+#include <hamsandwich>
 #include <xs>
 #include <fakemeta_util>
 #include <hns_matchsystem>
@@ -14,8 +15,10 @@ forward ms_session_ddrun(id, iCount, Float:flPercent, Float:flAVGSpeed);
 
 #define TASK_TIMER_STATS 61237
 #define SPOT_START_DELAY 5.0
-#define SPOT_CONFIRM_TIME 3.0
+#define SPOT_CONFIRM_TIME 2.0
 #define SPOT_HEIGHT_LIMIT 100.0
+#define SPOT_DISTANCE_LIMIT 700.0
+#define STABS_MISS_RADIUS 80.0
 
 enum _:TYPE_STATS
 {
@@ -30,6 +33,7 @@ enum _: PLAYER_STATS {
 	PLR_STATS_DEATHS_CT,
 	PLR_STATS_ASSISTS_CT,
 	PLR_STATS_STABS_CT,
+	PLR_STATS_STABS_ATTEMPT_CT,
 	PLR_STATS_DAMAGE_CT,
 	PLR_STATS_FALLDMG_CT,
 	PLR_STATS_FALLDMG_TT,
@@ -69,6 +73,7 @@ new g_StatsRound[MAX_PLAYERS + 1][PLAYER_STATS];
 new g_iGameStops;
 
 new g_iLastAttacker[MAX_PLAYERS + 1];
+new g_iCtKnifeDamageOnTtRound[MAX_PLAYERS + 1];
 
 new bool:g_bFirstKillCt;
 new bool:g_bFirstDeathTt;
@@ -97,6 +102,8 @@ public plugin_init() {
 	RegisterHookChain(RG_PlayerBlind, "rgPlayerBlind");
 	RegisterHookChain(RG_ThrowFlashbang, "rgThrowFlashbang", true);
 	RegisterHookChain(RG_CGrenade_ExplodeFlashbang, "rgExplodeFlashbang", true);
+	RegisterHam(Ham_Weapon_PrimaryAttack, "weapon_knife", "hamKnifePrimaryAttackPost", true);
+	RegisterHam(Ham_Weapon_SecondaryAttack, "weapon_knife", "hamKnifeSecondaryAttackPost", true);
 
 	g_hApplyStatsForward = CreateMultiForward("hns_apply_stats", ET_CONTINUE, FP_CELL);
 	g_hSaveLeaveForward = CreateMultiForward("hns_save_leave_stats", ET_CONTINUE, FP_CELL, FP_CELL);
@@ -114,6 +121,7 @@ public plugin_natives() {
 	register_native("hns_get_stats_deaths", "native_get_stats_deaths");
 	register_native("hns_get_stats_assists", "native_get_stats_assists");
 	register_native("hns_get_stats_stabs", "native_get_stats_stabs");
+	register_native("hns_get_stats_stabs_attempt", "native_get_stats_stabs_attempt");
 	register_native("hns_get_stats_damage", "native_get_stats_damage");
 	
 	register_native("hns_get_stats_falldmg_ct", "native_get_stats_falldmg_ct");
@@ -182,6 +190,14 @@ public native_get_stats_stabs(amxx, params) {
 		return g_StatsRound[get_param(id)][PLR_STATS_STABS_CT];
 	}
 	return iStats[get_param(id)][PLR_STATS_STABS_CT] + g_StatsRound[get_param(id)][PLR_STATS_STABS_CT];
+}
+
+public native_get_stats_stabs_attempt(amxx, params) {
+	enum { type = 1, id = 2 };
+	if (get_param(type) == STATS_ROUND) {
+		return g_StatsRound[get_param(id)][PLR_STATS_STABS_ATTEMPT_CT];
+	}
+	return iStats[get_param(id)][PLR_STATS_STABS_ATTEMPT_CT] + g_StatsRound[get_param(id)][PLR_STATS_STABS_ATTEMPT_CT];
 }
 
 public native_get_stats_damage(amxx, params) {
@@ -450,6 +466,7 @@ public hns_player_leave_inmatch(id) {
 	g_flSpottedVisibleTime[id] = 0.0;
 	g_bSpottedConfirmed[id] = false;
 	g_iLastAttacker[id] = 0;
+	g_iCtKnifeDamageOnTtRound[id] = 0;
 }
 
 public hns_match_reset_round() {
@@ -467,6 +484,7 @@ public hns_match_reset_round() {
 		arrayset(g_StatsRound[iPlayer], 0, PLAYER_STATS);
 		g_flSpottedVisibleTime[iPlayer] = 0.0;
 		g_bSpottedConfirmed[iPlayer] = false;
+		g_iCtKnifeDamageOnTtRound[iPlayer] = 0;
 
 		SetScoreInfo(iPlayer, false);
 	}
@@ -482,6 +500,7 @@ public hns_match_started() {
 		arrayset(g_StatsRound[id], 0, PLAYER_STATS);
 		g_flSpottedVisibleTime[id] = 0.0;
 		g_bSpottedConfirmed[id] = false;
+		g_iCtKnifeDamageOnTtRound[id] = 0;
 		SetScoreInfo(id, false);
 	}
 }
@@ -583,10 +602,46 @@ public rgPlayerTakeDamage(iVictim, iWeapon, iAttacker, Float:fDamage) { // Пр�
 
 	if (iAttackerTeam == TEAM_CT && iVictimTeam == TEAM_TERRORIST) {
 		if (is_attacker_knife(iAttacker)) {
-			g_StatsRound[iAttacker][PLR_STATS_DAMAGE_CT] += iDamage;
+			g_StatsRound[iAttacker][PLR_STATS_STABS_CT]++;
+
+			new iAllowedVictimDamage = 100 - g_iCtKnifeDamageOnTtRound[iVictim];
+			if (iAllowedVictimDamage <= 0) {
+				return;
+			}
+
+			new iCreditedDamage = min(iDamage, iAllowedVictimDamage);
+			g_iCtKnifeDamageOnTtRound[iVictim] += iCreditedDamage;
+			g_StatsRound[iAttacker][PLR_STATS_DAMAGE_CT] += iCreditedDamage;
 		}
-		g_StatsRound[iAttacker][PLR_STATS_STABS_CT]++;
 	}
+}
+
+public hamKnifeSecondaryAttackPost(iWeapon) {
+	count_knife_attempt(iWeapon);
+	return HAM_IGNORED;
+}
+
+public hamKnifePrimaryAttackPost(iWeapon) {
+	count_knife_attempt(iWeapon);
+	return HAM_IGNORED;
+}
+
+stock bool:count_knife_attempt(iWeapon) {
+	if (hns_get_mode() != MODE_MIX || hns_get_state() != STATE_ENABLED) {
+		return false;
+	}
+
+	new id = get_member(iWeapon, m_pPlayer);
+	if (!is_user_alive(id) || rg_get_user_team(id) != TEAM_CT) {
+		return false;
+	}
+
+	if (!has_tt_in_radius(id, STABS_MISS_RADIUS)) {
+		return false;
+	}
+
+	g_StatsRound[id][PLR_STATS_STABS_ATTEMPT_CT]++;
+	return true;
 }
 
 public rgPlayerFallDamage(id) {
@@ -785,6 +840,7 @@ public hns_match_finished_post() {
 		arrayset(g_StatsRound[id], 0, PLAYER_STATS);
 		g_flSpottedVisibleTime[id] = 0.0;
 		g_bSpottedConfirmed[id] = false;
+		g_iCtKnifeDamageOnTtRound[id] = 0;
 	}
 }
 
@@ -816,6 +872,7 @@ public rgRoundStart() {
 		arrayset(g_flLastPosition[id], 0, sizeof(g_flLastPosition[]));
 		g_flSpottedVisibleTime[id] = 0.0;
 		g_bSpottedConfirmed[id] = false;
+		g_iCtKnifeDamageOnTtRound[id] = 0;
 	
 		g_iLastAttacker[id] = 0;
 	}
@@ -830,10 +887,13 @@ public rgRoundStart() {
 stock SetScoreInfo(id, bool:bRound = false) {
 	new Float:flKills, iDeaths;
 	if (bRound) {
-		flKills = float(iStats[id][PLR_STATS_KILLS_CT] + g_StatsRound[id][PLR_STATS_KILLS_CT]);
+		flKills = float(
+			iStats[id][PLR_STATS_KILLS_CT] + g_StatsRound[id][PLR_STATS_KILLS_CT] +
+			iStats[id][PLR_STATS_ASSISTS_CT] + g_StatsRound[id][PLR_STATS_ASSISTS_CT]
+		);
 		iDeaths = iStats[id][PLR_STATS_DEATHS_CT] + g_StatsRound[id][PLR_STATS_DEATHS_CT];
 	} else {
-		flKills = float(iStats[id][PLR_STATS_KILLS_CT]);
+		flKills = float(iStats[id][PLR_STATS_KILLS_CT] + iStats[id][PLR_STATS_ASSISTS_CT]);
 		iDeaths = iStats[id][PLR_STATS_DEATHS_CT];
 	}
 
@@ -916,6 +976,29 @@ stock bool:is_attacker_knife(id) {
 	return (equal(szClassname, "weapon_knife") != 0);
 }
 
+stock bool:has_tt_in_radius(id, Float:flRadius) {
+	if (!is_user_alive(id) || rg_get_user_team(id) != TEAM_CT) {
+		return false;
+	}
+
+	new Float:attackerOrigin[3];
+	new Float:targetOrigin[3];
+	get_entvar(id, var_origin, attackerOrigin);
+
+	for (new iPlayer = 1; iPlayer <= MaxClients; iPlayer++) {
+		if (!is_user_alive(iPlayer) || rg_get_user_team(iPlayer) != TEAM_TERRORIST) {
+			continue;
+		}
+
+		get_entvar(iPlayer, var_origin, targetOrigin);
+		if (xs_vec_distance(attackerOrigin, targetOrigin) <= flRadius) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
 stock bool:is_player_spotted_by_ct(id) {
 	if (!is_user_alive(id) || rg_get_user_team(id) != TEAM_TERRORIST) {
 		return false;
@@ -938,6 +1021,10 @@ stock bool:is_player_spotted_by_ct(id) {
 		ctEye[2] += ctViewOfs[2];
 
 		if (floatabs(ttEye[2] - ctEye[2]) > SPOT_HEIGHT_LIMIT) {
+			continue;
+		}
+
+		if (xs_vec_distance(ttEye, ctEye) > SPOT_DISTANCE_LIMIT) {
 			continue;
 		}
 
@@ -992,6 +1079,7 @@ collect_stats()
 		iStats[id][PLR_STATS_DEATHS_CT] += g_StatsRound[id][PLR_STATS_DEATHS_CT];
 		iStats[id][PLR_STATS_ASSISTS_CT] += g_StatsRound[id][PLR_STATS_ASSISTS_CT];
 		iStats[id][PLR_STATS_STABS_CT] += g_StatsRound[id][PLR_STATS_STABS_CT];
+		iStats[id][PLR_STATS_STABS_ATTEMPT_CT] += g_StatsRound[id][PLR_STATS_STABS_ATTEMPT_CT];
 		iStats[id][PLR_STATS_FALLDMG_TT] += g_StatsRound[id][PLR_STATS_FALLDMG_TT];
 		iStats[id][PLR_STATS_FALLDMG_CT] += g_StatsRound[id][PLR_STATS_FALLDMG_CT];
 		iStats[id][PLR_STATS_DAMAGE_CT] += g_StatsRound[id][PLR_STATS_DAMAGE_CT];

@@ -50,6 +50,18 @@ native hns_get_stats_assists(type, id);
 native hns_get_stats_stabs(type, id);
 
 /**
+* Gets knife stab attempts by CT.
+* Counted on primary/secondary knife attack event when at least one alive TT
+* is within 80 units.
+*
+* @param type Stats type: TYPE_STATS
+* @param id Client index
+*
+* @return num
+*/
+native hns_get_stats_stabs_attempt(type, id);
+
+/**
 * Gets fall damage received while playing CT.
 * Damage per fall is capped at 100.
 *
@@ -234,8 +246,8 @@ native hns_get_stats_ct_rounds(type, id);
 
 /**
 * Gets number of confirmed spotted rounds.
-* A round is confirmed if TT had visible contact with CT for 3 continuous seconds
-* after 5 seconds from freeze end and within height delta limit.
+* A round is confirmed if TT had visible contact with CT for 2 continuous seconds
+* after 5 seconds from freeze end, within height delta limit and 700 units distance.
 *
 * @param type Stats type: TYPE_STATS
 * @param id Client index
