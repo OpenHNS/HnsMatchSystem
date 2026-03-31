@@ -5,6 +5,10 @@
 #include <fakemeta_util>
 #include <hns_matchsystem>
 
+#if !defined AMX_BAN
+	#define AMX_BAN ADMIN_BAN
+#endif
+
 forward hns_players_replaced(requested_id, id);
 
 forward hns_ownage(iToucher, iTouched);
@@ -19,6 +23,7 @@ forward ms_session_ddrun(id, iCount, Float:flPercent, Float:flAVGSpeed);
 #define SPOT_HEIGHT_LIMIT 100.0
 #define SPOT_DISTANCE_LIMIT 700.0
 #define STABS_MISS_RADIUS 80.0
+#define SPOT_DEBUG_ACCESS AMX_BAN
 
 enum _:TYPE_STATS
 {
@@ -82,6 +87,7 @@ new Float:g_flLastPosition[MAX_PLAYERS + 1][3];
 new Float:g_flSpottedVisibleTime[MAX_PLAYERS + 1];
 new bool:g_bSpottedConfirmed[MAX_PLAYERS + 1];
 new Float:g_flSpottedTrackStart;
+new bool:g_bSpotDebug[MAX_PLAYERS + 1];
 
 new Trie:g_tSaveData;
 new Trie:g_tSaveRoundData;
@@ -104,6 +110,7 @@ public plugin_init() {
 	RegisterHookChain(RG_CGrenade_ExplodeFlashbang, "rgExplodeFlashbang", true);
 	RegisterHam(Ham_Weapon_PrimaryAttack, "weapon_knife", "hamKnifePrimaryAttackPost", true);
 	RegisterHam(Ham_Weapon_SecondaryAttack, "weapon_knife", "hamKnifeSecondaryAttackPost", true);
+	RegisterSayCmd("dbgspot", "dbgspot", "cmdDbgSpot", SPOT_DEBUG_ACCESS, "Toggle spotted debug");
 
 	g_hApplyStatsForward = CreateMultiForward("hns_apply_stats", ET_CONTINUE, FP_CELL);
 	g_hSaveLeaveForward = CreateMultiForward("hns_save_leave_stats", ET_CONTINUE, FP_CELL, FP_CELL);
@@ -441,6 +448,7 @@ public hns_players_replaced(requested_id, id) {
 public client_putinserver(id) {
 	TrieGetArray(g_tSaveData, getUserKey(id), iStats[id], PLAYER_STATS);
 	TrieGetArray(g_tSaveRoundData, getUserKey(id), g_StatsRound[id], PLAYER_STATS);
+	g_bSpotDebug[id] = false;
 
 	if (hns_get_mode() == MODE_MIX || hns_get_state() == STATE_PAUSED) {
 		SetScoreInfo(id, true);
@@ -748,11 +756,13 @@ public rgPlayerPreThink(id) {
 		if (is_user_alive(id)) {
 			if (rg_get_user_team(id) == TEAM_TERRORIST) {
 				if (get_gametime() >= g_flSpottedTrackStart && !g_bSpottedConfirmed[id]) {
-					if (is_player_spotted_by_ct(id)) {
+					new iSpotter;
+					if (is_player_spotted_by_ct(id, iSpotter)) {
 						g_flSpottedVisibleTime[id] += frametime;
 						if (g_flSpottedVisibleTime[id] >= SPOT_CONFIRM_TIME) {
 							g_bSpottedConfirmed[id] = true;
 							g_StatsRound[id][PLR_STATS_SPOTTED_ROUNDS] = 1;
+							sendSpottedDebug(iSpotter, id);
 						}
 					} else {
 						g_flSpottedVisibleTime[id] = 0.0;
@@ -764,6 +774,16 @@ public rgPlayerPreThink(id) {
 
 	last_updated[id] = get_gametime();
 	xs_vec_copy(origin, g_flLastPosition[id]);
+}
+
+public cmdDbgSpot(id) {
+	if (!(get_user_flags(id) & SPOT_DEBUG_ACCESS)) {
+		return PLUGIN_HANDLED;
+	}
+
+	g_bSpotDebug[id] = !g_bSpotDebug[id];
+	client_print_color(id, print_team_blue, "[DBGSPOT] %s", g_bSpotDebug[id] ? "enabled" : "disabled");
+	return PLUGIN_HANDLED;
 }
 
 public rgRoundFreezeEnd() {
@@ -999,7 +1019,8 @@ stock bool:has_tt_in_radius(id, Float:flRadius) {
 	return false;
 }
 
-stock bool:is_player_spotted_by_ct(id) {
+stock bool:is_player_spotted_by_ct(id, &iSpotter = 0) {
+	iSpotter = 0;
 	if (!is_user_alive(id) || rg_get_user_team(id) != TEAM_TERRORIST) {
 		return false;
 	}
@@ -1029,11 +1050,26 @@ stock bool:is_player_spotted_by_ct(id) {
 		}
 
 		if (fm_is_in_viewcone(iCT, ttEye) && fm_is_ent_visible(iCT, id)) {
+			iSpotter = iCT;
 			return true;
 		}
 	}
 
 	return false;
+}
+
+stock sendSpottedDebug(iSpotter, iTt) {
+	if (!is_user_connected(iSpotter) || !is_user_connected(iTt)) {
+		return;
+	}
+
+	if (g_bSpotDebug[iTt] && (get_user_flags(iTt) & SPOT_DEBUG_ACCESS) && rg_get_user_team(iTt) == TEAM_TERRORIST) {
+		client_print_color(iTt, print_team_blue, "^3%n^1 stotted ^3you^1.", iSpotter);
+	}
+
+	if (g_bSpotDebug[iSpotter] && (get_user_flags(iSpotter) & SPOT_DEBUG_ACCESS) && rg_get_user_team(iSpotter) == TEAM_CT) {
+		client_print_color(iSpotter, print_team_blue, "^3you^1 spotted ^3%n^1.", iTt);
+	}
 }
 public Float:get_average_percent(iCount, Float:flPercentSum) {
     if (iCount == 0) {
