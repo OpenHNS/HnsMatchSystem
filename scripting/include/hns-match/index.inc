@@ -27,6 +27,7 @@
 #include <hns-match/modes/modes.inc>
 
 #include <hns-match/addition/cvars>
+#include <hns-match/controller>
 #include <hns-match/utils>
 #include <hns-match/user>
 #include <hns-match/save>

@@ -176,6 +176,33 @@ native Float:hns_get_score_b();
 native HNS_TEAM:hns_get_is_team_tt();
 
 /**
+* Returns current number of players with controller status LEFT.
+*
+* @return		Count of LEFT players
+*/
+native hns_controller_get_left_count();
+
+/**
+* Copies LEFT player steamid by index.
+*
+* @param iIndex	Zero-based index in LEFT list
+* @param szSteamId	Buffer for steamid
+* @param iLen		Maximum buffer size
+*
+* @return		1 on success, 0 if index is invalid
+*/
+native hns_controller_get_left_steamid(iIndex, szSteamId[], iLen);
+
+/**
+* Returns match side (HNS_TEAM) for LEFT player by index.
+*
+* @param iIndex	Zero-based index in LEFT list
+*
+* @return		HNS_TEAM value, or -1 if index is invalid
+*/
+native HNS_TEAM:hns_controller_get_left_team(iIndex);
+
+/**
 * Returns current point distance bucket (0..10).
 *
 * @return		Integer distance bucket
@@ -301,6 +328,13 @@ forward hns_round_freezeend();
 * @noreturn
 */
 forward hns_round_end();
+
+/**
+* Called after controller state is applied/synced.
+*
+* @noreturn
+*/
+forward hns_controller_apply();
 
 stock RegisterSayCmd(const szCmd[], const szShort[], const szFunc[], flags = -1, szInfo[] = "") {
 	new szTemp[65], szInfoLang[65];

@@ -15,6 +15,7 @@ public mix_init() {
 }
 
 public mix_start() {
+	ControllerReset();
 	match_reset_data();
 
 	ChangeGameplay(GAMEPLAY_HNS);
@@ -24,6 +25,7 @@ public mix_start() {
 	g_eMatchState = STATE_PREPARE;
 
 	g_isTeamTT = HNS_TEAM_A;
+	ControllerInit();
 
 	g_eSurrenderData[e_sFlDelay] = get_gametime() + g_iSettings[SURTIMEDELAY];
 
@@ -160,6 +162,8 @@ public mix_roundstart() {
 		return;
 	}
 
+	ControllerCheck();
+
 	g_flRoundTime = 0.0;
 
 	cmdShowTimers(0);
@@ -227,6 +231,7 @@ public taskCheckLeave() {
 }
 
 public MixFinishedMR(iWinTeam) {
+	ControllerCheck();
 	ExecuteForward(g_hForwards[MATCH_FINISH], _, iWinTeam);
 
 	new Float:TimeDiff = floatabs(g_eMatchInfo[e_flSidesTime][g_isTeamTT] - g_eMatchInfo[e_flSidesTime][HNS_TEAM:!g_isTeamTT]);
@@ -244,6 +249,7 @@ public MixFinishedMR(iWinTeam) {
 }
 
 public MixFinishedWT() {
+	ControllerCheck();
 	ExecuteForward(g_hForwards[MATCH_FINISH], _, 1);
 
 	new Float:TimeDiff = floatabs(g_eMatchInfo[e_flSidesTime][g_isTeamTT] - g_eMatchInfo[e_flSidesTime][HNS_TEAM:!g_isTeamTT]);

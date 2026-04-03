@@ -27,6 +27,9 @@ public plugin_natives() {
 	register_native("hns_get_score_b", "native_get_score_b");
 
 	register_native("hns_get_is_team_tt", "native_get_is_team_tt");
+	register_native("hns_controller_get_left_count", "native_controller_get_left_count");
+	register_native("hns_controller_get_left_steamid", "native_controller_get_left_steamid");
+	register_native("hns_controller_get_left_team", "native_controller_get_left_team");
 
 	register_native("hns_get_point_distance", "native_get_point_distance");
 	register_native("hns_get_players_distance", "native_get_players_distance");
@@ -131,6 +134,93 @@ public Float:native_get_score_b() {
 
 public HNS_TEAM:native_get_is_team_tt() {
 	return g_isTeamTT;
+}
+
+public native_controller_get_left_count(amxx, params) {
+	if (g_aController == Invalid_Array) {
+		return 0;
+	}
+
+	new iSize = ArraySize(g_aController);
+	new iCount = 0;
+
+	for (new i = 0; i < iSize; i++) {
+		new ePlayer[PLAYERS_MATCH];
+		ArrayGetArray(g_aController, i, ePlayer);
+
+		if (ePlayer[PM_STATUS] == STATUS_LEFT) {
+			iCount++;
+		}
+	}
+
+	return iCount;
+}
+
+public native_controller_get_left_steamid(amxx, params) {
+	if (params < 3 || g_aController == Invalid_Array) {
+		return 0;
+	}
+
+	enum { argIndex = 1, argSteamId, argLen };
+
+	new iTarget = get_param(argIndex);
+	if (iTarget < 0) {
+		return 0;
+	}
+
+	new iSize = ArraySize(g_aController);
+	new iLeftCursor = 0;
+
+	for (new i = 0; i < iSize; i++) {
+		new ePlayer[PLAYERS_MATCH];
+		ArrayGetArray(g_aController, i, ePlayer);
+
+		if (ePlayer[PM_STATUS] != STATUS_LEFT) {
+			continue;
+		}
+
+		if (iLeftCursor != iTarget) {
+			iLeftCursor++;
+			continue;
+		}
+
+		set_string(argSteamId, ePlayer[PM_STEAMID], get_param(argLen));
+		return 1;
+	}
+
+	return 0;
+}
+
+public HNS_TEAM:native_controller_get_left_team(amxx, params) {
+	if (params < 1 || g_aController == Invalid_Array) {
+		return HNS_TEAM:-1;
+	}
+
+	new iTarget = get_param(1);
+	if (iTarget < 0) {
+		return HNS_TEAM:-1;
+	}
+
+	new iSize = ArraySize(g_aController);
+	new iLeftCursor = 0;
+
+	for (new i = 0; i < iSize; i++) {
+		new ePlayer[PLAYERS_MATCH];
+		ArrayGetArray(g_aController, i, ePlayer);
+
+		if (ePlayer[PM_STATUS] != STATUS_LEFT) {
+			continue;
+		}
+
+		if (iLeftCursor != iTarget) {
+			iLeftCursor++;
+			continue;
+		}
+
+		return ePlayer[TEAM_MATCH];
+	}
+
+	return HNS_TEAM:-1;
 }
 
 public native_get_point_distance() {

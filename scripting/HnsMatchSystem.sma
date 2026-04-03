@@ -126,6 +126,7 @@ public forward_init() {
 	g_hForwards[HNS_ROUND_START] = CreateMultiForward("hns_round_start", ET_CONTINUE);
 	g_hForwards[HNS_ROUND_FREEZEEND] = CreateMultiForward("hns_round_freezeend", ET_CONTINUE);
 	g_hForwards[HNS_ROUND_END] = CreateMultiForward("hns_round_end", ET_CONTINUE);
+	g_hForwards[CONTROLLER_APPLY] = CreateMultiForward("hns_controller_apply", ET_CONTINUE);
 }
 
 public MATCH_STATUS:native_get_status(amxx, params) {
@@ -434,6 +435,7 @@ public ShowTimeAsMoney()
 }
 
 public plugin_end() {
+	ControllerDestroy();
 	TrieDestroy(g_eMatchInfo[e_tLeaveData]);
 	ArrayDestroy(g_aPlayersLoadData);
 }

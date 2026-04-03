@@ -121,7 +121,8 @@ enum _: Forwards {
 	MATCH_JOIN_PLAYER,
 	HNS_ROUND_START,
 	HNS_ROUND_END,
-	HNS_ROUND_FREEZEEND
+	HNS_ROUND_FREEZEEND,
+	CONTROLLER_APPLY
 };
 
 new g_hForwards[Forwards];
@@ -133,6 +134,31 @@ enum PLAYER_ROLES {
 	ROLE_CAP_B, 
 	ROLE_TEAM_B
 };
+
+/* CONTROLLER (draft).
+ * Source of truth for leave/replace state should live in core plugin.
+ * NOTE: structure only, not wired into runtime logic yet.
+ */
+enum PLAYER_STATUS {
+	STATUS_NONE = 0,
+	STATUS_ACTIVE,
+	STATUS_LEFT,
+	STATUS_REPLACED
+};
+
+enum _:PLAYERS_MATCH {
+	PM_STEAMID[MAX_AUTHID_LENGTH],
+	PLAYER_ROLES:PM_ROLE,
+	PLAYER_STATUS:PM_STATUS,
+	HNS_TEAM:TEAM_MATCH,
+	TeamName:TEAM_GAME
+};
+
+// Players controller registry (single storage).
+// Keep after finish; reset on next mix_start; destroy on map change.
+new Array:g_aController = Invalid_Array;
+new Trie:g_tControllerByAuth = Invalid_Trie;
+new bool:g_bControllerInitialized = false;
 
 enum _: PLAYER_INFO {
 	PLAYER_ROLES:PLAYER_ROLE,
