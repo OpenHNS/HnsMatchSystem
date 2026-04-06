@@ -108,8 +108,8 @@ public plugin_init() {
 	RegisterHookChain(RG_PlayerBlind, "rgPlayerBlind");
 	RegisterHookChain(RG_ThrowFlashbang, "rgThrowFlashbang", true);
 	RegisterHookChain(RG_CGrenade_ExplodeFlashbang, "rgExplodeFlashbang", true);
-	RegisterHam(Ham_Weapon_PrimaryAttack, "weapon_knife", "hamKnifePrimaryAttackPost", true);
-	RegisterHam(Ham_Weapon_SecondaryAttack, "weapon_knife", "hamKnifeSecondaryAttackPost", true);
+	RegisterHam(Ham_Weapon_PrimaryAttack, "weapon_knife", "hamKnifePrimaryAttackPre");
+	RegisterHam(Ham_Weapon_SecondaryAttack, "weapon_knife", "hamKnifeSecondaryAttackPre");
 	RegisterSayCmd("dbgspot", "dbgspot", "cmdDbgSpot", SPOT_DEBUG_ACCESS, "Toggle spotted debug");
 
 	g_hApplyStatsForward = CreateMultiForward("hns_apply_stats", ET_CONTINUE, FP_CELL);
@@ -624,12 +624,12 @@ public rgPlayerTakeDamage(iVictim, iWeapon, iAttacker, Float:fDamage) { // Пр�
 	}
 }
 
-public hamKnifeSecondaryAttackPost(iWeapon) {
+public hamKnifeSecondaryAttackPre(iWeapon) {
 	count_knife_attempt(iWeapon);
 	return HAM_IGNORED;
 }
 
-public hamKnifePrimaryAttackPost(iWeapon) {
+public hamKnifePrimaryAttackPre(iWeapon) {
 	count_knife_attempt(iWeapon);
 	return HAM_IGNORED;
 }
