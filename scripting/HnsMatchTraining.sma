@@ -153,8 +153,11 @@ public CmdGoCheck(id) {
 	}
 	
 	set_entvar(id, var_velocity, Float:{0.0, 0.0, 0.0});
+	set_entvar(id, var_view_ofs, Float:{0.0, 0.0, 12.0});
 	set_entvar(id, var_flags, get_entvar(id, var_flags) | FL_DUCKING);
 	set_entvar(id, var_origin, g_fCheckpoints[id][!g_fCheckpointAlternate[id]]);
+	set_entvar(id, var_fuser2, 0.0);
+	set_entvar(id, var_friction, 1.0);
 
 	if(g_bSaveAngles[id]) {
 		set_entvar(id, var_angles, g_fCheckpointAngles[id]);
