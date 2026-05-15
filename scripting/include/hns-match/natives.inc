@@ -20,6 +20,7 @@ public plugin_natives() {
 	register_native("hns_get_state", "native_get_state");
 
 	register_native("hns_get_rules", "native_get_rules");
+	register_native("hns_set_rules", "native_set_rules");
 
 	register_native("hns_isboost", "native_hns_isboost");
 
@@ -121,6 +122,20 @@ public native_set_status(amxx, params) {
 	}
 
 	g_iMatchStatus = iNewStatus;
+	return 1;
+}
+
+public native_set_rules(amxx, params) {
+	if (params < 1) {
+		return 0;
+	}
+
+	new NATCH_RULES:iNewRules = NATCH_RULES:get_param(1);
+	if (iNewRules < RULES_MR || iNewRules > RULES_MULTYDUEL) {
+		return 0;
+	}
+
+	g_iCurrentRules = iNewRules;
 	return 1;
 }
 

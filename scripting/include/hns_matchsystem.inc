@@ -120,7 +120,8 @@ native MODE_STATES:hns_get_state();
 enum MATCH_RULES {
 	RULES_MR,
 	RULES_TIMER,
-	RULES_DUEL
+	RULES_DUEL,
+	RULES_MULTYDUEL
 }
 
 /**
@@ -129,6 +130,15 @@ enum MATCH_RULES {
 * @return		Match rules (MATCH_RULES)
 */
 native MATCH_RULES:hns_get_rules();
+
+/**
+* Sets current match rules.
+*
+* @param iRules	Match rules (MATCH_RULES)
+*
+* @return		1 on success, 0 on invalid value
+*/
+native hns_set_rules(MATCH_RULES:iRules);
 
 enum HNS_TEAM {
 	HNS_TEAM_B,

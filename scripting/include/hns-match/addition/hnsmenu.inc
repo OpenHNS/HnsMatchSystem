@@ -287,6 +287,9 @@ public settingsMatchMenu(id) {
 		case RULES_DUEL: {
 			formatex(szMsg, charsmax(szMsg), "%L", id, "MENU_STNGS_WINTIME", g_eMatchInfo[e_mWintime]);
 		}
+		case RULES_MULTYDUEL: {
+			formatex(szMsg, charsmax(szMsg), "%L", id, "MENU_STNGS_WINTIME", g_eMatchInfo[e_mWintime]);
+		}
 	}
 	
 	menu_additem(hMenu, szMsg, "3");
@@ -370,17 +373,27 @@ public settingsMatchMenuHandler(id, hMenu, item) {
 
 					set_pcvar_float(pCvar[WINTIME], g_eMatchInfo[e_mWintime]);
 				}
-				case RULES_DUEL: {
-					if (g_eMatchInfo[e_mWintime] <= 10.0)
-						g_eMatchInfo[e_mWintime] = 15.0;
+					case RULES_DUEL: {
+						if (g_eMatchInfo[e_mWintime] <= 10.0)
+							g_eMatchInfo[e_mWintime] = 15.0;
 					else if (g_eMatchInfo[e_mWintime] <= 15.0)
 						g_eMatchInfo[e_mWintime] = 20.0;
 					else if (g_eMatchInfo[e_mWintime] >= 20.0)
 						g_eMatchInfo[e_mWintime] = 10.0;
 
-					set_pcvar_float(pCvar[WINTIME], g_eMatchInfo[e_mWintime]);
+						set_pcvar_float(pCvar[WINTIME], g_eMatchInfo[e_mWintime]);
+					}
+					case RULES_MULTYDUEL: {
+						if (g_eMatchInfo[e_mWintime] <= 10.0)
+							g_eMatchInfo[e_mWintime] = 15.0;
+						else if (g_eMatchInfo[e_mWintime] <= 15.0)
+							g_eMatchInfo[e_mWintime] = 20.0;
+						else if (g_eMatchInfo[e_mWintime] >= 20.0)
+							g_eMatchInfo[e_mWintime] = 10.0;
+
+						set_pcvar_float(pCvar[WINTIME], g_eMatchInfo[e_mWintime]);
+					}
 				}
-			}
 
 			settingsMatchMenu(id);
 		}
@@ -487,6 +500,12 @@ public menuSelectMode(id) {
 		format(szMsg, charsmax(szMsg), "%s \r[%L]", szMsg, id, "MENU_CUSTOM_ACTIVE");
 	}
 	menu_additem(hMenu, szMsg, "3");
+
+	formatex(szMsg, charsmax(szMsg), "Multi Duel");
+	if (g_iCurrentRules == RULES_MULTYDUEL) {
+		format(szMsg, charsmax(szMsg), "%s \r[%L]", szMsg, id, "MENU_CUSTOM_ACTIVE");
+	}
+	menu_additem(hMenu, szMsg, "4");
 		
 	menu_setprop(hMenu, MPROP_EXIT, MEXIT_ALL);
 	
@@ -516,6 +535,9 @@ public HandlerSelectMode(id, hMenu, item) {
 		}
 		case 3: {
 			cmdDuelMode(id);
+		}
+		case 4: {
+			cmdMultyDuelMode(id);
 		}
 	}
 

@@ -732,7 +732,7 @@ public task_ShowPlayerInfo() {
 			ShowSyncHudMsg(id, g_MsgSync, "%s", szHudMess);
 		}
 
-		if (g_iHudPlayerPlayer && g_HudOnOff[id] && hns_get_rules() != RULES_DUEL) {
+			if (g_iHudPlayerPlayer && g_HudOnOff[id] && hns_get_rules() != RULES_DUEL && hns_get_rules() != RULES_MULTYDUEL) {
 			set_hudmessage(.red = 100, .green = 100, .blue = 100, .x = 0.01, .y = 0.25, .holdtime = 1.0);
 			new szHudMess[1024], iLen;
 			if (show_id != id) {
@@ -758,7 +758,7 @@ public task_ShowPlayerInfo() {
 				}
 			}
 
-			if (hns_get_mode() == MODE_MIX && hns_get_state() != STATE_PAUSED && hns_get_rules() != RULES_DUEL) {
+				if (hns_get_mode() == MODE_MIX && hns_get_state() != STATE_PAUSED && hns_get_rules() != RULES_DUEL && hns_get_rules() != RULES_MULTYDUEL) {
 				new szTime[24];
 				fnConvertTime(hns_get_stats_surv(STATS_ALL, show_id), szTime, charsmax(szTime), false);
 				iLen += format(szHudMess[iLen], sizeof szHudMess - iLen, "\

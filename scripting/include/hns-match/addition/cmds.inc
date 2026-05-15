@@ -21,6 +21,7 @@ stock cmds_init() {
 	RegisterSayCmd("mr", 		"maxround", 	"cmdMrMode",		iWatcherAccess, "Choose MR mode");
 	RegisterSayCmd("timer", 	"wintime", 		"cmdWintimeMode",	iWatcherAccess, "Choose Wintime mode");
 	RegisterSayCmd("duel", 		"versus", 		"cmdDuelMode",		iWatcherAccess, "Choose 1x1 mode");
+	RegisterSayCmd("multyduel", "multy", 		"cmdMultyDuelMode",	iWatcherAccess, "Choose multi 1x1 mode");
 	RegisterSayCmd("pub", 		"public", 		"cmdPubMode", 		iWatcherAccess, "Public mode");
 	RegisterSayCmd("dm", 		"deathmatch", 	"cmdDMMode", 		iWatcherAccess, "DeathMatch mode");
 	RegisterSayCmd("dm1tt", 	"dm1", 			"cmdDM1TTMode", 	iWatcherAccess, "DeathMatch 1TT mode");
@@ -242,6 +243,27 @@ public cmdDuelMode(id) {
 
 	client_print_color(0, print_team_blue, "%L", LANG_PLAYER, "MODE_SET_DUEL", g_iSettings[PREFIX], id);
 	g_iCurrentRules = RULES_DUEL;
+
+	return PLUGIN_HANDLED;
+}
+
+public cmdMultyDuelMode(id) {
+	if (!isUserWatcher(id)) {
+		return PLUGIN_HANDLED;
+	}
+
+	if (g_iCurrentRules == RULES_MULTYDUEL) {
+		client_print_color(id, print_team_blue, "%L", id, "MODE_ALREADY", g_iSettings[PREFIX]);
+		return PLUGIN_HANDLED;
+	}
+
+	if (g_iCurrentMode == MODE_MIX) {
+		client_print_color(id, print_team_blue, "%L", id, "MODE_NOT_MIX", g_iSettings[PREFIX]);
+		return PLUGIN_HANDLED;
+	}
+
+	client_print_color(0, print_team_blue, "%s Multi Duel mode selected by %n.", g_iSettings[PREFIX], id);
+	g_iCurrentRules = RULES_MULTYDUEL;
 
 	return PLUGIN_HANDLED;
 }
@@ -864,9 +886,9 @@ public cmdShowTimers(id) {
 				client_print_color(id, print_team_blue, "%L", id, "SCORE_TIME_WT", g_iSettings[PREFIX], szTimeToWin[HNS_TEAM_B], szTimeToWin[HNS_TEAM_A], szTimeDiff);
 			}
 		}
-		case RULES_DUEL: {
-			new Float:flScoreA = Float:g_eMatchInfo[e_flSidesTime][HNS_TEAM_A];
-			new Float:flScoreB = Float:g_eMatchInfo[e_flSidesTime][HNS_TEAM_B];
+			case RULES_DUEL: {
+				new Float:flScoreA = Float:g_eMatchInfo[e_flSidesTime][HNS_TEAM_A];
+				new Float:flScoreB = Float:g_eMatchInfo[e_flSidesTime][HNS_TEAM_B];
 
 			new ttPlayers[MAX_PLAYERS], ctPlayers[MAX_PLAYERS], ttNum, ctNum;
 			get_players(ttPlayers, ttNum, "he", "TERRORIST");
@@ -884,9 +906,12 @@ public cmdShowTimers(id) {
 			new szTime[24];
 			fnConvertTime(g_flPointsMatchTime, szTime, charsmax(szTime), false);
 			
-			client_print_color(id, print_team_blue, "%L", id, "DUEL_POINTS_TIME", g_iSettings[PREFIX], iPlayerA, flScoreA, flScoreB, iPlayerB, szTime);
+				client_print_color(id, print_team_blue, "%L", id, "DUEL_POINTS_TIME", g_iSettings[PREFIX], iPlayerA, flScoreA, flScoreB, iPlayerB, szTime);
+			}
+			case RULES_MULTYDUEL: {
+				client_print_color(id, print_team_blue, "%s Multi Duel: scores and pair status are handled by addon plugin.", g_iSettings[PREFIX]);
+			}
 		}
-	}
 
 	return PLUGIN_HANDLED;
 }

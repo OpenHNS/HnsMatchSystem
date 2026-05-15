@@ -97,7 +97,7 @@ public hns_setrole(id)
 
 	if (g_iSettings[ONEHPMODE] == 1) {
 		set_entvar(id, var_health, 1.0);
-	} else if (g_iCurrentMode == MODE_MIX && g_iCurrentRules == RULES_DUEL) {
+	} else if (g_iCurrentMode == MODE_MIX && (g_iCurrentRules == RULES_DUEL || g_iCurrentRules == RULES_MULTYDUEL)) {
 		set_entvar(id, var_health, 60.0);
 	}
 }
@@ -111,7 +111,7 @@ public hns_killed(victim, attacker)
 	
 	if (g_iCurrentMode == MODE_DM
 		|| g_iCurrentMode == MODE_DM_1TT
-		|| (g_iCurrentMode == MODE_MIX && g_iCurrentRules == RULES_DUEL)
+		|| (g_iCurrentMode == MODE_MIX && (g_iCurrentRules == RULES_DUEL || g_iCurrentRules == RULES_MULTYDUEL))
 		|| !g_iSettings[LASTGRENADE])
 	{
 		return;
