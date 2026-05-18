@@ -127,6 +127,11 @@ public WatcherMenu(id) {
 }
 
 public codeWatcherMenu(id, hMenu, item) {
+	if (!is_user_connected(id)) {
+		menu_destroy(hMenu);
+		return PLUGIN_HANDLED;
+	}
+
 	if (item == MENU_EXIT) {
 		menu_destroy(hMenu);
 		return PLUGIN_HANDLED;
@@ -201,6 +206,11 @@ public ManagementWatcherMenu(id) {
 }
 
 public codeManagementWatcherMenu(id, hMenu, item) {
+	if (!is_user_connected(id)) {
+		menu_destroy(hMenu);
+		return PLUGIN_HANDLED;
+	}
+
 	if (item == MENU_EXIT) {
 		menu_destroy(hMenu);
 		return PLUGIN_HANDLED;
@@ -264,6 +274,11 @@ public ChooseNewWatcherMenu(id) {
 }
 
 public codeChooseNewWatcherMenu(id, hMenu, item) {
+	if (!is_user_connected(id)) {
+		menu_destroy(hMenu);
+		return PLUGIN_HANDLED;
+	}
+
 	if (item == MENU_EXIT) {
 		menu_destroy(hMenu);
 		return PLUGIN_HANDLED;
@@ -285,6 +300,10 @@ public codeChooseNewWatcherMenu(id, hMenu, item) {
 }
 
 public MakeWatcher(maker, id) {
+	if (!is_user_connected(maker)) {
+		return PLUGIN_HANDLED;
+	}
+
 	if(!is_user_connected(id)) {
 		client_print_color(maker, print_team_blue, "%L", maker, "WTR_PLR_DISC", g_sPrefix)
 		
@@ -411,6 +430,11 @@ public voteWatcherMenu(id) {
 }
 
 public codeVoteWatcherMenu(id, hMenu, item) {
+	if (!is_user_connected(id)) {
+		menu_destroy(hMenu);
+		return PLUGIN_HANDLED;
+	}
+
 	if(!g_eRnw[r_bIsVote]) {
 		menu_destroy(hMenu);
 		return PLUGIN_HANDLED;

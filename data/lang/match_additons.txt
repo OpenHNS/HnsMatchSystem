@@ -8,7 +8,7 @@ PTS_SET_CT = %s Team ^3CT^1 set ^3+15^1 pts.
 
 WTR_LEAVE = %s ^3%n^1 (watcher) has left, wait or chose a new one (say ^4rnw^1)...
 WTR_DELETE = %s ^3%n^1 removed ^3%n^1 watcher privileges.
-WTR_DELETE_STEAM = %s ^3%n^1 removed ^3%n^1 (steamid) watcher privileges.
+WTR_DELETE_STEAM = %s ^3%n^1 removed ^3%s^1 (steamid) watcher privileges.
 WTR_PLR_DISC = %s Player you chose is disconnected.
 WTR_CHOOSE_NEW = %s ^3%n^1 choose ^3%n^1 as new server watcher.
 WTR_NOT_ADM = %s Can't start a vote if admin is online.
