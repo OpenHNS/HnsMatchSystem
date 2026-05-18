@@ -197,8 +197,6 @@ public mix_roundstart() {
 	}
 
 	set_task(0.3, "taskSaveAfk");
-
-	set_task(5.0, "taskCheckAfk");
 }
 
 public taskCheckLeave() {

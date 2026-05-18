@@ -44,6 +44,10 @@ public taskCheckAfk() {
 		if (PlayerIsAfk(id)) {
 			eAfkData[id][is_afk] = true;
 			iPlayersAfk++;
+
+			if (g_bDebugMode) {
+				server_print("[MATCH][AFK] detected | player=%n team=%d state=%d mode=%d status=%d freeze=%d", id, getUserTeam(id), g_eMatchState, g_iCurrentMode, g_iMatchStatus, get_member_game(m_bFreezePeriod));
+			}
 		}
 	}
 
@@ -51,18 +55,22 @@ public taskCheckAfk() {
 		if(task_exists(TASK_AFK))
 			remove_task(TASK_AFK);
 
-		switch (g_iCurrentMode){
-			case MODE_KNIFE: {
-				kniferound_pause()
+			switch (g_iCurrentMode){
+				case MODE_KNIFE: {
+					kniferound_pause()
+				}
+				case MODE_MIX:{
+					mix_pause();
+				}
 			}
-			case MODE_MIX:{
-				mix_pause();
+
+			if (g_bDebugMode) {
+				server_print("[MATCH][AFK] pause on | afk_count=%d", iPlayersAfk);
 			}
+			
+			client_print_color(0, print_team_blue, "%L", LANG_PLAYER, "AFK_PAUSE", g_iSettings[PREFIX], iPlayersAfk);
+			set_task(1.0, "taskAfk", .id = TASK_AFK, .flags = "b");
 		}
-		
-		client_print_color(0, print_team_blue, "%L", LANG_PLAYER, "AFK_PAUSE", g_iSettings[PREFIX], iPlayersAfk);
-		set_task(1.0, "taskAfk", .id = TASK_AFK, .flags = "b");
-	}
 }
 
 public taskAfk() {
@@ -80,19 +88,27 @@ public taskAfk() {
 		new id = iPlayers[i];
 		new szTime[16];
 
-		if (eAfkData[id][is_afk]) {
-			if (getUserTeam(id) == TEAM_SPECTATOR || !is_user_alive(id)) {
-				arrayset(eAfkData[id], 0, AfkData_s);
-				arrayset(flAfkOrigin[id], 0.0, sizeof(flAfkOrigin[]));
-				iPlayersAfk--;
-				continue;
-			}
+			if (eAfkData[id][is_afk]) {
+				if (getUserTeam(id) == TEAM_SPECTATOR || !is_user_alive(id)) {
+					if (g_bDebugMode) {
+						server_print("[MATCH][AFK] removed from afk tracking | player=%n reason=%s", id, getUserTeam(id) == TEAM_SPECTATOR ? "spectator" : "dead");
+					}
 
-			if (!PlayerIsAfk(id)) {
-				arrayset(eAfkData[id], 0, AfkData_s);
-				arrayset(flAfkOrigin[id], 0.0, sizeof(flAfkOrigin[]));
-				iPlayersAfk--;
-			} else {
+					arrayset(eAfkData[id], 0, AfkData_s);
+					arrayset(flAfkOrigin[id], 0.0, sizeof(flAfkOrigin[]));
+					iPlayersAfk--;
+					continue;
+				}
+
+				if (!PlayerIsAfk(id)) {
+					if (g_bDebugMode) {
+						server_print("[MATCH][AFK] returned | player=%n", id);
+					}
+
+					arrayset(eAfkData[id], 0, AfkData_s);
+					arrayset(flAfkOrigin[id], 0.0, sizeof(flAfkOrigin[]));
+					iPlayersAfk--;
+				} else {
 				eAfkData[id][afk_timer]++;
 				fnConvertTime(eAfkData[id][afk_timer] * 1.0, szTime, 23, false);
 				add(szBuffer, charsmax(szBuffer), fmt("%n (%s)^n", id, szTime));
@@ -101,6 +117,10 @@ public taskAfk() {
 	}
 
 	if (!iPlayersAfk) {
+		if (g_bDebugMode) {
+			server_print("[MATCH][AFK] pause off | all players returned");
+		}
+
 		if (g_ModFuncs[g_iCurrentMode][MODEFUNC_UNPAUSE])
 			ExecuteForward(g_ModFuncs[g_iCurrentMode][MODEFUNC_UNPAUSE], _);
 			
@@ -134,7 +154,7 @@ ResetAfkData() {
 stock bool:PlayerIsAfk(id) {
 	new Float:origin[3]; get_entvar(id, var_origin, origin);
 
-	if (getUserTeam(id) == TEAM_CT && get_member_game(m_bFreezePeriod)) {
+	if (get_member_game(m_bFreezePeriod)) {
 		return false;
 	}
 
