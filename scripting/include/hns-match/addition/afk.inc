@@ -37,6 +37,10 @@ public taskCheckAfk() {
 	for(new i; i < iNum; i++) {
 		new id = iPlayers[i];
 
+		if (getUserTeam(id) != TEAM_TERRORIST && getUserTeam(id) != TEAM_CT) {
+			continue;
+		}
+
 		if (PlayerIsAfk(id)) {
 			eAfkData[id][is_afk] = true;
 			iPlayersAfk++;
@@ -146,6 +150,11 @@ public taskSaveAfk() {
 
 	for(new i; i < iNum; i++) {
 		new id = iPlayers[i];
+
+		if (getUserTeam(id) != TEAM_TERRORIST && getUserTeam(id) != TEAM_CT) {
+			continue;
+		}
+
 		get_entvar(id, var_origin, flAfkOrigin[id]);
 	}
 }
