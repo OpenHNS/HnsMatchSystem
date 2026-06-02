@@ -1266,6 +1266,7 @@ public task_PlayerReturn(id) {
 	PreparePlayer(id, false);
 }
 
+// TODO: Нужна оптимизация
 public AddToFullPack_Post(es, e, iEnt, id, hostflags, player, pSet) {
 	if (!g_eBattleData[BATTLE_ENABLED]) {
 		return FMRES_IGNORED;
