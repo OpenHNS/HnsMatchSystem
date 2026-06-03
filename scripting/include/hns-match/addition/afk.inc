@@ -44,10 +44,6 @@ public taskCheckAfk() {
 		if (PlayerIsAfk(id)) {
 			eAfkData[id][is_afk] = true;
 			iPlayersAfk++;
-
-			if (g_bDebugMode) {
-				server_print("[MATCH][AFK] detected | player=%n team=%d state=%d mode=%d status=%d freeze=%d", id, getUserTeam(id), g_eMatchState, g_iCurrentMode, g_iMatchStatus, get_member_game(m_bFreezePeriod));
-			}
 		}
 	}
 
@@ -64,10 +60,6 @@ public taskCheckAfk() {
 				}
 			}
 
-			if (g_bDebugMode) {
-				server_print("[MATCH][AFK] pause on | afk_count=%d", iPlayersAfk);
-			}
-			
 			client_print_color(0, print_team_blue, "%L", LANG_PLAYER, "AFK_PAUSE", g_iSettings[PREFIX], iPlayersAfk);
 			set_task(1.0, "taskAfk", .id = TASK_AFK, .flags = "b");
 		}
@@ -90,10 +82,6 @@ public taskAfk() {
 
 			if (eAfkData[id][is_afk]) {
 				if (getUserTeam(id) == TEAM_SPECTATOR || !is_user_alive(id)) {
-					if (g_bDebugMode) {
-						server_print("[MATCH][AFK] removed from afk tracking | player=%n reason=%s", id, getUserTeam(id) == TEAM_SPECTATOR ? "spectator" : "dead");
-					}
-
 					arrayset(eAfkData[id], 0, AfkData_s);
 					arrayset(flAfkOrigin[id], 0.0, sizeof(flAfkOrigin[]));
 					iPlayersAfk--;
@@ -101,10 +89,6 @@ public taskAfk() {
 				}
 
 				if (!PlayerIsAfk(id)) {
-					if (g_bDebugMode) {
-						server_print("[MATCH][AFK] returned | player=%n", id);
-					}
-
 					arrayset(eAfkData[id], 0, AfkData_s);
 					arrayset(flAfkOrigin[id], 0.0, sizeof(flAfkOrigin[]));
 					iPlayersAfk--;
@@ -117,10 +101,6 @@ public taskAfk() {
 	}
 
 	if (!iPlayersAfk) {
-		if (g_bDebugMode) {
-			server_print("[MATCH][AFK] pause off | all players returned");
-		}
-
 		if (g_ModFuncs[g_iCurrentMode][MODEFUNC_UNPAUSE])
 			ExecuteForward(g_ModFuncs[g_iCurrentMode][MODEFUNC_UNPAUSE], _);
 			
