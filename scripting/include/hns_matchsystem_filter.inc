@@ -50,6 +50,10 @@ public match_system_additons(const szNativeName[], iNativeID, iTrapMode) {
 		return PLUGIN_HANDLED
 	}
 
+	if (equal(szNativeName, "hns_custom_knifes_is_loaded") || equal(szNativeName, "hns_custom_knifes_open_menu") || equal(szNativeName, "hns_custom_knifes_teams_ready")) {
+		return PLUGIN_HANDLED
+	}
+
 	if (equal(szNativeName, "hns_is_user_noplay")) {
 		return PLUGIN_HANDLED
 	}

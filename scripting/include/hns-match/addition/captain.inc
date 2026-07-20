@@ -550,6 +550,15 @@ public checkFullTeams() {
 	// [Если игроков в матче 10] || [Если нет игроков в спеках] || [(Количество игроков чётное) и (максимум 1 в спеках)]
 	if (iPlayersMatch == 10 || !iPlayersNotMatch || (iPlayersMatch % 2 == 0) && (iPlayersNotMatch <= 1)) {
 		resetCaptainData();
+
+		if (hns_custom_knifes_is_loaded()) {
+			// Picking is finished, but keep MATCH_TEAMPICK pending until a watcher
+			// chooses the knife type through /kf.
+			g_iMatchStatus = MATCH_TEAMPICK;
+			hns_custom_knifes_teams_ready();
+			return;
+		}
+
 		client_print_color(0, print_team_blue, "%L", LANG_PLAYER, "TEAM_FULL", g_iSettings[PREFIX]); // TODO: Чат: Ножевой раунд начнется через 5 сек
 		start_team_decide(); // TODO: Добавить в худ таймер: Ножевой раунд/батл начнется через %d сек
 	}

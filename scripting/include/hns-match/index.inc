@@ -20,6 +20,7 @@
 #include <hns_matchsystem_maps.inc>
 #include <hns_matchsystem_battles.inc>
 #include <hns_matchsystem_cup.inc>
+#include <hns_matchsystem_custom_knifes.inc>
 
 #include <hns-match/globals>
 

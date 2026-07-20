@@ -469,6 +469,13 @@ public cmdStartMatch(id) {
 }
 
 public cmdKnifeRound(id) {
+	// The optional custom-knifes hub owns both /kf and the knife item in the
+	// main admin menu. The core only delegates the request through its API.
+	if (hns_custom_knifes_is_loaded()) {
+		hns_custom_knifes_open_menu(id);
+		return PLUGIN_HANDLED;
+	}
+
 	if (!isUserWatcher(id)) {
 		return PLUGIN_HANDLED;
 	}
