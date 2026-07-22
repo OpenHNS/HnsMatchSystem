@@ -68,7 +68,7 @@ public battlesmode_roundend(bool:win_ct) {
 			g_eMatchState = STATE_DISABLED;
 
 			Save_players(win_ct ? TEAM_CT : TEAM_TERRORIST);
-			if (!hns_cup_enabled()) {
+			if (!hns_cup_enabled() && g_iSettings[VOTERULES]) {
 				StartVoteRules();
 			}
 		}

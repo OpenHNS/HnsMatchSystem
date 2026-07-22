@@ -139,7 +139,7 @@ public kniferound_roundend(bool:win_ct) {
 
 			Save_players(win_ct ? TEAM_CT : TEAM_TERRORIST);
 
-			if (!hns_cup_enabled()) {
+			if (!hns_cup_enabled() && g_iSettings[VOTERULES]) {
 				StartVoteRules();
 			}
 		}

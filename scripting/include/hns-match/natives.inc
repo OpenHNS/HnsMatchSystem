@@ -41,7 +41,7 @@ public plugin_natives() {
 public native_get_prefix(amxx, params) {
 	enum { argPrefix = 1, argLen };
 	new szPrefix[24];
-	format(szPrefix, charsmax(szPrefix), "[^3%s^1]", g_iSettings[PREFIX]);
+	format(szPrefix, charsmax(szPrefix), "[^4%s^1]", g_iSettings[PREFIX]);
 	set_string(argPrefix, szPrefix, get_param(argLen));
 }
 
