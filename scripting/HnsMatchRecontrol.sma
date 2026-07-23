@@ -569,7 +569,8 @@ public ReControl(id)
 		g_bGiveWeapons[id] = true;
 		
 		rg_round_respawn(id);
-		
+
+		rg_remove_all_items(requested_id);
 		user_kill(requested_id, true);
 	}
 	else
@@ -636,7 +637,8 @@ ReplacePlayers(replacement_player, substitutive_player, admin_replaced = 0) {
 
 		g_bGiveWeapons[substitutive_player] = true;
 
-		rg_round_respawn(substitutive_player);        
+		rg_round_respawn(substitutive_player);
+		rg_remove_all_items(replacement_player);
 		user_silentkill(replacement_player);
 	}
 	else {
