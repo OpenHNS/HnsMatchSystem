@@ -322,6 +322,12 @@ public Knife_PrimaryAttack(ent)
 	//new id = get_member(ent, m_pPlayer); // TODO
 	/* get_member(id, m_iTeam) == _:CS_TEAM_CT */ // Условие тоже TODO
 
+	if (hns_custom_knifes_is_loaded()) {
+		if (hns_custom_knifes_get_type() == KNIFE_KATANA) {
+			return HAM_IGNORED;
+		}
+	}
+
 	if (g_iCurrentMode || g_iCurrentGameplay == GAMEPLAY_KNIFE)
 	{
 		ExecuteHamB(Ham_Weapon_SecondaryAttack, ent);
