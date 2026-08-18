@@ -88,6 +88,9 @@ public native_set_mode(amxx, params) {
 		case MODE_MIX: {
 			mix_start()
 		}
+		case MODE_RETAKE: {
+			retake_start()
+		}
 	}
 }
 

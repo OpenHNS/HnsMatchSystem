@@ -7,7 +7,8 @@ enum _:HNS_MODES
 	MODE_ZM,
 	MODE_MIX,
 	MODE_DM_1TT,
-	MODE_BATTLES
+	MODE_BATTLES,
+	MODE_RETAKE
 }
 new g_iCurrentMode; 
 
@@ -38,6 +39,7 @@ public InitGameModes() {
 	dm_1tt_init();
 	zm_init();
 	battlesmode_init();
+	retake_init();
 	mode_init();
 	trainingmode_init();
 }
@@ -56,6 +58,7 @@ public set_cvars_mode(iMode) {
 		case MODE_BATTLES: server_cmd("exec %s/battles.cfg", szPath);
 		case MODE_MIX: server_cmd("exec %s/match.cfg", szPath);
 		case MODE_ZM: server_cmd("exec %s/zombie.cfg", szPath);
+		case MODE_RETAKE: server_cmd("exec %s/retake.cfg", szPath);
 	}
 }
 

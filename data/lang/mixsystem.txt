@@ -46,6 +46,10 @@ PUB_ACTIVATED   = [^3%s^1] ^3%n^1 has activated ^3public^1 mode.
 PUB_ALREADY     = [^3%s^1] Public mode is already running.
 PUB_CANC        = [^3%s^1] Please, disable other mode to enable public mode.
 
+RETAKE_ACTIVATED = [^3%s^1] ^3%n^1 has activated ^3Retake Boost^1 mode.
+RETAKE_ALREADY   = [^3%s^1] Retake Boost mode is already running.
+RETAKE_CANC      = [^3%s^1] Please, disable other mode to enable Retake Boost mode.
+
 DM_ACTIVATED    = [^3%s^1] ^3%n^1 has activated ^3deatchmatch^1 mode.
 DM_ALREADY      = [^3%s^1] Deatchmatch mode is already running.
 DM_CANC         = [^3%s^1] Please, disable other mode to enable deathmatch mode.
@@ -91,6 +95,7 @@ START_CAPBATTLE = Started ^3captain battle^1 round!
 STOP_MIX        = [^3%s^1] ^3%n^1 stopped ^3mix^1.
 STOP_KNIFE      = [^3%s^1] ^3%n^1 stopped ^3knife^1 round^1.
 STOP_PUB        = [^3%s^1] ^3%n^1 stopped ^3public^1 mode^1.
+STOP_RETAKE     = [^3%s^1] ^3%n^1 stopped ^3Retake Boost^1 mode.
 STOP_CAP        = [^3%s^1] ^3%n^1 stopped ^3captain^1 mode^1.
 STOP_DM         = [^3%s^1] ^3%n^1 stopped ^3deathmatch^1 mode^1.
 STOP_DM_1TT     = [^3%s^1] ^3%n^1 stopped ^3deathmatch 1TT^1 mode^1.
@@ -267,6 +272,10 @@ PUB_ACTIVATED   = [^3%s^1] ^3%n^1 активировал ^3паблик^1 реж
 PUB_ALREADY     = [^3%s^1] Паблик режим уже запущен.
 PUB_CANC        = [^3%s^1] Пожалуйста, отключите другой режим чтобы запустить паблик.
 
+RETAKE_ACTIVATED = [^3%s^1] ^3%n^1 активировал ^3Retake Boost^1 режим.
+RETAKE_ALREADY   = [^3%s^1] Retake Boost режим уже запущен.
+RETAKE_CANC      = [^3%s^1] Пожалуйста, отключите другой режим чтобы запустить Retake Boost.
+
 DM_ACTIVATED    = [^3%s^1] ^3%n^1 активировал ^3ДМ^1 режим.
 DM_ALREADY      = [^3%s^1] ДМ режим уже запущен.
 DM_CANC         = [^3%s^1] Пожалуйста, отключите другой режим чтобы запустить ДМ.
@@ -312,6 +321,7 @@ START_CAPBATTLE = Запущен ^3батл раунд капитанов^1!
 STOP_MIX        = [^3%s^1] ^3%n^1 остановил ^3микс^1.
 STOP_KNIFE      = [^3%s^1] ^3%n^1 остановил ^3ножевой раунд^1.
 STOP_PUB        = [^3%s^1] ^3%n^1 остановил ^3паблик^1 режим.
+STOP_RETAKE     = [^3%s^1] ^3%n^1 остановил ^3Retake Boost^1 режим.
 STOP_CAP        = [^3%s^1] ^3%n^1 остановил режим ^3капитанов^1.
 STOP_DM         = [^3%s^1] ^3%n^1 остановил ^3ДМ^1 режим.
 STOP_DM_1TT     = [^3%s^1] ^3%n^1 остановил ^3ДМ 1TT^1 режим.

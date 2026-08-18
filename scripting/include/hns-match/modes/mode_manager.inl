@@ -35,6 +35,8 @@ public delayed_mode() {
 		dm_start();
 	} else if (g_iCurrentGameplay == GAMEPLAY_HNS && g_iCurrentMode == MODE_DM_1TT) {
 		dm_1tt_start();
+	} else if (g_iCurrentGameplay == GAMEPLAY_HNS && g_iCurrentMode == MODE_RETAKE) {
+		retake_start();
 	} else {
 		if (!g_iSettings[RULES]) {
 			g_iCurrentRules = RULES_MR;
@@ -116,7 +118,7 @@ public Task_CheckTime() {
 		return PLUGIN_HANDLED;
 	}
 
-	if((g_iCurrentMode == MODE_PUB || g_iCurrentMode == MODE_DM || g_iCurrentMode == MODE_DM_1TT || g_iCurrentMode == MODE_ZM) && g_iCurrentGameplay == GAMEPLAY_HNS) {
+	if((g_iCurrentMode == MODE_PUB || g_iCurrentMode == MODE_DM || g_iCurrentMode == MODE_DM_1TT || g_iCurrentMode == MODE_ZM || g_iCurrentMode == MODE_RETAKE) && g_iCurrentGameplay == GAMEPLAY_HNS) {
 		return PLUGIN_HANDLED;
 	}
 

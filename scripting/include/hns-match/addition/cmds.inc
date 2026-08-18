@@ -22,6 +22,7 @@ stock cmds_init() {
 	RegisterSayCmd("timer", 	"wintime", 		"cmdWintimeMode",	iWatcherAccess, "Choose Wintime mode");
 	RegisterSayCmd("duel", 		"versus", 		"cmdDuelMode",		iWatcherAccess, "Choose 1x1 mode");
 	RegisterSayCmd("pub", 		"public", 		"cmdPubMode", 		iWatcherAccess, "Public mode");
+	RegisterSayCmd("retake", 	"rtk", 			"cmdRetakeMode", 	iWatcherAccess, "Retake Boost mode");
 	RegisterSayCmd("dm", 		"deathmatch", 	"cmdDMMode", 		iWatcherAccess, "DeathMatch mode");
 	RegisterSayCmd("dm1tt", 	"dm1", 			"cmdDM1TTMode", 	iWatcherAccess, "DeathMatch 1TT mode");
 	RegisterSayCmd("zm", 		"zombie", 		"cmdZMMode", 		iWatcherAccess, "Zombie mode");
@@ -286,6 +287,27 @@ public cmdDMMode(id) {
 	client_print_color(0, print_team_blue, "%L", LANG_PLAYER, "DM_ACTIVATED", g_iSettings[PREFIX], id);
 
 	dm_start();
+
+	return PLUGIN_HANDLED;
+}
+
+public cmdRetakeMode(id) {
+	if (!isUserWatcher(id)) {
+		return PLUGIN_HANDLED;
+	}
+
+	if (g_iCurrentMode == MODE_RETAKE) {
+		client_print_color(id, print_team_blue, "%L", id, "RETAKE_ALREADY", g_iSettings[PREFIX]);
+		return PLUGIN_HANDLED;
+	}
+
+	if (g_iCurrentMode != MODE_TRAINING || g_iMatchStatus != MATCH_NONE) {
+		client_print_color(id, print_team_blue, "%L", id, "RETAKE_CANC", g_iSettings[PREFIX]);
+		return PLUGIN_HANDLED;
+	}
+
+	client_print_color(0, print_team_blue, "%L", LANG_PLAYER, "RETAKE_ACTIVATED", g_iSettings[PREFIX], id);
+	retake_start();
 
 	return PLUGIN_HANDLED;
 }
@@ -650,6 +672,10 @@ public cmdStop(id) {
 		case MODE_PUB: {
 			training_start();
 			client_print_color(0, print_team_blue, "%L", LANG_PLAYER, "STOP_PUB", g_iSettings[PREFIX], id);
+		}
+		case MODE_RETAKE: {
+			training_start();
+			client_print_color(0, print_team_blue, "%L", LANG_PLAYER, "STOP_RETAKE", g_iSettings[PREFIX], id);
 		}
 		case MODE_DM: {
 			training_start();

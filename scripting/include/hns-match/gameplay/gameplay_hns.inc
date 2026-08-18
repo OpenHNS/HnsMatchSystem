@@ -111,6 +111,7 @@ public hns_killed(victim, attacker)
 	
 	if (g_iCurrentMode == MODE_DM
 		|| g_iCurrentMode == MODE_DM_1TT
+		|| g_iCurrentMode == MODE_RETAKE
 		|| (g_iCurrentMode == MODE_MIX && g_iCurrentRules == RULES_DUEL)
 		|| !g_iSettings[LASTGRENADE])
 	{
@@ -195,7 +196,7 @@ public hns_roundstart()
 
 public hns_roundend(bool:win_ct)
 {
-	if (g_iCurrentMode != MODE_MIX && g_iCurrentMode != MODE_ZM) {
+	if (g_iCurrentMode != MODE_MIX && g_iCurrentMode != MODE_ZM && g_iCurrentMode != MODE_RETAKE) {
 		if (win_ct)
 		{
 			rg_swap_all_players();
