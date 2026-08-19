@@ -206,6 +206,11 @@ public hns_roundend(bool:win_ct)
 
 public fwd_Player_ResetMaxSpeed_Post(id)
 {
+	if (g_iCurrentMode == MODE_RETAKE && get_member_game(m_bFreezePeriod))
+	{
+		return;
+	}
+
 	if (getUserTeam(id) == TEAM_TERRORIST)
 	{
 		new weapon = get_member(id, m_pActiveItem);

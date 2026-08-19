@@ -36,7 +36,8 @@ public delayed_mode() {
 	} else if (g_iCurrentGameplay == GAMEPLAY_HNS && g_iCurrentMode == MODE_DM_1TT) {
 		dm_1tt_start();
 	} else if (g_iCurrentGameplay == GAMEPLAY_HNS && g_iCurrentMode == MODE_RETAKE) {
-		retake_start();
+		g_iMatchStatus = MATCH_NONE;
+		training_start();
 	} else {
 		if (!g_iSettings[RULES]) {
 			g_iCurrentRules = RULES_MR;
