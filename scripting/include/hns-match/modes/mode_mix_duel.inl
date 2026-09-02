@@ -10,8 +10,18 @@ new Float:g_flPointsMatchTimeSnap;
 new Float:g_flPointsSnap[HNS_TEAM];
 new HNS_TEAM:g_iPointsTeamSnap;
 
+new bool:g_bDuelHasRespawnOrigin[MAX_PLAYERS + 1];
+new Float:g_flDuelRespawnOrigin[MAX_PLAYERS + 1][3];
+new bool:g_bDuelFallDeath[MAX_PLAYERS + 1];
+new bool:g_bDuelWaitRespawnMove[MAX_PLAYERS + 1];
+new Float:g_flDuelRespawnMoveOrigin[MAX_PLAYERS + 1][3];
+
+new const Float:g_flDuelRespawnRadius[] = {16.0, 32.0, 48.0, 64.0, 80.0, 96.0, 128.0};
+new const Float:g_flDuelRespawnHeight[] = {0.0, 18.0, -18.0, 36.0, -36.0, 54.0};
+
 // Вызывается при старте матча в микс системе
 public duel_start() {
+	duel_clear_respawn_data();
 
 	g_flPointsMatchTime = g_eMatchInfo[e_mWintime] * 60.0;
 
@@ -51,6 +61,7 @@ public duel_roundend() {
 
 // Вызывается при рестарте раунда (reapi:  RG_RoundEnd)
 public duel_restartround() {
+	duel_clear_respawn_data();
 	points_restore_state();
 }
 
@@ -80,6 +91,17 @@ public duel_killed(victim, killer) {
 		preKillerTeam = getUserTeam(killer);
 	}
 
+	new bool:bFallDeath = g_bDuelFallDeath[victim];
+	g_bDuelFallDeath[victim] = false;
+	g_bDuelWaitRespawnMove[victim] = true;
+
+	if (preVictimTeam == TEAM_TERRORIST && preKillerTeam == TEAM_CT && !bFallDeath) {
+		get_entvar(victim, var_origin, g_flDuelRespawnOrigin[victim]);
+		g_bDuelHasRespawnOrigin[victim] = true;
+	} else {
+		g_bDuelHasRespawnOrigin[victim] = false;
+	}
+
 	dm_killed(victim, killer); // DeathMatch убийство (реализация в mode_dm.inl)
 
 	if (preKillerTeam == TEAM_CT && killer != victim) {
@@ -94,6 +116,9 @@ public duel_killed(victim, killer) {
 // Вызывается при падении игрока (reapi:  RG_CSGameRules_FlPlayerFallDamage)
 public duel_falldamage(id, Float:flDmg) {
 	new TeamName:preTeam = getUserTeam(id);
+	new Float:flHealth;
+	get_entvar(id, var_health, flHealth);
+	g_bDuelFallDeath[id] = (flDmg > 0.0 && flDmg >= flHealth);
 
 	dm_falldamage(id, flDmg); // DeathMatch падение (реализация в mode_dm.inl)
 
@@ -101,6 +126,119 @@ public duel_falldamage(id, Float:flDmg) {
 		g_isTeamTT = HNS_TEAM:!g_isTeamTT;
 		points_save_state();
 	}
+}
+
+// Возвращает пойманного TT на место смерти уже после смены его роли на CT.
+public duel_player_spawn(id) {
+	if (g_iCurrentMode != MODE_MIX || g_iCurrentRules != RULES_DUEL || !is_user_alive(id)) {
+		return;
+	}
+
+	g_bDuelFallDeath[id] = false;
+
+	if (g_bDuelHasRespawnOrigin[id]) {
+		g_bDuelHasRespawnOrigin[id] = false;
+
+		if (getUserTeam(id) == TEAM_CT) {
+			new Float:flTargetOrigin[3];
+			if (duel_find_safe_respawn_origin(id, g_flDuelRespawnOrigin[id], flTargetOrigin)) {
+				set_entvar(id, var_origin, flTargetOrigin);
+
+				static const Float:flZero[3] = {0.0, 0.0, 0.0};
+				set_entvar(id, var_velocity, flZero);
+			}
+		}
+	}
+
+	if (g_bDuelWaitRespawnMove[id]) {
+		get_entvar(id, var_origin, g_flDuelRespawnMoveOrigin[id]);
+	}
+}
+
+stock duel_clear_player_respawn(id) {
+	if (id < 1 || id > MaxClients) {
+		return;
+	}
+
+	g_bDuelHasRespawnOrigin[id] = false;
+	g_bDuelFallDeath[id] = false;
+	g_bDuelWaitRespawnMove[id] = false;
+	arrayset(g_flDuelRespawnMoveOrigin[id], 0.0, sizeof(g_flDuelRespawnMoveOrigin[]));
+}
+
+stock duel_clear_respawn_data() {
+	for (new id = 1; id <= MaxClients; id++) {
+		duel_clear_player_respawn(id);
+	}
+}
+
+stock bool:duel_find_safe_respawn_origin(id, const Float:flBaseOrigin[3], Float:flOutOrigin[3]) {
+	if (duel_is_position_free(id, flBaseOrigin)) {
+		flOutOrigin[0] = flBaseOrigin[0];
+		flOutOrigin[1] = flBaseOrigin[1];
+		flOutOrigin[2] = flBaseOrigin[2];
+		return true;
+	}
+
+	new Float:flCandidate[3];
+
+	for (new iHeight; iHeight < sizeof(g_flDuelRespawnHeight); iHeight++) {
+		for (new iRadius; iRadius < sizeof(g_flDuelRespawnRadius); iRadius++) {
+			new Float:flRadius = g_flDuelRespawnRadius[iRadius];
+
+			for (new iAngle; iAngle < 360; iAngle += 45) {
+				new Float:flYaw = float(iAngle);
+
+				flCandidate[0] = flBaseOrigin[0] + floatcos(flYaw, degrees) * flRadius;
+				flCandidate[1] = flBaseOrigin[1] + floatsin(flYaw, degrees) * flRadius;
+				flCandidate[2] = flBaseOrigin[2] + g_flDuelRespawnHeight[iHeight];
+
+				if (!duel_is_position_free(id, flCandidate)) {
+					continue;
+				}
+
+				flOutOrigin[0] = flCandidate[0];
+				flOutOrigin[1] = flCandidate[1];
+				flOutOrigin[2] = flCandidate[2];
+				return true;
+			}
+		}
+	}
+
+	return false;
+}
+
+stock bool:duel_is_position_free(id, const Float:flOrigin[3]) {
+	new iTrace = create_tr2();
+	new iHull = (get_entvar(id, var_flags) & FL_DUCKING) ? HULL_HEAD : HULL_HUMAN;
+
+	engfunc(EngFunc_TraceHull, flOrigin, flOrigin, 0, iHull, id, iTrace);
+
+	new bool:bStartSolid = bool:get_tr2(iTrace, TR_StartSolid);
+	new bool:bAllSolid = bool:get_tr2(iTrace, TR_AllSolid);
+	new Float:flFraction;
+	get_tr2(iTrace, TR_flFraction, flFraction);
+
+	free_tr2(iTrace);
+
+	return !bStartSolid && !bAllSolid && flFraction >= 1.0;
+}
+
+stock bool:duel_is_waiting_for_respawn_move(id) {
+	if (!g_bDuelWaitRespawnMove[id]) {
+		return false;
+	}
+
+	new Float:flOrigin[3];
+	get_entvar(id, var_origin, flOrigin);
+
+	// Тот же порог движения, который используется в AFK-проверке.
+	if (get_distance_f(g_flDuelRespawnMoveOrigin[id], flOrigin) <= 1.0) {
+		return true;
+	}
+
+	g_bDuelWaitRespawnMove[id] = false;
+	return false;
 }
 
 
@@ -121,6 +259,14 @@ public taskDuelPoints() {
 
 	if (ttNum != 1 || ctNum != 1) {
 		// TODO: учитывать ситуацию, когда игроков больше или один отсутствует.
+		g_iPointsDistance = 0;
+		g_iPlayerDistance = 0;
+		return;
+	}
+
+	new bool:bTtWaitingForMove = duel_is_waiting_for_respawn_move(ttPlayers[0]);
+	new bool:bCtWaitingForMove = duel_is_waiting_for_respawn_move(ctPlayers[0]);
+	if (bTtWaitingForMove || bCtWaitingForMove) {
 		g_iPointsDistance = 0;
 		g_iPlayerDistance = 0;
 		return;

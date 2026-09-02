@@ -102,10 +102,10 @@ stock cvars_init() {
 	pCvar[ADMIN_FLAG] = create_cvar("hns_admin_flag", "d", FCVAR_NONE, "Admin access flag");
 	bind_pcvar_string(pCvar[ADMIN_FLAG], g_iSettings[ADMIN_FLAG], charsmax(g_iSettings[ADMIN_FLAG]));
 
-	pCvar[POINTS_DISTANCE_1] = create_cvar("hns_points_distance_1", "150", FCVAR_NONE, "Points 1vs1 distance 1 (units)", true, 0.0, true, 2000.0);
+	pCvar[POINTS_DISTANCE_1] = create_cvar("hns_points_distance_1", "110", FCVAR_NONE, "Points 1vs1 distance 1 (units)", true, 0.0, true, 2000.0);
 	bind_pcvar_num(pCvar[POINTS_DISTANCE_1], g_iSettings[POINTS_DISTANCE_1]);
 
-	pCvar[POINTS_DISTANCE_2] = create_cvar("hns_points_distance_2", "250", FCVAR_NONE, "Points 1vs1 distance 2 (units)", true, 0.0, true, 2000.0);
+	pCvar[POINTS_DISTANCE_2] = create_cvar("hns_points_distance_2", "230", FCVAR_NONE, "Points 1vs1 distance 2 (units)", true, 0.0, true, 2000.0);
 	bind_pcvar_num(pCvar[POINTS_DISTANCE_2], g_iSettings[POINTS_DISTANCE_2]);
 
 	pCvar[POINTS_DISTANCE_3] = create_cvar("hns_points_distance_3", "350", FCVAR_NONE, "Points 1vs1 distance 3 (units)", true, 0.0, true, 2000.0);

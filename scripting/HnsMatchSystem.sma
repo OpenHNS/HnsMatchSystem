@@ -302,6 +302,8 @@ public registerMode() {
 }
 
 public client_disconnected(id) {
+	duel_clear_player_respawn(id);
+
 	if (g_ModFuncs[g_iCurrentMode][MODEFUNC_PLAYER_LEAVE])
 		ExecuteForward(g_ModFuncs[g_iCurrentMode][MODEFUNC_PLAYER_LEAVE], _, id);
 
