@@ -203,11 +203,6 @@ public cmdMapsMenu(id) {
 	new szMsg[192];
 	formatex(szMsg, charsmax(szMsg), "\r%L", id, "MAPS_MENU_TITLE");
 
-	new szDescription[192];
-	formatex(szDescription, charsmax(szDescription), "^n\d%L", id, "MAPS_MENU_DESC_TYPE");
-	
-	add(szMsg, charsmax(szMsg), szDescription);
-
 	new hMenu = menu_create(szMsg, "cmdMapsRootHandler");
 
 	new sectionData[SectionData];
@@ -402,10 +397,7 @@ showMapsMenu(id, Array:arr) {
 		formatex(szSelectedSection, charsmax(szSelectedSection), "%L", id, "MAPS_MENU_DESC_NONE");
 	}
 
-	formatex(szBuffer[iLen], charsmax(szBuffer) - iLen, "\d%L^n", id, "MAPS_MENU_DESC_SELECTED", szSelectedSection);
-	iLen += strlen(szBuffer[iLen]);
-
-	formatex(szBuffer[iLen], charsmax(szBuffer) - iLen, "\d%L^n^n", id, "MAPS_MENU_DESC_MAP");
+	formatex(szBuffer[iLen], charsmax(szBuffer) - iLen, "\d%L^n^n", id, "MAPS_MENU_DESC_SELECTED", szSelectedSection);
 	iLen += strlen(szBuffer[iLen]);
 
 	for (new i = 0; i < MAPS_MENU_SLOTS; i++) {
@@ -545,9 +537,7 @@ public cmdMapActionMenu(id, szMap[]) {
 	formatex(szMsg, charsmax(szMsg), "\r%L", id, "MAPS_MENU_TITLE");
 
 	new szDescription[160];
-	formatex(szDescription, charsmax(szDescription), "^n\d%L^n%L",
-		id, "MAPS_MENU_ACTION_MAP", szMap,
-		id, "MAPS_ACTION_DESC");
+	formatex(szDescription, charsmax(szDescription), "^n\d%L", id, "MAPS_MENU_ACTION_MAP", szMap);
 	add(szMsg, charsmax(szMsg), szDescription);
 
 	copy(g_SelectedMap[id], charsmax(g_SelectedMap[]), szMap);
