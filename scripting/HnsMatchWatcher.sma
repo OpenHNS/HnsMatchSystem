@@ -1,5 +1,6 @@
 #include <amxmodx>
 #include <amxmisc>
+#include <nvault>
 #include <hns_matchsystem>
 
 #include <hns_matchsystem_filter>
@@ -7,9 +8,12 @@
 
 #define RATIO 0.66
 
-new const g_szFileName[] = "watcher.ini";
+new const g_szVaultName[] = "hns_match_watcher";
+new const g_szVaultKey[] = "current_watcher";
 
 new g_sPrefix[24];
+new g_iWatcherVault = INVALID_HANDLE;
+new bool:g_bRestoreWatcher[MAX_PLAYERS + 1];
 
 enum _:CVARS {
 	MIN_RNW_PLAYERS
@@ -39,7 +43,7 @@ public plugin_natives() {
 }
 
 public plugin_init() {
-	register_plugin("Match: Watcher", "1.3", "OpenHNS"); // Garey
+	register_plugin("Match: Watcher", "1.4", "OpenHNS"); // Garey
 
 	pCvar[MIN_RNW_PLAYERS] = create_cvar("hns_watcher_min_rnw", "0", FCVAR_NONE, "Minimum players required for /rnw", true, 0.0, true, 32.0);
 	bind_pcvar_num(pCvar[MIN_RNW_PLAYERS], g_iMinRnwPlayers);
@@ -50,7 +54,12 @@ public plugin_init() {
 
 	register_dictionary("match_additons.txt");
 
-	LoadWatcher();
+	g_iWatcherVault = nvault_open(g_szVaultName);
+	if (g_iWatcherVault == INVALID_HANDLE) {
+		log_amx("[HNS] Failed to open watcher nVault '%s'.", g_szVaultName);
+	} else {
+		LoadWatcher();
+	}
 }
 
 public plugin_cfg() {
@@ -61,13 +70,40 @@ public client_putinserver(id) {
 	g_eRnw[r_iVotes][id] = 0;
 	g_eRnw[r_bPlayerVote][id] = false;
 
-	new szAuthID[64]; get_user_authid(id, szAuthID, charsmax(szAuthID));
-	if(equal(g_eWatcher[w_szSteamId], szAuthID)) {
+	if (g_bRestoreWatcher[id]) {
+		RestoreWatcher(id);
+	}
+}
+
+public client_authorized(id, const szAuthID[]) {
+	g_bRestoreWatcher[id] = bool:(g_eWatcher[w_szSteamId] && equal(g_eWatcher[w_szSteamId], szAuthID));
+
+	if (g_bRestoreWatcher[id]) {
+		set_task(0.1, "TaskRestoreWatcher", id);
+	}
+}
+
+public TaskRestoreWatcher(id) {
+	RestoreWatcher(id);
+}
+
+stock RestoreWatcher(id) {
+	if (!g_bRestoreWatcher[id] || !is_user_connected(id)) {
+		return;
+	}
+
+	new szAuthID[64];
+	get_user_authid(id, szAuthID, charsmax(szAuthID));
+
+	if (equal(g_eWatcher[w_szSteamId], szAuthID)) {
 		ActivateWatcher(id);
 	}
 }
 
 public client_disconnected(id) {
+	remove_task(id);
+	g_bRestoreWatcher[id] = false;
+
 	if(g_eRnw[r_bPlayerVote][id]) {
 		g_eRnw[r_bPlayerVote][id] = false;
 		g_eRnw[r_iNeedVote]--;
@@ -230,16 +266,14 @@ public codeManagementWatcherMenu(id, hMenu, item) {
 			}
 
 			if(is_user_connected(g_eWatcher[w_iId])) {
-				remove_user_flags(g_eWatcher[w_iId], hns_get_flag_watcher());
 				client_print_color(0, print_team_red, "%L", LANG_PLAYER, "WTR_DELETE", g_sPrefix, id, g_eWatcher[w_iId]);
-				g_eWatcher[w_szSteamId] = "";
-				g_eWatcher[w_iId] = 0;
 			} else {
 				if(strlen(g_eWatcher[w_szSteamId])) {
 					client_print_color(0, print_team_red, "%L", LANG_PLAYER, "WTR_DELETE_STEAM", g_sPrefix, id, g_eWatcher[w_szSteamId]);
-					g_eWatcher[w_szSteamId] = "";
 				}
 			}
+
+			ClearWatcher();
 		}
 		case 2: {
 			ChooseNewWatcherMenu(id);
@@ -325,8 +359,22 @@ public ActivateWatcher(id) {
 	g_eWatcher[w_iId] = id;
 	
 	set_user_flags(id, hns_get_flag_watcher());
+	SaveWatcher();
 	
 	return PLUGIN_CONTINUE;
+}
+
+stock ClearWatcher() {
+	if (is_user_connected(g_eWatcher[w_iId])) {
+		remove_user_flags(g_eWatcher[w_iId], hns_get_flag_watcher());
+	}
+
+	g_eWatcher[w_iId] = 0;
+	g_eWatcher[w_szSteamId] = EOS;
+
+	if (g_iWatcherVault != INVALID_HANDLE) {
+		nvault_remove(g_iWatcherVault, g_szVaultKey);
+	}
 }
 
 public cmdRnw(id) {
@@ -508,39 +556,18 @@ public check_votes() {
 }
 
 public plugin_end() {
-	SaveWatcher();
-}
-
-public LoadWatcher() {
-	new szDatadDr[128];
-	get_datadir(szDatadDr, charsmax(szDatadDr));
-
-	format(szDatadDr, charsmax(szDatadDr), "%s/%s",szDatadDr, g_szFileName);
-	
-	if(file_exists(szDatadDr)) {
-		new iFile = fopen(szDatadDr, "r");
-
-		fgets(iFile, g_eWatcher[w_szSteamId], charsmax(g_eWatcher[w_szSteamId]));
-
-		fclose(iFile);
+	if (g_iWatcherVault != INVALID_HANDLE) {
+		nvault_close(g_iWatcherVault);
+		g_iWatcherVault = INVALID_HANDLE;
 	}
 }
 
-public SaveWatcher() {
-	new szDatadDr[128];
-	get_datadir(szDatadDr, charsmax(szDatadDr));
+stock LoadWatcher() {
+	nvault_get(g_iWatcherVault, g_szVaultKey, g_eWatcher[w_szSteamId], charsmax(g_eWatcher[w_szSteamId]));
+}
 
-	format(szDatadDr, charsmax(szDatadDr), "%s/%s",szDatadDr, g_szFileName);
-	
-	if(file_exists(szDatadDr)) {
-		delete_file(szDatadDr);
+stock SaveWatcher() {
+	if (g_iWatcherVault != INVALID_HANDLE && g_eWatcher[w_szSteamId]) {
+		nvault_set(g_iWatcherVault, g_szVaultKey, g_eWatcher[w_szSteamId]);
 	}
-
-	new iFile = fopen(szDatadDr, "w");
-	
-	if(strlen(g_eWatcher[w_szSteamId])) {
-		fputs(iFile, g_eWatcher[w_szSteamId]);
-	}
-
-	fclose(iFile);	
 }

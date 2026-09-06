@@ -22,7 +22,6 @@ stock cmds_init() {
 	RegisterSayCmd("timer", 	"wintime", 		"cmdWintimeMode",	iWatcherAccess, "Choose Wintime mode");
 	RegisterSayCmd("duel", 		"versus", 		"cmdDuelMode",		iWatcherAccess, "Choose 1x1 mode");
 	RegisterSayCmd("pub", 		"public", 		"cmdPubMode", 		iWatcherAccess, "Public mode");
-	RegisterSayCmd("retake", 	"rtk", 			"cmdRetakeMode", 	iWatcherAccess, "Retake Boost mode");
 	RegisterSayCmd("dm", 		"deathmatch", 	"cmdDMMode", 		iWatcherAccess, "DeathMatch mode");
 	RegisterSayCmd("dm1tt", 	"dm1", 			"cmdDM1TTMode", 	iWatcherAccess, "DeathMatch 1TT mode");
 	RegisterSayCmd("zm", 		"zombie", 		"cmdZMMode", 		iWatcherAccess, "Zombie mode");
@@ -48,6 +47,19 @@ stock cmds_init() {
 	RegisterSayCmd("ip", 		"play", 		"cmdPlay", 			0, "Play");
 	RegisterSayCmd("save", 		"sv", 		"Save_d", 			0, "Show top");
 	RegisterSayCmd("load", 		"ld", 		"Load_d", 			0, "Show top");
+
+	// Other plugins may still be initializing at this point.
+	set_task(0.1, "registerRetakeCommands");
+}
+
+public registerRetakeCommands() {
+	g_bRetakeAvailable = is_plugin_loaded(RETAKE_PLUGIN_FILE, true) != -1;
+	if (!g_bRetakeAvailable) {
+		return;
+	}
+
+	new iWatcherAccess = read_flags(g_iSettings[WATCHER_FLAG]);
+	RegisterSayCmd("retake", "rtk", "cmdRetakeMode", iWatcherAccess, "Retake Boost mode");
 }
 
 public sayHandle(id) {
@@ -292,6 +304,10 @@ public cmdDMMode(id) {
 }
 
 public cmdRetakeMode(id) {
+	if (!g_bRetakeAvailable) {
+		return PLUGIN_HANDLED;
+	}
+
 	if (!isUserWatcher(id)) {
 		return PLUGIN_HANDLED;
 	}

@@ -16,7 +16,10 @@
 
 #define TASK_SURRENDER 55566
 
+#define RETAKE_PLUGIN_FILE "HnsMatchRetake.amxx"
+
 new bool:g_bDebugMode;
+new bool:g_bRetakeAvailable;
 
 new g_iRegisterSpawn;
 new const g_szDefaultEntities[][] = {
