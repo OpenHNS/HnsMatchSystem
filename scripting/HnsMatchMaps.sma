@@ -40,6 +40,7 @@ new g_iSmoke;
 new g_PlayerMenuArray[MAX_PLAYERS + 1];
 new g_MapMenuOffset[MAX_PLAYERS + 1];
 new g_MapMenuChoice[MAX_PLAYERS + 1][MAPS_MENU_SLOTS];
+new Array:g_ArrSearchResults[MAX_PLAYERS + 1];
 new g_PlayerNomination[MAX_PLAYERS + 1][32];
 
 new g_SelectedMap[MAX_PLAYERS + 1][32];
@@ -135,10 +136,12 @@ public plugin_precache() {
 }
 
 public plugin_init() {
-	register_plugin("Match: Maps", "1.5", "OpenHNS");
+	register_plugin("Match: Maps", "1.6", "OpenHNS");
 
-	RegisterSayCmd("map", "maps", "cmdMapsMenu", 0, "Open mapmenu");
+	RegisterSayCmd("maps", "maps", "cmdMapsMenu", 0, "Open mapmenu");
 	RegisterSayCmd("amx_mapmenu", "amx_mapsmenu", "cmdMapsMenu", 0, "Open mapmenu");
+	register_clcmd("say", "cmdMapsSearch");
+	register_clcmd("say_team", "cmdMapsSearch");
 	register_menucmd(register_menuid("MapsMenu"), 1023, "maps_menu_handler");
 
 	register_dictionary("match_additons.txt");
@@ -187,10 +190,16 @@ public plugin_cfg() {
 }
 
 public plugin_end() {
+	for (new id = 1; id <= MAX_PLAYERS; id++) {
+		clear_map_search_results(id);
+	}
+
 	destroy_maps_arrays();
 }
 
 public cmdMapsMenu(id) {
+	clear_map_search_results(id);
+
 	new szMsg[192];
 	formatex(szMsg, charsmax(szMsg), "\r%L", id, "MAPS_MENU_TITLE");
 
@@ -243,6 +252,57 @@ public cmdMapsMenu(id) {
 
 	menu_display(id, hMenu, 0);
 	return PLUGIN_CONTINUE;
+}
+
+public cmdMapsSearch(id) {
+	new szArgs[64], szCommand[8], szQuery[32];
+	read_args(szArgs, charsmax(szArgs));
+	remove_quotes(szArgs);
+	trim(szArgs);
+	parse(szArgs, szCommand, charsmax(szCommand), szQuery, charsmax(szQuery));
+
+	if (!equali(szCommand, "/map") && !equali(szCommand, "/m")) {
+		return PLUGIN_CONTINUE;
+	}
+
+	if (!szQuery[0]) {
+		client_print_color(id, print_team_blue, "%L", id, "MAPS_MENU_SEARCH_USAGE", g_szPrefix);
+	} else {
+		show_map_search_results(id, szQuery);
+	}
+
+	return PLUGIN_HANDLED;
+}
+
+stock show_map_search_results(id, const szQuery[]) {
+	clear_map_search_results(id);
+
+	new Array:arrResults = ArrayCreate(32);
+	new szMap[32], szMatchMap[32], szMatchQuery[32];
+	copy(szMatchQuery, charsmax(szMatchQuery), szQuery);
+	strtolower(szMatchQuery);
+
+	for (new i = 0, iSize = ArraySize(g_ArrAllMaps); i < iSize; i++) {
+		ArrayGetString(g_ArrAllMaps, i, szMap, charsmax(szMap));
+		copy(szMatchMap, charsmax(szMatchMap), szMap);
+		strtolower(szMatchMap);
+
+		if (contain(szMatchMap, szMatchQuery) != -1) {
+			ArrayPushString(arrResults, szMap);
+		}
+	}
+
+	if (!ArraySize(arrResults)) {
+		ArrayDestroy(arrResults);
+		client_print_color(id, print_team_blue, "%L", id, "MAPS_MENU_NO_RESULTS", g_szPrefix, szQuery);
+		return;
+	}
+
+	g_ArrSearchResults[id] = arrResults;
+	copy(g_SelectedSection[id], charsmax(g_SelectedSection[]), szQuery);
+	g_MapMenuOffset[id] = 0;
+
+	showMapsMenu(id, arrResults);
 }
 
 public cmdMapsRootHandler(id, hMenu, item) {
@@ -436,6 +496,7 @@ public maps_menu_handler(id, iKey) {
 				showMapsMenu(id, arr);
 			} else {
 				g_MapMenuOffset[id] = 0;
+				clear_map_search_results(id);
 				g_PlayerMenuArray[id] = 0;
 				cmdMapsMenu(id);
 			}
@@ -448,6 +509,7 @@ public maps_menu_handler(id, iKey) {
 		}
 		case 9: {
 			g_MapMenuOffset[id] = 0;
+			clear_map_search_results(id);
 			g_PlayerMenuArray[id] = 0;
 		}
 	}
@@ -457,11 +519,25 @@ public maps_menu_handler(id, iKey) {
 
 public client_disconnected(id) {
 	clear_player_nomination(id);
+	clear_map_search_results(id);
 
 	g_PlayerMenuArray[id] = 0;
 	g_MapMenuOffset[id] = 0;
 	g_SelectedMap[id][0] = EOS;
 	g_SelectedSection[id][0] = EOS;
+}
+
+stock clear_map_search_results(id) {
+	if (g_ArrSearchResults[id] == Invalid_Array) {
+		return;
+	}
+
+	if (g_PlayerMenuArray[id] == _:g_ArrSearchResults[id]) {
+		g_PlayerMenuArray[id] = 0;
+	}
+
+	ArrayDestroy(g_ArrSearchResults[id]);
+	g_ArrSearchResults[id] = Invalid_Array;
 }
 
 public cmdMapActionMenu(id, szMap[]) {
