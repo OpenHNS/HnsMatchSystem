@@ -47,6 +47,19 @@ stock cmds_init() {
 	RegisterSayCmd("ip", 		"play", 		"cmdPlay", 			0, "Play");
 	RegisterSayCmd("save", 		"sv", 		"Save_d", 			0, "Show top");
 	RegisterSayCmd("load", 		"ld", 		"Load_d", 			0, "Show top");
+
+	// Other plugins may still be initializing at this point.
+	set_task(0.1, "registerRetakeCommands");
+}
+
+public registerRetakeCommands() {
+	g_bRetakeAvailable = is_plugin_loaded(RETAKE_PLUGIN_FILE, true) != -1;
+	if (!g_bRetakeAvailable) {
+		return;
+	}
+
+	new iWatcherAccess = read_flags(g_iSettings[WATCHER_FLAG]);
+	RegisterSayCmd("retake", "rtk", "cmdRetakeMode", iWatcherAccess, "Retake Boost mode");
 }
 
 public sayHandle(id) {
@@ -286,6 +299,31 @@ public cmdDMMode(id) {
 	client_print_color(0, print_team_blue, "%L", LANG_PLAYER, "DM_ACTIVATED", g_iSettings[PREFIX], id);
 
 	dm_start();
+
+	return PLUGIN_HANDLED;
+}
+
+public cmdRetakeMode(id) {
+	if (!g_bRetakeAvailable) {
+		return PLUGIN_HANDLED;
+	}
+
+	if (!isUserWatcher(id)) {
+		return PLUGIN_HANDLED;
+	}
+
+	if (g_iCurrentMode == MODE_RETAKE) {
+		client_print_color(id, print_team_blue, "%L", id, "RETAKE_ALREADY", g_iSettings[PREFIX]);
+		return PLUGIN_HANDLED;
+	}
+
+	if (g_iCurrentMode != MODE_TRAINING || g_iMatchStatus != MATCH_NONE) {
+		client_print_color(id, print_team_blue, "%L", id, "RETAKE_CANC", g_iSettings[PREFIX]);
+		return PLUGIN_HANDLED;
+	}
+
+	client_print_color(0, print_team_blue, "%L", LANG_PLAYER, "RETAKE_ACTIVATED", g_iSettings[PREFIX], id);
+	retake_start();
 
 	return PLUGIN_HANDLED;
 }
@@ -650,6 +688,10 @@ public cmdStop(id) {
 		case MODE_PUB: {
 			training_start();
 			client_print_color(0, print_team_blue, "%L", LANG_PLAYER, "STOP_PUB", g_iSettings[PREFIX], id);
+		}
+		case MODE_RETAKE: {
+			training_start();
+			client_print_color(0, print_team_blue, "%L", LANG_PLAYER, "STOP_RETAKE", g_iSettings[PREFIX], id);
 		}
 		case MODE_DM: {
 			training_start();

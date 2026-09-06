@@ -126,6 +126,7 @@ public forward_init() {
 	g_hForwards[HNS_ROUND_START] = CreateMultiForward("hns_round_start", ET_CONTINUE);
 	g_hForwards[HNS_ROUND_FREEZEEND] = CreateMultiForward("hns_round_freezeend", ET_CONTINUE);
 	g_hForwards[HNS_ROUND_END] = CreateMultiForward("hns_round_end", ET_CONTINUE);
+	g_hForwards[HNS_PLAYER_SPAWN_POST] = CreateMultiForward("hns_player_spawn_post", ET_CONTINUE, FP_CELL);
 	g_hForwards[CONTROLLER_APPLY] = CreateMultiForward("hns_controller_apply", ET_CONTINUE);
 }
 
@@ -221,7 +222,7 @@ public rgResetMaxSpeed(id) {
 			return HC_SUPERCEDE;
 		}
 
-		if (getUserTeam(id) == TEAM_TERRORIST) {
+		if (getUserTeam(id) == TEAM_TERRORIST && g_iCurrentMode != MODE_RETAKE) {
 			set_entvar(id, var_maxspeed, 250.0);
 			return HC_SUPERCEDE;
 		}
@@ -265,13 +266,15 @@ public rgFlPlayerFallDamage(const id) {
 }
 
 public rgPlayerSpawn(id) {
-	if (!is_user_alive(id) || is_user_bot(id) || is_user_hltv(id))
+	if (!is_user_alive(id) || is_user_hltv(id) || (is_user_bot(id) && g_iCurrentMode != MODE_RETAKE))
 		return;
 
 	if (g_GPFuncs[g_iCurrentGameplay][GP_SETROLE])
 	{
 		ExecuteForward(g_GPFuncs[g_iCurrentGameplay][GP_SETROLE], _, id);
 	}
+
+	ExecuteForward(g_hForwards[HNS_PLAYER_SPAWN_POST], _, id);
 }
 
 public rgPlayerKilled(victim, attacker) {

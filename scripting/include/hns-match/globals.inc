@@ -16,7 +16,10 @@
 
 #define TASK_SURRENDER 55566
 
+#define RETAKE_PLUGIN_FILE "HnsMatchRetake.amxx"
+
 new bool:g_bDebugMode;
+new bool:g_bRetakeAvailable;
 
 new g_iRegisterSpawn;
 new const g_szDefaultEntities[][] = {
@@ -122,6 +125,7 @@ enum _: Forwards {
 	HNS_ROUND_START,
 	HNS_ROUND_END,
 	HNS_ROUND_FREEZEEND,
+	HNS_PLAYER_SPAWN_POST,
 	CONTROLLER_APPLY
 };
 

@@ -16,7 +16,8 @@ enum HNS_MODES {
 	MODE_ZM,
 	MODE_MIX,
 	MODE_DM_1TT,
-	MODE_BATTLES
+	MODE_BATTLES,
+	MODE_RETAKE
 };
 
 /**
@@ -307,6 +308,15 @@ forward hns_match_finished(iWinTeam);
 * @noreturn
 */
 forward hns_match_finished_post(iWinTeam);
+
+/**
+* Called after the active gameplay has equipped a spawned player.
+*
+* @param id            Player index
+*
+* @noreturn
+*/
+forward hns_player_spawn_post(id);
 
 /**
 * Called on round start.
