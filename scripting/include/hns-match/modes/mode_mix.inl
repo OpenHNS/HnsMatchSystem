@@ -341,6 +341,13 @@ public mix_roundend(bool:win_ct) {
 				}
 			}
 
+			new Float:flCapTime = g_eMatchInfo[e_mWintime] * 60.0;
+			if (g_eMatchInfo[e_flSidesTime][g_isTeamTT] >= flCapTime) {
+				g_eMatchInfo[e_flSidesTime][g_isTeamTT] = flCapTime;
+				MixFinishedWT();
+				return;
+			}
+
 			if (win_ct) {
 				hns_swap_teams();
 			}
@@ -376,6 +383,7 @@ public taskRoundEvent() {
 		case RULES_TIMER: {
 			new Float:flCapTime = floatmul(g_eMatchInfo[e_mWintime], 60.0);
 			if (g_eMatchInfo[e_flSidesTime][g_isTeamTT] >= flCapTime) {
+				g_eMatchInfo[e_flSidesTime][g_isTeamTT] = flCapTime;
 				MixFinishedWT()
 			}
 		}
