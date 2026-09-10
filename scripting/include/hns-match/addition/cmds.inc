@@ -400,7 +400,8 @@ public cmdBlend(id) {
 	get_players(Players, Num, "ch");
 
 	for (new i; i < Num; i++) {
-		if (!getUserTeam(Players[i])) {
+		new TeamName:playerTeam = getUserTeam(Players[i]);
+		if (playerTeam != TEAM_TERRORIST && playerTeam != TEAM_CT) {
 			Players[i--] = Players[--Num];
 		}
 	}
