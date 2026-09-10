@@ -14,6 +14,7 @@
 #define MAPS_MENU_SLOTS 7
 
 new bool:g_bDebugMode;
+new g_iMapsChatSearch;
 
 new g_szLogPath[64];
 
@@ -138,7 +139,10 @@ public plugin_precache() {
 public plugin_init() {
 	register_plugin("Match: Maps", "1.6", "OpenHNS");
 
-	RegisterSayCmd("maps", "maps", "cmdMapsMenu", 0, "Open mapmenu");
+	new pCvar = create_cvar("hns_maps_chat_search", "1", FCVAR_NONE, "0: disable map search in chat, 1: enable", true, 0.0, true, 1.0);
+	bind_pcvar_num(pCvar, g_iMapsChatSearch);
+
+	RegisterSayCmd("map", "maps", "cmdMapsMenu", 0, "Open mapmenu");
 	RegisterSayCmd("amx_mapmenu", "amx_mapsmenu", "cmdMapsMenu", 0, "Open mapmenu");
 	register_clcmd("say", "cmdMapsSearch");
 	register_clcmd("say_team", "cmdMapsSearch");
@@ -250,28 +254,25 @@ public cmdMapsMenu(id) {
 }
 
 public cmdMapsSearch(id) {
-	new szArgs[64], szCommand[8], szQuery[32];
-	read_args(szArgs, charsmax(szArgs));
-	remove_quotes(szArgs);
-	trim(szArgs);
-	parse(szArgs, szCommand, charsmax(szCommand), szQuery, charsmax(szQuery));
-
-	if (!equali(szCommand, "/map") && !equali(szCommand, "/m")) {
+	if (!g_iMapsChatSearch) {
 		return PLUGIN_CONTINUE;
 	}
 
-	if (!szQuery[0]) {
-		client_print_color(id, print_team_blue, "%L", id, "MAPS_MENU_SEARCH_USAGE", g_szPrefix);
-	} else {
-		show_map_search_results(id, szQuery);
+	new szQuery[192];
+	read_args(szQuery, charsmax(szQuery));
+	remove_quotes(szQuery);
+	trim(szQuery);
+
+	new iQueryLength = strlen(szQuery);
+	if (iQueryLength < 3 || iQueryLength > 31) {
+		return PLUGIN_CONTINUE;
 	}
 
-	return PLUGIN_HANDLED;
+	show_map_search_results(id, szQuery);
+	return PLUGIN_CONTINUE;
 }
 
-stock show_map_search_results(id, const szQuery[]) {
-	clear_map_search_results(id);
-
+stock bool:show_map_search_results(id, const szQuery[]) {
 	new Array:arrResults = ArrayCreate(32);
 	new szMap[32], szMatchMap[32], szMatchQuery[32];
 	copy(szMatchQuery, charsmax(szMatchQuery), szQuery);
@@ -289,15 +290,16 @@ stock show_map_search_results(id, const szQuery[]) {
 
 	if (!ArraySize(arrResults)) {
 		ArrayDestroy(arrResults);
-		client_print_color(id, print_team_blue, "%L", id, "MAPS_MENU_NO_RESULTS", g_szPrefix, szQuery);
-		return;
+		return false;
 	}
 
+	clear_map_search_results(id);
 	g_ArrSearchResults[id] = arrResults;
 	copy(g_SelectedSection[id], charsmax(g_SelectedSection[]), szQuery);
 	g_MapMenuOffset[id] = 0;
 
 	showMapsMenu(id, arrResults);
+	return true;
 }
 
 public cmdMapsRootHandler(id, hMenu, item) {
