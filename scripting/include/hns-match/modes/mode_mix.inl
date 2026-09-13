@@ -18,8 +18,6 @@ public mix_start() {
 	ControllerReset();
 	match_reset_data();
 
-	ChangeGameplay(GAMEPLAY_HNS);
-
 	g_iCurrentMode = MODE_MIX;
 	g_iMatchStatus = MATCH_STARTED;
 	g_eMatchState = STATE_PREPARE;
@@ -32,6 +30,10 @@ public mix_start() {
 	set_cvars_mode(MODE_MIX);
 
 	loadMapCFG();
+
+	// HNS rules use the map-specific hns_boost value to configure semiclip.
+	// Enable the gameplay only after those settings have been loaded.
+	ChangeGameplay(GAMEPLAY_HNS);
 
 	if (g_iCurrentRules == RULES_DUEL) {
 		duel_start();

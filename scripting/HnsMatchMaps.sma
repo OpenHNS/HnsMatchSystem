@@ -118,7 +118,9 @@ public plugin_precache() {
 				g_bKnifeMap = true;
 			}
 
-			g_bBoost = bool:equali(sectionData[SectionName], SECTION_NAME_BOOST);
+			if (equali(sectionData[SectionName], SECTION_NAME_BOOST)) {
+				g_bBoost = true;
+			}
 
 			if (rt[0] && ft[0] && flash[0] && smoke[0]) {
 				g_fRoundTime = str_to_float(rt);
