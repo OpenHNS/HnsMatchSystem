@@ -152,6 +152,8 @@ MAPS_MENU_NOMINATED = Nominated maps
 MAPS_ACTION_NOM = Nominated map
 MAPS_ACTION_CHANGE = Change map
 MAPS_NOM = %s ^3%n^1 nominated map: ^3%s^1.
+MAPS_NOM_LIMIT = %s You can nominate up to ^3%d maps^1.
+MAPS_NOM_ALREADY = %s You have already nominated map ^3%s^1.
 MAPS_CHAGE = %s ^3%n^1 change map: ^3%s^1.
 
 BATTLE_NO_ARENAS = No configured battle arenas on this map.
@@ -336,6 +338,8 @@ MAPS_MENU_NOMINATED = Номинированные карты
 MAPS_ACTION_NOM = Номинировать карту
 MAPS_ACTION_CHANGE = Сменить карту
 MAPS_NOM = %s ^3%n^1 номинировал карту: ^3%s^1.
+MAPS_NOM_LIMIT = %s Вы можете номинировать не более ^3%d карт^1.
+MAPS_NOM_ALREADY = %s Вы уже номинировали карту ^3%s^1.
 MAPS_CHAGE = %s ^3%n^1 сменил карту: ^3%s^1.
 
 BATTLE_NO_ARENAS = На этой карте нет сконфигурированных арен.

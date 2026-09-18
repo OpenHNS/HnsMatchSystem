@@ -12,6 +12,11 @@
 #define SECTION_NAME_ALL "__all__"
 #define SECTION_NAME_NOMINATED "nominated"
 #define MAPS_MENU_SLOTS 7
+#define MAX_PLAYER_NOMINATIONS 2
+
+#define NOMINATION_DUPLICATE 0
+#define NOMINATION_ADDED 1
+#define NOMINATION_LIMIT_REACHED -1
 
 new bool:g_bDebugMode;
 new g_iMapsChatSearch;
@@ -42,7 +47,7 @@ new g_PlayerMenuArray[MAX_PLAYERS + 1];
 new g_MapMenuOffset[MAX_PLAYERS + 1];
 new g_MapMenuChoice[MAX_PLAYERS + 1][MAPS_MENU_SLOTS];
 new Array:g_ArrSearchResults[MAX_PLAYERS + 1];
-new g_PlayerNomination[MAX_PLAYERS + 1][32];
+new g_PlayerNomination[MAX_PLAYERS + 1][MAX_PLAYER_NOMINATIONS][32];
 
 new g_SelectedMap[MAX_PLAYERS + 1][32];
 new g_SelectedSection[MAX_PLAYERS + 1][32];
@@ -139,7 +144,7 @@ public plugin_precache() {
 }
 
 public plugin_init() {
-	register_plugin("Match: Maps", "1.6", "OpenHNS");
+	register_plugin("Match: Maps", "1.7", "OpenHNS");
 
 	new pCvar = create_cvar("hns_maps_chat_search", "1", FCVAR_NONE, "0: disable map search in chat, 1: enable", true, 0.0, true, 1.0);
 	bind_pcvar_num(pCvar, g_iMapsChatSearch);
@@ -157,6 +162,8 @@ public plugin_natives() {
 	register_native("hnsmatch_maps_init", "native_maps_init");
 	register_native("hnsmatch_maps_is_knife", "native_maps_is_knife");
 	register_native("hnsmatch_maps_load_settings", "native_maps_load_settings");
+	register_native("hnsmatch_maps_get_nominated_count", "native_maps_get_nominated_count");
+	register_native("hnsmatch_maps_get_nominated", "native_maps_get_nominated");
 }
 
 public native_maps_init(amxx, params) {
@@ -189,6 +196,23 @@ public bool:native_maps_load_settings(amxx, params) {
 	} else {
 		return false;
 	}
+}
+
+public native_maps_get_nominated_count(amxx, params) {
+	return ArraySize(g_ArrNominatedMaps);
+}
+
+public bool:native_maps_get_nominated(amxx, params) {
+	new iIndex = get_param(1);
+	if (iIndex < 0 || iIndex >= ArraySize(g_ArrNominatedMaps)) {
+		return false;
+	}
+
+	new szMap[32];
+	ArrayGetString(g_ArrNominatedMaps, iIndex, szMap, charsmax(szMap));
+	set_string(2, szMap, get_param(3));
+
+	return true;
 }
 
 public plugin_cfg() {
@@ -594,8 +618,14 @@ public cmdMapActionHandler(id, hMenu, item) {
 	new choice = str_to_num(szData);
 
 	if (choice == 1) {
-		set_player_nomination(id, g_SelectedMap[id]);
-		client_print_color(0, print_team_blue, "%L", LANG_PLAYER, "MAPS_NOM", g_szPrefix, id, g_SelectedMap[id]);
+		new iResult = set_player_nomination(id, g_SelectedMap[id]);
+		if (iResult == NOMINATION_ADDED) {
+			client_print_color(0, print_team_blue, "%L", LANG_PLAYER, "MAPS_NOM", g_szPrefix, id, g_SelectedMap[id]);
+		} else if (iResult == NOMINATION_LIMIT_REACHED) {
+			client_print_color(id, print_team_blue, "%L", id, "MAPS_NOM_LIMIT", g_szPrefix, MAX_PLAYER_NOMINATIONS);
+		} else {
+			client_print_color(id, print_team_blue, "%L", id, "MAPS_NOM_ALREADY", g_szPrefix, g_SelectedMap[id]);
+		}
 	}
 	else if (choice == 2) {
 		if (isUserWatcher(id)) {
@@ -738,28 +768,39 @@ stock bool:array_contains_string(Array:arr, const value[]) {
 
 stock set_player_nomination(id, const szMap[]) {
 	if (!szMap[0]) {
-		return;
+		return NOMINATION_DUPLICATE;
 	}
 
-	if (equali(g_PlayerNomination[id], szMap)) {
-		return;
+	new iFreeSlot = -1;
+	for (new i; i < MAX_PLAYER_NOMINATIONS; i++) {
+		if (equali(g_PlayerNomination[id][i], szMap)) {
+			return NOMINATION_DUPLICATE;
+		}
+
+		if (iFreeSlot == -1 && !g_PlayerNomination[id][i][0]) {
+			iFreeSlot = i;
+		}
 	}
 
-	if (g_PlayerNomination[id][0]) {
-		adjust_nomination_count(g_PlayerNomination[id], -1);
+	if (iFreeSlot == -1) {
+		return NOMINATION_LIMIT_REACHED;
 	}
 
-	copy(g_PlayerNomination[id], charsmax(g_PlayerNomination[]), szMap);
+	copy(g_PlayerNomination[id][iFreeSlot], charsmax(g_PlayerNomination[][]), szMap);
 	adjust_nomination_count(szMap, 1);
+
+	return NOMINATION_ADDED;
 }
 
 stock clear_player_nomination(id) {
-	if (!g_PlayerNomination[id][0]) {
-		return;
-	}
+	for (new i; i < MAX_PLAYER_NOMINATIONS; i++) {
+		if (!g_PlayerNomination[id][i][0]) {
+			continue;
+		}
 
-	adjust_nomination_count(g_PlayerNomination[id], -1);
-	g_PlayerNomination[id][0] = EOS;
+		adjust_nomination_count(g_PlayerNomination[id][i], -1);
+		g_PlayerNomination[id][i][0] = EOS;
+	}
 }
 
 stock adjust_nomination_count(const szMap[], delta) {
