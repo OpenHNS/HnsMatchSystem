@@ -59,23 +59,16 @@ public dm_1tt_player_join(id) {
 		return;
 	}
 
-	new bool:bForceRespawn = false;
 	new bool:bNeedTT = (get_playersnum_ex(GetPlayers_MatchTeam, "TERRORIST") <= 0);
 
 	if (bNeedTT) {
 		if (getUserTeam(id) != TEAM_TERRORIST) {
 			rg_join_team(id, TEAM_TERRORIST);
-			bForceRespawn = true;
 		}
 	} else {
 		if (getUserTeam(id) != TEAM_CT) {
 			rg_join_team(id, TEAM_CT);
-			bForceRespawn = true;
 		}
-	}
-
-	if (bForceRespawn || !is_user_alive(id)) {
-		rg_round_respawn(id);
 	}
 
 	if (bNeedTT) {

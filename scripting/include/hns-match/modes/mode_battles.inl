@@ -93,10 +93,6 @@ public battlesmode_player_join(id) {
 	}
 
 	rg_join_team(id, rg_get_join_team_priority());
-
-	if (!is_user_alive(id)) {
-		rg_round_respawn(id);
-	}
 }
 
 public battlesmode_player_leave(id) {

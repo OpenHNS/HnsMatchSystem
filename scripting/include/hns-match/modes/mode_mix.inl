@@ -471,9 +471,6 @@ public mix_player_join(id) {
 		}
 
 		rg_join_team(id, iTargetTeam);
-
-		if (g_eMatchState == STATE_PAUSED)
-			rg_round_respawn(id);
 	} else {
 		rg_join_team(id, TEAM_SPECTATOR);
 		return;

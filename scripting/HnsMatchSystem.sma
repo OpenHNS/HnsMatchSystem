@@ -46,6 +46,7 @@ public plugin_init() {
 	RegisterHam(Ham_Weapon_PrimaryAttack, "weapon_knife", "Knife_PrimaryAttack", false);
 
 	register_message(get_user_msgid("HostagePos"), "msgHostagePos");
+	// TODO: Если все ок заменить на реапи
 	register_message(get_user_msgid("ShowMenu"), "msgShowMenu");
 	register_message(get_user_msgid("VGUIMenu"), "msgVguiMenu");
 	register_message(get_user_msgid("HideWeapon"), "msgHideWeapon");
