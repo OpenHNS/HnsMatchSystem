@@ -1,5 +1,6 @@
 public retake_init() {
 	g_ModFuncs[MODE_RETAKE][MODEFUNC_START] = CreateOneForward(g_PluginId, "retake_start");
+	g_ModFuncs[MODE_RETAKE][MODEFUNC_PLAYER_JOIN] = CreateOneForward(g_PluginId, "retake_player_join", FP_CELL);
 }
 
 public retake_start() {
@@ -21,4 +22,8 @@ public retake_start() {
 	set_cvar_float("mp_roundtime", 2.5);
 
 	hns_restart_round(0.5);
+}
+
+public retake_player_join(id) {
+	rg_join_team(id, rg_get_join_team_priority());
 }

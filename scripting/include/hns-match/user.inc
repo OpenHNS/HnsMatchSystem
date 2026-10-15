@@ -243,24 +243,10 @@ public taskToTeam(Params[]) {
 }
 
 setTeam(id, TeamName:iTeam) {
-	set_member(id, m_bTeamChanged, false);
+	if (!is_user_connected(id) || getUserTeam(id) == iTeam)
+		return;
 
-	if (is_user_alive(id))
-		user_silentkill(id);
-
-	switch (iTeam) {
-		case TEAM_TERRORIST: {
-			rg_internal_cmd(id, "jointeam", "1");
-			rg_internal_cmd(id, "joinclass", "5");
-		}
-		case TEAM_CT: {
-			rg_internal_cmd(id, "jointeam", "2");
-			rg_internal_cmd(id, "joinclass", "5");
-		}
-		case TEAM_SPECTATOR: {
-			rg_internal_cmd(id, "jointeam", "6");
-		}
-	}
+	rg_join_team(id, iTeam);
 }
 
 

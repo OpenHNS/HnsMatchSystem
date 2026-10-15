@@ -174,5 +174,5 @@ public kniferound_player_leave(id) {
 }
 
 public kniferound_player_join(id) {
-	transferUserToSpec(id);
+	rg_join_team(id, TEAM_SPECTATOR);
 }

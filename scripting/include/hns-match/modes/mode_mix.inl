@@ -457,22 +457,25 @@ public mix_player_join(id) {
 		ExecuteForward(g_hForwards[MATCH_JOIN_PLAYER], _, id, bReplaced);
 
 		if (bReplaced) {
-			transferUserToSpec(id);
+			rg_join_team(id, TEAM_SPECTATOR);
 			return;
 		}
 
 		new iMatchRounds = g_eMatchInfo[e_iSidesRounds][HNS_TEAM_A] + g_eMatchInfo[e_iSidesRounds][HNS_TEAM_B];
+		new TeamName:iTargetTeam;
 
 		if (iMatchRounds == g_ePlayerInfo[id][LEAVE_IN_ROUND]) {
-			rg_set_user_team(id, g_ePlayerInfo[id][PLAYER_TEAM][0] == 'T' ? TEAM_TERRORIST : TEAM_CT);
+			iTargetTeam = g_ePlayerInfo[id][PLAYER_TEAM][0] == 'T' ? TEAM_TERRORIST : TEAM_CT;
 		} else {
-			rg_set_user_team(id, g_ePlayerInfo[id][PLAYER_TEAM][0] == 'T' ? TEAM_CT : TEAM_TERRORIST);
+			iTargetTeam = g_ePlayerInfo[id][PLAYER_TEAM][0] == 'T' ? TEAM_CT : TEAM_TERRORIST;
 		}
+
+		rg_join_team(id, iTargetTeam);
 
 		if (g_eMatchState == STATE_PAUSED)
 			rg_round_respawn(id);
 	} else {
-		transferUserToSpec(id);
+		rg_join_team(id, TEAM_SPECTATOR);
 		return;
 	}
 }

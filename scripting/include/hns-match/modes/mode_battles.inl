@@ -84,13 +84,15 @@ public battlesmode_roundend(bool:win_ct) {
 
 public battlesmode_player_join(id) {
 	if (g_iMatchStatus == MATCH_CAPTAINBATTLE || g_iMatchStatus == MATCH_TEAMBATTLE) {
-		transferUserToSpec(id);
+		rg_join_team(id, TEAM_SPECTATOR);
 		return;
 	}
 
-	if (!is_user_connected(id) || getUserTeam(id) == TEAM_SPECTATOR) {
+	if (!is_user_connected(id)) {
 		return;
 	}
+
+	rg_join_team(id, rg_get_join_team_priority());
 
 	if (!is_user_alive(id)) {
 		rg_round_respawn(id);

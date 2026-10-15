@@ -64,12 +64,12 @@ public dm_1tt_player_join(id) {
 
 	if (bNeedTT) {
 		if (getUserTeam(id) != TEAM_TERRORIST) {
-			rg_set_user_team(id, TEAM_TERRORIST);
+			rg_join_team(id, TEAM_TERRORIST);
 			bForceRespawn = true;
 		}
 	} else {
 		if (getUserTeam(id) != TEAM_CT) {
-			rg_set_user_team(id, TEAM_CT);
+			rg_join_team(id, TEAM_CT);
 			bForceRespawn = true;
 		}
 	}

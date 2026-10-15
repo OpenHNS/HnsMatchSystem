@@ -36,10 +36,10 @@ public training_player_join(id) {
 	if (g_iMatchStatus == MATCH_CAPTAINPICK || g_iMatchStatus == MATCH_TEAMPICK || g_iMatchStatus == MATCH_MAPPICK) {
 		if (!hns_is_user_role(id, ROLE_SPEC)) {
 			if (g_ePlayerInfo[id][PLAYER_ROLE] == ROLE_TEAM_A || g_ePlayerInfo[id][PLAYER_ROLE] == ROLE_CAP_A) {
-				rg_set_user_team(id, TEAM_TERRORIST);
+				rg_join_team(id, TEAM_TERRORIST);
 				rg_round_respawn(id);
 			} else {
-				rg_set_user_team(id, TEAM_CT);
+				rg_join_team(id, TEAM_CT);
 				rg_round_respawn(id);
 			}
 
@@ -87,21 +87,24 @@ public training_player_join(id) {
 			}
 
 		} else {
-			transferUserToSpec(id);
+			rg_join_team(id, TEAM_SPECTATOR);
 		}
 		return;
 	}
 	
 	if (hns_is_knife_map()) {
+		rg_join_team(id, rg_get_join_team_priority());
 		rg_round_respawn(id);
 		return;
 	}
 
 	if (g_iMatchStatus == MATCH_WAITCONNECT && g_bPlayersListLoaded) {
 		if (!checkPlayer(id)) {
-			transferUserToSpec(id);
+			rg_join_team(id, TEAM_SPECTATOR);
 			return;
 		}
+	} else {
+		rg_join_team(id, rg_get_join_team_priority());
 	}
 
 	rg_round_respawn(id);

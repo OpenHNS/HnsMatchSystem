@@ -97,7 +97,7 @@ GetRandomAlive() {
 }
 
 public zm_player_join(id) {
-	rg_set_user_team(id, TEAM_CT);
+	rg_join_team(id, TEAM_CT);
 	rg_round_respawn(id);
 }
 

@@ -360,7 +360,7 @@ public msgShowMenu(msgid, dest, id) {
 	if (!equal(menu_text_code, team_select))
 		return PLUGIN_CONTINUE;
 
-	setForceTeamJoinTask(id, msgid);
+	setForceTeamJoinTask(id);
 
 	return PLUGIN_HANDLED;
 }
@@ -373,7 +373,7 @@ public msgVguiMenu(msgid, dest, id) {
 		return PLUGIN_CONTINUE;
 	}
 
-	setForceTeamJoinTask(id, msgid);
+	setForceTeamJoinTask(id);
 
 	return PLUGIN_HANDLED;
 }
@@ -389,43 +389,21 @@ bool:shouldAutoJoin(id) {
 	return (!get_user_team(id) && !task_exists(id));
 }
 
-setForceTeamJoinTask(id, menu_msgid) {
-	static param_menu_msgid[2];
-	param_menu_msgid[0] = menu_msgid;
-
-	set_task(0.1, "taskForceTeamJoin", id, param_menu_msgid, sizeof param_menu_msgid);
+setForceTeamJoinTask(id) {
+	set_task(0.1, "taskForceTeamJoin", id);
 }
 
-public taskForceTeamJoin(menu_msgid[], id) {
-	if (get_user_team(id))
-		return;
-	
-	forceTeamJoin(id, menu_msgid[0], "5", "5");
-}
-
-stock forceTeamJoin(id, menu_msgid, team[] = "5", class[] = "0") {
-	static jointeam[] = "jointeam";
-	if (class[0] == '0') {
-		engclient_cmd(id, jointeam, team);
-		return;
-	}
-
-	static msg_block, joinclass[] = "joinclass";
-	msg_block = get_msg_block(menu_msgid);
-	set_msg_block(menu_msgid, BLOCK_SET);
-	engclient_cmd(id, jointeam, team);
-	engclient_cmd(id, joinclass, class);
-	set_msg_block(menu_msgid, msg_block);
-
-	set_task(0.2, "taskSetPlayerTeam", id);
-}
-
-public taskSetPlayerTeam(id) {
-	if (!is_user_connected(id))
+public taskForceTeamJoin(id) {
+	if (!is_user_connected(id) || get_user_team(id))
 		return;
 
-	if (g_ModFuncs[g_iCurrentMode][MODEFUNC_PLAYER_JOIN])
+	if (g_ModFuncs[g_iCurrentMode][MODEFUNC_PLAYER_JOIN]) {
 		ExecuteForward(g_ModFuncs[g_iCurrentMode][MODEFUNC_PLAYER_JOIN], _, id);
+	} else {
+		// Every registered mode should provide a join handler. Keep a safe
+		// ReAPI fallback so a player is never left unassigned.
+		rg_join_team(id, rg_get_join_team_priority());
+	}
 }
 
 public ShowTimeAsMoney()

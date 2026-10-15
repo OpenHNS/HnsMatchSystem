@@ -32,7 +32,7 @@ stock bool:checkPlayer(id) {
 	for (new i; i < iSize; i++) {
 		ArrayGetArray(g_aPlayersLoadData, i, eTmpPlayer);
 		if (equal(szAuth, eTmpPlayer[SAVE_AUTH])) {
-			rg_set_user_team(id, eTmpPlayer[SAVE_TEAM]);
+			rg_join_team(id, eTmpPlayer[SAVE_TEAM]);
 			return true;
 		}
 	}

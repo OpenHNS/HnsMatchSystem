@@ -1,6 +1,7 @@
 public dm_init() {
 	g_ModFuncs[MODE_DM][MODEFUNC_KILL] = CreateOneForward(g_PluginId, "dm_killed", FP_CELL, FP_CELL);
 	g_ModFuncs[MODE_DM][MODEFUNC_FALLDAMAGE] = CreateOneForward(g_PluginId, "dm_falldamage", FP_CELL, FP_FLOAT);
+	g_ModFuncs[MODE_DM][MODEFUNC_PLAYER_JOIN] = CreateOneForward(g_PluginId, "dm_player_join", FP_CELL);
 }
 
 public dm_start() {
@@ -11,6 +12,10 @@ public dm_start() {
 	g_iSettings[SMOKE] = 1;
 	set_cvars_mode(MODE_DM);
 	hns_restart_round(0.5);
+}
+
+public dm_player_join(id) {
+	rg_join_team(id, rg_get_join_team_priority());
 }
 
 public dm_killed(victim, killer) {
