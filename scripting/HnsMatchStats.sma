@@ -446,14 +446,22 @@ public hns_players_replaced(requested_id, id) {
 }
 
 public client_putinserver(id) {
+	arrayset(iStats[id], 0, PLAYER_STATS);
+	arrayset(g_StatsRound[id], 0, PLAYER_STATS);
+	g_bSpotDebug[id] = false;
+
+	// Fake clients may receive this forward before ReGameDLL creates their
+	// private player data, so entity/member natives are not safe here.
+	// Stand-in bots also must not share persisted statistics under authid BOT.
+	if (is_user_bot(id) || is_user_hltv(id)) {
+		return;
+	}
+
 	TrieGetArray(g_tSaveData, getUserKey(id), iStats[id], PLAYER_STATS);
 	TrieGetArray(g_tSaveRoundData, getUserKey(id), g_StatsRound[id], PLAYER_STATS);
-	g_bSpotDebug[id] = false;
 
 	if (hns_get_mode() == MODE_MIX || hns_get_state() == STATE_PAUSED) {
 		SetScoreInfo(id, true);
-	} else {
-		arrayset(iStats[id], 0, PLAYER_STATS);
 	}
 }
 

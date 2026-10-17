@@ -191,8 +191,8 @@ public chooseCapsHandler(id, hMenu, item) {
 
 		if (is_user_connected(iCaptainA) && is_user_connected(iCaptainB)) {
 			g_isTeamTT = HNS_TEAM_A;
-			rg_set_user_team(iCaptainA, TEAM_TERRORIST);
-			rg_set_user_team(iCaptainB, TEAM_CT);
+			setTeam(iCaptainA, TEAM_TERRORIST);
+			setTeam(iCaptainB, TEAM_CT);
 
 			if (hns_battle_init() && hns_battle_arenas_init()) {
 				captainDecideMethodMenu(id);
@@ -408,10 +408,7 @@ public pickHandler(id, hMenu, item) {
 
 	//LogSendMessage("[MATCH] Captain (%n) pick (%n)", id, iPlayer);
 
-	// TODO: Надо убрать hns_distribute_roles_teams делает тоже самое.
-	rg_set_user_team(iPlayer, getUserTeam(id));
-	rg_round_respawn(iPlayer);
-	//
+	joinUserTeamAndRespawn(iPlayer, getUserTeam(id));
 
 	hns_distribute_roles_teams();
 
@@ -468,8 +465,7 @@ public wait_function(id) {
 				hns_set_user_role(iRandomPlayer, ROLE_TEAM_B);
 			}
 
-			rg_set_user_team(iRandomPlayer, getUserTeam(pPlayer));
-			rg_round_respawn(iRandomPlayer);
+			joinUserTeamAndRespawn(iRandomPlayer, getUserTeam(pPlayer));
 
 			client_print_color(0, print_team_blue, "%L", LANG_PLAYER, "PLAYER_CHOOSE_RANDOM", g_iSettings[PREFIX], pPlayer, iRandomPlayer);
 
