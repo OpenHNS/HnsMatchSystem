@@ -1,6 +1,9 @@
 #include <amxmodx>
 #include <reapi>
 #include <hns_matchsystem>
+#include <hns_matchsystem_filter>
+
+native hns_votemap_add_map(id, const szMap[]);
 
 #define TASK_MAP 12344
 #define SECTION_CHOICE_ALL -1
@@ -159,6 +162,7 @@ public plugin_init() {
 }
 
 public plugin_natives() {
+	set_native_filter("match_system_additons");
 	register_native("hnsmatch_maps_init", "native_maps_init");
 	register_native("hnsmatch_maps_is_knife", "native_maps_is_knife");
 	register_native("hnsmatch_maps_load_settings", "native_maps_load_settings");
@@ -583,7 +587,14 @@ public cmdMapActionMenu(id, szMap[]) {
 
 	menu_additem(hMenu, szMsg, "2");
 
-	menu_addblank2(hMenu); // 3
+	if (isUserWatcher(id) && LibraryExists("hns_votemanager", LibType_Library)) {
+		formatex(szMsg, charsmax(szMsg), "Add to /votemap list");
+	} else {
+		formatex(szMsg, charsmax(szMsg), "\dAdd to /votemap list");
+	}
+
+	menu_additem(hMenu, szMsg, "3");
+
 	menu_addblank2(hMenu); // 4
 	menu_addblank2(hMenu); // 5
 	menu_addblank2(hMenu); // 6
@@ -631,6 +642,13 @@ public cmdMapActionHandler(id, hMenu, item) {
 		if (isUserWatcher(id)) {
 			client_print_color(0, print_team_blue, "%L", LANG_PLAYER, "MAPS_CHAGE", g_szPrefix, id, g_SelectedMap[id]);
 			set_task(1.0, "change_map", id + TASK_MAP);
+		} else {
+			cmdMapActionMenu(id, g_SelectedMap[id]);
+		}
+	}
+	else if (choice == 3) {
+		if (isUserWatcher(id) && LibraryExists("hns_votemanager", LibType_Library)) {
+			hns_votemap_add_map(id, g_SelectedMap[id]);
 		} else {
 			cmdMapActionMenu(id, g_SelectedMap[id]);
 		}
