@@ -946,26 +946,26 @@ public cmdTeamSpec(id) {
 		if (getUserTeam(id) == TEAM_SPECTATOR) {
 			new iNumTT = get_playersnum_ex(GetPlayers_MatchTeam, "TERRORIST");
 			new iNumCT = get_playersnum_ex(GetPlayers_MatchTeam, "CT");
+			new TeamName:iTargetTeam;
 
 			if (g_iCurrentMode == MODE_DM_1TT) {
 				if (iNumTT == 0) {
-					rg_set_user_team(id, TEAM_TERRORIST);
+					iTargetTeam = TEAM_TERRORIST;
 				} else {
-					rg_set_user_team(id, TEAM_CT);
+					iTargetTeam = TEAM_CT;
 				}
 			} else if (iNumTT == iNumCT && g_eSpecBack[id] != TEAM_UNASSIGNED) {
-				rg_set_user_team(id, g_eSpecBack[id]);
+				iTargetTeam = g_eSpecBack[id];
 			} else if (iNumTT < iNumCT) {
-				rg_set_user_team(id, TEAM_TERRORIST);
+				iTargetTeam = TEAM_TERRORIST;
 			} else {
-				rg_set_user_team(id, TEAM_CT);
+				iTargetTeam = TEAM_CT;
 			}
+
 			if (g_iCurrentMode == MODE_PUB) {
-				if (rg_is_player_can_respawn(id)) {
-					rg_round_respawn(id);
-				}
+				setTeam(id, iTargetTeam);
 			} else {
-				rg_round_respawn(id);
+				joinUserTeamAndRespawn(id, iTargetTeam);
 			}
 		} else {
 			g_eSpecBack[id] = getUserTeam(id);

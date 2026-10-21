@@ -306,6 +306,7 @@ public registerMode() {
 }
 
 public client_disconnected(id) {
+	remove_task(id + TASK_TEAM_JOIN_RESPAWN);
 	duel_clear_player_respawn(id);
 
 	if (g_ModFuncs[g_iCurrentMode][MODEFUNC_PLAYER_LEAVE])

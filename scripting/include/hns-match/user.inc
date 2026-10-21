@@ -113,14 +113,12 @@ stock hns_distribute_roles_teams() {
 			}
 			case ROLE_CAP_A, ROLE_TEAM_A: {
 				if (getUserTeam(id) != TEAM_TERRORIST) {
-					rg_set_user_team(id, TEAM_TERRORIST);
-					rg_round_respawn(id);
+					joinUserTeamAndRespawn(id, TEAM_TERRORIST);
 				}
 			}
 			case ROLE_CAP_B, ROLE_TEAM_B: {
 				if (getUserTeam(id) != TEAM_CT) {
-					rg_set_user_team(id, TEAM_CT);
-					rg_round_respawn(id);
+					joinUserTeamAndRespawn(id, TEAM_CT);
 				}
 			}
 		}
@@ -246,7 +244,33 @@ setTeam(id, TeamName:iTeam) {
 	if (!is_user_connected(id) || getUserTeam(id) == iTeam)
 		return;
 
+	remove_task(id + TASK_TEAM_JOIN_RESPAWN);
 	rg_join_team(id, iTeam);
+}
+
+stock joinUserTeamAndRespawn(id, TeamName:iTeam) {
+	if (!is_user_connected(id) || (iTeam != TEAM_TERRORIST && iTeam != TEAM_CT)) {
+		return;
+	}
+
+	remove_task(id + TASK_TEAM_JOIN_RESPAWN);
+	rg_join_team(id, iTeam);
+
+	if (!is_user_alive(id)) {
+		set_task(0.2, "taskTeamJoinRespawn", id + TASK_TEAM_JOIN_RESPAWN);
+	}
+}
+
+public taskTeamJoinRespawn(taskId) {
+	new id = taskId - TASK_TEAM_JOIN_RESPAWN;
+
+	if (!is_user_connected(id) || is_user_alive(id)) {
+		return;
+	}
+
+	switch (getUserTeam(id)) {
+		case TEAM_TERRORIST, TEAM_CT: rg_round_respawn(id);
+	}
 }
 
 

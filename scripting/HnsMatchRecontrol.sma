@@ -38,6 +38,15 @@ enum _:CVARS
 	ENABLE_REPLACE,
 	ENABLE_CONTROL
 }
+
+enum _:PendingReplacement
+{
+	bool:PR_ACTIVE,
+	PR_OUTGOING,
+	PR_OUTGOING_USERID,
+	PR_ADMIN,
+	bool:PR_OUTGOING_WAS_ALIVE
+}
 /*
 [33] == [request]
 */
@@ -48,6 +57,7 @@ new Float:g_flDelay[MAX_PLAYERS + 1];
 new ControlType:g_ControlType[MAX_PLAYERS + 1];
 new bool:g_bInvited[MAX_PLAYERS + 1];
 new bool:g_bGiveWeapons[MAX_PLAYERS + 1];
+new g_ePendingReplacement[MAX_PLAYERS + 1][PendingReplacement];
 
 new TransferType:g_eTransferType[MAX_PLAYERS + 1], g_iTransferPlayer[MAX_PLAYERS + 1];
 
@@ -80,6 +90,7 @@ public plugin_init()
 	register_clcmd("hns_transfer", "ReplaceAdmin");
 	RegisterSayCmd("rea", "rea", "ReplaceAdmin");
 
+	RegisterHookChain(RG_CBasePlayer_GetIntoGame, "@CBasePlayer_GetIntoGame", true);
 	RegisterHookChain(RG_CSGameRules_PlayerSpawn, "@CSGameRules_PlayerSpawn", true);
 
 	g_hReplaceForward = CreateMultiForward("hns_players_replaced", ET_CONTINUE, FP_CELL, FP_CELL);
@@ -97,6 +108,7 @@ public client_putinserver(id)
 	remove_task(id + TASK_RESPONSE);
 
 	arrayset(g_saveData[id], 0, Data);
+	arrayset(g_ePendingReplacement[id], 0, PendingReplacement);
 	g_bGiveWeapons[id] = false;
 	g_flDelay[id] = 0.0;
 	g_bInvited[id] = false;
@@ -105,8 +117,26 @@ public client_putinserver(id)
 public client_disconnected(id)
 {
 	remove_task(id + TASK_RESPONSE);
-	
+
+	arrayset(g_ePendingReplacement[id], 0, PendingReplacement);
+	g_bGiveWeapons[id] = false;
 	g_bInvited[id] = false;
+}
+
+@CBasePlayer_GetIntoGame(id)
+{
+	if (!is_user_connected(id) || !g_ePendingReplacement[id][PR_ACTIVE]) {
+		return;
+	}
+
+	if (!g_ePendingReplacement[id][PR_OUTGOING_WAS_ALIVE]) {
+		FinalizeReplacement(id);
+		return;
+	}
+
+	if (!is_user_alive(id)) {
+		rg_round_respawn(id);
+	}
 }
 
 @CSGameRules_PlayerSpawn(id)
@@ -536,15 +566,17 @@ public GiveWeapons(id)
 		}
 		
 		g_bGiveWeapons[id] = false;
+		FinalizeReplacement(id);
 	}
 }
 
 public ReControl(id)
 {
 	new requested_id = g_ReplaceRequests[id];
-		
+	new bool:bRequestedAlive = bool:is_user_alive(requested_id);
+
 	g_saveData[id][iTeam] = rg_get_user_team(requested_id);
-	if (is_user_alive(requested_id))
+	if (bRequestedAlive)
 	{
 		get_entvar(requested_id, var_origin, 	g_saveData[id][Origin], 3);
 		get_entvar(requested_id, var_velocity, 	g_saveData[id][Velocity], 3);
@@ -554,43 +586,89 @@ public ReControl(id)
 		g_saveData[id][iFlash] = rg_get_user_bpammo(requested_id, WEAPON_FLASHBANG);
 		g_saveData[id][iSmoke] = rg_get_user_bpammo(requested_id, WEAPON_SMOKEGRENADE);
 		g_saveData[id][flHealth] = get_entvar(requested_id, var_health);
-		
-		if (g_ControlType[requested_id] == TYPE_REPLACE)
-		{
-			set_entvar(id, var_frags, Float:get_entvar(requested_id, var_frags));
-			set_member(id, m_iDeaths, get_member(requested_id, m_iDeaths));
+	}
 
-			rg_set_user_team(id, g_saveData[id][iTeam]);
-			rg_set_user_team(requested_id, TEAM_SPECTATOR);
+	if (g_ControlType[requested_id] == TYPE_REPLACE)
+	{
+		set_entvar(id, var_frags, Float:get_entvar(requested_id, var_frags));
+		set_member(id, m_iDeaths, get_member(requested_id, m_iDeaths));
 
-			ExecuteForward(g_hReplaceForward, _, requested_id, id);
-		}
-		
+		g_bGiveWeapons[id] = bRequestedAlive;
+		BeginReplacement(id, requested_id, 0, bRequestedAlive);
+	}
+	else if (bRequestedAlive)
+	{
 		g_bGiveWeapons[id] = true;
-		
 		rg_round_respawn(id);
 
 		rg_remove_all_items(requested_id);
 		user_kill(requested_id, true);
 	}
-	else
-	{
-		if (g_ControlType[requested_id] == TYPE_REPLACE)
-		{
-			set_entvar(id, var_frags, Float:get_entvar(requested_id, var_frags));
-			set_member(id, m_iDeaths, get_member(requested_id, m_iDeaths));	
 
-			rg_set_user_team(id, g_saveData[id][iTeam]);
-			rg_set_user_team(requested_id, TEAM_SPECTATOR);
+	show_menu(requested_id, 0, "", 1);
+}
 
-			ExecuteForward(g_hReplaceForward, _, requested_id, id);
+stock bool:BeginReplacement(id, outgoing, admin, bool:bOutgoingWasAlive)
+{
+	arrayset(g_ePendingReplacement[id], 0, PendingReplacement);
+	g_ePendingReplacement[id][PR_ACTIVE] = true;
+	g_ePendingReplacement[id][PR_OUTGOING] = outgoing;
+	g_ePendingReplacement[id][PR_OUTGOING_USERID] = get_user_userid(outgoing);
+	g_ePendingReplacement[id][PR_ADMIN] = admin;
+	g_ePendingReplacement[id][PR_OUTGOING_WAS_ALIVE] = bOutgoingWasAlive;
+
+	if (!bOutgoingWasAlive) {
+		// Preserve the state of the dead player being replaced while still
+		// completing the normal spectator-to-team initialization sequence.
+		set_member(id, m_iNumSpawns, 1);
+	}
+
+	if (!rg_join_team(id, TeamName:g_saveData[id][iTeam])) {
+		arrayset(g_ePendingReplacement[id], 0, PendingReplacement);
+		g_bGiveWeapons[id] = false;
+		return false;
+	}
+
+	if (is_user_alive(id)) {
+		if (bOutgoingWasAlive) {
+			RequestFrame("GiveWeapons", id);
+		} else {
+			user_silentkill(id);
+			FinalizeReplacement(id);
 		}
 	}
-	
-	if (g_ControlType[requested_id] == TYPE_REPLACE)
-		client_print_color(0, print_team_blue, "%L", LANG_PLAYER, "RECON_REPLACE", g_szPrefix, id, requested_id);
-	
-	show_menu(requested_id, 0, "", 1);
+
+	return true;
+}
+
+stock FinalizeReplacement(id)
+{
+	if (!g_ePendingReplacement[id][PR_ACTIVE]) {
+		return;
+	}
+
+	if (g_ePendingReplacement[id][PR_OUTGOING_WAS_ALIVE] && !is_user_alive(id)) {
+		return;
+	}
+
+	new outgoing = g_ePendingReplacement[id][PR_OUTGOING];
+	new outgoingUserId = g_ePendingReplacement[id][PR_OUTGOING_USERID];
+	new admin = g_ePendingReplacement[id][PR_ADMIN];
+
+	arrayset(g_ePendingReplacement[id], 0, PendingReplacement);
+
+	if (!is_user_connected(outgoing) || get_user_userid(outgoing) != outgoingUserId) {
+		return;
+	}
+
+	rg_join_team(outgoing, TEAM_SPECTATOR);
+	ExecuteForward(g_hReplaceForward, _, outgoing, id);
+
+	if (admin > 0) {
+		client_print_color(0, print_team_blue, "%L", LANG_PLAYER, "RECON_ADM_REPLACE", g_szPrefix, admin, outgoing, id);
+	} else {
+		client_print_color(0, print_team_blue, "%L", LANG_PLAYER, "RECON_REPLACE", g_szPrefix, id, outgoing);
+	}
 }
 
 public task_Response(Parms[], task_id)
@@ -618,11 +696,12 @@ public task_Response(Parms[], task_id)
 
 ReplacePlayers(replacement_player, substitutive_player, admin_replaced = 0) {
 	g_saveData[substitutive_player][iTeam] = rg_get_user_team(replacement_player);
+	new bool:bReplacementAlive = bool:is_user_alive(replacement_player);
 
 	set_entvar(substitutive_player, var_frags, Float:get_entvar(replacement_player, var_frags));
 	set_member(substitutive_player, m_iDeaths, get_member(replacement_player, m_iDeaths));
 
-	if(is_user_alive(replacement_player)) {
+	if (bReplacementAlive) {
 		get_entvar(replacement_player, var_origin, g_saveData[substitutive_player][Origin], 3);
 		get_entvar(replacement_player, var_velocity, g_saveData[substitutive_player][Velocity], 3);
 		get_entvar(replacement_player, var_v_angle, g_saveData[substitutive_player][Angles], 3);
@@ -631,22 +710,8 @@ ReplacePlayers(replacement_player, substitutive_player, admin_replaced = 0) {
 		g_saveData[substitutive_player][iFlash]   = rg_get_user_bpammo(replacement_player, WEAPON_FLASHBANG);
 		g_saveData[substitutive_player][iHe]   = rg_get_user_bpammo(replacement_player, WEAPON_HEGRENADE);
 		g_saveData[substitutive_player][flHealth]  = get_entvar(replacement_player, var_health);
-
-		rg_set_user_team(substitutive_player, g_saveData[substitutive_player][iTeam]);
-		rg_set_user_team(replacement_player, TEAM_SPECTATOR);
-
-		g_bGiveWeapons[substitutive_player] = true;
-
-		rg_round_respawn(substitutive_player);
-		rg_remove_all_items(replacement_player);
-		user_silentkill(replacement_player);
-	}
-	else {
-		rg_set_user_team(substitutive_player, g_saveData[substitutive_player][iTeam]);
-		rg_set_user_team(replacement_player, TEAM_SPECTATOR);
 	}
 
-	ExecuteForward(g_hReplaceForward, _, replacement_player, substitutive_player);
-
-	client_print_color(0, print_team_blue, "%L", LANG_PLAYER, "RECON_ADM_REPLACE", g_szPrefix, admin_replaced, replacement_player, substitutive_player);
+	g_bGiveWeapons[substitutive_player] = bReplacementAlive;
+	BeginReplacement(substitutive_player, replacement_player, admin_replaced, bReplacementAlive);
 }
