@@ -72,28 +72,30 @@ jobs:
           AMXX_COMPILER_PATH="$(pwd)/dep/amxx/addons/amxmodx/scripting"
           test -x "$AMXX_COMPILER_PATH/amxxpc"
           echo "$AMXX_COMPILER_PATH" >> "$GITHUB_PATH"
+          echo "AMXX_INCLUDE_PATH=$AMXX_COMPILER_PATH/include" >> "$GITHUB_ENV"
           echo "LD_LIBRARY_PATH=$AMXX_COMPILER_PATH" >> "$GITHUB_ENV"
 
       - name: Compile plugins
         working-directory: scripting/
         env:
+          AMXX_INCLUDE: ${{ env.AMXX_INCLUDE_PATH }}
           REAPI_INCLUDE: ${{ env.REAPI_INCLUDE_PATH }}
         run: |
-          compile() {
-            sourcefile=$1
-            amxxfile="$(echo $sourcefile | sed -e 's/\.sma$/.amxx/')"
+          set -euo pipefail
+
+          while IFS= read -r -d '' sourcefile; do
+            relative_source="${sourcefile#./}"
+            amxxfile="${relative_source%.sma}.amxx"
             output_path="../plugins/$amxxfile"
-            
-            mkdir -p $(dirname $output_path)
-            
-            echo -n "Compiling $sourcefile ... "
-            amxxpc $sourcefile -o"$output_path" \
+
+            mkdir -p "$(dirname "$output_path")"
+
+            echo "Compiling $relative_source ..."
+            amxxpc "$sourcefile" -o"$output_path" \
               -i"include" \
+              -i"$AMXX_INCLUDE" \
               -i"$REAPI_INCLUDE"
-          }
-          export -f compile
-          
-          find * -type f -name "*.sma" -exec bash -c 'compile "$0"' {} \;
+          done < <(find . -type f -name "*.sma" -print0)
           
       - name: Directory
         run: |
@@ -102,7 +104,7 @@ jobs:
           mv configs data modules scripting plugins cstrike/addons/amxmodx/
           
       - name: Deploy artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: HnsMatchSystem-${{ steps.declare_sha.outputs.COMMIT_SHA }}-dev
           path: ./*
@@ -117,7 +119,7 @@ jobs:
       startsWith(github.ref, 'refs/tags/')
     steps:
       - name: Download artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: HnsMatchSystem-${{ needs.build.outputs.COMMIT_SHA }}-dev
 
