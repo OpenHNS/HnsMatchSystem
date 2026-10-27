@@ -54,9 +54,6 @@ stock cmds_init() {
 
 public registerRetakeCommands() {
 	g_bRetakeAvailable = is_plugin_loaded(RETAKE_PLUGIN_FILE, true) != -1;
-	if (!g_bRetakeAvailable) {
-		return;
-	}
 
 	new iWatcherAccess = read_flags(g_iSettings[WATCHER_FLAG]);
 	RegisterSayCmd("retake", "rtk", "cmdRetakeMode", iWatcherAccess, "Retake Boost mode");
