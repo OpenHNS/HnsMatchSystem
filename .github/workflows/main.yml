@@ -19,7 +19,7 @@ jobs:
       COMMIT_SHA: ${{ steps.declare_sha.outputs.COMMIT_SHA }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
@@ -50,9 +50,29 @@ jobs:
           echo "REAPI_INCLUDE_PATH=$(pwd)/addons/amxmodx/scripting/include" >> $GITHUB_ENV
           
       - name: Setup AMXXPawn Compiler
-        uses: wopox1337/setup-amxxpawn@master
-        with:
-          version: '1.9.x'
+        env:
+          AMXX_ARCHIVE: amxmodx-1.9.0-git5303-base-linux.tar.gz
+          AMXX_SHA256: 1ed6898ced2c1fcf225c288b94effc19917e987b284e42911587738ee3c93699
+          AMXX_VERSION: 1.9.0.5303
+        run: |
+          mkdir -p dep/amxx
+
+          curl \
+            --fail \
+            --location \
+            --retry 5 \
+            --retry-all-errors \
+            --connect-timeout 15 \
+            --output "dep/$AMXX_ARCHIVE" \
+            "https://github.com/alliedmodders/amxmodx/releases/download/$AMXX_VERSION/$AMXX_ARCHIVE"
+
+          echo "$AMXX_SHA256  dep/$AMXX_ARCHIVE" | sha256sum --check -
+          tar -xzf "dep/$AMXX_ARCHIVE" -C dep/amxx
+
+          AMXX_COMPILER_PATH="$(pwd)/dep/amxx/addons/amxmodx/scripting"
+          test -x "$AMXX_COMPILER_PATH/amxxpc"
+          echo "$AMXX_COMPILER_PATH" >> "$GITHUB_PATH"
+          echo "LD_LIBRARY_PATH=$AMXX_COMPILER_PATH" >> "$GITHUB_ENV"
 
       - name: Compile plugins
         working-directory: scripting/

@@ -150,6 +150,7 @@ public native_set_player_hud_specinfo(amxx, params) {
 
 public plugin_init() {
 	register_plugin("Match: Player info", "1.3", "OpenHNS");
+	register_dictionary("match_additons.txt");
 
 	pCvar[HUDPLAYER_PLAYER] = create_cvar("hns_hudplayer_player", "1", FCVAR_NONE, "0: disable player hud, 1: enable player hud", true, 0.0, true, 1.0);
 	bind_pcvar_num(pCvar[HUDPLAYER_PLAYER], g_iHudPlayerPlayer);

@@ -215,7 +215,7 @@ public Menu(id)
 				formatex(szBuffer, charsmax(szBuffer), "\d%s \r[noplay]", szName);
 				menu_additem(m_Menu, szBuffer, szPlayer);
 			} else if (g_bHnsBannedInit && e_bBanned[Player] && !is_control) {
-				formatex(szBuffer, charsmax(szBuffer), "%L", id, "RECON_BANNED", szName);
+				formatex(szBuffer, charsmax(szBuffer), "%L", id, "RECON_BANNED", Player);
 				menu_additem(m_Menu, szBuffer, szPlayer);
 			} else if (g_bInvited[Player]) {
 				formatex(szBuffer, charsmax(szBuffer), "%L", id, "RECON_INVITED", szName);

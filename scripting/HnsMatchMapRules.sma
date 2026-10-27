@@ -8,6 +8,7 @@ new g_sPrefix[24];
 
 public plugin_init() {
     register_plugin("Kill Piranesi", "0.0.1", "OpenHNS") // hedqi
+    register_dictionary("mixsystem.txt");
 
     rh_get_mapname(g_szMapName, charsmax(g_szMapName));
 
