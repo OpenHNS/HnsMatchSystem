@@ -4,7 +4,7 @@
 #include <hns_matchsystem>
 
 public stock const PluginName[] = "[Match] DM Death Respawn";
-public stock const PluginVersion[] = "1.0.1";
+public stock const PluginVersion[] = "1.0.2";
 public stock const PluginAuthor[] = "ufame";
 public stock const PluginDescription[] = "Respawns deathmatch players at their death position";
 
@@ -50,6 +50,7 @@ new Float: g_flDeathOrigin[MAX_PLAYERS + 1][3];
 new Float: g_flDeathAngles[MAX_PLAYERS + 1][3];
 new bool: g_bDeathSpawn[MAX_PLAYERS + 1];
 new bool: g_bDeathDucked[MAX_PLAYERS + 1];
+new bool: g_bFallDeath[MAX_PLAYERS + 1];
 new g_iUnstuckAttempts[MAX_PLAYERS + 1];
 
 public plugin_init()
@@ -78,15 +79,25 @@ public plugin_init()
 
   RegisterHookChain(RG_CBasePlayer_Killed, "OnPlayerKilled", .post = true);
   RegisterHookChain(RG_CBasePlayer_Spawn, "OnPlayerSpawn", .post = true);
+  RegisterHookChain(RG_CSGameRules_FlPlayerFallDamage, "OnPlayerFallDamage", .post = true);
   RegisterHookChain(RG_CSGameRules_RestartRound, "OnRoundRestart");
 }
 
 public OnPlayerKilled(const victim, const attacker)
 {
-  if (!IsDeathSpawnActive())
+  if (victim < 1 || victim > MaxClients)
     return;
 
-  if (victim < 1 || victim > MaxClients || !is_user_connected(victim))
+  new bool: fellToDeath = g_bFallDeath[victim];
+
+  g_bFallDeath[victim] = false;
+  g_bDeathSpawn[victim] = false;
+  g_bDeathDucked[victim] = false;
+
+  if (!IsDeathSpawnActive() || !IsPlayer(victim))
+    return;
+
+  if (fellToDeath || attacker == victim || !IsPlayer(attacker))
     return;
 
   get_entvar(victim, var_origin, g_flDeathOrigin[victim], 3);
@@ -97,15 +108,20 @@ public OnPlayerKilled(const victim, const attacker)
 
 public OnPlayerSpawn(const playerIndex)
 {
-  if (!g_bDeathSpawn[playerIndex])
-    return;
+  new bool: deathSpawn = g_bDeathSpawn[playerIndex];
+  new bool: deathDucked = g_bDeathDucked[playerIndex];
 
   g_bDeathSpawn[playerIndex] = false;
+  g_bDeathDucked[playerIndex] = false;
+  g_bFallDeath[playerIndex] = false;
+
+  if (!deathSpawn)
+    return;
 
   if (!IsDeathSpawnActive() || !is_user_alive(playerIndex))
     return;
 
-  if (g_bDeathDucked[playerIndex])
+  if (deathDucked)
     set_entvar(playerIndex, var_flags, get_entvar(playerIndex, var_flags) | FL_DUCKING);
 
   set_entvar(playerIndex, var_origin, g_flDeathOrigin[playerIndex]);
@@ -117,15 +133,31 @@ public OnPlayerSpawn(const playerIndex)
     ScheduleUnstuckCheck(playerIndex, UNSTUCK_FIRST_DELAY);
 }
 
+public OnPlayerFallDamage(const playerIndex)
+{
+  if (playerIndex < 1 || playerIndex > MaxClients || !is_user_connected(playerIndex))
+    return;
+
+  new Float: fallDamage = Float: GetHookChainReturn(ATYPE_FLOAT);
+
+  new Float: health;
+  get_entvar(playerIndex, var_health, health);
+
+  g_bFallDeath[playerIndex] = bool: (fallDamage > 0.0 && fallDamage >= health);
+}
+
 public OnRoundRestart()
 {
   arrayset(g_bDeathSpawn, false, sizeof(g_bDeathSpawn));
+  arrayset(g_bDeathDucked, false, sizeof(g_bDeathDucked));
+  arrayset(g_bFallDeath, false, sizeof(g_bFallDeath));
 }
 
 public client_disconnected(playerIndex)
 {
   g_bDeathSpawn[playerIndex] = false;
   g_bDeathDucked[playerIndex] = false;
+  g_bFallDeath[playerIndex] = false;
   g_iUnstuckAttempts[playerIndex] = 0;
 
   remove_task(TASK_UNSTUCK_CHECK + playerIndex);
@@ -153,7 +185,7 @@ public TaskCheckUnstuck(taskId)
 {
   new playerIndex = taskId - TASK_UNSTUCK_CHECK;
 
-  if (playerIndex < 1 || playerIndex > MaxClients || !is_user_connected(playerIndex))
+  if (!IsPlayer(playerIndex))
     return;
 
   if (!is_user_alive(playerIndex) || !IsDeathSpawnActive())
@@ -202,6 +234,11 @@ bool: AttemptUnstuck(playerIndex)
   return false;
 }
 
+bool: IsPlayer(const playerIndex)
+{
+  return playerIndex >= 1 && playerIndex <= MaxClients && is_user_connected(playerIndex);
+}
+
 bool: IsPlayerStuck(playerIndex)
 {
   new Float: origin[3];
@@ -216,7 +253,7 @@ bool: IsHullVacant(playerIndex, const Float: position[3], hullSize)
 {
   engfunc(EngFunc_TraceHull, position, position, DONT_IGNORE_MONSTERS, hullSize, playerIndex, 0);
 
-  return bool: (!get_tr2(0, TR_StartSolid) || !get_tr2(0, TR_AllSolid));
+  return bool: (!get_tr2(0, TR_StartSolid) && !get_tr2(0, TR_AllSolid));
 }
 
 GetHullSize(playerIndex)
