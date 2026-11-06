@@ -18,7 +18,7 @@ new bool:g_bInvisPlayers[MAX_PLAYERS + 1];
 
 new g_hResetBugForward;
 
-new g_iMsgHookTempEntity;
+new MessageHook:g_iMsgHookTempEntity;
 
 public plugin_natives() {
 	set_native_filter("match_system_additons");
@@ -462,7 +462,7 @@ public rgExplodeGrenade(const pGrenade, const tracehandle, const bitsDamageType)
 	}
 
 	if (!g_iMsgHookTempEntity) {
-		g_iMsgHookTempEntity = register_message(SVC_TEMPENTITY, "Message_TempEntity");
+		g_iMsgHookTempEntity = RegisterMessage(SVC_TEMPENTITY, "Message_TempEntity");
 	}
 
 	return HC_CONTINUE;
@@ -470,8 +470,8 @@ public rgExplodeGrenade(const pGrenade, const tracehandle, const bitsDamageType)
 
 public rgExplodeGrenadePost(const pGrenade, const tracehandle, const bitsDamageType) {
 	if (g_iMsgHookTempEntity) {
-		unregister_message(SVC_TEMPENTITY, g_iMsgHookTempEntity);
-		g_iMsgHookTempEntity = 0;
+		UnregisterMessage(g_iMsgHookTempEntity);
+		g_iMsgHookTempEntity = INVALID_MESSAGEHOOK;
 	}
 
 	if (!should_cleanup_flash_effects()) {
@@ -534,27 +534,27 @@ stock bool:should_cleanup_flash_effects() {
 
 public Message_TempEntity(const iMsgId, const iMsgType, const pEnt) {
 	if (hns_get_mode() != MODE_TRAINING && hns_get_state() != STATE_PAUSED) {
-		return PLUGIN_CONTINUE;
+		return HC_CONTINUE;
 	}
 
-	new iTempEntityId = get_msg_arg_int(1)
+	new iTempEntityId = GetMessageData(MsgArg, 1)
 
 	if (iTempEntityId == TE_DECAL || iTempEntityId == TE_WORLDDECAL) {
-		return PLUGIN_HANDLED;
+		return HC_SUPERCEDE;
 	}
 
 	if (iTempEntityId == TE_SPARKS) {
-		return PLUGIN_HANDLED
+		return HC_SUPERCEDE
 	}
 
-	return PLUGIN_CONTINUE;
+	return HC_CONTINUE;
 }
 
 
 public plugin_end() {
 	if (g_iMsgHookTempEntity) {
-		unregister_message(SVC_TEMPENTITY, g_iMsgHookTempEntity);
-		g_iMsgHookTempEntity = 0;
+		UnregisterMessage(g_iMsgHookTempEntity);
+		g_iMsgHookTempEntity = INVALID_MESSAGEHOOK;
 	}
 
 	DestroyForward(g_hResetBugForward);

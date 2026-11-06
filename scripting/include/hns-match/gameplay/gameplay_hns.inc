@@ -1,5 +1,5 @@
 new HamHook:fwdDisableKnife;
-new HamHook:fwdResetMaxSpeed;
+new HookChain:fwdResetMaxSpeed;
 
 enum
 {
@@ -39,11 +39,11 @@ public hns_enable_rules()
 	}
 	if (!fwdResetMaxSpeed)
 	{
-		fwdResetMaxSpeed = RegisterHam(Ham_CS_Player_ResetMaxSpeed, "player", "fwd_Player_ResetMaxSpeed_Post", true);
+		fwdResetMaxSpeed = RegisterHookChain(RG_CBasePlayer_ResetMaxSpeed, "fwd_Player_ResetMaxSpeed_Post", true);
 	}
 
 	EnableHamForward(fwdDisableKnife);
-	EnableHamForward(fwdResetMaxSpeed);
+	EnableHookChain(fwdResetMaxSpeed);
 }
 
 public hns_disable_rules()
@@ -54,7 +54,7 @@ public hns_disable_rules()
 	}
 	if (fwdResetMaxSpeed)
 	{
-		DisableHamForward(fwdResetMaxSpeed);
+		DisableHookChain(fwdResetMaxSpeed);
 	}
 }
 
@@ -212,7 +212,7 @@ public fwd_Player_ResetMaxSpeed_Post(id)
 {
 	if (g_iCurrentMode == MODE_RETAKE && get_member_game(m_bFreezePeriod))
 	{
-		return;
+		return HC_CONTINUE;
 	}
 
 	if (getUserTeam(id) == TEAM_TERRORIST)
@@ -223,6 +223,8 @@ public fwd_Player_ResetMaxSpeed_Post(id)
 			set_entvar(id, var_maxspeed, get_member(weapon, m_Weapon_fMaxSpeed));
 		}
 	}
+
+	return HC_CONTINUE;
 }
 
 public fwd_Knife_Deploy_Post(ent)

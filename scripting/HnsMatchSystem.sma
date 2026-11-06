@@ -29,10 +29,10 @@ public plugin_init() {
 
 	cmds_init();
 
-	register_forward(FM_EmitSound, "fwdEmitSoundPre", 0);
 	register_forward(FM_ClientKill, "fwdClientKill");
 	register_forward(FM_GetGameDescription, "fwdGameNameDesc");
 
+	RegisterHookChain(RH_SV_StartSound, "rhStartSound", false);
 	RegisterHookChain(RG_RoundEnd, "rgRoundEnd", false);
 	RegisterHookChain(RG_CBasePlayer_ResetMaxSpeed, "rgResetMaxSpeed", false);
 	RegisterHookChain(RG_CSGameRules_RestartRound, "rgRestartRound", false);
@@ -45,17 +45,15 @@ public plugin_init() {
 
 	RegisterHam(Ham_Weapon_PrimaryAttack, "weapon_knife", "Knife_PrimaryAttack", false);
 
-	register_message(get_user_msgid("HostagePos"), "msgHostagePos");
-	// TODO: Если все ок заменить на реапи
-	register_message(get_user_msgid("ShowMenu"), "msgShowMenu");
-	register_message(get_user_msgid("VGUIMenu"), "msgVguiMenu");
-	register_message(get_user_msgid("HideWeapon"), "msgHideWeapon");
-
 	unregister_forward(FM_Spawn, g_iRegisterSpawn, 1);
-	
 
-	set_msg_block(get_user_msgid("HudTextArgs"), BLOCK_SET);
-	set_msg_block(g_msgMoney = get_user_msgid("Money"), BLOCK_SET);
+	RegisterHookChain(RG_ShowMenu, "rgShowMenu", false);
+	RegisterHookChain(RG_ShowVGUIMenu, "rgShowVGUIMenu", false);
+
+	RegisterMessage(get_user_msgid("HideWeapon"), "msgHideWeapon");
+	SetMessageBlock(get_user_msgid("HostagePos"), MSG_BLOCK_SET);
+	SetMessageBlock(get_user_msgid("HudTextArgs"), MSG_BLOCK_SET);
+	SetMessageBlock(g_msgMoney = get_user_msgid("Money"), MSG_BLOCK_SET);
 
 	set_task(0.1, "ShowTimeAsMoney", 15671983, .flags="b"); // TODO: Что это за число
 
@@ -143,16 +141,14 @@ public NATCH_RULES:native_get_rules(amxx, params) {
 	return g_iCurrentRules;
 }
 
-public fwdEmitSoundPre(id, iChannel, szSample[], Float:volume, Float:attenuation, fFlags, pitch) {
-	if (equal(szSample, "weapons/knife_deploy1.wav")) {
-		return FMRES_SUPERCEDE;
-	}
+public rhStartSound(const recipients, const entity, const channel, const sample[], const volume, Float:attenuation, const flags, const pitch) {
+	if (equal(sample, "weapons/knife_deploy1.wav"))
+		return HC_SUPERCEDE;
 
-	if (is_user_alive(id) && getUserTeam(id) == TEAM_TERRORIST && equal(szSample, sndDenySelect)) {
-		emit_sound(id, iChannel, sndUseSound, volume, attenuation, fFlags, pitch);
-		return FMRES_SUPERCEDE;
-	}
-	return FMRES_IGNORED;
+	if (is_user_alive(entity) && getUserTeam(entity) == TEAM_TERRORIST && equal(sample, sndDenySelect))
+		SetHookChainArg(4, ATYPE_STRING, sndUseSound);
+
+	return HC_CONTINUE;
 }
 
 public fwdClientKill(id) {
@@ -344,47 +340,41 @@ public Knife_PrimaryAttack(ent)
 	return HAM_IGNORED;
 }
 
-public msgHostagePos(msgid, dest, id) {
-	return PLUGIN_HANDLED;
-}
-
-public msgShowMenu(msgid, dest, id) {
+public rgShowMenu(const id, const bitsSlots, const iDisplayTime, const iNeedMore, const pszText[]) {
 	if (!shouldAutoJoin(id))
-		return PLUGIN_CONTINUE;
+		return HC_CONTINUE;
 
 	if (hns_is_knife_map() && hns_cup_enabled()) {
-		return PLUGIN_CONTINUE;
+		return HC_CONTINUE;
 	}
 
-	static team_select[] = "#Team_Select";
-	static menu_text_code[sizeof team_select];
-	get_msg_arg_string(4, menu_text_code, sizeof menu_text_code - 1);
-	if (!equal(menu_text_code, team_select))
-		return PLUGIN_CONTINUE;
+	if (!equal(pszText, "#Team_Select"))
+		return HC_CONTINUE;
 
 	setForceTeamJoinTask(id);
 
-	return PLUGIN_HANDLED;
+	return HC_SUPERCEDE;
 }
 
-public msgVguiMenu(msgid, dest, id) {
-	if (get_msg_arg_int(1) != 2 || !shouldAutoJoin(id))
-		return PLUGIN_CONTINUE;
+public rgShowVGUIMenu(const id, const VGUIMenu:menuType, const bitsSlots, const szOldMenu[]) {
+	if (menuType != VGUI_Menu_Team || !shouldAutoJoin(id))
+		return HC_CONTINUE;
 	
 	if (hns_is_knife_map() && hns_cup_enabled()) {
-		return PLUGIN_CONTINUE;
+		return HC_CONTINUE;
 	}
 
 	setForceTeamJoinTask(id);
 
-	return PLUGIN_HANDLED;
+	return HC_SUPERCEDE;
 }
 
-public msgHideWeapon(msgid, dest, id) {
+public msgHideWeapon(const msgId, const msgDest, const id) {
 	if (g_iCurrentMode != MODE_MIX) {
-		const money = (1 << 5);
-		set_msg_arg_int(1, ARG_BYTE, get_msg_arg_int(1) | money);
+		SetMessageData(MsgArg, 1, GetMessageData(MsgArg, 1) | HIDEHUD_MONEY);
 	}
+
+	return HC_CONTINUE;
 }
 
 bool:shouldAutoJoin(id) {

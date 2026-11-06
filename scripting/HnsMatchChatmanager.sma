@@ -102,7 +102,7 @@ public plugin_init() {
 	register_clcmd("say", "clcmd__say_handler");
 	register_clcmd("say_team", "clcmd__say_handler");
 	
-	register_message((g_SayText = get_user_msgid("SayText")), "message__say_text");
+	RegisterMessage((g_SayText = get_user_msgid("SayText")), "message__say_text");
 
 	// cm_player_send_message(id, message[], team_chat);
 	g_iForwards[SEND_MESSAGE] = CreateMultiForward("cm_player_send_message", ET_STOP, FP_CELL, FP_STRING, FP_CELL);
@@ -408,31 +408,31 @@ public FormatMessage(sender, CsTeams:sender_team, channel, name_color, chat_colo
 }
 
 public message__say_text(msgid, dest, receiver) {
-	if(get_msg_args() != 4) {
-		return PLUGIN_CONTINUE;
+	if(GetMessageArgsNum() != 4) {
+		return HC_CONTINUE;
 	}
 	
 	new str2[22], channel;
 
-	get_msg_arg_string(2, str2, charsmax(str2));
+	GetMessageData(MsgArg, 2, str2, charsmax(str2));
 	channel = get_msg_channel(str2);
 	
 	if(!channel) {
-		return PLUGIN_CONTINUE;
+		return HC_CONTINUE;
 	}
 	
 	new str3[2];
-	get_msg_arg_string(3, str3, charsmax(str3));
+	GetMessageData(MsgArg, 3, str3, charsmax(str3));
 	
 	if(str3[0]) {
-		return PLUGIN_CONTINUE;
+		return HC_CONTINUE;
 	}
 	
-	set_msg_arg_string(2, "#Spec_PlayerItem");
-	set_msg_arg_string(3, g_sMessage);
-	set_msg_arg_string(4, "");
+	SetMessageData(MsgArg, 2, "#Spec_PlayerItem");
+	SetMessageData(MsgArg, 3, g_sMessage);
+	SetMessageData(MsgArg, 4, "");
 	
-	return PLUGIN_CONTINUE;
+	return HC_CONTINUE;
 }
 
 get_msg_channel(str[]) {
