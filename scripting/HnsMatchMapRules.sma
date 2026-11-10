@@ -1,5 +1,6 @@
 #include <amxmodx>
 #include <reapi>
+#include <fakemeta>
 #include <hns_matchsystem>
 
 new g_szMapName[32];
@@ -12,7 +13,7 @@ public plugin_init() {
     rh_get_mapname(g_szMapName, charsmax(g_szMapName));
 
     if(equali(g_szMapName, "de_piranesi")) {
-		RegisterHookChain(RG_CBasePlayer_PreThink, "rgPlayerPreThink", false);
+		register_forward(FM_PlayerPreThink, "fwdPreThink");
 	}
 }
 
@@ -20,15 +21,15 @@ public plugin_cfg() {
 	hns_get_prefix(g_sPrefix, charsmax(g_sPrefix));
 }
 
-public rgPlayerPreThink(id) {
+public fwdPreThink(id) {
 	if(!is_user_alive(id))
-		return HC_CONTINUE;
+		return FMRES_IGNORED;
 
 	if(hns_get_mode() != MODE_TRAINING) {
-		if(get_entvar(id, var_waterlevel)) {
+		if(pev(id, pev_waterlevel)) {
 			client_print_color(0, print_team_blue, "%L", LANG_PLAYER, "KILL_WATER", g_sPrefix, id);
 			user_kill(id, 1);
 		}
 	}
-	return HC_CONTINUE;
+	return FMRES_IGNORED;
 }
