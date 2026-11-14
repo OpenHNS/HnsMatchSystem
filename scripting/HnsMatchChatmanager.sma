@@ -102,7 +102,7 @@ public plugin_init() {
 	register_clcmd("say", "clcmd__say_handler");
 	register_clcmd("say_team", "clcmd__say_handler");
 	
-	RegisterMessage((g_SayText = get_user_msgid("SayText")), "message__say_text");
+	register_message((g_SayText = get_user_msgid("SayText")), "message__say_text");
 
 	// cm_player_send_message(id, message[], team_chat);
 	g_iForwards[SEND_MESSAGE] = CreateMultiForward("cm_player_send_message", ET_STOP, FP_CELL, FP_STRING, FP_CELL);
@@ -333,6 +333,7 @@ public clcmd__say_handler(id) {
 	
 	new is_sender_alive = is_user_alive(id);
 	new CsTeams:sender_team = rg_get_user_team(id);
+	new is_spec_team_msg = is_team_msg && sender_team == CS_TEAM_SPECTATOR;
 	
 	new channel = get_user_text_channel(is_sender_alive, is_team_msg, sender_team);
 	
@@ -352,7 +353,8 @@ public clcmd__say_handler(id) {
 		player_team = rg_get_user_team(player);
 		player_flags = get_user_flags(player) & ADMIN_FLAG ? ADMIN_CHAT_FLAGS : PLAYER_CHAT_FLAGS;
 		
-		if(player_flags & ALIVE_SEE_DEAD && !is_sender_alive && is_player_alive && (!is_team_msg || is_team_msg && sender_team == player_team) //flag ALIVE_SEE_DEAD
+		if(is_spec_team_msg && player_team == CS_TEAM_SPECTATOR // ReGameDLL SendSayMessage regression: spectators are not GR_TEAMMATE
+		|| player_flags & ALIVE_SEE_DEAD && !is_sender_alive && is_player_alive && (!is_team_msg || is_team_msg && sender_team == player_team) //flag ALIVE_SEE_DEAD
 		|| player_flags & DEAD_SEE_ALIVE && is_sender_alive && !is_player_alive && (!is_team_msg || is_team_msg && sender_team == player_team) //flag DEAD_SEE_ALIVE
 		|| player_flags & TEAM_SEE_TEAM && is_team_msg && sender_team != player_team) //flag TEAM_SEE_TEAM
 		{
@@ -408,31 +410,31 @@ public FormatMessage(sender, CsTeams:sender_team, channel, name_color, chat_colo
 }
 
 public message__say_text(msgid, dest, receiver) {
-	if(GetMessageArgsNum() != 4) {
-		return HC_CONTINUE;
+	if(get_msg_args() != 4) {
+		return PLUGIN_CONTINUE;
 	}
 	
 	new str2[22], channel;
 
-	GetMessageData(MsgArg, 2, str2, charsmax(str2));
+	get_msg_arg_string(2, str2, charsmax(str2));
 	channel = get_msg_channel(str2);
 	
 	if(!channel) {
-		return HC_CONTINUE;
+		return PLUGIN_CONTINUE;
 	}
 	
 	new str3[2];
-	GetMessageData(MsgArg, 3, str3, charsmax(str3));
+	get_msg_arg_string(3, str3, charsmax(str3));
 	
 	if(str3[0]) {
-		return HC_CONTINUE;
+		return PLUGIN_CONTINUE;
 	}
 	
-	SetMessageData(MsgArg, 2, "#Spec_PlayerItem");
-	SetMessageData(MsgArg, 3, g_sMessage);
-	SetMessageData(MsgArg, 4, "");
+	set_msg_arg_string(2, "#Spec_PlayerItem");
+	set_msg_arg_string(3, g_sMessage);
+	set_msg_arg_string(4, "");
 	
-	return HC_CONTINUE;
+	return PLUGIN_CONTINUE;
 }
 
 get_msg_channel(str[]) {
