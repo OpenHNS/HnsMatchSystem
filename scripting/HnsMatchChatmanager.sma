@@ -333,6 +333,10 @@ public clcmd__say_handler(id) {
 	
 	new is_sender_alive = is_user_alive(id);
 	new CsTeams:sender_team = rg_get_user_team(id);
+	// ReGameDLL_CS may reject spectator teammates in SendSayMessage:
+	// https://github.com/rehlds/ReGameDLL_CS/issues/1208
+	// Handle this case completely here and block the original command below,
+	// otherwise builds without the regression deliver the message twice.
 	new is_spec_team_msg = is_team_msg && sender_team == CS_TEAM_SPECTATOR;
 	
 	new channel = get_user_text_channel(is_sender_alive, is_team_msg, sender_team);
@@ -344,6 +348,13 @@ public clcmd__say_handler(id) {
 	
 	for(new i; i < players_num; i++) {
 		player = players[i];
+
+		if(is_spec_team_msg) {
+			if(rg_get_user_team(player) == CS_TEAM_SPECTATOR) {
+				send_formatted_message(id, player);
+			}
+			continue;
+		}
 		
 		if(player == id) {
 			continue;
@@ -353,8 +364,7 @@ public clcmd__say_handler(id) {
 		player_team = rg_get_user_team(player);
 		player_flags = get_user_flags(player) & ADMIN_FLAG ? ADMIN_CHAT_FLAGS : PLAYER_CHAT_FLAGS;
 		
-		if(is_spec_team_msg && player_team == CS_TEAM_SPECTATOR // ReGameDLL SendSayMessage regression: spectators are not GR_TEAMMATE
-		|| player_flags & ALIVE_SEE_DEAD && !is_sender_alive && is_player_alive && (!is_team_msg || is_team_msg && sender_team == player_team) //flag ALIVE_SEE_DEAD
+		if(player_flags & ALIVE_SEE_DEAD && !is_sender_alive && is_player_alive && (!is_team_msg || is_team_msg && sender_team == player_team) //flag ALIVE_SEE_DEAD
 		|| player_flags & DEAD_SEE_ALIVE && is_sender_alive && !is_player_alive && (!is_team_msg || is_team_msg && sender_team == player_team) //flag DEAD_SEE_ALIVE
 		|| player_flags & TEAM_SEE_TEAM && is_team_msg && sender_team != player_team) //flag TEAM_SEE_TEAM
 		{
@@ -372,7 +382,16 @@ public clcmd__say_handler(id) {
 	formatex(log_msg, charsmax(log_msg), "<br><font color=black>%s %s %s <font color=%s><b>%s</b> </font>:</font><font color=%s> %s </font>", time_code, is_sender_alive ? "" : (_:sender_team == 1 || _:sender_team == 2 ? "*DEAD*" : "*SPEC*"), is_team_msg ? "(TEAM)" : "", team_color[sender_team], name, chat_color == GREEN ? "green" : "#FFB41E", message);
 	write_file(g_szLogFile, log_msg);
 	
-	return PLUGIN_CONTINUE;
+	return is_spec_team_msg ? PLUGIN_HANDLED : PLUGIN_CONTINUE;
+}
+
+stock send_formatted_message(sender, receiver) {
+	message_begin(MSG_ONE, g_SayText, _, receiver);
+	write_byte(sender);
+	write_string("#Spec_PlayerItem");
+	write_string(g_sMessage);
+	write_string("");
+	message_end();
 }
 
 public FormatMessage(sender, CsTeams:sender_team, channel, name_color, chat_color, time_code[], name[], message[]) {
