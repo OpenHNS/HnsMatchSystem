@@ -409,7 +409,7 @@ public cmdBlend(id) {
 	while (Num) {
 		Random = random(Num);
 		Player = Players[Random];
-		rg_set_user_team(Player, TeamName:Team);
+		setUserTeamInstant(Player, TeamName:Team);
 		Players[Random] = Players[--Num];
 		Team = (Team % 2 + 1);
 	}

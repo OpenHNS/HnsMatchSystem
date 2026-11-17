@@ -19,7 +19,7 @@ stock hns_restart_round(Float:delay = 0.5) {
 stock hns_swap_teams() {
 	g_eMatchState = STATE_PREPARE;
 
-	rg_swap_all_players();
+	swapUsersTeams();
 
 	if (g_ModFuncs[g_iCurrentMode][MODEFUNC_SWAP])
 		ExecuteForward(g_ModFuncs[g_iCurrentMode][MODEFUNC_SWAP], _);

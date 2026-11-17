@@ -25,10 +25,10 @@ public zm_start() {
 
 public zm_killed(victim, killer) {
 	if (killer != victim && getUserTeam(killer) == TEAM_CT) {
-		rg_set_user_team(victim, TEAM_CT);
+		setUserTeamInstant(victim, TEAM_CT);
 	} else {
 		if (getUserTeam(victim) == TEAM_TERRORIST) {
-			rg_set_user_team(victim, TEAM_CT);
+			setUserTeamInstant(victim, TEAM_CT);
 		}
 	}
 
@@ -48,7 +48,7 @@ public zm_set_teams() {
 		if (getUserTeam(iPlayer) == TEAM_SPECTATOR)
 			continue;
 
-		rg_set_user_team(iPlayer, TEAM_TERRORIST);
+		setUserTeamInstant(iPlayer, TEAM_TERRORIST);
 	}
 
 	set_task(1.0, "set_zombie", 11223);
@@ -117,7 +117,7 @@ public checkZombie() {
 
 public set_zombie() {
 	new iZombie = GetRandomAlive();
-	rg_set_user_team(iZombie, TEAM_CT);
+	setUserTeamInstant(iZombie, TEAM_CT);
 	client_print_color(0, print_team_blue, "%L", LANG_PLAYER, "SET_ZOMBIE", g_iSettings[PREFIX], iZombie);
 	iLastZombie = iZombie;
 	hns_setrole(iZombie);

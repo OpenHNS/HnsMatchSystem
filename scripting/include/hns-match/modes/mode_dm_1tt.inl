@@ -26,8 +26,8 @@ public dm_1tt_killed(victim, killer) {
 	new bool:bVictimTT = (getUserTeam(victim) == TEAM_TERRORIST);
 
 	if (killer != victim && is_user_connected(killer) && getUserTeam(killer) == TEAM_CT && bVictimTT) {
-		rg_set_user_team(killer, TEAM_TERRORIST);
-		rg_set_user_team(victim, TEAM_CT);
+		setUserTeamInstant(killer, TEAM_TERRORIST);
+		setUserTeamInstant(victim, TEAM_CT);
 
 		if (!g_iSettings[ONEHPMODE]) {
 			set_entvar(killer, var_health, 100.0);
@@ -109,7 +109,7 @@ public dm_1tt_set_teams() {
 			continue;
 		}
 
-		rg_set_user_team(iPlayer, TEAM_CT);
+		setUserTeamInstant(iPlayer, TEAM_CT);
 	}
 
 	new iTT = dm_1tt_get_random_ct();
@@ -117,7 +117,7 @@ public dm_1tt_set_teams() {
 		return;
 	}
 
-	rg_set_user_team(iTT, TEAM_TERRORIST);
+	setUserTeamInstant(iTT, TEAM_TERRORIST);
 	hns_setrole(iTT);
 }
 
@@ -127,8 +127,8 @@ stock dm_1tt_transfer_tt(iPrevTT) {
 		return 0;
 	}
 
-	rg_set_user_team(iNextTT, TEAM_TERRORIST);
-	rg_set_user_team(iPrevTT, TEAM_CT);
+	setUserTeamInstant(iNextTT, TEAM_TERRORIST);
+	setUserTeamInstant(iPrevTT, TEAM_CT);
 	client_print_color(0, print_team_blue, "%L", LANG_PLAYER, "DM_TRANSF", g_iSettings[PREFIX], iNextTT);
 
 	if (!g_iSettings[ONEHPMODE]) {
@@ -161,7 +161,7 @@ stock dm_1tt_ensure_tt(bool:bRespawnNewTT = false) {
 		return 0;
 	}
 
-	rg_set_user_team(iNextTT, TEAM_TERRORIST);
+	setUserTeamInstant(iNextTT, TEAM_TERRORIST);
 
 	if (!g_iSettings[ONEHPMODE]) {
 		set_entvar(iNextTT, var_health, 100.0);

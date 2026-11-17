@@ -203,7 +203,7 @@ public hns_roundend(bool:win_ct)
 	if (g_iCurrentMode != MODE_MIX && g_iCurrentMode != MODE_ZM && g_iCurrentMode != MODE_RETAKE) {
 		if (win_ct)
 		{
-			rg_swap_all_players();
+			swapUsersTeams();
 		}
 	}
 }

@@ -261,6 +261,40 @@ stock joinUserTeamAndRespawn(id, TeamName:iTeam) {
 	}
 }
 
+stock setUserTeamInstant(id, TeamName:iTeam) {
+	if (!is_user_connected(id)) {
+		return 0;
+	}
+
+	new result = rg_set_user_team(id, iTeam);
+	if (result && (iTeam == TEAM_TERRORIST || iTeam == TEAM_CT)) {
+		// rg_set_user_team updates the visible model, but not m_modelIndexPlayer.
+		// Keep the MODEL_AUTO choice and synchronize the server-side model index.
+		rg_reset_user_model(id, true);
+	}
+
+	return result;
+}
+
+stock syncPlayingUsersModelIndex() {
+	new iPlayers[MAX_PLAYERS], iNum;
+	get_players(iPlayers, iNum, "ch");
+
+	for (new i; i < iNum; i++) {
+		new id = iPlayers[i];
+		new TeamName:iTeam = getUserTeam(id);
+
+		if (iTeam == TEAM_TERRORIST || iTeam == TEAM_CT) {
+			rg_reset_user_model(id, true);
+		}
+	}
+}
+
+stock swapUsersTeams() {
+	rg_swap_all_players();
+	syncPlayingUsersModelIndex();
+}
+
 public taskTeamJoinRespawn(taskId) {
 	new id = taskId - TASK_TEAM_JOIN_RESPAWN;
 

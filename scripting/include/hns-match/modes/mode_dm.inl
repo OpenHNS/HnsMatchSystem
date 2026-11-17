@@ -22,8 +22,8 @@ public dm_killed(victim, killer) {
 	if (killer != victim) {
 		if (is_user_connected(killer)) {
 			if (getUserTeam(killer) == TEAM_CT) {
-				rg_set_user_team(killer, TEAM_TERRORIST);
-				rg_set_user_team(victim, TEAM_CT);
+				setUserTeamInstant(killer, TEAM_TERRORIST);
+				setUserTeamInstant(victim, TEAM_CT);
 
 				if (!g_iSettings[ONEHPMODE])
 					set_entvar(killer, var_health, 100.0);
@@ -68,9 +68,9 @@ public LuckyTransferToTT(id) {
 
 	new lucky = GetRandomCT();
 	if (lucky) {
-		rg_set_user_team(lucky, TEAM_TERRORIST);
+		setUserTeamInstant(lucky, TEAM_TERRORIST);
 		client_print_color(0, print_team_blue, "%L", LANG_PLAYER, "DM_TRANSF", g_iSettings[PREFIX], lucky)
-		rg_set_user_team(id, TEAM_CT);
+		setUserTeamInstant(id, TEAM_CT);
 
 		if (!g_iSettings[ONEHPMODE])
 			set_entvar(lucky, var_health, 100.0);
